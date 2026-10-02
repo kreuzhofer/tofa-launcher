@@ -19,8 +19,13 @@ The CLI workflow below retains its experimental policy. The later
 [GLM Flash and Kimi diagnostic reruns](desktop-retest-2026-09-29.md) separate
 main-output failures from inference deadlines and retain all new observations.
 
-This workflow evaluates one exact selected candidate with **Codex CLI 0.155.1,
-macOS ARM64, adapted connection**. The selected model serves both the main and
+This workflow evaluates one exact selected candidate with **Codex CLI 0.155.1 or newer,
+macOS ARM64, adapted connection**. The lowest tested CLI version, 0.155.1, is a
+minimum compatibility boundary. Newer versions are accepted unless a breaking
+change is discovered; they do not require an exact-version allowlist. Reports
+still record the actual measured version and executable hash for reproducibility.
+Historical reports retain their original measured versions and results.
+The selected model serves both the main and
 Guardian roles by default. `--guardian-model` explicitly selects a different reviewer
 for this invocation. Omitting `--model` retains the original Kimi-K3 invocation. It extends the existing
 [compatibility harness](../prototype/LIVE-COMPATIBILITY.md); it is not a model
@@ -138,9 +143,12 @@ request cap, not an invented provider maximum. The [Responses API contract](http
 defines `max_output_tokens` to include reasoning and visible output; a provider
 rejection remains failed evidence. Launcher metadata omits unverified optional reasoning defaults, summary and
 verbosity controls. With an explicitly cataloged Guardian, Codex 0.155.1 itself
-sends `reasoning.effort = "none"`; main requests omit effort. This native preset
-default is recorded in effective settings, not advertised as a verified provider
-capability. Live provider rejection remains failed evidence. Shell selection, prompt template, output truncation and
+sends `reasoning.effort = "none"`. Main requests omit effort. The observer records
+each native request's actual Guardian effort before the launcher adapter, and
+effective settings list the distinct observed values: null means omitted and an
+empty list means unmeasured. The GLM 5.3 adapter removes `effort=none` upstream to
+preserve the provider's reasoning separation. These native defaults are not advertised as verified provider
+capabilities. Live provider rejection remains failed evidence. Shell selection, prompt template, output truncation and
 95% compaction headroom are client policy, not provider capabilities. The
 [existing Codex metadata investigation](../research/kimi-provider-metadata.md)
 records the pinned client's schema and prompt requirements. Metadata missing
@@ -149,7 +157,7 @@ Unknown ordinary launcher models retain their existing behavior.
 
 ## Reproduce
 
-Python 3.9+, Go and the pinned Codex CLI are developer prerequisites. Authenticate
+Python 3.9+, Go and Codex CLI at or above the minimum are developer prerequisites. Authenticate
 interactively using the launcher if needed; never put a key in a command or report.
 
 ```sh
@@ -250,7 +258,7 @@ The installed-client fixture invokes the evaluation command using the real
 `tofa.App` launcher and request adapter through a loopback-only test executable.
 It exercises all five exact IDs, the two-turn artifacts, allow/deny command
 execution, costs, and independent failed lanes. It uses synthetic credentials in
-temporary stores and never changes ordinary credentials. A missing pinned client
+temporary stores and never changes ordinary credentials. A missing installed client
 is an explicit skip, not an installed-client pass. Synthetic responses validate
 the harness, not any real candidate's compatibility, policy decisions or broad
 coding quality; those require separately retained live evidence.

@@ -128,8 +128,10 @@ def evaluate(options):
             version = subprocess.run([getattr(options, name), '--version'], capture_output=True,
                                      text=True, env=probe_env, timeout=10, check=True).stdout.strip()
             evidence[name + '_version'] = version
-        if evidence['codex_version'] != 'codex-cli 0.155.1':
-            raise ValueError('requires Codex 0.155.1')
+        version = re.fullmatch(r'codex-cli (0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[A-Za-z0-9.-]+)?(?:\+[A-Za-z0-9.-]+)?', evidence['codex_version'])
+        if (not version or tuple(map(int, version.group(1, 2, 3))) < (0, 155, 1)
+                or (tuple(map(int, version.group(1, 2, 3))) == (0, 155, 1) and version.group(4))):
+            return blocked(options, 'codex_version_below_minimum_or_invalid')
         budget = root / 'budget.json'
         budget.write_text(json.dumps({'used': 0, 'maximum': 48}))
         os.environ['TOFA_EVAL_BUDGET'] = str(budget)
@@ -191,6 +193,9 @@ def evaluate(options):
             report['metadata_source'] = {key: snapshot()[key] for key in ('snapshot_date', 'source', 'source_sha256')}
             report['catalog_checked_utc'] = options.catalog_checked_utc
             report['price_snapshot'] = rates
+            guardian_efforts = list(dict.fromkeys(request['reasoning_effort']
+                for case in approvals for request in case.get('requests', [])
+                if request.get('kind') == 'automatic_review' and 'reasoning_effort' in request))
             report['effective_settings'] = {
                 'main_model': options.model, 'guardian_model': options.guardian_model,
                 'coding_approval_policy': 'never', 'coding_sandbox': 'workspace-write',
@@ -198,8 +203,10 @@ def evaluate(options):
                 'web_search': 'disabled', 'provider_request_retries': 0, 'provider_stream_retries': 0,
                 'native_guardian_retries': 'owned by Codex; observed and budgeted',
                 'guardian_selection': 'launch-scoped catalog auto_review_model_override',
-                'main_reasoning_effort': None, 'guardian_reasoning_effort': 'none',
-                'optional_reasoning_controls': 'main effort, summaries and verbosity omitted; Guardian effort=none is the native Codex preset default, not a verified provider capability'}
+                'main_reasoning_effort': None,
+                'guardian_reasoning_effort': guardian_efforts[0] if len(guardian_efforts) == 1 else None,
+                'guardian_reasoning_efforts_observed': guardian_efforts,
+                'optional_reasoning_controls': 'main effort, summaries and verbosity omitted; Guardian uses native client defaults. Efforts are observed before the launcher adapter: null means omitted, an empty list means unmeasured. The GLM 5.3 adapter removes effort=none upstream. These are not verified provider capabilities.'}
             report['limits'] = {'repeats': REPEATS, 'total_upstream_requests': 48,
                 'request_body_bytes': BODY_LIMIT, 'output_tokens_per_request': OUTPUT_LIMIT,
                 'response_body_bytes': 8 * 1024 * 1024, 'sse_event_bytes': 256 * 1024,

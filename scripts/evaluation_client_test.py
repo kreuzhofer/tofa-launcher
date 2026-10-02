@@ -181,9 +181,17 @@ class InstalledEvaluationTests(unittest.TestCase):
                     self.assertNotIn('synthetic-fixture-token', output.read_text())
                     return
                 self.assertEqual(sentinel.read_text(), 'model = "ordinary-model"\n')
-                self.assertTrue(all(controls == {'effort': 'none'} if review else not controls
-                                    for review, controls in optional_controls), optional_controls)
-                self.assertEqual(report['effective_settings']['guardian_reasoning_effort'], 'none')
+                self.assertTrue(all(not controls for review, controls in optional_controls if not review), optional_controls)
+                observed_efforts = list(dict.fromkeys((controls or {}).get('effort')
+                    for review, controls in optional_controls if review))
+                native_efforts = report['effective_settings']['guardian_reasoning_efforts_observed']
+                # The observer measures native requests before the adapter;
+                # GLM 5.3's qualified adapter removes effort=none upstream.
+                expected_upstream = list(dict.fromkeys(None if reviewer == 'zai-org/GLM-5.3' and effort == 'none'
+                    else effort for effort in native_efforts))
+                self.assertEqual(observed_efforts, expected_upstream)
+                self.assertEqual(report['effective_settings']['guardian_reasoning_effort'],
+                                 native_efforts[0] if len(native_efforts) == 1 else None)
                 if disappear:
                     self.assertTrue(report['harness_defect'])
                     self.assertEqual(report['runs'][0]['coding']['score'], 1)

@@ -149,7 +149,12 @@ class EvaluationProxy:
                     budget_data['used'] += 1
                     if owner.budget:
                         owner.budget.write_text(json.dumps(budget_data))
+                reasoning = body.get('reasoning')
+                effort = reasoning.get('effort') if isinstance(reasoning, dict) else None
+                if effort not in (None, 'none', 'minimal', 'low', 'medium', 'high', 'xhigh'):
+                    effort = 'unrecognized'
                 record = {'kind': 'automatic_review' if review else 'task', 'status': 0,
+                          'reasoning_effort': effort,
                           'model': selected, 'role': 'guardian' if review else 'main', 'paid_inference': True,
                           'request_id': budget_data['used'] if owner.budget else uuid.uuid4().hex,
                           'tool_results': sum(item.get('type') == 'function_call_output' for item in body.get('input', []) if isinstance(item, dict)),

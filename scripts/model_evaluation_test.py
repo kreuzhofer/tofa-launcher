@@ -259,26 +259,47 @@ class EvaluationTests(unittest.TestCase):
             self.assertEqual(report['roles']['guardian']['unattempted_cases'], 6)
 
     @unittest.skipUnless(sys.platform == 'darwin', 'evaluation is pinned to macOS')
+    def test_minimum_and_newer_clients_reach_evaluation(self):
+        for version in ('0.155.1', '0.155.1+build.7', '0.158.0', '0.160.0', '1.0.0', '0.160.0-alpha.1'):
+            with self.subTest(version=version):
+                report = self.disappearing_launcher_report(version)
+                self.assertEqual(report['codex_version'], 'codex-cli ' + version)
+                self.assertEqual(report['roles']['main']['attempted'], 1)
+                self.assertEqual(report['roles']['guardian']['attempted'], 1)
+
+    @unittest.skipUnless(sys.platform == 'darwin', 'requires executable Unix fixtures')
+    def test_below_minimum_and_invalid_clients_are_blocked_before_inference(self):
+        for version in ('0.154.9', '0.155.0', '0.155.1-alpha.1', '0.160.0junk', 'unknown'):
+            with self.subTest(version=version):
+                report = self.disappearing_launcher_report(version)
+                self.assertEqual(report['blocked_reason'], 'codex_version_below_minimum_or_invalid')
+                self.assertEqual(report['roles']['main']['attempted'], 0)
+                self.assertEqual(report['roles']['guardian']['attempted'], 0)
+
+    @unittest.skipUnless(sys.platform == 'darwin', 'evaluation is pinned to macOS')
     def test_launcher_disappearing_after_preflight_retains_both_lane_attempts(self):
+        report = self.disappearing_launcher_report('0.155.1')
+        self.assertTrue(report['harness_defect'], report)
+        self.assertEqual(report['roles']['main']['attempted'], 1)
+        self.assertEqual(report['roles']['guardian']['attempted'], 1)
+        self.assertIn('harness_defect', report['runs'][0]['failures'])
+        self.assertEqual(report['roles']['main']['cost']['paid_requests'], 0)
+
+    def disappearing_launcher_report(self, version):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             launcher, codex = root / 'launcher', root / 'codex'
             launcher.write_text('#!' + sys.executable + '\nimport pathlib,sys\n'
                 'if sys.argv[1:] == ["models"]: print("moonshotai/Kimi-K3\\tunverified")\n'
                 'else: print("tofa fixture"); pathlib.Path(__file__).unlink()\n')
-            codex.write_text('#!/bin/sh\necho codex-cli 0.155.1\n')
+            codex.write_text('#!/bin/sh\necho codex-cli ' + version + '\n')
             launcher.chmod(0o700); codex.chmod(0o700)
             output = root / 'report.json'
             env = dict(os.environ, HOME=str(root), CODEX_HOME=str(root / 'ordinary'), XDG_CONFIG_HOME=str(root))
             result = subprocess.run([sys.executable, str(SCRIPT), '--launcher', str(launcher),
                 '--codex', str(codex), '--output', str(output)], env=env, capture_output=True, text=True)
             self.assertEqual(result.returncode, 1, result.stderr)
-            report = json.loads(output.read_text())
-            self.assertTrue(report['harness_defect'], report)
-            self.assertEqual(report['roles']['main']['attempted'], 1)
-            self.assertEqual(report['roles']['guardian']['attempted'], 1)
-            self.assertIn('harness_defect', report['runs'][0]['failures'])
-            self.assertEqual(report['roles']['main']['cost']['paid_requests'], 0)
+            return json.loads(output.read_text())
 
     def test_unresolved_candidate_metadata_is_rejected_at_boundary(self):
         for settings in ({}, {'context_window': 4096, 'responses_api': True, 'function_calling': True, 'input_modalities': ['text']},

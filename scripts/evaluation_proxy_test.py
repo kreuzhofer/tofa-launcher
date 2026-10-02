@@ -114,7 +114,7 @@ class ProxyTests(unittest.TestCase):
                     self.assertEqual(error.exception.code, 400)
                 self.assertEqual(json.loads(budget.read_text())['used'], 0)
 
-    def test_guardian_decision_is_measured_separately_from_synthetic_task(self, model="moonshotai/Kimi-K3"):
+    def test_guardian_decision_is_measured_separately_from_synthetic_task(self, model="moonshotai/Kimi-K3", effort=None):
         seen = []
         class Upstream(http.server.BaseHTTPRequestHandler):
             def log_message(self, *unused): pass
@@ -147,7 +147,8 @@ class ProxyTests(unittest.TestCase):
                     self.assertIn(b'function_call', ordinary)
                     self.assertIn(model.encode(), ordinary)
                     post({'text': {'format': {'name': 'guardian_assessment', 'type': 'json_schema', 'schema': ASSESSMENT}},
-                          'instructions': 'Preserve this policy', 'tools': [{'name': 'exec_command'}]})
+                          'instructions': 'Preserve this policy', 'tools': [{'name': 'exec_command'}],
+                          **({'reasoning': {'effort': effort}} if effort is not None else {})})
                 self.assertEqual(len(seen), 1)
                 self.assertEqual(seen[0]['max_output_tokens'], 4096)
                 self.assertEqual(seen[0]['instructions'], 'Preserve this policy')
@@ -157,6 +158,8 @@ class ProxyTests(unittest.TestCase):
                 self.assertEqual(data[-1]['decision'], 'deny')
                 self.assertEqual(data[-1]['model'], model)
                 self.assertEqual(data[-1]['role'], 'guardian')
+                self.assertEqual(data[-1]['reasoning_effort'], effort)
+                self.assertEqual(seen[0].get('reasoning', {}).get('effort'), effort)
                 self.assertEqual(seen[0]['model'], model)
                 self.assertEqual(data[0]['model'], model)
                 self.assertFalse(data[0]['paid_inference'])
@@ -168,6 +171,9 @@ class ProxyTests(unittest.TestCase):
 
     def test_selected_candidate_routes_guardian_and_synthetic_proposal(self):
         self.test_guardian_decision_is_measured_separately_from_synthetic_task("zai-org/GLM-5.3-Flash")
+
+    def test_explicit_native_reasoning_effort_is_recorded_without_substitution(self):
+        self.test_guardian_decision_is_measured_separately_from_synthetic_task(effort='none')
 
     def test_provider_cannot_complete_with_a_different_model_identity(self):
         class Upstream(http.server.BaseHTTPRequestHandler):
