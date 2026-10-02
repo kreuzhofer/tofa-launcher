@@ -101,7 +101,10 @@ identity = '11111111-1111-4111-8111-111111111111'
 if mode == 'wrong_session' and continued: identity = '22222222-2222-4222-8222-222222222222'
 print(json.dumps({'type':'thread.started','thread_id':identity}))
 print(json.dumps({'type':'item.completed','item':{'type':'command_execution','status':'completed','exit_code':1 if mode == 'failed_tool' else 0,'aggregated_output':'PRIVATE_BODY'}}))
-print(json.dumps({'type':'turn.completed'}))
+if mode == 'reasoning_channels':
+    print(json.dumps({'type':'item.completed','item':{'type':'reasoning','text':'PRIVATE_BODY'}}))
+    print(json.dumps({'type':'item.completed','item':{'type':'agent_message','text':'PRIVATE_BODY'}}))
+print(json.dumps({'type':'turn.completed', 'usage': {'reasoning_output_tokens':7} if mode == 'reasoning_channels' else {}}))
 if mode == 'metadata_warning': print('Model metadata for PRIVATE_BODY', file=sys.stderr)
 ''')
             launcher.chmod(0o700)
@@ -175,6 +178,14 @@ if mode == 'metadata_warning': print('Model metadata for PRIVATE_BODY', file=sys
             finally:
                 server.shutdown()
                 server.server_close()
+
+    def test_reasoning_and_answer_channels_are_counted_without_exporting_text(self):
+        result, evidence = self.fixture('reasoning_channels')
+        self.assertEqual(result.returncode, 0)
+        for turn in evidence['runs'][0]['turns']:
+            self.assertEqual(turn['reasoning_items'], 1)
+            self.assertEqual(turn['answer_items'], 1)
+            self.assertEqual(turn['reasoning_output_tokens'], 7)
 
     def test_completion_cannot_hide_an_earlier_stream_failure(self):
         result, evidence = self.fixture("incomplete_then_completed")

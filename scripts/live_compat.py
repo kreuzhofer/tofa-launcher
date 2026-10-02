@@ -251,7 +251,8 @@ def stop(process):
 def turn(command, env, workspace, prompt, timeout):
     """Consume client output without retaining conversation text or launcher project IDs."""
     summary = {"exit_code": None, "tools_succeeded": 0, "turn_completed": False,
-               "client_error": False, "metadata_warning": False, "timed_out": False}
+               "client_error": False, "metadata_warning": False, "timed_out": False,
+               "reasoning_items": 0, "answer_items": 0, "reasoning_output_tokens": None}
     started = time.perf_counter()
     thread_ids = []
     if os.name == "nt":
@@ -286,9 +287,17 @@ def turn(command, env, workspace, prompt, timeout):
                     thread_ids.append(identity)
             if kind == "turn.completed":
                 summary["turn_completed"] = True
+                usage = event.get('usage')
+                tokens = usage.get('reasoning_output_tokens') if isinstance(usage, dict) else None
+                if type(tokens) is int and tokens >= 0:
+                    summary['reasoning_output_tokens'] = tokens
             if kind in ("error", "turn.failed"):
                 summary["client_error"] = True
             item = event.get("item", {})
+            if kind == 'item.completed' and item.get('type') == 'reasoning':
+                summary['reasoning_items'] += 1
+            if kind == 'item.completed' and item.get('type') == 'agent_message':
+                summary['answer_items'] += 1
             if (kind == "item.completed" and item.get("type") == "command_execution"
                     and item.get("status") == "completed" and item.get("exit_code") == 0):
                 summary["tools_succeeded"] += 1

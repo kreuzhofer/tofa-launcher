@@ -115,7 +115,9 @@ def score_run(run):
             failures.add('response_model_mismatch')
         if turn.get('metadata_warning'):
             failures.add('metadata_warning')
-        timings.append({'turn_ms': measurement(turn.get('elapsed_ms')), 'requests': [
+        timings.append({'turn_ms': measurement(turn.get('elapsed_ms')),
+            **{key: measurement(turn.get(key), integer=True)
+               for key in ('reasoning_items', 'answer_items', 'reasoning_output_tokens')}, 'requests': [
             {**{key: measurement(s.get(key), integer=(key == 'status'))
               for key in ('status', 'headers_ms', 'first_delta_ms', 'completed_ms')},
              'model': identity(s, 'model', r'[A-Za-z0-9_.-]{1,64}/[A-Za-z0-9_.-]{1,128}'),

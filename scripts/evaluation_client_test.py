@@ -27,6 +27,12 @@ class InstalledEvaluationTests(unittest.TestCase):
             with self.subTest(model=model):
                 self.candidate_run(model, coding_pass=True)
 
+    def test_five_campaign_pairs_use_the_explicit_guardian(self):
+        for model in ('deepseek-ai/DeepSeek-V4.1-Flash', 'zai-org/GLM-5.3',
+                      'zai-org/GLM-5.3-Flash', 'moonshotai/Kimi-K3', 'nvidia/Nemotron-3-Ultra-550b-a55b'):
+            with self.subTest(model=model):
+                self.candidate_run(model, guardian='zai-org/GLM-5.3-Flash', coding_pass=True)
+
     def test_failed_guardian_preserves_passing_main_lane_and_native_retries(self):
         self.candidate_run('zai-org/GLM-5.3', coding_pass=True, guardian_pass=False)
 
@@ -181,17 +187,17 @@ class InstalledEvaluationTests(unittest.TestCase):
                     self.assertNotIn('synthetic-fixture-token', output.read_text())
                     return
                 self.assertEqual(sentinel.read_text(), 'model = "ordinary-model"\n')
-                self.assertTrue(all(not controls for review, controls in optional_controls if not review), optional_controls)
-                observed_efforts = list(dict.fromkeys((controls or {}).get('effort')
-                    for review, controls in optional_controls if review))
-                native_efforts = report['effective_settings']['guardian_reasoning_efforts_observed']
-                # The observer measures native requests before the adapter;
-                # GLM 5.3's qualified adapter removes effort=none upstream.
-                expected_upstream = list(dict.fromkeys(None if reviewer == 'zai-org/GLM-5.3' and effort == 'none'
-                    else effort for effort in native_efforts))
-                self.assertEqual(observed_efforts, expected_upstream)
-                self.assertEqual(report['effective_settings']['guardian_reasoning_effort'],
-                                 native_efforts[0] if len(native_efforts) == 1 else None)
+                for role, identity in (('main', model), ('guardian', reviewer)):
+                    observed_efforts = list(dict.fromkeys((controls or {}).get('effort')
+                        for review, controls in optional_controls if review == (role == 'guardian')))
+                    native_efforts = report['effective_settings'][role + '_reasoning_efforts_observed']
+                    # The observer measures native requests before the adapter;
+                    # GLM 5.3's qualified adapter removes effort=none upstream.
+                    expected_upstream = list(dict.fromkeys(None if identity == 'zai-org/GLM-5.3' and effort == 'none'
+                        else effort for effort in native_efforts))
+                    self.assertEqual(observed_efforts, expected_upstream)
+                    self.assertEqual(report['effective_settings'][role + '_reasoning_effort'],
+                                     native_efforts[0] if len(native_efforts) == 1 else None)
                 if disappear:
                     self.assertTrue(report['harness_defect'])
                     self.assertEqual(report['runs'][0]['coding']['score'], 1)
@@ -235,6 +241,11 @@ class InstalledEvaluationTests(unittest.TestCase):
                     if model == 'moonshotai/Kimi-K3':
                         self.assertEqual(report['roles']['main']['cost']['estimated_usd'], 0.0072)
                 self.assertTrue(report['normal_settings_preserved'])
+                if os.environ.get('TOFA_NATIVE_WINDOWS_CODEX_HOME'):
+                    self.assertTrue(report['native_config_auth_preserved'])
+                    self.assertTrue(report['owned_native_sessions_removed'])
+                    if coding_pass and guardian_pass:
+                        self.assertEqual(report['owned_native_session_count'], 9)
                 self.assertNotIn('synthetic-fixture-token', output.read_text())
         finally:
             server.shutdown(); server.server_close()

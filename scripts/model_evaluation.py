@@ -107,16 +107,25 @@ def approval(options, root, case):
 
 
 def evaluate(options):
-    if platform.system() != 'Darwin' or platform.machine() != 'arm64':
-        raise ValueError('evaluation is pinned to macOS ARM64')
+    system, architecture = platform.system(), platform.machine()
+    if os.name == 'nt':
+        import windows_process
+        import windows_sandbox_state
+        architecture = windows_process.architecture()
+    if system not in ('Darwin', 'Windows') or architecture != 'arm64':
+        raise ValueError('evaluation requires macOS ARM64 or Windows ARM64')
     options.launcher = str(Path(options.launcher).resolve())
     options.codex = str(Path(options.codex).resolve())
+    if os.name == 'nt':
+        options.codex = [options.codex]
+    launcher_home = (Path(os.environ['LOCALAPPDATA']) if os.name == 'nt' else
+                     Path(os.environ.get('XDG_CONFIG_HOME', str(Path.home() / '.config')))) / 'tofa'
     watched = {'codex_config': Path(os.environ.get('CODEX_HOME', str(Path.home() / '.codex'))) / 'config.toml',
                'codex_auth': Path(os.environ.get('CODEX_HOME', str(Path.home() / '.codex'))) / 'auth.json',
-               'launcher_config': Path(os.environ.get('XDG_CONFIG_HOME', str(Path.home() / '.config'))) / 'tofa' / 'config.yml',
-               'launcher_credential_file': Path(os.environ.get('XDG_CONFIG_HOME', str(Path.home() / '.config'))) / 'tofa' / 'credentials.yml'}
+               'launcher_config': launcher_home / 'config.yml',
+               'launcher_credential_file': launcher_home / 'credentials.yml'}
     before = {key: live.digest(path) for key, path in watched.items()}
-    evidence = {'model': options.model, 'guardian_model': options.guardian_model, 'platform': 'Darwin/arm64',
+    evidence = {'model': options.model, 'guardian_model': options.guardian_model, 'platform': system + '/' + architecture,
                 'route': 'adapted with evaluation-only capped loopback observer',
                 'started_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'runs': []}
     approvals = []
@@ -125,7 +134,9 @@ def evaluate(options):
         (root / 'home').mkdir(); (root / 'codex').mkdir()
         probe_env = live.client_environment(root / 'home', root / 'codex')
         for name in ('codex', 'launcher'):
-            version = subprocess.run([getattr(options, name), '--version'], capture_output=True,
+            executable = getattr(options, name)
+            command = executable if isinstance(executable, list) else [executable]
+            version = subprocess.run(command + ['--version'], capture_output=True,
                                      text=True, env=probe_env, timeout=10, check=True).stdout.strip()
             evidence[name + '_version'] = version
         version = re.fullmatch(r'codex-cli (0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[A-Za-z0-9.-]+)?(?:\+[A-Za-z0-9.-]+)?', evidence['codex_version'])
@@ -138,11 +149,16 @@ def evaluate(options):
         os.environ['TOFA_EVAL_CASE'] = 'coding'
         os.environ['TOFA_EVAL_MODEL'] = options.model
         os.environ['TOFA_EVAL_GUARDIAN_MODEL'] = options.guardian_model
+        native_state = None
+        if os.name == 'nt':
+            options.supervisor = windows_process.build_supervisor(root)
+            native_state = windows_sandbox_state.NativeState(root)
         try:
             for number in range(REPEATS):
                 run_root = root / ('run-' + str(number)); run_root.mkdir()
                 settings = SimpleNamespace(launcher=options.launcher, codex=options.codex, timeout=180,
-                                           observer_harness=Path(__file__).resolve(), model=options.model, guardian_model=options.guardian_model)
+                                           observer_harness=Path(__file__).resolve(), model=options.model,
+                                           guardian_model=options.guardian_model, supervisor=getattr(options, 'supervisor', None))
                 print('Coding repeat ' + str(number + 1), flush=True)
                 try:
                     run = live.run_one(settings, run_root)
@@ -174,12 +190,22 @@ def evaluate(options):
         except (OSError, ValueError, RuntimeError, subprocess.SubprocessError):
             evidence['harness_defect'] = True
         finally:
+            cleanup = {}
+            if native_state is not None:
+                cleanup['passed'] = (len(evidence['runs']) == REPEATS and all(r['passed'] for r in evidence['runs'])
+                    and len(approvals) == 2 * REPEATS and all(a['passed'] for a in approvals))
+                native_state.finish(cleanup)
+                cleanup.pop('passed')
+                if cleanup.get('owned_native_sessions_removed') is False:
+                    evidence['harness_defect'] = True
             try:
-                evidence['normal_settings_preserved'] = all(before[key] == live.digest(path) for key, path in watched.items())
+                evidence['normal_settings_preserved'] = (all(before[key] == live.digest(path) for key, path in watched.items())
+                    and cleanup.get('native_config_auth_preserved', True))
             except OSError:
                 evidence['normal_settings_preserved'] = False
                 evidence['harness_defect'] = True
             report = score(evidence)
+            report.update(cleanup)
             report['automatic_approval'] = {'status': 'measured' if len(approvals) == 2 * REPEATS else 'incomplete',
                 'policy': 'on-request / auto_review', 'primary_inference': 'synthetic controlled proposals',
                 'review_inference': 'live selected model', 'cases': approvals}
@@ -196,6 +222,9 @@ def evaluate(options):
             guardian_efforts = list(dict.fromkeys(request['reasoning_effort']
                 for case in approvals for request in case.get('requests', [])
                 if request.get('kind') == 'automatic_review' and 'reasoning_effort' in request))
+            main_efforts = list(dict.fromkeys(request['reasoning_effort']
+                for run in evidence['runs'] for turn in run.get('turns', []) for request in turn.get('streams', [])
+                if request.get('kind') == 'task' and 'reasoning_effort' in request))
             report['effective_settings'] = {
                 'main_model': options.model, 'guardian_model': options.guardian_model,
                 'coding_approval_policy': 'never', 'coding_sandbox': 'workspace-write',
@@ -203,10 +232,11 @@ def evaluate(options):
                 'web_search': 'disabled', 'provider_request_retries': 0, 'provider_stream_retries': 0,
                 'native_guardian_retries': 'owned by Codex; observed and budgeted',
                 'guardian_selection': 'launch-scoped catalog auto_review_model_override',
-                'main_reasoning_effort': None,
+                'main_reasoning_effort': main_efforts[0] if len(main_efforts) == 1 else None,
+                'main_reasoning_efforts_observed': main_efforts,
                 'guardian_reasoning_effort': guardian_efforts[0] if len(guardian_efforts) == 1 else None,
                 'guardian_reasoning_efforts_observed': guardian_efforts,
-                'optional_reasoning_controls': 'main effort, summaries and verbosity omitted; Guardian uses native client defaults. Efforts are observed before the launcher adapter: null means omitted, an empty list means unmeasured. The GLM 5.3 adapter removes effort=none upstream. These are not verified provider capabilities.'}
+                'optional_reasoning_controls': 'Main and Guardian use native client settings. Efforts are observed before the launcher adapter: null means omitted, an empty list means unmeasured. The GLM 5.3 adapter removes effort=none upstream. These are not verified provider capabilities.'}
             report['limits'] = {'repeats': REPEATS, 'total_upstream_requests': 48,
                 'request_body_bytes': BODY_LIMIT, 'output_tokens_per_request': OUTPUT_LIMIT,
                 'response_body_bytes': 8 * 1024 * 1024, 'sse_event_bytes': 256 * 1024,
@@ -229,13 +259,14 @@ def evaluate(options):
 
 def reproducibility(options):
     return {'launcher_sha256': live.digest(Path(options.launcher)) if options.launcher else None,
-            'codex_sha256': live.digest(Path(options.codex)) if options.codex else None,
+            'codex_sha256': live.digest(Path(options.codex[0] if isinstance(options.codex, list) else options.codex)) if options.codex else None,
             'harness_sha256': live.digest(Path(__file__)),
             'harness_files_sha256': {name: live.digest(Path(__file__).with_name(name))
                 for name in ('model_evaluation.py', 'evaluation_proxy.py', 'evaluation_report.py',
-                             'evaluation_candidates.py', 'live_compat.py')},
+                             'evaluation_candidates.py', 'live_compat.py', 'windows_process.py',
+                             'windows_process.cs', 'windows_sandbox_state.py')},
             'candidate_snapshot_sha256': live.digest(SNAPSHOT_PATH),
-            'campaign_authorization': 'Maintainer authorized expanded five-model campaign without a currency cap; issue #36',
+            'campaign_authorization': 'Maintainer authorized five-model campaign without a currency cap in issue #36; CLI refresh in issue #75',
             'currency_cap_enforced': False}
 
 
@@ -304,6 +335,8 @@ def main():
         live.write_json(output, score(evidence))
         return 0
     # Preflight errors still produce shareable, zero-inference evidence.
+    if platform.system() == 'Windows' and (not options.codex or Path(options.codex).suffix.lower() != '.exe'):
+        return blocked(options, 'native_codex_executable_required')
     try:
         candidate(options.model)
         candidate(options.guardian_model)

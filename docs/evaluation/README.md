@@ -20,7 +20,7 @@ The CLI workflow below retains its experimental policy. The later
 main-output failures from inference deadlines and retain all new observations.
 
 This workflow evaluates one exact selected candidate with **Codex CLI 0.155.1 or newer,
-macOS ARM64, adapted connection**. The lowest tested CLI version, 0.155.1, is a
+macOS ARM64 or Windows ARM64, adapted connection**. The lowest tested CLI version, 0.155.1, is a
 minimum compatibility boundary. Newer versions are accepted unless a breaking
 change is discovered; they do not require an exact-version allowlist. Reports
 still record the actual measured version and executable hash for reproducibility.
@@ -143,8 +143,8 @@ request cap, not an invented provider maximum. The [Responses API contract](http
 defines `max_output_tokens` to include reasoning and visible output; a provider
 rejection remains failed evidence. Launcher metadata omits unverified optional reasoning defaults, summary and
 verbosity controls. With an explicitly cataloged Guardian, Codex 0.155.1 itself
-sends `reasoning.effort = "none"`. Main requests omit effort. The observer records
-each native request's actual Guardian effort before the launcher adapter, and
+sends `reasoning.effort = "none"`. Main settings can differ with the native client
+environment. The observer records each role's actual effort before the launcher adapter, and
 effective settings list the distinct observed values: null means omitted and an
 empty list means unmeasured. The GLM 5.3 adapter removes `effort=none` upstream to
 preserve the provider's reasoning separation. These native defaults are not advertised as verified provider
@@ -178,12 +178,20 @@ retains all five live attempts, a fresh Kimi baseline, and the Guardian selectio
 The [final selected-pair comparison](selected-pairs-2026-09-23.md) records the two
 eligible main models with the selected Guardian, exact qualification results,
 and campaign totals without counting selection evidence twice.
+
+For Windows ARM64, use the installed native Codex executable. A ready native
+sandbox can be reused explicitly by setting `TOFA_NATIVE_WINDOWS_CODEX_HOME` to
+its existing home (Python 3.11+). The evaluator uses the established Windows
+process supervisor and runtime settings overrides, checks ordinary config/auth
+preservation, and removes only the sessions created by this evaluation. It does
+not initialize a sandbox or copy credentials. The report includes native
+architecture, settings preservation and owned-session cleanup results.
 For a distinct pair, add `--guardian-model 'zai-org/GLM-5.3-Flash'` while selecting
 `--model 'moonshotai/Kimi-K3'`. To record explicit same-model evidence, pass the
 same exact ID to both flags. Both models must be available with resolved metadata.
 The evaluator supplies the launch-only `--evaluation-guardian-model` flag; ordinary
 launcher invocations keep their previous single-model behavior. See
-[paired runtime evidence and frozen configuration](paired-routing-2026-09-23.md). Every real client has an isolated HOME, CODEX_HOME and synthetic workspace;
+[paired runtime evidence and frozen configuration](paired-routing-2026-09-23.md). Every real client has an isolated HOME and synthetic workspace, with a private CODEX_HOME except for the explicit Windows sandbox reuse above;
 normal launcher credentials are read only by the launcher. Normal configuration
 and credential-file hashes are compared in memory and never published. Native
 credential-store lifecycle is outside this evaluation. Scratch session files are

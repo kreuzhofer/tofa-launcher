@@ -431,6 +431,16 @@ class EvaluationTests(unittest.TestCase):
         self.assertEqual(request['stage'], 'stream_read')
         self.assertNotIn('PRIVATE', raw)
 
+    def test_reasoning_channel_evidence_survives_scoring_without_text(self):
+        report, raw = self.score({'exit_code': 0, 'turn_completed': True,
+            'reasoning_items': 2, 'answer_items': 1, 'reasoning_output_tokens': 17,
+            'reasoning_text': 'PRIVATE', 'answer_text': 'PRIVATE'})
+        turn = report['runs'][0]['timing'][0]
+        self.assertEqual(turn['reasoning_items'], 2)
+        self.assertEqual(turn['answer_items'], 1)
+        self.assertEqual(turn['reasoning_output_tokens'], 17)
+        self.assertNotIn('PRIVATE', raw)
+
     def test_completed_stream_with_prior_error_cannot_pass_protocol(self):
         report, _ = self.score({'exit_code': 0, 'turn_completed': True, 'tools_succeeded': 1,
             'files_correct': True, 'streaming_observed': True,
@@ -441,6 +451,17 @@ class EvaluationTests(unittest.TestCase):
 
 
 class QualificationPairInputTests(unittest.TestCase):
+    def test_windows_evaluation_requires_native_codex_for_provenance(self):
+        import model_evaluation
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / 'report.json'
+            with patch('model_evaluation.platform.system', return_value='Windows'), patch('sys.argv', [str(SCRIPT),
+                    '--launcher', '/must-not-run', '--codex', 'codex.cmd', '--output', str(output)]):
+                self.assertEqual(model_evaluation.main(), 1)
+            report = json.loads(output.read_text())
+            self.assertEqual(report['blocked_reason'], 'native_codex_executable_required')
+            self.assertEqual(report['roles']['main']['attempted'], 0)
+
     def test_existing_report_is_rejected_before_running_a_client(self):
         with tempfile.TemporaryDirectory() as directory:
             report = Path(directory)/'report.json'; report.write_text('preserve me')
