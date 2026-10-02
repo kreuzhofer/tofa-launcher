@@ -15,7 +15,8 @@ complete five-candidate comparison.
 The [support publication and full comparison](desktop-comparison-2026-09-29.md)
 promotes only DeepSeek and GLM desktop mains with GLM Flash Guardian, preserving
 all failures, unknown costs, naming limitations and measured-artifact provenance.
-The CLI workflow below retains its experimental policy. The later
+The [2026-10-02 CLI refresh](cli-refresh-2026-10-02.md) records separately reviewed,
+macOS ARM64 support decisions for three pairs; other CLI combinations remain experimental. The later
 [GLM Flash and Kimi diagnostic reruns](desktop-retest-2026-09-29.md) separate
 main-output failures from inference deadlines and retain all new observations.
 

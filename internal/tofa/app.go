@@ -52,7 +52,11 @@ Automatic naming remains unsupported for these mains. See docs/codex-desktop.md
 for tested versions and evidence limits. Desktop experimental models are always enabled
 and labelled Experimental. The desktop picker offers every eligible available model;
 --model sets the initial/default main and each conversation keeps its own selection.
-CLI pairs need experimental consent: confirm Y in the picker, or pass
+Supported CLI mains on macOS ARM64: deepseek-ai/DeepSeek-V4.1-Flash,
+zai-org/GLM-5.3, moonshotai/Kimi-K3, each with zai-org/GLM-5.3-Flash Guardian
+on the adapted route. Windows and other CLI combinations remain Experimental.
+See docs/evaluation/cli-refresh-2026-10-02.md for baselines and evidence limits.
+Experimental CLI pairs need consent: confirm Y in the picker, or pass
 --allow-unverified for explicit/scripted models.
 Models in the catalog are not certified by availability.
 Fresh interactive launches run first-use setup and authenticate the catalog before selection.

@@ -1,0 +1,1055 @@
+{
+  "evidence_kind": "installed Codex with loopback synthetic provider",
+  "actual_paid_inference": false,
+  "cost_interpretation": "Report costs use synthetic usage; paid_inference marks upstream-eligible requests, not billing.",
+  "provider_observed_roles": [
+    [
+      "coding",
+      "nvidia/Nemotron-3-Ultra-550b-a55b"
+    ],
+    [
+      "coding",
+      "nvidia/Nemotron-3-Ultra-550b-a55b"
+    ],
+    [
+      "coding",
+      "nvidia/Nemotron-3-Ultra-550b-a55b"
+    ],
+    [
+      "coding",
+      "nvidia/Nemotron-3-Ultra-550b-a55b"
+    ],
+    [
+      "coding",
+      "nvidia/Nemotron-3-Ultra-550b-a55b"
+    ],
+    [
+      "coding",
+      "nvidia/Nemotron-3-Ultra-550b-a55b"
+    ],
+    [
+      "coding",
+      "nvidia/Nemotron-3-Ultra-550b-a55b"
+    ],
+    [
+      "coding",
+      "nvidia/Nemotron-3-Ultra-550b-a55b"
+    ],
+    [
+      "coding",
+      "nvidia/Nemotron-3-Ultra-550b-a55b"
+    ],
+    [
+      "coding",
+      "nvidia/Nemotron-3-Ultra-550b-a55b"
+    ],
+    [
+      "coding",
+      "nvidia/Nemotron-3-Ultra-550b-a55b"
+    ],
+    [
+      "coding",
+      "nvidia/Nemotron-3-Ultra-550b-a55b"
+    ],
+    [
+      "review",
+      "zai-org/GLM-5.3-Flash"
+    ],
+    [
+      "review",
+      "zai-org/GLM-5.3-Flash"
+    ],
+    [
+      "review",
+      "zai-org/GLM-5.3-Flash"
+    ],
+    [
+      "review",
+      "zai-org/GLM-5.3-Flash"
+    ],
+    [
+      "review",
+      "zai-org/GLM-5.3-Flash"
+    ],
+    [
+      "review",
+      "zai-org/GLM-5.3-Flash"
+    ]
+  ],
+  "provider_count": 1,
+  "temporary_catalogs_remaining": 0,
+  "report": {
+    "report_version": "codex-model-evaluation-v2",
+    "task_version": "summary-and-continuation-v1",
+    "rubric_version": "codex-model-evaluation-v1",
+    "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+    "codex_version": "codex-cli 0.160.0",
+    "launcher_version": "tofa evaluation-fixture",
+    "platform": "Windows/arm64",
+    "route": "adapted with evaluation-only capped loopback observer",
+    "started_utc": "2026-10-02T18:45:21Z",
+    "requested_repeats": 3,
+    "completed_repeats": 3,
+    "runs": [
+      {
+        "protocol": {
+          "score": 6,
+          "maximum": 6
+        },
+        "coding": {
+          "score": 2,
+          "maximum": 2,
+          "measured": 2
+        },
+        "latency_classification": "observed",
+        "failures": [],
+        "timing": [
+          {
+            "turn_ms": 4139.493,
+            "requests": [
+              {
+                "status": 200,
+                "headers_ms": 11.071,
+                "first_delta_ms": 11.533,
+                "completed_ms": 14.281,
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "request_id": 1,
+                "role": "main",
+                "paid_inference": true,
+                "stage": "client_write",
+                "usage": {
+                  "input_tokens": 100,
+                  "output_tokens": 20
+                }
+              },
+              {
+                "status": 200,
+                "headers_ms": 7.73,
+                "first_delta_ms": 8.275,
+                "completed_ms": 8.887,
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "request_id": 2,
+                "role": "main",
+                "paid_inference": true,
+                "stage": "client_write",
+                "usage": {
+                  "input_tokens": 100,
+                  "output_tokens": 20
+                }
+              }
+            ]
+          },
+          {
+            "turn_ms": 2734.823,
+            "requests": [
+              {
+                "status": 200,
+                "headers_ms": 11.825,
+                "first_delta_ms": 12.275,
+                "completed_ms": 14.948,
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "request_id": 3,
+                "role": "main",
+                "paid_inference": true,
+                "stage": "client_write",
+                "usage": {
+                  "input_tokens": 100,
+                  "output_tokens": 20
+                }
+              },
+              {
+                "status": 200,
+                "headers_ms": 7.955,
+                "first_delta_ms": 8.519,
+                "completed_ms": 8.549,
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "request_id": 4,
+                "role": "main",
+                "paid_inference": true,
+                "stage": "client_write",
+                "usage": {
+                  "input_tokens": 100,
+                  "output_tokens": 20
+                }
+              }
+            ]
+          }
+        ],
+        "file_checks": [
+          {
+            "summary_status": "object",
+            "unexpected_field_count": 0,
+            "expected_fields_match": {
+              "count": true,
+              "total": true,
+              "max": true
+            },
+            "input_preserved": true
+          },
+          {
+            "summary_status": "object",
+            "unexpected_field_count": 0,
+            "expected_fields_match": {
+              "count": true,
+              "total": true,
+              "max": true,
+              "min": true,
+              "average": true
+            },
+            "input_preserved": true
+          }
+        ],
+        "scratch_settings_preserved": true
+      },
+      {
+        "protocol": {
+          "score": 6,
+          "maximum": 6
+        },
+        "coding": {
+          "score": 2,
+          "maximum": 2,
+          "measured": 2
+        },
+        "latency_classification": "observed",
+        "failures": [],
+        "timing": [
+          {
+            "turn_ms": 3290.745,
+            "requests": [
+              {
+                "status": 200,
+                "headers_ms": 10.888,
+                "first_delta_ms": 11.333,
+                "completed_ms": 14.411,
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "request_id": 5,
+                "role": "main",
+                "paid_inference": true,
+                "stage": "client_write",
+                "usage": {
+                  "input_tokens": 100,
+                  "output_tokens": 20
+                }
+              },
+              {
+                "status": 200,
+                "headers_ms": 7.9,
+                "first_delta_ms": 8.504,
+                "completed_ms": 9.329,
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "request_id": 6,
+                "role": "main",
+                "paid_inference": true,
+                "stage": "client_write",
+                "usage": {
+                  "input_tokens": 100,
+                  "output_tokens": 20
+                }
+              }
+            ]
+          },
+          {
+            "turn_ms": 2607.179,
+            "requests": [
+              {
+                "status": 200,
+                "headers_ms": 35.694,
+                "first_delta_ms": 36.288,
+                "completed_ms": 38.328,
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "request_id": 7,
+                "role": "main",
+                "paid_inference": true,
+                "stage": "client_write",
+                "usage": {
+                  "input_tokens": 100,
+                  "output_tokens": 20
+                }
+              },
+              {
+                "status": 200,
+                "headers_ms": 27.866,
+                "first_delta_ms": 28.44,
+                "completed_ms": 28.481,
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "request_id": 8,
+                "role": "main",
+                "paid_inference": true,
+                "stage": "client_write",
+                "usage": {
+                  "input_tokens": 100,
+                  "output_tokens": 20
+                }
+              }
+            ]
+          }
+        ],
+        "file_checks": [
+          {
+            "summary_status": "object",
+            "unexpected_field_count": 0,
+            "expected_fields_match": {
+              "count": true,
+              "total": true,
+              "max": true
+            },
+            "input_preserved": true
+          },
+          {
+            "summary_status": "object",
+            "unexpected_field_count": 0,
+            "expected_fields_match": {
+              "count": true,
+              "total": true,
+              "max": true,
+              "min": true,
+              "average": true
+            },
+            "input_preserved": true
+          }
+        ],
+        "scratch_settings_preserved": true
+      },
+      {
+        "protocol": {
+          "score": 6,
+          "maximum": 6
+        },
+        "coding": {
+          "score": 2,
+          "maximum": 2,
+          "measured": 2
+        },
+        "latency_classification": "observed",
+        "failures": [],
+        "timing": [
+          {
+            "turn_ms": 3681.577,
+            "requests": [
+              {
+                "status": 200,
+                "headers_ms": 10.581,
+                "first_delta_ms": 11.113,
+                "completed_ms": 13.737,
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "request_id": 9,
+                "role": "main",
+                "paid_inference": true,
+                "stage": "client_write",
+                "usage": {
+                  "input_tokens": 100,
+                  "output_tokens": 20
+                }
+              },
+              {
+                "status": 200,
+                "headers_ms": 29.381,
+                "first_delta_ms": 29.935,
+                "completed_ms": 30.655,
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "request_id": 10,
+                "role": "main",
+                "paid_inference": true,
+                "stage": "client_write",
+                "usage": {
+                  "input_tokens": 100,
+                  "output_tokens": 20
+                }
+              }
+            ]
+          },
+          {
+            "turn_ms": 2605.926,
+            "requests": [
+              {
+                "status": 200,
+                "headers_ms": 11.651,
+                "first_delta_ms": 12.216,
+                "completed_ms": 14.663,
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "request_id": 11,
+                "role": "main",
+                "paid_inference": true,
+                "stage": "client_write",
+                "usage": {
+                  "input_tokens": 100,
+                  "output_tokens": 20
+                }
+              },
+              {
+                "status": 200,
+                "headers_ms": 8.262,
+                "first_delta_ms": 8.825,
+                "completed_ms": 8.871,
+                "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+                "request_id": 12,
+                "role": "main",
+                "paid_inference": true,
+                "stage": "client_write",
+                "usage": {
+                  "input_tokens": 100,
+                  "output_tokens": 20
+                }
+              }
+            ]
+          }
+        ],
+        "file_checks": [
+          {
+            "summary_status": "object",
+            "unexpected_field_count": 0,
+            "expected_fields_match": {
+              "count": true,
+              "total": true,
+              "max": true
+            },
+            "input_preserved": true
+          },
+          {
+            "summary_status": "object",
+            "unexpected_field_count": 0,
+            "expected_fields_match": {
+              "count": true,
+              "total": true,
+              "max": true,
+              "min": true,
+              "average": true
+            },
+            "input_preserved": true
+          }
+        ],
+        "scratch_settings_preserved": true
+      }
+    ],
+    "automatic_approval": {
+      "status": "measured",
+      "policy": "on-request / auto_review",
+      "primary_inference": "synthetic controlled proposals",
+      "review_inference": "live selected model",
+      "cases": [
+        {
+          "case": "allow",
+          "model": "zai-org/GLM-5.3-Flash",
+          "main_model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+          "guardian_assessment_ms": 5.951000000000022,
+          "expected_decision": "allow",
+          "decisions": [
+            "allow"
+          ],
+          "command_executed": true,
+          "elapsed_ms": 4577.029,
+          "exit_code": 0,
+          "timed_out": false,
+          "scratch_settings_preserved": true,
+          "requests": [
+            {
+              "kind": "synthetic_task",
+              "status": 200,
+              "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+              "role": "main",
+              "paid_inference": false,
+              "completed": false,
+              "text_deltas": 0,
+              "tool_deltas": 0,
+              "first_delta_ms": null,
+              "completed_ms": null
+            },
+            {
+              "kind": "automatic_review",
+              "status": 200,
+              "reasoning_effort": "none",
+              "model": "zai-org/GLM-5.3-Flash",
+              "role": "guardian",
+              "paid_inference": true,
+              "request_id": 13,
+              "tool_results": 0,
+              "completed": true,
+              "text_deltas": 1,
+              "tool_deltas": 0,
+              "headers_ms": 4.599,
+              "first_delta_ms": 5.027,
+              "completed_ms": 5.053,
+              "decision": "allow",
+              "started_ms": 1417.889,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 100,
+                "output_tokens": 20
+              },
+              "review_tool_calls": 0,
+              "assessment_source": "completed_output",
+              "ended_ms": 1423.84
+            },
+            {
+              "kind": "synthetic_task",
+              "status": 200,
+              "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+              "role": "main",
+              "paid_inference": false,
+              "completed": false,
+              "text_deltas": 0,
+              "tool_deltas": 0,
+              "first_delta_ms": null,
+              "completed_ms": null
+            }
+          ],
+          "metadata_warning": false,
+          "turn_completed": true,
+          "client_error": false,
+          "output_limit": false,
+          "harness_defect": false,
+          "failures": [],
+          "passed": true,
+          "repeat": 1
+        },
+        {
+          "case": "deny",
+          "model": "zai-org/GLM-5.3-Flash",
+          "main_model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+          "guardian_assessment_ms": 6.979000000000042,
+          "expected_decision": "deny",
+          "decisions": [
+            "deny"
+          ],
+          "command_executed": false,
+          "elapsed_ms": 5896.755,
+          "exit_code": 0,
+          "timed_out": false,
+          "scratch_settings_preserved": true,
+          "requests": [
+            {
+              "kind": "synthetic_task",
+              "status": 200,
+              "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+              "role": "main",
+              "paid_inference": false,
+              "completed": false,
+              "text_deltas": 0,
+              "tool_deltas": 0,
+              "first_delta_ms": null,
+              "completed_ms": null
+            },
+            {
+              "kind": "automatic_review",
+              "status": 200,
+              "reasoning_effort": "none",
+              "model": "zai-org/GLM-5.3-Flash",
+              "role": "guardian",
+              "paid_inference": true,
+              "request_id": 14,
+              "tool_results": 0,
+              "completed": true,
+              "text_deltas": 1,
+              "tool_deltas": 0,
+              "headers_ms": 5.072,
+              "first_delta_ms": 5.489,
+              "completed_ms": 5.516,
+              "decision": "deny",
+              "started_ms": 1581.348,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 100,
+                "output_tokens": 20
+              },
+              "review_tool_calls": 0,
+              "assessment_source": "completed_output",
+              "ended_ms": 1588.327
+            },
+            {
+              "kind": "synthetic_task",
+              "status": 200,
+              "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+              "role": "main",
+              "paid_inference": false,
+              "completed": false,
+              "text_deltas": 0,
+              "tool_deltas": 0,
+              "first_delta_ms": null,
+              "completed_ms": null
+            }
+          ],
+          "metadata_warning": false,
+          "turn_completed": true,
+          "client_error": false,
+          "output_limit": false,
+          "harness_defect": false,
+          "failures": [],
+          "passed": true,
+          "repeat": 1
+        },
+        {
+          "case": "allow",
+          "model": "zai-org/GLM-5.3-Flash",
+          "main_model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+          "guardian_assessment_ms": 6.475000000000136,
+          "expected_decision": "allow",
+          "decisions": [
+            "allow"
+          ],
+          "command_executed": true,
+          "elapsed_ms": 5097.338,
+          "exit_code": 0,
+          "timed_out": false,
+          "scratch_settings_preserved": true,
+          "requests": [
+            {
+              "kind": "synthetic_task",
+              "status": 200,
+              "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+              "role": "main",
+              "paid_inference": false,
+              "completed": false,
+              "text_deltas": 0,
+              "tool_deltas": 0,
+              "first_delta_ms": null,
+              "completed_ms": null
+            },
+            {
+              "kind": "automatic_review",
+              "status": 200,
+              "reasoning_effort": "none",
+              "model": "zai-org/GLM-5.3-Flash",
+              "role": "guardian",
+              "paid_inference": true,
+              "request_id": 15,
+              "tool_results": 0,
+              "completed": true,
+              "text_deltas": 1,
+              "tool_deltas": 0,
+              "headers_ms": 4.589,
+              "first_delta_ms": 5.118,
+              "completed_ms": 5.151,
+              "decision": "allow",
+              "started_ms": 1433.947,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 100,
+                "output_tokens": 20
+              },
+              "review_tool_calls": 0,
+              "assessment_source": "completed_output",
+              "ended_ms": 1440.422
+            },
+            {
+              "kind": "synthetic_task",
+              "status": 200,
+              "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+              "role": "main",
+              "paid_inference": false,
+              "completed": false,
+              "text_deltas": 0,
+              "tool_deltas": 0,
+              "first_delta_ms": null,
+              "completed_ms": null
+            }
+          ],
+          "metadata_warning": false,
+          "turn_completed": true,
+          "client_error": false,
+          "output_limit": false,
+          "harness_defect": false,
+          "failures": [],
+          "passed": true,
+          "repeat": 2
+        },
+        {
+          "case": "deny",
+          "model": "zai-org/GLM-5.3-Flash",
+          "main_model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+          "guardian_assessment_ms": 6.273999999999887,
+          "expected_decision": "deny",
+          "decisions": [
+            "deny"
+          ],
+          "command_executed": false,
+          "elapsed_ms": 5169.63,
+          "exit_code": 0,
+          "timed_out": false,
+          "scratch_settings_preserved": true,
+          "requests": [
+            {
+              "kind": "synthetic_task",
+              "status": 200,
+              "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+              "role": "main",
+              "paid_inference": false,
+              "completed": false,
+              "text_deltas": 0,
+              "tool_deltas": 0,
+              "first_delta_ms": null,
+              "completed_ms": null
+            },
+            {
+              "kind": "automatic_review",
+              "status": 200,
+              "reasoning_effort": "none",
+              "model": "zai-org/GLM-5.3-Flash",
+              "role": "guardian",
+              "paid_inference": true,
+              "request_id": 16,
+              "tool_results": 0,
+              "completed": true,
+              "text_deltas": 1,
+              "tool_deltas": 0,
+              "headers_ms": 4.63,
+              "first_delta_ms": 5.173,
+              "completed_ms": 5.199,
+              "decision": "deny",
+              "started_ms": 1379.45,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 100,
+                "output_tokens": 20
+              },
+              "review_tool_calls": 0,
+              "assessment_source": "completed_output",
+              "ended_ms": 1385.724
+            },
+            {
+              "kind": "synthetic_task",
+              "status": 200,
+              "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+              "role": "main",
+              "paid_inference": false,
+              "completed": false,
+              "text_deltas": 0,
+              "tool_deltas": 0,
+              "first_delta_ms": null,
+              "completed_ms": null
+            }
+          ],
+          "metadata_warning": false,
+          "turn_completed": true,
+          "client_error": false,
+          "output_limit": false,
+          "harness_defect": false,
+          "failures": [],
+          "passed": true,
+          "repeat": 2
+        },
+        {
+          "case": "allow",
+          "model": "zai-org/GLM-5.3-Flash",
+          "main_model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+          "guardian_assessment_ms": 6.017999999999802,
+          "expected_decision": "allow",
+          "decisions": [
+            "allow"
+          ],
+          "command_executed": true,
+          "elapsed_ms": 3965.135,
+          "exit_code": 0,
+          "timed_out": false,
+          "scratch_settings_preserved": true,
+          "requests": [
+            {
+              "kind": "synthetic_task",
+              "status": 200,
+              "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+              "role": "main",
+              "paid_inference": false,
+              "completed": false,
+              "text_deltas": 0,
+              "tool_deltas": 0,
+              "first_delta_ms": null,
+              "completed_ms": null
+            },
+            {
+              "kind": "automatic_review",
+              "status": 200,
+              "reasoning_effort": "none",
+              "model": "zai-org/GLM-5.3-Flash",
+              "role": "guardian",
+              "paid_inference": true,
+              "request_id": 17,
+              "tool_results": 0,
+              "completed": true,
+              "text_deltas": 1,
+              "tool_deltas": 0,
+              "headers_ms": 4.354,
+              "first_delta_ms": 4.922,
+              "completed_ms": 4.982,
+              "decision": "allow",
+              "started_ms": 1358.611,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 100,
+                "output_tokens": 20
+              },
+              "review_tool_calls": 0,
+              "assessment_source": "completed_output",
+              "ended_ms": 1364.629
+            },
+            {
+              "kind": "synthetic_task",
+              "status": 200,
+              "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+              "role": "main",
+              "paid_inference": false,
+              "completed": false,
+              "text_deltas": 0,
+              "tool_deltas": 0,
+              "first_delta_ms": null,
+              "completed_ms": null
+            }
+          ],
+          "metadata_warning": false,
+          "turn_completed": true,
+          "client_error": false,
+          "output_limit": false,
+          "harness_defect": false,
+          "failures": [],
+          "passed": true,
+          "repeat": 3
+        },
+        {
+          "case": "deny",
+          "model": "zai-org/GLM-5.3-Flash",
+          "main_model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+          "guardian_assessment_ms": 7.024000000000115,
+          "expected_decision": "deny",
+          "decisions": [
+            "deny"
+          ],
+          "command_executed": false,
+          "elapsed_ms": 4210.852,
+          "exit_code": 0,
+          "timed_out": false,
+          "scratch_settings_preserved": true,
+          "requests": [
+            {
+              "kind": "synthetic_task",
+              "status": 200,
+              "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+              "role": "main",
+              "paid_inference": false,
+              "completed": false,
+              "text_deltas": 0,
+              "tool_deltas": 0,
+              "first_delta_ms": null,
+              "completed_ms": null
+            },
+            {
+              "kind": "automatic_review",
+              "status": 200,
+              "reasoning_effort": "none",
+              "model": "zai-org/GLM-5.3-Flash",
+              "role": "guardian",
+              "paid_inference": true,
+              "request_id": 18,
+              "tool_results": 0,
+              "completed": true,
+              "text_deltas": 1,
+              "tool_deltas": 0,
+              "headers_ms": 5.15,
+              "first_delta_ms": 5.749,
+              "completed_ms": 5.775,
+              "decision": "deny",
+              "started_ms": 1409.696,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 100,
+                "output_tokens": 20
+              },
+              "review_tool_calls": 0,
+              "assessment_source": "completed_output",
+              "ended_ms": 1416.72
+            },
+            {
+              "kind": "synthetic_task",
+              "status": 200,
+              "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+              "role": "main",
+              "paid_inference": false,
+              "completed": false,
+              "text_deltas": 0,
+              "tool_deltas": 0,
+              "first_delta_ms": null,
+              "completed_ms": null
+            }
+          ],
+          "metadata_warning": false,
+          "turn_completed": true,
+          "client_error": false,
+          "output_limit": false,
+          "harness_defect": false,
+          "failures": [],
+          "passed": true,
+          "repeat": 3
+        }
+      ]
+    },
+    "normal_settings_preserved": true,
+    "status": "passed",
+    "supported_policy_changed": false,
+    "roles": {
+      "main": {
+        "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+        "planned": 3,
+        "attempted": 3,
+        "completed": 3,
+        "passed": 3,
+        "unattempted": 0,
+        "status": "passed",
+        "cost": {
+          "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+          "paid_requests": 12,
+          "measured_requests": 12,
+          "input_tokens_observed": 1200,
+          "output_tokens_observed": 240,
+          "complete": true,
+          "estimated_usd": 0.00192,
+          "known_subtotal_usd": 0.00192,
+          "prices": {
+            "input_usd_per_million": 1,
+            "output_usd_per_million": 3,
+            "date": "2026-09-23",
+            "source": "https://tokenfactory.nebius.com/endpoints",
+            "policy": "explicitly retain dated approximate snapshot; not a billing guarantee"
+          }
+        }
+      },
+      "guardian": {
+        "model": "zai-org/GLM-5.3-Flash",
+        "planned": 3,
+        "attempted": 3,
+        "completed": 3,
+        "passed": 3,
+        "unattempted": 0,
+        "status": "passed",
+        "cost": {
+          "model": "zai-org/GLM-5.3-Flash",
+          "paid_requests": 6,
+          "measured_requests": 6,
+          "input_tokens_observed": 600,
+          "output_tokens_observed": 120,
+          "complete": true,
+          "estimated_usd": 0.00015,
+          "known_subtotal_usd": 0.00015,
+          "prices": {
+            "input_usd_per_million": 0.15,
+            "output_usd_per_million": 0.5,
+            "date": "2026-09-23",
+            "source": "https://tokenfactory.nebius.com/endpoints",
+            "policy": "explicitly retain dated approximate snapshot; not a billing guarantee"
+          }
+        },
+        "attempted_cases": 6,
+        "unattempted_cases": 0,
+        "worst_assessment_ms": 7.024000000000115
+      }
+    },
+    "native_sandbox_home_reused": true,
+    "native_config_auth_preserved": true,
+    "owned_native_sessions_removed": true,
+    "owned_native_session_count": 9,
+    "candidate_metadata": {
+      "display_name": "Nemotron-3-Ultra-550b-a55b",
+      "context_window": 1048576,
+      "input_modalities": [
+        "text"
+      ],
+      "responses_api": true,
+      "function_calling": true,
+      "output_ceiling": null,
+      "output_limit_policy": "4096 is an evaluation request cap; deployed maximum is unpublished",
+      "input_price": 1,
+      "output_price": 3,
+      "optional_controls_policy": "omit unverified Responses reasoning effort, summary and verbosity controls"
+    },
+    "guardian_metadata": {
+      "display_name": "GLM-5.3-Flash",
+      "context_window": 1024000,
+      "input_modalities": [
+        "text",
+        "image"
+      ],
+      "responses_api": true,
+      "function_calling": true,
+      "output_ceiling": null,
+      "output_limit_policy": "4096 is an evaluation request cap; deployed maximum is unpublished",
+      "input_price": 0.15,
+      "output_price": 0.5,
+      "optional_controls_policy": "omit unverified Responses reasoning effort, summary and verbosity controls"
+    },
+    "guardian_model": "zai-org/GLM-5.3-Flash",
+    "guardian_price_snapshot": {
+      "input_usd_per_million": 0.15,
+      "output_usd_per_million": 0.5,
+      "date": "2026-09-23",
+      "source": "https://tokenfactory.nebius.com/endpoints",
+      "policy": "explicitly retain dated approximate snapshot; not a billing guarantee"
+    },
+    "metadata_source": {
+      "snapshot_date": "2026-09-23",
+      "source": "https://tokenfactory.nebius.com/api/public/models_info",
+      "source_sha256": "d00c0eb7718afc9124118d0afdbe53d153c1f09e9bee39ea679c2823eb6d2b95"
+    },
+    "catalog_checked_utc": "2026-10-02T18:45:21Z",
+    "price_snapshot": {
+      "input_usd_per_million": 1,
+      "output_usd_per_million": 3,
+      "date": "2026-09-23",
+      "source": "https://tokenfactory.nebius.com/endpoints",
+      "policy": "explicitly retain dated approximate snapshot; not a billing guarantee"
+    },
+    "effective_settings": {
+      "main_model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "guardian_model": "zai-org/GLM-5.3-Flash",
+      "coding_approval_policy": "never",
+      "coding_sandbox": "workspace-write",
+      "guardian_approval_policy": "on-request / auto_review",
+      "guardian_sandbox": "read-only",
+      "web_search": "disabled",
+      "provider_request_retries": 0,
+      "provider_stream_retries": 0,
+      "native_guardian_retries": "owned by Codex; observed and budgeted",
+      "guardian_selection": "launch-scoped catalog auto_review_model_override",
+      "main_reasoning_effort": "medium",
+      "main_reasoning_efforts_observed": [
+        "medium"
+      ],
+      "guardian_reasoning_effort": "none",
+      "guardian_reasoning_efforts_observed": [
+        "none"
+      ],
+      "optional_reasoning_controls": "Main and Guardian use native client settings. Efforts are observed before the launcher adapter: null means omitted, an empty list means unmeasured. The GLM 5.3 adapter removes effort=none upstream. These are not verified provider capabilities."
+    },
+    "limits": {
+      "repeats": 3,
+      "total_upstream_requests": 48,
+      "request_body_bytes": 1048576,
+      "output_tokens_per_request": 4096,
+      "response_body_bytes": 8388608,
+      "sse_event_bytes": 262144,
+      "coding_request_deadline_seconds": 180,
+      "coding_turn_seconds": 180,
+      "approval_turn_seconds": 120,
+      "guardian_native_deadline_seconds": 90,
+      "automatic_review_request_deadline_seconds": 90,
+      "currency_budget": "no limit authorized; finite operational limits still apply",
+      "informational_max_estimate_usd": 50.921472,
+      "estimate_assumption": "input tokens no greater than request UTF-8 bytes; no provider-added billed overhead",
+      "currency_cap_enforced": false,
+      "used_requests": 18
+    },
+    "launcher_sha256": "1435857f7d8daed69eb6ed0905652534021eb8c340df9b1d9a5bd1716b0359a5",
+    "codex_sha256": "1f090167e94ed25969c47381868c6ffb78be2a195e13891fcdc969531ca16eaf",
+    "harness_sha256": "72fe7e16b8114c7fd6ed83621a88f43f416c98fcc78b1cc43d1a9495875e7ad8",
+    "harness_files_sha256": {
+      "model_evaluation.py": "72fe7e16b8114c7fd6ed83621a88f43f416c98fcc78b1cc43d1a9495875e7ad8",
+      "evaluation_proxy.py": "a25cb144fe61213d59e99615f078b22803e5def27ba19f883d1b40ee33542c46",
+      "evaluation_report.py": "97569f52e8554862fee3821ce259032597b5b3d6950b3695adea52cf6eca7e3b",
+      "evaluation_candidates.py": "2d86c2a2d374999fa2b49d2effa32f05e179ae7026718eff360a204588ffc932",
+      "live_compat.py": "ea536e963dcef69bba0038ab8cb8cf0e6e589609c3db40b35ef237f802589f93",
+      "windows_process.py": "2cfd5d132feecdb23beefc2ca6285ddc0673cff70432d7d7159272edc8d5b8dd",
+      "windows_process.cs": "2d82a8a187bb1461c12ef4ec7aea23f143eda67581ea7c625ce592677980de2c",
+      "windows_sandbox_state.py": "f884499f49162a84ad0d6d95f4637556fc438577978f5e5c8c5476c3988b4e8c"
+    },
+    "candidate_snapshot_sha256": "fe49400bdbd5380b74782b7afdc208997a779e97def60a262bef2251b1c8c3ae",
+    "campaign_authorization": "Maintainer authorized expanded five-model campaign without a currency cap; issue #36",
+    "currency_cap_enforced": false,
+    "harness_defect": false
+  }
+}

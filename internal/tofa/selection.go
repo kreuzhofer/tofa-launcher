@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"runtime"
+	"slices"
 )
 
 //go:embed assets/model-verification.json
@@ -61,7 +63,10 @@ func validateAvailableRole(models []Model, role, identity string) error {
 // Guardian in another launch does not transfer to this selection.
 func selectionStatus(target, route, main, guardian string, allow bool) (string, error) {
 	var snapshot struct {
-		Records []struct{ Target, Route, Main, Guardian, Status, Evidence string }
+		Records []struct {
+			Target, Route, Main, Guardian, Status, Evidence string
+			Platforms                                       []string
+		}
 	}
 	if err := json.Unmarshal(verificationSnapshot, &snapshot); err != nil || snapshot.Records == nil {
 		return "", errors.New("invalid bundled model verification records")
@@ -71,6 +76,9 @@ func selectionStatus(target, route, main, guardian string, allow bool) (string, 
 			return "", errors.New("invalid bundled model verification record")
 		}
 		if record.Target == target && record.Route == route && record.Main == main && record.Guardian == guardian && record.Status == "supported" {
+			if len(record.Platforms) > 0 && !slices.Contains(record.Platforms, runtime.GOOS+"/"+runtime.GOARCH) {
+				continue
+			}
 			return "supported", nil
 		}
 	}

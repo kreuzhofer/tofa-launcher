@@ -1,0 +1,38 @@
+{
+  "go_race": {
+    "command": "GORACE=atexit_sleep_ms=0 go test -race ./...",
+    "result": "passed",
+    "package_seconds": 283.319,
+    "instrumentation_note": "Default race instrumentation caused TestDesktopAllowsEngineFirstGracefulShutdown to miss its real shutdown grace period. The failure reproduced with all production changes reverted via a baseline overlay. The test passed without race instrumentation and with only its artificial exit sleep disabled. Race detection remained enabled; no production timeout was changed."
+  },
+  "go_vet": "passed",
+  "python": {
+    "discovered": 252,
+    "passed_after_correct_invocations": 172,
+    "optional_or_platform_skipped": 80,
+    "invocation_corrections": "Discovery does not provide lifecycle_test.py DIST VERSION or terminal_test.py BINARY. Those six tests initially errored from missing arguments and all passed with the built final distribution. All other discovered tests passed.",
+    "picker_after_shared_fixture_fix": {
+      "tests": 40,
+      "result": "passed"
+    },
+    "desktop_picker_after_shared_fixture_fix": "passed in focused and final Go race suites"
+  },
+  "native_synthetic": {
+    "macos_five_pairs": "passed",
+    "windows_five_pairs": "passed",
+    "macos_reasoning_separation": "passed",
+    "windows_reasoning_separation": "passed",
+    "windows_final_cli_scope_tests": "passed"
+  },
+  "review": {
+    "standards_findings": 0,
+    "spec_findings": 0,
+    "fixed_review_finding": "Windows native client executable provenance; npm wrappers are explicitly blocked."
+  },
+  "privacy": "Evidence JSON validated; no credential, project identity, user home path or generated-text matches. CRLF line endings normalized without changing JSON values. All ten attempts match frozen artifact hashes and follow the pre-run freeze.",
+  "cleanup": {
+    "windows_left_running": true,
+    "remaining_campaign_scheduled_tasks": 0
+  },
+  "release_published": false
+}

@@ -42,9 +42,12 @@ must provide their own validation and evidence; implementing Claude remains in
 
 Current desktop support records promote DeepSeek V4.1 Flash and GLM 5.3 mains
 with GLM 5.3 Flash Guardian on the pinned adapted macOS desktop configuration.
-CLI and other combinations remain experimental. See the
-[five-model comparison and launch guidance](evaluation/desktop-comparison-2026-09-29.md).
-Naming remains unsupported for both promoted mains.
+See the [desktop comparison](evaluation/desktop-comparison-2026-09-29.md).
+Naming remains unsupported for both promoted desktop mains.
+The [CLI refresh](evaluation/cli-refresh-2026-10-02.md) separately promotes DeepSeek,
+GLM 5.3 and Kimi mains with GLM Flash Guardian on the adapted macOS ARM64 route.
+Other CLI platforms and combinations remain Experimental. Platform-restricted
+records cannot supply a Supported badge outside their verified platforms.
 
 The shared implementation is `mainModelChoices`, `pickTargetClient`, `pickMainModel`,
 and the common terminal runner with `pickerView`.

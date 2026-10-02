@@ -1,0 +1,11 @@
+{
+  "checked_utc": "2026-10-02T19:01:34.246091+00:00",
+  "catalog_exit_code": 0,
+  "availability": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": true,
+    "zai-org/GLM-5.3": true,
+    "zai-org/GLM-5.3-Flash": true,
+    "moonshotai/Kimi-K3": true,
+    "nvidia/Nemotron-3-Ultra-550b-a55b": true
+  }
+}

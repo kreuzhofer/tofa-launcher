@@ -4,6 +4,7 @@ import fcntl
 import json
 import os
 import pathlib
+import platform
 import pty
 import select
 import re
@@ -28,15 +29,20 @@ class PickerFixture(unittest.TestCase):
         dict(target='codex', route='adapted', main=KIMI, guardian=GLM),
         dict(target='codex', route='adapted', main=DEEPSEEK, guardian=KIMI),
         dict(target='codex', route='direct', main=DEEPSEEK, guardian=''),
+        dict(target='codex', route='adapted', main=GLM, guardian=GLM,
+             platforms=['unverified/architecture']),
     ]
 
     @classmethod
     def setUpClass(cls):
         cls.build = tempfile.TemporaryDirectory()
-        cls.binary = pathlib.Path(cls.build.name) / 'picker-launcher'
-        subprocess.run(['go', 'build', '-o', str(cls.binary), './scripts/fixtures/picker_launcher'], cwd=ROOT, check=True)
+        cls.experimental = pathlib.Path(cls.build.name) / 'experimental-launcher'
+        cls.production = pathlib.Path(cls.build.name) / 'production-launcher'
+        subprocess.run(['go', 'build', '-o', str(cls.production), './scripts/fixtures/picker_launcher'], cwd=ROOT, check=True)
+        cls.binary = cls.production
         # Synthetic support records are compiled only into this test executable.
-        # Production assets and their experimental status remain untouched.
+        # Production assets remain untouched. A separate empty snapshot keeps
+        # generic experimental-consent tests independent of current promotions.
         records = [dict(record) for record in cls.support_records]
         for record in records:
             record.update(status='supported', evidence='test-only synthetic verification')
@@ -44,6 +50,9 @@ class PickerFixture(unittest.TestCase):
         snapshot.write_text(json.dumps({'records': records}))
         overlay = pathlib.Path(cls.build.name) / 'overlay.json'
         overlay.write_text(json.dumps({'Replace': {str(ROOT / 'internal/tofa/assets/model-verification.json'): str(snapshot)}}))
+        snapshot.write_text(json.dumps({'records': []}))
+        subprocess.run(['go', 'build', '-overlay', str(overlay), '-o', str(cls.experimental), './scripts/fixtures/picker_launcher'], cwd=ROOT, check=True)
+        snapshot.write_text(json.dumps({'records': records}))
         cls.supported = pathlib.Path(cls.build.name) / 'supported-launcher'
         subprocess.run(['go', 'build', '-overlay', str(overlay), '-o', str(cls.supported), './scripts/fixtures/picker_launcher'], cwd=ROOT, check=True)
 
@@ -213,6 +222,30 @@ open(os.environ['FIXTURE_MARKER'],'w').write(json.dumps({'model':model,'args':ar
 
 
 class PickerTests(PickerFixture):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.binary = cls.experimental
+
+    def test_qualified_production_pairs_launch_without_consent_only_on_macos_arm64(self):
+        self.models.append('zai-org/GLM-5.3')
+        for model in (DEEPSEEK, 'zai-org/GLM-5.3', KIMI):
+            with self.subTest(model=model):
+                self.start(['launch', 'codex'], self.production)
+                self.read_until('Enter confirms')
+                os.write(self.master, model.encode() + b'\r')
+                if sys.platform == 'darwin' and platform.machine() == 'arm64':
+                    self.finish()
+                    self.read_until('Status: supported')
+                    self.assertNotIn(b'Launch experimental selection?', self.output)
+                    self.assertEqual(json.loads(self.marker.read_text())['model'], model)
+                    self.marker.unlink()
+                else:
+                    self.read_until('Launch experimental selection?')
+                    self.assertFalse(self.marker.exists())
+                    os.write(self.master, b'\x03')
+                    self.finish(1)
+
     def test_first_launch_authenticates_before_app_and_continues(self):
         for path in self.store.iterdir():
             path.unlink()
@@ -546,6 +579,17 @@ class PickerTests(PickerFixture):
         self.finish()
         self.read_until('Guardian: ' + KIMI)
         self.assertEqual(json.loads(self.marker.read_text())['model'], DEEPSEEK)
+
+    def test_support_from_another_platform_requires_experimental_consent(self):
+        self.start(['launch', 'codex'], self.supported)
+        self.read_until('Enter confirms')
+        os.write(self.master, b'glm\r')
+        self.read_until('Launch experimental selection?')
+        self.assertFalse(self.marker.exists())
+        os.write(self.master, b'y')
+        self.finish()
+        self.assertEqual(json.loads(self.marker.read_text())['model'], GLM)
+        self.read_until('Status: experimental')
 
     def test_direct_picker_uses_route_support_and_native_reviewer(self):
         self.start(['launch', 'codex', '--direct'], self.supported)

@@ -246,7 +246,9 @@ leading selection indicator. Guardian uses its default or explicit override
 without another prompt.
 
 Supported and experimental models appear together, labelled for the exact target,
-route and Guardian. CLI combinations remain experimental. Choosing one in CLI asks for
+route, Guardian and verified platform. On macOS ARM64, the adapted CLI pairs for
+DeepSeek V4.1 Flash, GLM 5.3 and Kimi K3 with GLM 5.3 Flash Guardian are Supported.
+Other CLI combinations remain Experimental. Choosing an experimental CLI entry asks for
 confirmation: **Y** launches once, **N/Enter** returns to the list, and **Esc**
 cancels. `--allow-unverified` skips this extra confirmation. Explicit or scripted
 experimental CLI `--model ID` launches still require the flag. Desktop experimental
@@ -399,10 +401,15 @@ rejects `--guardian-model` (including the retained internal
 approval policies and routing-override protections still apply.
 
 Support decisions use [recorded combination statuses](internal/tofa/assets/model-verification.json)
-for the exact target, route and main/Guardian roles. Current CLI combinations need
-interactive experimental consent or explicit `--allow-unverified`: the [historical CLI campaign](docs/evaluation/selected-pairs-2026-09-23.md)
-explicitly retained experimental status, and does not promote launcher or desktop
-support. Changing a role or route does not inherit another combination's support.
+for the exact target, route, main/Guardian roles and recorded platform scope. The
+[2026-10-02 CLI refresh](docs/evaluation/cli-refresh-2026-10-02.md) promotes DeepSeek
+V4.1 Flash, GLM 5.3 and Kimi K3 with GLM 5.3 Flash Guardian on macOS ARM64 only.
+Windows live attempts were blocked by missing saved login; synthetic tests do not
+qualify live models. GLM Flash and Nemotron remain Experimental as mains. Other
+combinations require interactive experimental consent or explicit
+`--allow-unverified`. Changing a role, route or platform does not inherit support.
+Recorded client versions are measured baselines; newer versions are accepted until
+a breaking change is found. Historical campaign evidence remains unchanged.
 Evaluation tools retain their explicit same-model default and the internal flag.
 The desktop picker uses desktop evidence; CLI qualification never becomes desktop
 support by inference. See the [universal picker contract](docs/model-picker.md)

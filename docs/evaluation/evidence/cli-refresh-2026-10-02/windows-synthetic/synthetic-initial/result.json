@@ -1,0 +1,8 @@
+{
+  "test_exit_code": 1,
+  "platform": "Windows/arm64",
+  "codex_version": "codex-cli 0.160.0",
+  "codex_sha256": "1f090167e94ed25969c47381868c6ffb78be2a195e13891fcdc969531ca16eaf",
+  "model_evaluation_sha256": "9eedae6685018627d09885b5d3879a163da08e44d51cd5199b2eeeb91ba11be1",
+  "paid_inference": false
+}

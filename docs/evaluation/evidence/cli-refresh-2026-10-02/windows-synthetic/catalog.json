@@ -1,0 +1,18 @@
+{
+  "checked_utc": "2026-10-02T19:02:31.690409+00:00",
+  "catalog_exit_code": 1,
+  "availability": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": false,
+    "zai-org/GLM-5.3": false,
+    "zai-org/GLM-5.3-Flash": false,
+    "moonshotai/Kimi-K3": false,
+    "nvidia/Nemotron-3-Ultra-550b-a55b": false
+  },
+  "os": "Windows 11",
+  "os_version": "10.0.26200",
+  "architecture": "arm64",
+  "codex_version": "codex-cli 0.160.0",
+  "codex_sha256": "1f090167e94ed25969c47381868c6ffb78be2a195e13891fcdc969531ca16eaf",
+  "launcher_version": "tofa issue75-374d137",
+  "launcher_sha256": "37bd69dd681310593b380ba30fdcf7922c4d4d593b3acf954a5f81ed77e7c1ba"
+}

@@ -1,0 +1,114 @@
+{
+  "frozen_utc": "2026-10-02T19:02:29.661912+00:00",
+  "source_commit": "374d1371ee0862648b30fac2ff73e3ad3e6c71e0",
+  "route": "adapted with evaluation-only capped loopback observer",
+  "guardian": "zai-org/GLM-5.3-Flash",
+  "mains": [
+    "deepseek-ai/DeepSeek-V4.1-Flash",
+    "zai-org/GLM-5.3",
+    "zai-org/GLM-5.3-Flash",
+    "moonshotai/Kimi-K3",
+    "nvidia/Nemotron-3-Ultra-550b-a55b"
+  ],
+  "platforms": {
+    "Darwin/arm64": {
+      "os_version": "26.6.2",
+      "os_build": "25G83",
+      "codex_version": "0.158.0",
+      "codex_sha256": "788a818fbb9596869c7a487554507cb8bdca17584b8671112b23f9e225ba35c8",
+      "launcher_sha256": "74800f54e47decf1f4bfbb5f8e52c70f804735684087b227475c408d8d14fb96"
+    },
+    "Windows/arm64": {
+      "os": "Windows 11",
+      "os_version": "10.0.26200",
+      "codex_version": "0.160.0",
+      "codex_sha256": "1f090167e94ed25969c47381868c6ffb78be2a195e13891fcdc969531ca16eaf",
+      "launcher_sha256": "37bd69dd681310593b380ba30fdcf7922c4d4d593b3acf954a5f81ed77e7c1ba"
+    }
+  },
+  "candidate_snapshot_sha256": "fe49400bdbd5380b74782b7afdc208997a779e97def60a262bef2251b1c8c3ae",
+  "harness_files_sha256": {
+    "live_compat.py": "66e03046115af949ea7c974f88a62b1d7b3e15013b22341a6fe44e9d5ceeca7c",
+    "model_evaluation.py": "a8afeb64aaddbf220b7a2dc5fb825c2bdbe1a4150ff4848e32627e1f3f2cb458",
+    "windows_process.py": "2cfd5d132feecdb23beefc2ca6285ddc0673cff70432d7d7159272edc8d5b8dd",
+    "windows_sandbox_state.py": "f884499f49162a84ad0d6d95f4637556fc438577978f5e5c8c5476c3988b4e8c",
+    "evaluation_candidates.py": "2d86c2a2d374999fa2b49d2effa32f05e179ae7026718eff360a204588ffc932",
+    "evaluation_report.py": "064be8abe31c4b5e92ca6103d9abf24c06c9cace069dc08a206028b88202eb3a",
+    "evaluation_proxy.py": "a25cb144fe61213d59e99615f078b22803e5def27ba19f883d1b40ee33542c46"
+  },
+  "limits": {
+    "upstream_requests_per_pair_platform": 48,
+    "total_upstream_requests_all_ten_runs": 480,
+    "coding_sessions_per_run": 3,
+    "turns_per_session": 2,
+    "guardian_pairs_per_run": 3,
+    "output_tokens_per_request": 4096,
+    "input_body_bytes": 1048576,
+    "response_bytes": 8388608,
+    "sse_event_bytes": 262144,
+    "coding_request_and_turn_seconds": 180,
+    "approval_turn_seconds": 120,
+    "guardian_request_and_native_deadline_seconds": 90,
+    "stop_on_failure": "independent coding and Guardian lanes",
+    "harness_retries": 0,
+    "currency_cap_enforced": false
+  },
+  "price_snapshot_date": "2026-09-23",
+  "prices": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": {
+      "input_usd_per_million": 0.3,
+      "output_usd_per_million": 1.2,
+      "date": "2026-09-23",
+      "source": "https://tokenfactory.nebius.com/endpoints",
+      "policy": "explicitly retain dated approximate snapshot; not a billing guarantee"
+    },
+    "zai-org/GLM-5.3": {
+      "input_usd_per_million": 1.4,
+      "output_usd_per_million": 4.4,
+      "date": "2026-09-23",
+      "source": "https://tokenfactory.nebius.com/endpoints",
+      "policy": "explicitly retain dated approximate snapshot; not a billing guarantee"
+    },
+    "zai-org/GLM-5.3-Flash": {
+      "input_usd_per_million": 0.15,
+      "output_usd_per_million": 0.5,
+      "date": "2026-09-23",
+      "source": "https://tokenfactory.nebius.com/endpoints",
+      "policy": "explicitly retain dated approximate snapshot; not a billing guarantee"
+    },
+    "moonshotai/Kimi-K3": {
+      "input_usd_per_million": 3,
+      "output_usd_per_million": 15,
+      "date": "2026-09-23",
+      "source": "https://tokenfactory.nebius.com/endpoints",
+      "policy": "explicitly retain dated approximate snapshot; not a billing guarantee"
+    },
+    "nvidia/Nemotron-3-Ultra-550b-a55b": {
+      "input_usd_per_million": 1,
+      "output_usd_per_million": 3,
+      "date": "2026-09-23",
+      "source": "https://tokenfactory.nebius.com/endpoints",
+      "policy": "explicitly retain dated approximate snapshot; not a billing guarantee"
+    }
+  },
+  "informational_max_estimate_usd_per_run": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": 15.335424,
+    "zai-org/GLM-5.3": 71.329382,
+    "zai-org/GLM-5.3-Flash": 7.648051,
+    "moonshotai/Kimi-K3": 153.944064,
+    "nvidia/Nemotron-3-Ultra-550b-a55b": 50.921472
+  },
+  "estimate_assumptions": "Input tokens no greater than request UTF-8 bytes; excludes unknown provider-added overhead; retained dated rates, not a billing guarantee. Actual usage costs will be reported; missing usage remains unknown.",
+  "native_deadline_sources": {
+    "0.158.0": {
+      "url": "https://github.com/openai/codex/blob/rust-v0.158.0/codex-rs/ext/guardian-reviewer/src/lib.rs",
+      "sha256": "2f25b0bc6ee42771a670bab75114efe3b48b25cd4bf6c2dff026b2015dd98aec",
+      "seconds": 90
+    },
+    "0.160.0": {
+      "url": "https://github.com/openai/codex/blob/rust-v0.160.0/codex-rs/ext/guardian-reviewer/src/lib.rs",
+      "sha256": "2f25b0bc6ee42771a670bab75114efe3b48b25cd4bf6c2dff026b2015dd98aec",
+      "seconds": 90
+    }
+  }
+}

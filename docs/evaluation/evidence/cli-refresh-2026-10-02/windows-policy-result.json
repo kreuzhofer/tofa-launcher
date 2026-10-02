@@ -1,0 +1,6 @@
+{
+  "exit_code": 0,
+  "platform": "Windows/arm64",
+  "paid_inference": false,
+  "scope": "public CLI platform admission, failed mains, exact combinations, help"
+}

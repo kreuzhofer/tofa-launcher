@@ -1,0 +1,48 @@
+{
+  "paid_inference": false,
+  "attempts": [
+    {
+      "platform": "Windows/arm64",
+      "label": "initial",
+      "outcome": "blocked",
+      "reason": "prior harness allowed macOS only"
+    },
+    {
+      "platform": "Windows/arm64",
+      "label": "windows1",
+      "outcome": "assertion_failed",
+      "reason": "fixture incorrectly required omitted main reasoning effort; native client used medium"
+    },
+    {
+      "platform": "Windows/arm64",
+      "label": "five-pairs",
+      "outcome": "passed",
+      "scope": "before additive reasoning counters and native executable restriction"
+    },
+    {
+      "platform": "Windows/arm64",
+      "label": "final",
+      "outcome": "passed",
+      "coding_sessions": 15,
+      "guardian_pairs": 15,
+      "owned_sessions_removed": 45
+    },
+    {
+      "platform": "Darwin/arm64",
+      "label": "final-invocation-1",
+      "outcome": "output_capture_failed",
+      "reason": "operator had not created optional evidence directory; synthetic runs completed but assertions after evidence write did not run; no JSON retained"
+    },
+    {
+      "platform": "Darwin/arm64",
+      "label": "final",
+      "outcome": "passed",
+      "coding_sessions": 15,
+      "guardian_pairs": 15
+    }
+  ],
+  "reasoning_separation": {
+    "Darwin/arm64": "TestInstalledCodexKeepsProviderReasoningSeparate passed with 0.158.0",
+    "Windows/arm64": "TestInstalledCodexKeepsProviderReasoningSeparate passed with 0.160.0"
+  }
+}

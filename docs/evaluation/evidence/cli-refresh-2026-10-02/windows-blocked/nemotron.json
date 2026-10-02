@@ -1,0 +1,100 @@
+{
+  "report_version": "codex-model-evaluation-v2",
+  "task_version": "summary-and-continuation-v1",
+  "rubric_version": "codex-model-evaluation-v1",
+  "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+  "codex_version": null,
+  "launcher_version": null,
+  "platform": null,
+  "route": null,
+  "started_utc": "2026-10-02T19:09:58Z",
+  "requested_repeats": 3,
+  "completed_repeats": 0,
+  "runs": [],
+  "automatic_approval": {
+    "status": "not_measured",
+    "ordinary_task_approval_policy": "never"
+  },
+  "normal_settings_preserved": false,
+  "status": "blocked",
+  "supported_policy_changed": false,
+  "roles": {
+    "main": {
+      "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+      "planned": 3,
+      "attempted": 0,
+      "completed": 0,
+      "passed": 0,
+      "unattempted": 3,
+      "status": "unmeasured",
+      "cost": {
+        "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+        "paid_requests": 0,
+        "measured_requests": 0,
+        "input_tokens_observed": 0,
+        "output_tokens_observed": 0,
+        "complete": false,
+        "estimated_usd": null,
+        "known_subtotal_usd": null,
+        "prices": {
+          "input_usd_per_million": 1,
+          "output_usd_per_million": 3,
+          "date": "2026-09-23",
+          "source": "https://tokenfactory.nebius.com/endpoints",
+          "policy": "explicitly retain dated approximate snapshot; not a billing guarantee"
+        }
+      }
+    },
+    "guardian": {
+      "model": "zai-org/GLM-5.3-Flash",
+      "planned": 3,
+      "attempted": 0,
+      "completed": 0,
+      "passed": 0,
+      "unattempted": 3,
+      "status": "unmeasured",
+      "cost": {
+        "model": "zai-org/GLM-5.3-Flash",
+        "paid_requests": 0,
+        "measured_requests": 0,
+        "input_tokens_observed": 0,
+        "output_tokens_observed": 0,
+        "complete": false,
+        "estimated_usd": null,
+        "known_subtotal_usd": null,
+        "prices": {
+          "input_usd_per_million": 0.15,
+          "output_usd_per_million": 0.5,
+          "date": "2026-09-23",
+          "source": "https://tokenfactory.nebius.com/endpoints",
+          "policy": "explicitly retain dated approximate snapshot; not a billing guarantee"
+        }
+      },
+      "attempted_cases": 0,
+      "unattempted_cases": 6,
+      "worst_assessment_ms": null
+    }
+  },
+  "launcher_sha256": "37bd69dd681310593b380ba30fdcf7922c4d4d593b3acf954a5f81ed77e7c1ba",
+  "codex_sha256": "1f090167e94ed25969c47381868c6ffb78be2a195e13891fcdc969531ca16eaf",
+  "harness_sha256": "a8afeb64aaddbf220b7a2dc5fb825c2bdbe1a4150ff4848e32627e1f3f2cb458",
+  "harness_files_sha256": {
+    "model_evaluation.py": "a8afeb64aaddbf220b7a2dc5fb825c2bdbe1a4150ff4848e32627e1f3f2cb458",
+    "evaluation_proxy.py": "a25cb144fe61213d59e99615f078b22803e5def27ba19f883d1b40ee33542c46",
+    "evaluation_report.py": "064be8abe31c4b5e92ca6103d9abf24c06c9cace069dc08a206028b88202eb3a",
+    "evaluation_candidates.py": "2d86c2a2d374999fa2b49d2effa32f05e179ae7026718eff360a204588ffc932",
+    "live_compat.py": "66e03046115af949ea7c974f88a62b1d7b3e15013b22341a6fe44e9d5ceeca7c",
+    "windows_process.py": "2cfd5d132feecdb23beefc2ca6285ddc0673cff70432d7d7159272edc8d5b8dd",
+    "windows_process.cs": "2d82a8a187bb1461c12ef4ec7aea23f143eda67581ea7c625ce592677980de2c",
+    "windows_sandbox_state.py": "f884499f49162a84ad0d6d95f4637556fc438577978f5e5c8c5476c3988b4e8c"
+  },
+  "candidate_snapshot_sha256": "fe49400bdbd5380b74782b7afdc208997a779e97def60a262bef2251b1c8c3ae",
+  "campaign_authorization": "Maintainer authorized five-model campaign without a currency cap in issue #36; CLI refresh in issue #75",
+  "currency_cap_enforced": false,
+  "guardian_model": "zai-org/GLM-5.3-Flash",
+  "blocked_reason": "catalog_unavailable",
+  "failures": [
+    "catalog_unavailable"
+  ],
+  "catalog_checked_utc": "2026-10-02T19:09:57Z"
+}

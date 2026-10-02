@@ -2,12 +2,14 @@ package tofa_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"testing"
@@ -65,7 +67,11 @@ func TestExplicitLaunchDefaultsToGLMGuardian(t *testing.T) {
 	if err := app.Run([]string{"launch", "codex", "--model", "moonshotai/Kimi-K3", "--allow-unverified"}); err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{"Main: moonshotai/Kimi-K3", "Guardian: zai-org/GLM-5.3-Flash", "Route: adapted", "Status: experimental"} {
+	status := "Status: experimental"
+	if runtime.GOOS == "darwin" && runtime.GOARCH == "arm64" {
+		status = "Status: supported"
+	}
+	for _, want := range []string{"Main: moonshotai/Kimi-K3", "Guardian: zai-org/GLM-5.3-Flash", "Route: adapted", status} {
 		if !strings.Contains(out.String(), want) {
 			t.Errorf("missing %q in %s", want, out)
 		}
@@ -139,16 +145,59 @@ func TestDirectLaunchPreservesNativeReviewerAndApprovalPolicy(t *testing.T) {
 	}
 }
 
-func TestHistoricalPairEvidenceDoesNotPromoteSupport(t *testing.T) {
-	app, _ := adapterFixture(t, nil, nil)
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		io.WriteString(w, `{"data":[{"id":"deepseek-ai/DeepSeek-V4.1-Flash"},{"id":"zai-org/GLM-5.3-Flash"}]}`)
-	}))
-	defer server.Close()
-	app.Endpoint = server.URL
-	app.RunClient = func([]string, []string) error { t.Fatal("historical evidence promoted support"); return nil }
-	if err := app.Run([]string{"launch", "codex", "--model", "deepseek-ai/DeepSeek-V4.1-Flash"}); err == nil || !strings.Contains(err.Error(), "--allow-unverified") {
-		t.Fatalf("expected experimental opt-in: %v", err)
+func TestQualifiedCLIPairsUsePlatformScopedSupport(t *testing.T) {
+	for _, main := range []string{"deepseek-ai/DeepSeek-V4.1-Flash", "zai-org/GLM-5.3", "moonshotai/Kimi-K3"} {
+		for _, test := range []struct {
+			name      string
+			flags     []string
+			supported bool
+		}{
+			{"qualified pair", nil, runtime.GOOS == "darwin" && runtime.GOARCH == "arm64"},
+			{"different Guardian", []string{"--guardian-model", main}, false},
+			{"direct route", []string{"--direct"}, false},
+		} {
+			t.Run(main+"/"+test.name, func(t *testing.T) {
+				app, out := adapterFixture(t, nil, nil)
+				server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					fmt.Fprintf(w, `{"data":[{"id":%q},{"id":"zai-org/GLM-5.3-Flash"}]}`, main)
+				}))
+				defer server.Close()
+				app.Endpoint = server.URL
+				launched := false
+				app.RunClient = func([]string, []string) error { launched = true; return nil }
+				args := append([]string{"launch", "codex", "--model", main}, test.flags...)
+				err := app.Run(args)
+				if test.supported {
+					if err != nil || !launched || !strings.Contains(out.String(), "Status: supported") {
+						t.Fatalf("launch=%v err=%v output=%s", launched, err, out)
+					}
+				} else if err == nil || launched || !strings.Contains(err.Error(), "--allow-unverified") {
+					t.Fatalf("unverified launch=%v err=%v", launched, err)
+				}
+			})
+		}
+	}
+}
+
+func TestFailedCLIMainsStillRequireExperimentalOptIn(t *testing.T) {
+	for _, main := range []string{"zai-org/GLM-5.3-Flash", "nvidia/Nemotron-3-Ultra-550b-a55b"} {
+		t.Run(main, func(t *testing.T) {
+			app, out := adapterFixture(t, nil, nil)
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				fmt.Fprintf(w, `{"data":[{"id":%q},{"id":"zai-org/GLM-5.3-Flash"}]}`, main)
+			}))
+			defer server.Close()
+			app.Endpoint = server.URL
+			launched := false
+			app.RunClient = func([]string, []string) error { launched = true; return nil }
+			args := []string{"launch", "codex", "--model", main}
+			if err := app.Run(args); err == nil || launched || !strings.Contains(err.Error(), "--allow-unverified") {
+				t.Fatalf("unverified launch=%v err=%v", launched, err)
+			}
+			if err := app.Run(append(args, "--allow-unverified")); err != nil || !launched || !strings.Contains(out.String(), "Status: experimental") {
+				t.Fatalf("explicit experimental launch=%v err=%v output=%s", launched, err, out)
+			}
+		})
 	}
 }
 
@@ -157,7 +206,7 @@ func TestHelpExplainsGuardianSelectionContract(t *testing.T) {
 	if err := app.Run([]string{"--help"}); err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{"--guardian-model ID", "zai-org/GLM-5.3-Flash", "native reviewer", "metadata", "--allow-unverified", "deepseek-ai/DeepSeek-V4.1-Flash", "zai-org/GLM-5.3", "Supported desktop pairs", "Automatic naming remains unsupported", "Choose an app, then a main model", "Fresh interactive launches run first-use setup", "authenticate the catalog before selection", "Interactive bare launches choose Codex CLI or Codex desktop"} {
+	for _, want := range []string{"--guardian-model ID", "zai-org/GLM-5.3-Flash", "native reviewer", "metadata", "--allow-unverified", "deepseek-ai/DeepSeek-V4.1-Flash", "zai-org/GLM-5.3", "Supported desktop pairs", "Supported CLI mains on macOS ARM64", "Windows and other CLI combinations remain Experimental", "Automatic naming remains unsupported", "Choose an app, then a main model", "Fresh interactive launches run first-use setup", "authenticate the catalog before selection", "Interactive bare launches choose Codex CLI or Codex desktop"} {
 		if !strings.Contains(out.String(), want) {
 			t.Errorf("help missing %q", want)
 		}

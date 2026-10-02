@@ -1,0 +1,27 @@
+[
+  {
+    "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+    "exit_code": 1,
+    "report_present": true
+  },
+  {
+    "model": "zai-org/GLM-5.3",
+    "exit_code": 1,
+    "report_present": true
+  },
+  {
+    "model": "zai-org/GLM-5.3-Flash",
+    "exit_code": 1,
+    "report_present": true
+  },
+  {
+    "model": "moonshotai/Kimi-K3",
+    "exit_code": 1,
+    "report_present": true
+  },
+  {
+    "model": "nvidia/Nemotron-3-Ultra-550b-a55b",
+    "exit_code": 1,
+    "report_present": true
+  }
+]

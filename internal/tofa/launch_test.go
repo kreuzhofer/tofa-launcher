@@ -42,7 +42,7 @@ func TestExplicitUnverifiedLaunchScopesOnlyChild(t *testing.T) {
 		}
 		return nil
 	}}
-	if err := app.Run([]string{"launch", "codex", "--model", "moonshotai/Kimi-K3", "--project-id", "override"}); err == nil {
+	if err := app.Run([]string{"launch", "codex", "--model", "moonshotai/Kimi-K3", "--direct", "--project-id", "override"}); err == nil {
 		t.Fatal("unverified model accepted by default")
 	}
 	if err := app.Run([]string{"launch", "codex", "--model", "moonshotai/Kimi-K3", "--allow-unverified", "--direct", "--project-id", "override", "--", "hello"}); err != nil {
