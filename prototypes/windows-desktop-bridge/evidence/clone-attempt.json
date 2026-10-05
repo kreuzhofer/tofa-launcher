@@ -1,0 +1,9 @@
+{
+  "status": "blocked",
+  "command": "utmctl clone 545C23DD-356D-434A-B2AE-48277320BF34 --name 'tofa77 Windows ARM64 bridge prototype'",
+  "host_exit_code": 0,
+  "guest_or_application_error": "The virtual machine must be stopped before this operation can be performed.",
+  "clone_created": false,
+  "original_stopped": false,
+  "next_action_requires": "Permission to interrupt open apps with normal shutdown, clone, and restart the original."
+}

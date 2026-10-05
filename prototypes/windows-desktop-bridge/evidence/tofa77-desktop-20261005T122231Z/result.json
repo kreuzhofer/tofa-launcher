@@ -1,0 +1,110 @@
+{
+  "started_utc": "2026-10-05T12:22:37.6321286Z",
+  "mode": "baseline",
+  "status": "completed",
+  "inference_requests": 0,
+  "package": "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0",
+  "engine_sha256": "fcdd6134ddd030fa4ec05779513a94290c7317796f0641add72c5e8ad978f8b4",
+  "activation_pid": 8300,
+  "processes": [
+    {
+      "pid": 8300,
+      "parent_pid": 2740,
+      "name": "ChatGPT.exe",
+      "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+      "app_server_argument": false,
+      "sandbox_service_argument": false
+    },
+    {
+      "pid": 8800,
+      "parent_pid": 8300,
+      "name": "ChatGPT.exe",
+      "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+      "app_server_argument": false,
+      "sandbox_service_argument": false
+    },
+    {
+      "pid": 1544,
+      "parent_pid": 8300,
+      "name": "ChatGPT.exe",
+      "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+      "app_server_argument": false,
+      "sandbox_service_argument": false
+    },
+    {
+      "pid": 7128,
+      "parent_pid": 8300,
+      "name": "ChatGPT.exe",
+      "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+      "app_server_argument": false,
+      "sandbox_service_argument": false
+    },
+    {
+      "pid": 4396,
+      "parent_pid": 8300,
+      "name": "ChatGPT.exe",
+      "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+      "app_server_argument": false,
+      "sandbox_service_argument": false
+    },
+    {
+      "pid": 7844,
+      "parent_pid": 8300,
+      "name": "ChatGPT.exe",
+      "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+      "app_server_argument": false,
+      "sandbox_service_argument": false
+    },
+    {
+      "pid": 1360,
+      "parent_pid": 8300,
+      "name": "ChatGPT.exe",
+      "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+      "app_server_argument": false,
+      "sandbox_service_argument": false
+    },
+    {
+      "pid": 9144,
+      "parent_pid": 8300,
+      "name": "codex.exe",
+      "path": "%USERPROFILE%\\AppData\\Local\\OpenAI\\Codex\\bin\\adbebd79223f9e27\\codex.exe",
+      "app_server_argument": true,
+      "sandbox_service_argument": false
+    },
+    {
+      "pid": 7044,
+      "parent_pid": 8300,
+      "name": "ChatGPT.exe",
+      "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+      "app_server_argument": false,
+      "sandbox_service_argument": false
+    },
+    {
+      "pid": 8324,
+      "parent_pid": 8300,
+      "name": "ChatGPT.exe",
+      "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+      "app_server_argument": false,
+      "sandbox_service_argument": false
+    }
+  ],
+  "vendor_service": [
+    {
+      "Name": "CodexSandboxService.OpenAI.Codex",
+      "Status": 4
+    }
+  ],
+  "profile_candidates": [
+    {
+      "path": "%USERPROFILE%\\AppData\\Roaming\\Codex",
+      "exists": true
+    },
+    {
+      "path": "%USERPROFILE%\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\Codex",
+      "exists": true
+    }
+  ],
+  "bridge_runs": [],
+  "exit_code": 0,
+  "finished_utc": "2026-10-05T12:23:00.9735249Z"
+}

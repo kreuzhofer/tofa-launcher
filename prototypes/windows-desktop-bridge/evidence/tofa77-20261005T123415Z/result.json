@@ -1,0 +1,18 @@
+{
+  "started_utc": "2026-10-05T12:34:29Z",
+  "status": "failed",
+  "inference_requests": 0,
+  "elevated": false,
+  "incumbent_refusal": {
+    "utc": "2026-10-05T12:34:30.0332654Z",
+    "launched": false,
+    "incumbent_count": 10,
+    "reason": "ordinary_app_running",
+    "exit_code": 41
+  },
+  "exit_code": 1,
+  "error_type": "FileNotFoundError",
+  "error": "[Errno 2] No such file or directory: 'C:\\\\Users\\\\<REDACTED_USER>\\\\AppData\\\\Local\\\\OpenAI\\\\Codex\\\\bin\\\\5c1982dfef3b03a5\\\\codex.exe'",
+  "finished_utc": "2026-10-05T12:34:30Z",
+  "export_note": "Guest username redacted; missing-engine failure preserved."
+}

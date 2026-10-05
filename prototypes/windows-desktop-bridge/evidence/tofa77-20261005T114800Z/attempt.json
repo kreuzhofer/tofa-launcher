@@ -1,0 +1,6 @@
+{
+  "status": "failed",
+  "stage": "host task evidence collection",
+  "reason": "Guest probe completed, but a Python non-raw string converted the task.json path's backslash-t to a tab. Task completion evidence was not obtained.",
+  "corrective_action": "Use raw PowerShell source strings and repeat under a fresh run ID; preserve this guest result without classifying the attempt as a pass."
+}

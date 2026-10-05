@@ -1,0 +1,14 @@
+{
+  "started_utc": "2026-10-05T12:55:40.0245312Z",
+  "mode": "bridge",
+  "status": "failed",
+  "turns_submitted_by_stage": 0,
+  "package": "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0",
+  "engine_sha256": "c98b873f74c4c2ae392c9b90474d9d4a17405a1d893951b4893305002bb7582a",
+  "bridge_sha256": "1fea5156a7db94b35d4e26d6224f55dca8995dde30b44a28881ce83b10c06718",
+  "owned_directory_created": true,
+  "activation_pid": 5828,
+  "exit_code": 1,
+  "error": "You cannot call a method on a null-valued expression.",
+  "finished_utc": "2026-10-05T12:56:00.3772012Z"
+}

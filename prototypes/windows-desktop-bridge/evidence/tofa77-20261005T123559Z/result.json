@@ -1,0 +1,79 @@
+{
+  "started_utc": "2026-10-05T12:36:12Z",
+  "status": "completed",
+  "inference_requests": 0,
+  "elevated": false,
+  "incumbent_refusal": {
+    "utc": "2026-10-05T12:36:12.7596860Z",
+    "launched": false,
+    "incumbent_count": 10,
+    "reason": "ordinary_app_running",
+    "exit_code": 41
+  },
+  "engine_sha256": "c98b873f74c4c2ae392c9b90474d9d4a17405a1d893951b4893305002bb7582a",
+  "bridge_sha256": "451695c633244d41302744179d7091201fa3eed78714e3d400be6457939ff2cd",
+  "transport_contract_test_exit_code": 0,
+  "initialize": {
+    "userAgent": "tofa77-prototype/0.160.0 (Windows 10.0.26200; aarch64) unknown (tofa77-prototype; 1)",
+    "platformFamily": "windows",
+    "platformOs": "windows"
+  },
+  "config": {
+    "approval_policy": null,
+    "approvals_reviewer": null,
+    "sandbox_mode": null,
+    "windows": null
+  },
+  "sandbox_service_feature": false,
+  "bridge_exit_code": 0,
+  "bridge_events": [
+    {
+      "app_server_argument": true,
+      "argc": 13,
+      "engine_sha256": "c98b873f74c4c2ae392c9b90474d9d4a17405a1d893951b4893305002bb7582a",
+      "event": "start",
+      "parent_pid": 6772,
+      "pid": 2680,
+      "registered_core_present": false,
+      "sandbox_family_present": false,
+      "sandbox_service_argument": false,
+      "utc": "2026-10-05T12:36:14.6262032Z"
+    },
+    {
+      "event": "child",
+      "pid": 5972,
+      "utc": "2026-10-05T12:36:14.6342847Z"
+    },
+    {
+      "event": "initialize_request",
+      "utc": "2026-10-05T12:36:14.6353282Z"
+    },
+    {
+      "event": "initialize_response",
+      "success": true,
+      "utc": "2026-10-05T12:36:14.8239347Z"
+    },
+    {
+      "event": "config/read_request",
+      "utc": "2026-10-05T12:36:14.8262807Z"
+    },
+    {
+      "approval_policy": "unset",
+      "approvals_reviewer": "unset",
+      "event": "config/read_response",
+      "sandbox_mode": "unset",
+      "success": true,
+      "utc": "2026-10-05T12:36:14.8324247Z",
+      "windows_sandbox_service": false
+    },
+    {
+      "event": "exit",
+      "exit_code": 0,
+      "utc": "2026-10-05T12:36:14.9356685Z"
+    }
+  ],
+  "hash_mismatch_refused": true,
+  "exit_code": 0,
+  "temporary_home_removed": true,
+  "finished_utc": "2026-10-05T12:36:15Z"
+}

@@ -1,0 +1,5 @@
+{
+  "status": "failed",
+  "stage": "host task-envelope collection",
+  "reason": "UTM returned PowerShell CLIXML progress on stderr; conservative runner refused it. Guest report collected; task envelope must be recovered separately."
+}

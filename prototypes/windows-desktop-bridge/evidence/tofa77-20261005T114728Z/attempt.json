@@ -1,0 +1,6 @@
+{
+  "status": "failed",
+  "stage": "guest staging",
+  "reason": "UTM asynchronous directory creation was not complete before file push; no guest task launched",
+  "corrective_action": "Require fresh ready.json before file staging"
+}

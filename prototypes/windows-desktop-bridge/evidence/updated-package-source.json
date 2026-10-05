@@ -1,0 +1,26 @@
+{
+  "package": "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0",
+  "sources": [
+    {
+      "path": ".vite/build/application-network-startup-BEAX-hka.js",
+      "bytes": 288867,
+      "sha256": "634382c7af55d0ff57eb028aa4dd904130215c44fb559ea90a4f4035a5419f6e",
+      "scratch": "tofa77-new-application-network-startup-BEAX-hka.js"
+    },
+    {
+      "path": ".vite/build/bootstrap-C8gUBg5L.js",
+      "bytes": 2234787,
+      "sha256": "1f726d0e3103d81501551546d3b6e70f1fc10646f9326e00fe68605f144c5f4f",
+      "scratch": "tofa77-new-bootstrap-C8gUBg5L.js"
+    },
+    {
+      "path": "package.json",
+      "bytes": 5605,
+      "sha256": "a788123d7dd19c35467ecd72810df556c1deab7806b5d8cb2fec4dab02e97894",
+      "scratch": "tofa77-new-package.json"
+    }
+  ],
+  "bundled_engine_sha256": "c98b873f74c4c2ae392c9b90474d9d4a17405a1d893951b4893305002bb7582a",
+  "selected_engine_sha256": "c98b873f74c4c2ae392c9b90474d9d4a17405a1d893951b4893305002bb7582a",
+  "status": "completed"
+}

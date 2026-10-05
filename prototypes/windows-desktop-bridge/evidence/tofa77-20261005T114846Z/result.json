@@ -1,0 +1,56 @@
+{
+  "started_utc": "2026-10-05T11:48:59Z",
+  "status": "completed",
+  "inference_requests": 0,
+  "elevated": false,
+  "incumbent_refusal": {
+    "utc": "2026-10-05T11:48:59.5018380Z",
+    "launched": false,
+    "incumbent_count": 11,
+    "reason": "ordinary_app_running",
+    "exit_code": 41
+  },
+  "engine_sha256": "fcdd6134ddd030fa4ec05779513a94290c7317796f0641add72c5e8ad978f8b4",
+  "bridge_sha256": "2ded6e66c37b89fee7952a708c7617b6e8419cc721c5593f26c1c89788d5b2cc",
+  "initialize": {
+    "userAgent": "tofa77-prototype/0.159.0-alpha.12.1 (Windows 10.0.26200; aarch64) unknown (tofa77-prototype; 1)",
+    "platformFamily": "windows",
+    "platformOs": "windows"
+  },
+  "config": {
+    "approval_policy": null,
+    "approvals_reviewer": null,
+    "sandbox_mode": null,
+    "windows": null
+  },
+  "sandbox_service_feature": false,
+  "bridge_exit_code": 0,
+  "bridge_events": [
+    {
+      "app_server_argument": true,
+      "argc": 13,
+      "engine_sha256": "fcdd6134ddd030fa4ec05779513a94290c7317796f0641add72c5e8ad978f8b4",
+      "event": "start",
+      "parent_pid": 1404,
+      "pid": 6616,
+      "registered_core_present": false,
+      "sandbox_family_present": false,
+      "sandbox_service_argument": false,
+      "utc": "2026-10-05T11:49:00.5843979Z"
+    },
+    {
+      "event": "child",
+      "pid": 7252,
+      "utc": "2026-10-05T11:49:00.592441Z"
+    },
+    {
+      "event": "exit",
+      "exit_code": 0,
+      "utc": "2026-10-05T11:49:00.8004435Z"
+    }
+  ],
+  "hash_mismatch_refused": true,
+  "exit_code": 0,
+  "temporary_home_removed": true,
+  "finished_utc": "2026-10-05T11:49:01Z"
+}

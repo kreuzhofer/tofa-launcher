@@ -1,0 +1,11 @@
+{
+  "started_utc": "2026-10-05T13:11:02.2639270Z",
+  "mode": "registered",
+  "status": "failed",
+  "turns_submitted_by_stage": 0,
+  "package": "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0",
+  "engine_sha256": "c98b873f74c4c2ae392c9b90474d9d4a17405a1d893951b4893305002bb7582a",
+  "exit_code": 1,
+  "error": "ambiguous registered application",
+  "finished_utc": "2026-10-05T13:11:03.0400149Z"
+}

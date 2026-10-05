@@ -1,0 +1,11 @@
+{
+  "original_vm": "545C23DD-356D-434A-B2AE-48277320BF34",
+  "owned_clone": "EF96CF12-D901-455F-81FF-4C5001E15F80",
+  "clone_name": "tofa77 Windows ARM64 bridge prototype",
+  "original_shutdown": "normal request; stopped status verified",
+  "clone_created": true,
+  "original_restarted": true,
+  "clone_started": true,
+  "user_authorized_interruption": true,
+  "force_stop_or_reset": false
+}

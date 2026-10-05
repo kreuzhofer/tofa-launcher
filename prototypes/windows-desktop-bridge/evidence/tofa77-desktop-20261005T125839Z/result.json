@@ -1,0 +1,1249 @@
+{
+  "started_utc": "2026-10-05T12:58:44.0438722Z",
+  "mode": "observe",
+  "status": "completed",
+  "turns_submitted_by_stage": 0,
+  "package": "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0",
+  "engine_sha256": "c98b873f74c4c2ae392c9b90474d9d4a17405a1d893951b4893305002bb7582a",
+  "processes": [
+    {
+      "pid": 5828,
+      "parent_pid": 3772,
+      "name": "ChatGPT.exe",
+      "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+      "path_available": true,
+      "command_line_available": true,
+      "app_server_argument": false,
+      "sandbox_service_argument": false
+    },
+    {
+      "pid": 8568,
+      "parent_pid": 5828,
+      "name": "ChatGPT.exe",
+      "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+      "path_available": true,
+      "command_line_available": true,
+      "app_server_argument": false,
+      "sandbox_service_argument": false
+    },
+    {
+      "pid": 9560,
+      "parent_pid": 8568,
+      "name": "ChatGPT.exe",
+      "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+      "path_available": true,
+      "command_line_available": true,
+      "app_server_argument": false,
+      "sandbox_service_argument": false
+    },
+    {
+      "pid": 5712,
+      "parent_pid": 5828,
+      "name": "ChatGPT.exe",
+      "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+      "path_available": true,
+      "command_line_available": true,
+      "app_server_argument": false,
+      "sandbox_service_argument": false
+    },
+    {
+      "pid": 9240,
+      "parent_pid": 5828,
+      "name": "ChatGPT.exe",
+      "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+      "path_available": true,
+      "command_line_available": true,
+      "app_server_argument": false,
+      "sandbox_service_argument": false
+    },
+    {
+      "pid": 1380,
+      "parent_pid": 5828,
+      "name": "ChatGPT.exe",
+      "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+      "path_available": true,
+      "command_line_available": true,
+      "app_server_argument": false,
+      "sandbox_service_argument": false
+    },
+    {
+      "pid": 2724,
+      "parent_pid": 5828,
+      "name": "ChatGPT.exe",
+      "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+      "path_available": true,
+      "command_line_available": true,
+      "app_server_argument": false,
+      "sandbox_service_argument": false
+    },
+    {
+      "pid": 6616,
+      "parent_pid": 5828,
+      "name": "ChatGPT.exe",
+      "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+      "path_available": true,
+      "command_line_available": true,
+      "app_server_argument": false,
+      "sandbox_service_argument": false
+    },
+    {
+      "pid": 9740,
+      "parent_pid": 5828,
+      "name": "bridge.exe",
+      "path": "%USERPROFILE%\\AppData\\Local\\tofa-prototype\\tofa77-desktop-20261005T125527Z\\bridge.exe",
+      "path_available": true,
+      "command_line_available": true,
+      "app_server_argument": true,
+      "sandbox_service_argument": false
+    },
+    {
+      "pid": 2628,
+      "parent_pid": 9740,
+      "name": "codex.exe",
+      "path": "%USERPROFILE%\\AppData\\Local\\OpenAI\\Codex\\bin\\adbebd79223f9e27\\codex.exe",
+      "path_available": true,
+      "command_line_available": true,
+      "app_server_argument": true,
+      "sandbox_service_argument": false
+    },
+    {
+      "pid": 9864,
+      "parent_pid": 5828,
+      "name": "ChatGPT.exe",
+      "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+      "path_available": true,
+      "command_line_available": true,
+      "app_server_argument": false,
+      "sandbox_service_argument": false
+    },
+    {
+      "pid": 920,
+      "parent_pid": 5828,
+      "name": "ChatGPT.exe",
+      "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+      "path_available": true,
+      "command_line_available": true,
+      "app_server_argument": false,
+      "sandbox_service_argument": false
+    },
+    {
+      "pid": 4800,
+      "parent_pid": 5828,
+      "name": "ChatGPT.exe",
+      "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+      "path_available": true,
+      "command_line_available": true,
+      "app_server_argument": false,
+      "sandbox_service_argument": false
+    }
+  ],
+  "vendor_service": [
+    {
+      "Name": "CodexSandboxService.OpenAI.Codex",
+      "Status": 4
+    }
+  ],
+  "profile_candidates": [
+    {
+      "path": "%USERPROFILE%\\AppData\\Roaming\\Codex",
+      "exists": true
+    },
+    {
+      "path": "%USERPROFILE%\\AppData\\Local\\Packages\\OpenAI.Codex_2p2nqsd0c76g0\\LocalCache\\Roaming\\Codex",
+      "exists": true
+    }
+  ],
+  "bridge_runs": [
+    {
+      "run": "tofa77-desktop-20261005T122826Z",
+      "events": [
+        {
+          "app_server_argument": true,
+          "argc": 8,
+          "engine_sha256": "c98b873f74c4c2ae392c9b90474d9d4a17405a1d893951b4893305002bb7582a",
+          "event": "start",
+          "parent_pid": 7984,
+          "pid": 5176,
+          "registered_core_present": false,
+          "sandbox_family_present": false,
+          "sandbox_service_argument": false,
+          "utc": "2026-10-05T12:28:42.476297Z"
+        },
+        {
+          "event": "child",
+          "pid": 2720,
+          "utc": "2026-10-05T12:28:42.4859093Z"
+        },
+        {
+          "event": "initialize_request",
+          "utc": "2026-10-05T12:28:42.4864464Z"
+        },
+        {
+          "event": "initialize_response",
+          "success": true,
+          "utc": "2026-10-05T12:28:42.5973142Z"
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:42.7552515Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:42.8525582Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:43.0102736Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:43.0830122Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:43.1037516Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:43.1105544Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:43.4162404Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:43.4329325Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:43.4951657Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:43.5011483Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:44.0718561Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:44.0780106Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:44.0828756Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:44.091116Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:44.1368Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:44.1450085Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:44.1550515Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:44.1616487Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:44.1772745Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:44.1848013Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:44.1955881Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:44.2008036Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:46.1686438Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:46.1949677Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:46.2168086Z"
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:46.2415474Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:46.2902267Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:46.3010225Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:46.3062124Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:46.4095931Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:46.4541198Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:46.4990552Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:48.3188536Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:48.6024911Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:49.2088774Z"
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:49.3196793Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:49.8061612Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:49.8061612Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:50.889323Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:50.9223352Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:50.9235847Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:50.9413301Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:50.9505552Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:50.9887427Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:51.2809447Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:51.2877895Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:51.4604637Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:51.5033875Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:51.5075661Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:51.5168975Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:57.619267Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:57.6425979Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:57.6725436Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:57.7214309Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:58.8320152Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:58.8393136Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:58.8553657Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:58.8608923Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:59.2171605Z"
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:59.2171605Z"
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:59.2692785Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:59.4358405Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:59.4369546Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:59.4369546Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:59.9540498Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:29:00.4613635Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:38:46.7116946Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:38:46.7784995Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:38:46.7835559Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:38:46.7934217Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:38:59.1972532Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:38:59.2065187Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:38:59.2116037Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:38:59.2680708Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:43:17.7736717Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:43:17.7833669Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:43:17.7919204Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:43:17.8019564Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:44:34.315022Z"
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:44:34.315871Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:44:34.3361516Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:44:34.3371457Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "app_server_argument": true,
+          "argc": 4,
+          "engine_sha256": "c98b873f74c4c2ae392c9b90474d9d4a17405a1d893951b4893305002bb7582a",
+          "event": "start",
+          "parent_pid": 7984,
+          "pid": 9156,
+          "registered_core_present": false,
+          "sandbox_family_present": false,
+          "sandbox_service_argument": false,
+          "utc": "2026-10-05T12:28:41.7280422Z"
+        },
+        {
+          "event": "child",
+          "pid": 6284,
+          "utc": "2026-10-05T12:28:41.7333781Z"
+        },
+        {
+          "event": "initialize_request",
+          "utc": "2026-10-05T12:28:41.7333781Z"
+        },
+        {
+          "event": "initialize_response",
+          "success": true,
+          "utc": "2026-10-05T12:28:41.8101342Z"
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:28:41.816328Z"
+        },
+        {
+          "approval_policy": "other",
+          "approvals_reviewer": "other",
+          "event": "config/read_response",
+          "sandbox_mode": "other",
+          "success": true,
+          "utc": "2026-10-05T12:28:41.8240307Z",
+          "windows_sandbox_service": false
+        }
+      ]
+    },
+    {
+      "run": "tofa77-desktop-20261005T125527Z",
+      "events": [
+        {
+          "app_server_argument": true,
+          "argc": 4,
+          "engine_sha256": "c98b873f74c4c2ae392c9b90474d9d4a17405a1d893951b4893305002bb7582a",
+          "event": "start",
+          "parent_pid": 5828,
+          "pid": 6600,
+          "registered_core_present": false,
+          "sandbox_family_present": false,
+          "sandbox_service_argument": false,
+          "utc": "2026-10-05T12:55:43.3092587Z"
+        },
+        {
+          "event": "child",
+          "pid": 3440,
+          "utc": "2026-10-05T12:55:43.3228378Z"
+        },
+        {
+          "event": "initialize_request",
+          "utc": "2026-10-05T12:55:43.3228378Z"
+        },
+        {
+          "event": "initialize_response",
+          "success": true,
+          "utc": "2026-10-05T12:55:43.394439Z"
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:43.3992853Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:43.4075887Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "app_server_argument": true,
+          "argc": 8,
+          "engine_sha256": "c98b873f74c4c2ae392c9b90474d9d4a17405a1d893951b4893305002bb7582a",
+          "event": "start",
+          "parent_pid": 5828,
+          "pid": 9740,
+          "registered_core_present": false,
+          "sandbox_family_present": false,
+          "sandbox_service_argument": false,
+          "utc": "2026-10-05T12:55:44.0751916Z"
+        },
+        {
+          "event": "child",
+          "pid": 2628,
+          "utc": "2026-10-05T12:55:44.0820774Z"
+        },
+        {
+          "event": "initialize_request",
+          "utc": "2026-10-05T12:55:44.0820774Z"
+        },
+        {
+          "event": "initialize_response",
+          "success": true,
+          "utc": "2026-10-05T12:55:44.1643193Z"
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:44.2275475Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:44.3517849Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:44.8514918Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:44.8798988Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:44.9289468Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:44.9354099Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:45.0038441Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:45.0176179Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:45.6786338Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:45.6857138Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:45.6911543Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:45.6965064Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:45.749729Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:45.7585928Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:45.7699972Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:45.775734Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:45.7891979Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:45.7964615Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:45.8077339Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:45.8124988Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:47.5128816Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:47.526148Z",
+          "windows_sandbox_service": false
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:47.5460467Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:47.5672184Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:47.6409416Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:47.7110057Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:47.7123667Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:47.8904497Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:48.2812982Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:48.2976589Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:48.3331699Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:48.3531579Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:49.6284635Z"
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:50.0804969Z"
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:51.0099612Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:51.1763333Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:51.1914801Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:51.7487614Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:55.4659078Z"
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:55.4659078Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:55.6601232Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:55.6601232Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:55.7566958Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:55.7695005Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:55:59.7048129Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:55:59.7683941Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:56:00.5717272Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:56:00.5829995Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:56:00.5881938Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:56:00.6009818Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:56:01.1774203Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:56:01.1936688Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:56:01.2175145Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:56:01.2219212Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:56:02.0513058Z"
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:56:02.0513058Z"
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:56:02.0625524Z"
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:56:02.0680709Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:56:02.1014785Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:56:02.101959Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:56:02.1089995Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:56:02.118906Z",
+          "windows_sandbox_service": true
+        },
+        {
+          "event": "config/read_request",
+          "utc": "2026-10-05T12:56:02.1451502Z"
+        },
+        {
+          "approval_policy": "unset",
+          "approvals_reviewer": "unset",
+          "event": "config/read_response",
+          "sandbox_mode": "unset",
+          "success": true,
+          "utc": "2026-10-05T12:56:02.1547335Z",
+          "windows_sandbox_service": true
+        }
+      ]
+    }
+  ],
+  "exit_code": 0,
+  "finished_utc": "2026-10-05T12:58:45.0533058Z"
+}

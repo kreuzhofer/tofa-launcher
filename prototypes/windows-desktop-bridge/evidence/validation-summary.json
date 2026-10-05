@@ -1,0 +1,25 @@
+{
+  "source": "Observed tool runs, summarized without raw user paths",
+  "host_executable_tests": {
+    "count": 4,
+    "passed": true,
+    "race_detector": true
+  },
+  "go_vet": {
+    "passed": true,
+    "scope": "./prototypes/windows-desktop-bridge"
+  },
+  "native_executable_tests": {
+    "count": 4,
+    "passed": true,
+    "evidence": "tofa77-20261005T125806Z/result.json"
+  },
+  "native_sandbox_trials": {
+    "count": 3,
+    "passed": false,
+    "error": "helper_unknown_error: setup refresh had errors",
+    "evidence": "tofa77-desktop-20261005T131554Z/result.json"
+  },
+  "live_guardian_allow_deny": "not measured; sandbox prerequisite failed",
+  "production_suite": "not run; no production code changed"
+}

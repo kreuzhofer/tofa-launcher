@@ -1,0 +1,6 @@
+{
+  "status": "failed",
+  "stage": "scheduled task submission",
+  "reason": "UTM rejected nested encoded PowerShell payload as Invalid argument; app not launched",
+  "corrective_action": "Stage a user-readable PowerShell file and use the native existing execution policy"
+}
