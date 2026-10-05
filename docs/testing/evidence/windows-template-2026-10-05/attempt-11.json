@@ -1,0 +1,81 @@
+{
+  "schema": 1,
+  "run": "tofa-template-90cd0246a9b44665a08c5523ee1b1942",
+  "operation": "prepare",
+  "outcome": "bootstrap_required",
+  "capabilities": {
+    "native_sandbox": "unverified",
+    "desktop_trust": "unverified",
+    "desktop_guardian": "unverified",
+    "test_authentication": "not_configured"
+  },
+  "stages": [
+    {
+      "stage": "template_identity",
+      "outcome": "passed"
+    },
+    {
+      "stage": "prerequisites",
+      "outcome": "passed"
+    },
+    {
+      "stage": "readiness",
+      "outcome": "failed",
+      "reason": "native_sandbox_consent_required"
+    }
+  ],
+  "changes": [
+    "Unique guest staging directory and limited interactive task",
+    "Synthetic workspace and outside directory; test markers removed on completion",
+    "Request elevated native sandbox setup through the installed engine; operator supplies Windows consent"
+  ],
+  "template": {
+    "uuid": "EF96CF12-D901-455F-81FF-4C5001E15F80",
+    "state": "started"
+  },
+  "os": {
+    "name": "Windows 11",
+    "architecture": "ARM64",
+    "version": "10.0.26200"
+  },
+  "workspace_fixture": "user-owned",
+  "diagnostics": {
+    "guest_staging": "C:\\Users\\Public\\tofa-template-90cd0246a9b44665a08c5523ee1b1942",
+    "guest_workspace": "%USERPROFILE%\\tofa-template-90cd0246a9b44665a08c5523ee1b1942"
+  },
+  "native": {
+    "identity": {
+      "client_version": "26.930.6422.0",
+      "engine_version": "0.160.0",
+      "engine_sha256": "c98b873f74c4c2ae392c9b90474d9d4a17405a1d893951b4893305002bb7582a",
+      "package_engine_sha256": "c98b873f74c4c2ae392c9b90474d9d4a17405a1d893951b4893305002bb7582a",
+      "package": "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0",
+      "architecture": "Arm64",
+      "python_version": "3.13.15",
+      "sid": "S-1-5-21-1299817968-325600504-2357610402-1005",
+      "session": 2
+    },
+    "checks": {
+      "limited_user": true,
+      "harness_read_only": true,
+      "workspace_owned_by_user": true,
+      "workspace_acl_manageable": true,
+      "ordinary_write": true,
+      "engine_exited": false,
+      "markers_removed": true
+    },
+    "execution": {},
+    "setup_status": "awaiting_completion"
+  },
+  "completion": {
+    "completed": true,
+    "unregistered": true,
+    "last_result": 1,
+    "state": "Ready"
+  },
+  "transport_progress_observed": false,
+  "reason": "native_sandbox_consent_required",
+  "bootstrap": [
+    "Rerun template prepare with --initialize-sandbox and approve Windows consent in the designated test account. Setup completion, workspace write/read, and outside-write denial must all pass."
+  ]
+}

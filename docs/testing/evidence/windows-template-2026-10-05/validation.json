@@ -1,0 +1,128 @@
+{
+  "python_checks": [
+    {
+      "check": "build.sh",
+      "exit_code": 0
+    },
+    {
+      "check": "build_test.py",
+      "exit_code": 0,
+      "tests": 6
+    },
+    {
+      "check": "desktop_evaluation_test.py",
+      "exit_code": 0,
+      "tests": 23,
+      "skipped": 16
+    },
+    {
+      "check": "desktop_history_test.py",
+      "exit_code": 0,
+      "tests": 3,
+      "skipped": 3
+    },
+    {
+      "check": "desktop_ownership_test.py",
+      "exit_code": 0,
+      "tests": 5,
+      "skipped": 5
+    },
+    {
+      "check": "desktop_picker_test.py",
+      "exit_code": 0,
+      "tests": 21,
+      "skipped": 21
+    },
+    {
+      "check": "evaluation_client_test.py",
+      "exit_code": 0,
+      "tests": 11,
+      "skipped": 11
+    },
+    {
+      "check": "evaluation_proxy_test.py",
+      "exit_code": 0,
+      "tests": 15
+    },
+    {
+      "check": "install_test.py",
+      "exit_code": 0,
+      "tests": 2
+    },
+    {
+      "check": "lifecycle_test.py",
+      "exit_code": 0,
+      "tests": 4
+    },
+    {
+      "check": "live_compat_test.py",
+      "exit_code": 0,
+      "tests": 20
+    },
+    {
+      "check": "model_evaluation_test.py",
+      "exit_code": 0,
+      "tests": 39
+    },
+    {
+      "check": "picker_test.py",
+      "exit_code": 0,
+      "tests": 40
+    },
+    {
+      "check": "qualify_macos_test.py",
+      "exit_code": 0,
+      "tests": 22
+    },
+    {
+      "check": "qualify_windows_test.py",
+      "exit_code": 0,
+      "tests": 17,
+      "skipped": 17
+    },
+    {
+      "check": "release_test.py",
+      "exit_code": 0,
+      "tests": 6
+    },
+    {
+      "check": "terminal_test.py",
+      "exit_code": 0,
+      "tests": 2
+    },
+    {
+      "check": "trace_codex_test.py",
+      "exit_code": 0,
+      "tests": 6
+    },
+    {
+      "check": "windows_process_test.py",
+      "exit_code": 0,
+      "tests": 10,
+      "skipped": 7
+    },
+    {
+      "check": "windows_template_test.py",
+      "exit_code": 0,
+      "tests": 20
+    }
+  ],
+  "go_vet": "passed",
+  "python_typecheck": "mypy --check-untyped-defs --platform win32: passed",
+  "go_race_suite": {
+    "outcome": "failed",
+    "reason": "Existing macOS desktop tests reject the already-running host Codex app; no existing process was stopped."
+  },
+  "native_readiness": "not yet verified",
+  "native_ownership_regression": "pending sandbox bootstrap",
+  "review": {
+    "standards": "all reported findings fixed",
+    "spec": "no additional findings; native acceptance still required"
+  },
+  "targeted_cli_final": {
+    "tests": 25,
+    "outcome": "passed",
+    "command": "python3 scripts/windows_template_test.py -v"
+  },
+  "go_version": "go1.27.1 darwin/arm64"
+}

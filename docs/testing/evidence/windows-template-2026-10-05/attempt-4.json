@@ -1,0 +1,43 @@
+{
+  "schema": 1,
+  "run": "tofa-template-754f61e2c25c49f0b9f607558eea0b85",
+  "operation": "prepare",
+  "outcome": "failed",
+  "capabilities": {
+    "native_sandbox": "unverified",
+    "desktop_trust": "unverified",
+    "desktop_guardian": "unverified",
+    "test_authentication": "not_configured"
+  },
+  "stages": [
+    {
+      "stage": "template_identity",
+      "outcome": "passed"
+    },
+    {
+      "stage": "prerequisites",
+      "outcome": "passed"
+    },
+    {
+      "stage": "readiness",
+      "outcome": "failed",
+      "reason": "vm_transport_failed"
+    }
+  ],
+  "changes": [
+    "Unique guest staging directory and limited interactive task",
+    "Synthetic workspace and outside directory; test markers removed on completion",
+    "Register installed Codex package for the designated test user"
+  ],
+  "template": {
+    "uuid": "EF96CF12-D901-455F-81FF-4C5001E15F80",
+    "state": "started"
+  },
+  "os": {
+    "name": "Windows 11",
+    "architecture": "ARM64",
+    "version": "10.0.26200"
+  },
+  "workspace_fixture": "user-owned",
+  "reason": "vm_transport_failed"
+}

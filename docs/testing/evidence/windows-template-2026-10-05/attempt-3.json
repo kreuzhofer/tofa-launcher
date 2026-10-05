@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "run": "tofa-template-cdc37bb9299e44a3a345fef70efdb4fc",
+  "operation": "prepare",
+  "outcome": "missing_prerequisites",
+  "capabilities": {
+    "native_sandbox": "unverified",
+    "desktop_trust": "unverified",
+    "desktop_guardian": "unverified",
+    "test_authentication": "not_configured"
+  },
+  "stages": [
+    {
+      "stage": "template_identity",
+      "outcome": "passed"
+    },
+    {
+      "stage": "readiness",
+      "outcome": "failed",
+      "reason": "native_client_missing_or_ambiguous"
+    }
+  ],
+  "changes": [],
+  "template": {
+    "uuid": "EF96CF12-D901-455F-81FF-4C5001E15F80",
+    "state": "started"
+  },
+  "bootstrap": [
+    "Install the native ARM64 Codex desktop for the designated test user. Rerun template prepare to verify its package and bundled engine."
+  ],
+  "reason": "native_client_missing_or_ambiguous"
+}

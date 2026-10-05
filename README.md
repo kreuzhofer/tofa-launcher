@@ -481,9 +481,14 @@ TOFA_TEST_CODEX="$(command -v codex)" go test ./internal/tofa -run TestInstalled
 python3 scripts/live_compat_test.py
 # Unix only, offline validation of the request-tracing harness:
 python3 scripts/trace_codex_test.py -v
+# Mac-side Windows template preparation, with controlled external UTM fixtures:
+python3 scripts/windows_template_test.py -v
 ```
 
 Python is a **development test tool**, not a runtime or installer dependency.
+
+For dedicated Windows 11 ARM64 UTM test templates, see
+[template preparation and native readiness](docs/testing/windows-template.md).
 The picker checks compile the public launcher with a loopback provider and a fake
 Codex process, then send actual keys through a pseudo-terminal. They verify the
 upstream model identity, route/Guardian support filtering using test-only records,

@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "run": "tofa-template-8b53e80c00a7484baeffa52d42066cef",
+  "operation": "prepare",
+  "outcome": "failed",
+  "capabilities": {
+    "native_sandbox": "unverified",
+    "desktop_trust": "unverified",
+    "desktop_guardian": "unverified",
+    "test_authentication": "not_configured"
+  },
+  "stages": [
+    {
+      "stage": "template_identity",
+      "outcome": "passed"
+    },
+    {
+      "stage": "readiness",
+      "outcome": "failed",
+      "reason": "vm_transport_failed"
+    }
+  ],
+  "changes": [],
+  "template": {
+    "uuid": "EF96CF12-D901-455F-81FF-4C5001E15F80",
+    "state": "started"
+  },
+  "reason": "vm_transport_failed"
+}
