@@ -1,0 +1,54 @@
+{
+  "observed_date": "2026-10-05",
+  "utm_version": "4.7.5",
+  "source_commit": "f84e6e4550199a707d1f6149a01308e8deb0a7ba",
+  "native_ui": {
+    "activation": "explorer.exe shell:AppsFolder\\OpenAI.Codex_2p2nqsd0c76g0!App in an Interactive/Limited scheduled task",
+    "task_result": 1,
+    "visible_result": "Codex home surface in the ChatGPT app; signed-in account menu, local computer target and existing conversation titles visible",
+    "inference_attempted": false,
+    "private_conversation_opened": false,
+    "screenshots_exported": false,
+    "normal_quit": "not established: Alt+F4 did not visibly close the app",
+    "final_app_state": "ordinary native app left open"
+  },
+  "transport": {
+    "utm_exec_exit23_host_status": 0,
+    "utm_exec_stdout": "empty",
+    "file_write_probe": "cmd.exe created marker file; file pull returned its contents",
+    "policy": "require guest completion record/task result plus visible result, never submission status alone"
+  },
+  "failed_attempts": [
+    {
+      "probe": "broad layout via Get-AppxPackage -User and recursive package hashes",
+      "result": "no completion record; three probe processes stopped by exact script paths; cause unproven"
+    },
+    {
+      "probe": "full 549383272-byte app.asar pull",
+      "result": "host 60-second timeout; replaced with bounded archive-index and selected-module extraction"
+    },
+    {
+      "probe": "SYSTEM engine version via PowerShell Start-Process",
+      "result": "version text returned but wrapper completion record absent; wrapper PID 736 later stopped; no headless pass claimed"
+    },
+    {
+      "probe": "interactive Python script in Windows Temp",
+      "result": "task exit 2, no report; user-readable Public path used for retry; cause not independently established"
+    },
+    {
+      "probe": "relocated engine isolated configuration",
+      "result": "protocol and engine exit succeeded; report failed on synthetic stderr.txt cleanup lock; exact temporary home subsequently removed"
+    },
+    {
+      "probe": "native UI input",
+      "result": "initial typing dropped characters and paste timed out; input capture plus Alt+Tab exposed native app; restored capture off"
+    }
+  ],
+  "boundaries": {
+    "no_native_install_update_uninstall": true,
+    "no_snapshot_reset_or_overwrite": true,
+    "no_credentials_or_policy_changed_by_probe": true,
+    "no_real_provider_inference_requested": true,
+    "no_windows_desktop_support_promoted": true
+  }
+}

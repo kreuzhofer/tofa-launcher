@@ -1,0 +1,109 @@
+{
+  "utc": "2026-10-05T10:39:32.2878827Z",
+  "tasks": [
+    {
+      "name": "tofa76-engine-probe-20261005",
+      "state": "Ready",
+      "last_result": 2,
+      "last_run": "2026-10-05T10:36:34.0000000Z"
+    },
+    {
+      "name": "tofa76-native-open-20261005",
+      "state": "Ready",
+      "last_result": 1,
+      "last_run": "2026-10-05T10:37:06.0000000Z"
+    },
+    {
+      "name": "tofa76-user-probe-20261005",
+      "state": "Ready",
+      "last_result": 0,
+      "last_run": "2026-10-05T10:34:45.0000000Z"
+    }
+  ],
+  "processes": [
+    {
+      "Name": "codex-windows-sandbox-service.exe",
+      "ProcessId": 4420,
+      "ParentProcessId": 848,
+      "SessionId": 0,
+      "ExecutablePath": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.2377.0_arm64__2p2nqsd0c76g0\\app\\resources\\codex-windows-sandbox-service.exe"
+    },
+    {
+      "Name": "ChatGPT.exe",
+      "ProcessId": 2964,
+      "ParentProcessId": 5040,
+      "SessionId": 1,
+      "ExecutablePath": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.2377.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe"
+    },
+    {
+      "Name": "ChatGPT.exe",
+      "ProcessId": 10692,
+      "ParentProcessId": 2964,
+      "SessionId": 1,
+      "ExecutablePath": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.2377.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe"
+    },
+    {
+      "Name": "ChatGPT.exe",
+      "ProcessId": 3736,
+      "ParentProcessId": 10692,
+      "SessionId": 1,
+      "ExecutablePath": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.2377.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe"
+    },
+    {
+      "Name": "ChatGPT.exe",
+      "ProcessId": 2860,
+      "ParentProcessId": 2964,
+      "SessionId": 1,
+      "ExecutablePath": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.2377.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe"
+    },
+    {
+      "Name": "ChatGPT.exe",
+      "ProcessId": 10016,
+      "ParentProcessId": 2964,
+      "SessionId": 1,
+      "ExecutablePath": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.2377.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe"
+    },
+    {
+      "Name": "ChatGPT.exe",
+      "ProcessId": 8108,
+      "ParentProcessId": 2964,
+      "SessionId": 1,
+      "ExecutablePath": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.2377.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe"
+    },
+    {
+      "Name": "ChatGPT.exe",
+      "ProcessId": 7136,
+      "ParentProcessId": 2964,
+      "SessionId": 1,
+      "ExecutablePath": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.2377.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe"
+    },
+    {
+      "Name": "ChatGPT.exe",
+      "ProcessId": 4204,
+      "ParentProcessId": 2964,
+      "SessionId": 1,
+      "ExecutablePath": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.2377.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe"
+    },
+    {
+      "Name": "codex.exe",
+      "ProcessId": 6192,
+      "ParentProcessId": 2964,
+      "SessionId": 1,
+      "ExecutablePath": "C:\\Users\\SabreTest\\AppData\\Local\\OpenAI\\Codex\\bin\\5c1982dfef3b03a5\\codex.exe"
+    },
+    {
+      "Name": "ChatGPT.exe",
+      "ProcessId": 1872,
+      "ParentProcessId": 2964,
+      "SessionId": 1,
+      "ExecutablePath": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.2377.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe"
+    },
+    {
+      "Name": "ChatGPT.exe",
+      "ProcessId": 10192,
+      "ParentProcessId": 2964,
+      "SessionId": 1,
+      "ExecutablePath": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.2377.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe"
+    }
+  ]
+}

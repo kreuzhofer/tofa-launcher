@@ -1,0 +1,48 @@
+{
+  "go_vet": {
+    "result": "passed",
+    "command": "go vet ./...",
+    "toolchain": "Go 1.27.1 from /tmp/tofa75-oct05/go"
+  },
+  "go_race": {
+    "result": "passed",
+    "command": "GORACE=atexit_sleep_ms=0 go test -race ./...",
+    "package_seconds": 277.145,
+    "initial_attempt": "sandbox loopback-bind permission failure; rerun outside sandbox passed"
+  },
+  "python": {
+    "result": "passed",
+    "discovered": 252,
+    "passed": 172,
+    "skipped": 80,
+    "seconds": 257.307,
+    "command": "python3 /tmp/tofa75-oct05/check-python.py dist v0.1.0-rc.62",
+    "invocation": "all scripts/*_test.py modules, lifecycle DIST/VERSION and terminal BINARY supplied"
+  },
+  "research_validation": {
+    "json_parse": "passed",
+    "local_markdown_links": "passed",
+    "production_code_changed": false,
+    "engine_probe": "failed: cleanup sharing violation; protocol observations retained",
+    "later_guest_cleanup": "passed",
+    "schema_probe": "passed, isolated SYSTEM schema only",
+    "catalog_probe": "passed, Interactive/Limited synthetic catalog and auto_review configuration; no turns",
+    "probe_python_syntax": "passed",
+    "final_guest_task_cleanup": "passed; no tofa76 tasks remain"
+  },
+  "log_sha256": {
+    "go-race.log": "1e123ddab624f953e9827a5733f7e40d9b84c00d75de2e18943b83c6c0d45b26",
+    "python.log": "e2319ddef3651dff263dff260b52b3ca1457449ef0d676dd14399e3a6d136a82"
+  },
+  "reviews": {
+    "standards_remaining_findings": 0,
+    "spec_remaining_findings": 0,
+    "resolved_spec_finding": "Added installed catalog/default-write/reviewer source trace and exact-engine schema/catalog observations; labelled automation thread-start precisely."
+  },
+  "issue77": {
+    "url": "https://github.com/kreuzhofer/tofa-launcher/issues/77",
+    "body_sha256": "6a8877da92a984cc370ff4df9c46e73f3cabb7e4f73ef7a8d8337b13c44cd123",
+    "read_after_write_verified": true,
+    "readiness": "gated pending desktop bridge, sandbox/approval, ownership and recovery proof"
+  }
+}

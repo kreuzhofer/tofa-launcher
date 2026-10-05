@@ -1,0 +1,90 @@
+{
+  "started_utc": "2026-10-05T10:54:48Z",
+  "status": "completed",
+  "schema_exit": 0,
+  "stderr": "",
+  "matches": {
+    "v2/ConfigBatchWriteParams.json/properties/reloadUserConfig": {
+      "description": "When true, hot-reload updated runtime settings into loaded threads after writing. Session-static model, reasoning-effort, Plan-mode reasoning-effort, and service-tier defaults are not reloaded. The deprecated personality setting is also not reloaded.",
+      "type": "boolean"
+    },
+    "v2/ConfigReadResponse.json/definitions/Config/properties/approvals_reviewer": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/ApprovalsReviewer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "[UNSTABLE] Optional default for where approval requests are routed for review."
+    },
+    "v2/ConfigReadResponse.json/definitions/Config/properties/model_provider": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "v2/ConfigReadResponse.json/definitions/Config/properties/model_reasoning_effort": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/ReasoningEffort"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "v2/ConfigRequirementsReadResponse.json/definitions/ConfigRequirements/properties/modelProvider": {
+      "description": "Exact provider selection required by managed policy.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "v2/ModelListResponse.json/definitions/Model/properties/hidden": {
+      "type": "boolean"
+    },
+    "v2/ModelListResponse.json/definitions/Model/properties/isDefault": {
+      "type": "boolean"
+    },
+    "v2/ModelListResponse.json/definitions/Model/properties/supportedReasoningEfforts": {
+      "items": {
+        "$ref": "#/definitions/ReasoningEffortOption"
+      },
+      "type": "array"
+    },
+    "v2/ThreadStartParams.json/properties/approvalsReviewer": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/ApprovalsReviewer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Override where approval requests are routed for review on this thread and subsequent turns."
+    },
+    "v2/ThreadStartParams.json/properties/modelProvider": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "v2/TurnSettingsUpdateParams.json/properties/approvalsReviewer": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/ApprovalsReviewer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Changes the active turn's reviewer without changing future thread settings. Already captured steps and pending approvals retain their original reviewer."
+    }
+  },
+  "exit_code": 0,
+  "cleanup": "passed",
+  "finished_utc": "2026-10-05T10:54:49Z",
+  "retention": "Relevant schema properties selected from generated output; full protocol schemas not redistributed."
+}

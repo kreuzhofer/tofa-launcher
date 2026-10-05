@@ -1,0 +1,36 @@
+{
+  "started_utc": "2026-10-05T10:27:23.6145347Z",
+  "status": "completed",
+  "files": [
+    {
+      "path": "app\\ChatGPT.exe",
+      "bytes": 3444016,
+      "pe_machine": "0xAA64",
+      "file_version": "154.0.8037.93",
+      "sha256": "A362B339F31BAFE544A45DF4448133C0125888C7F08A07B14387A68E83FD438A"
+    },
+    {
+      "path": "app\\resources\\codex.exe",
+      "bytes": 273522992,
+      "pe_machine": "0xAA64",
+      "file_version": null,
+      "sha256": "FCDD6134DDD030FA4EC05779513A94290C7317796F0641ADD72C5E8AD978F8B4"
+    },
+    {
+      "path": "app\\resources\\app.asar",
+      "bytes": 549383272,
+      "pe_machine": null,
+      "file_version": null,
+      "sha256": "4FF195911804F7440D4A73FCE5A31989A7B6FDD3419A87B86E29BC9D9753CC7C"
+    },
+    {
+      "path": "app\\resources\\codex-windows-sandbox-service.exe",
+      "bytes": 45420336,
+      "pe_machine": "0xAA64",
+      "file_version": null,
+      "sha256": "76AA430CABFABA7C220EDA65B77806186304D21AA59006EFCDC6E08551760068"
+    }
+  ],
+  "exit_code": 0,
+  "finished_utc": "2026-10-05T10:27:27.4308225Z"
+}

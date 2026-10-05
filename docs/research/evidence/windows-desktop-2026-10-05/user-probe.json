@@ -1,0 +1,33 @@
+{
+  "started_utc": "2026-10-05T10:34:46.6392701Z",
+  "status": "completed",
+  "identity": "WIN-NT3N6IPH111\\SabreTest",
+  "session_id": 1,
+  "packages": [
+    {
+      "Name": "OpenAI.Codex",
+      "Version": "26.930.2377.0",
+      "Architecture": 12,
+      "Status": 0,
+      "InstallLocation": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.2377.0_arm64__2p2nqsd0c76g0"
+    }
+  ],
+  "profile_paths": [
+    {
+      "path": "C:\\Users\\SabreTest\\.codex",
+      "exists": true
+    },
+    {
+      "path": "C:\\Users\\SabreTest\\AppData\\Roaming\\Codex",
+      "exists": false
+    }
+  ],
+  "python": [
+    {
+      "Source": "C:\\Python313ARM\\python.exe"
+    }
+  ],
+  "native_app_processes": [],
+  "exit_code": 0,
+  "finished_utc": "2026-10-05T10:34:47.3160457Z"
+}

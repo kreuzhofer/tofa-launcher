@@ -1,0 +1,128 @@
+{
+  "started_utc": "2026-10-05T11:23:00Z",
+  "status": "completed",
+  "inference_requests": 0,
+  "execution_context": "Interactive/Limited user; isolated engine contract only",
+  "version": {
+    "returncode": 0,
+    "stdout": "codex-cli 0.159.0-alpha.12.1\n",
+    "stderr": ""
+  },
+  "catalog_input": {
+    "native_descriptor_count": 10,
+    "synthetic_slugs": [
+      "probe-main",
+      "probe-guardian"
+    ],
+    "main_auto_review_model_override": "probe-guardian"
+  },
+  "initialize": {
+    "userAgent": "tofa76-probe/0.159.0-alpha.12.1 (Windows 10.0.26200; aarch64) unknown (tofa76-probe; 1)",
+    "platformFamily": "windows",
+    "platformOs": "windows"
+  },
+  "runtime_configuration": {
+    "model": "probe-main",
+    "model_provider": "tofa76",
+    "approvals_reviewer": "auto_review",
+    "windows": null,
+    "model_reasoning_effort": null
+  },
+  "synthetic_provider": {
+    "name": "Synthetic investigation",
+    "base_url": "http://127.0.0.1:9/v1",
+    "model_catalog_url": null,
+    "env_key": null,
+    "env_key_instructions": null,
+    "experimental_bearer_token": null,
+    "auth": null,
+    "gateway_oauth": null,
+    "aws": null,
+    "wire_api": "responses",
+    "query_params": null,
+    "http_headers": null,
+    "env_http_headers": null,
+    "request_max_retries": null,
+    "stream_max_retries": null,
+    "stream_idle_timeout_ms": null,
+    "websocket_connect_timeout_ms": null,
+    "requires_openai_auth": false,
+    "supports_websockets": false,
+    "supports_standalone_web_search": false
+  },
+  "requirements_present": false,
+  "listed_models": [
+    {
+      "id": "probe-main",
+      "model": "probe-main",
+      "displayName": "Synthetic main",
+      "hidden": false,
+      "supportedReasoningEfforts": [
+        {
+          "reasoningEffort": "low",
+          "description": "Fast responses with lighter reasoning"
+        },
+        {
+          "reasoningEffort": "medium",
+          "description": "Balances speed and reasoning depth for everyday tasks"
+        },
+        {
+          "reasoningEffort": "high",
+          "description": "Greater reasoning depth for complex problems"
+        },
+        {
+          "reasoningEffort": "xhigh",
+          "description": "Extra high reasoning depth for complex problems"
+        },
+        {
+          "reasoningEffort": "max",
+          "description": "Maximum reasoning depth for the hardest problems"
+        },
+        {
+          "reasoningEffort": "ultra",
+          "description": "Maximum reasoning with automatic task delegation"
+        }
+      ],
+      "isDefault": true
+    },
+    {
+      "id": "probe-guardian",
+      "model": "probe-guardian",
+      "displayName": "Synthetic guardian",
+      "hidden": false,
+      "supportedReasoningEfforts": [
+        {
+          "reasoningEffort": "low",
+          "description": "Fast responses with lighter reasoning"
+        },
+        {
+          "reasoningEffort": "medium",
+          "description": "Balances speed and reasoning depth for everyday tasks"
+        },
+        {
+          "reasoningEffort": "high",
+          "description": "Greater reasoning depth for complex problems"
+        },
+        {
+          "reasoningEffort": "xhigh",
+          "description": "Extra high reasoning depth for complex problems"
+        },
+        {
+          "reasoningEffort": "max",
+          "description": "Maximum reasoning depth for the hardest problems"
+        },
+        {
+          "reasoningEffort": "ultra",
+          "description": "Maximum reasoning with automatic task delegation"
+        }
+      ],
+      "isDefault": false
+    }
+  ],
+  "account_present": false,
+  "requires_openai_auth": false,
+  "engine_exit_code": 0,
+  "exit_code": 0,
+  "engine_stderr": "",
+  "finished_utc": "2026-10-05T11:23:00Z"
+}

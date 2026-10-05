@@ -1,0 +1,18 @@
+{
+  "started_utc": "2026-10-05T10:44:19.4490119Z",
+  "status": "completed",
+  "stopped_probe_pids": [
+    736
+  ],
+  "removed_tasks": [
+    "tofa76-user-probe-20261005",
+    "tofa76-engine-probe-20261005",
+    "tofa76-native-open-20261005"
+  ],
+  "failed_probe_home_removed": true,
+  "active_engine_sha256": "FCDD6134DDD030FA4EC05779513A94290C7317796F0641ADD72C5E8AD978F8B4",
+  "profile_directories": [],
+  "remaining_tasks": [],
+  "exit_code": 0,
+  "finished_utc": "2026-10-05T10:44:24.6098959Z"
+}

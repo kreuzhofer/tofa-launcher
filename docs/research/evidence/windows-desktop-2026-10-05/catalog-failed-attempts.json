@@ -1,0 +1,72 @@
+[
+  {
+    "script_sha256": "c3455e0bae0dffcc975775655884e604aae6f709e253a66bc0509f00d26b9337",
+    "report": {
+      "started_utc": "2026-10-05T11:18:18Z",
+      "status": "failed",
+      "inference_requests": 0,
+      "execution_context": "SYSTEM; isolated engine contract only",
+      "version": {
+        "returncode": 0,
+        "stdout": "codex-cli 0.159.0-alpha.12.1\n",
+        "stderr": ""
+      },
+      "exit_code": 1,
+      "error": "the JSON object must be str, bytes or bytearray, not NoneType",
+      "finished_utc": "2026-10-05T11:18:18Z"
+    }
+  },
+  {
+    "script_sha256": "7a6d0c5cb958e2cb1d000ace9686efae1a92cb3b318b09dea2a7d0ed52b75a98",
+    "report": {
+      "started_utc": "2026-10-05T11:19:27Z",
+      "status": "failed",
+      "inference_requests": 0,
+      "execution_context": "SYSTEM; isolated engine contract only",
+      "version": {
+        "returncode": 0,
+        "stdout": "codex-cli 0.159.0-alpha.12.1\n",
+        "stderr": ""
+      },
+      "catalog_input": {
+        "native_descriptor_count": 10,
+        "synthetic_slugs": [
+          "probe-main",
+          "probe-guardian"
+        ],
+        "main_auto_review_model_override": "probe-guardian"
+      },
+      "exit_code": 1,
+      "error": "",
+      "finished_utc": "2026-10-05T11:19:42Z"
+    }
+  },
+  {
+    "script_sha256": "f658f65b75c025014df261d9eb5c2a18f7ce1a97b238fc0e6b21f2f2c3b18419",
+    "report": {
+      "started_utc": "2026-10-05T11:21:26Z",
+      "status": "failed",
+      "inference_requests": 0,
+      "execution_context": "Interactive/Limited user; isolated engine contract only",
+      "version": {
+        "returncode": 0,
+        "stdout": "codex-cli 0.159.0-alpha.12.1\n",
+        "stderr": ""
+      },
+      "catalog_input": {
+        "native_descriptor_count": 10,
+        "synthetic_slugs": [
+          "probe-main",
+          "probe-guardian"
+        ],
+        "main_auto_review_model_override": "probe-guardian"
+      },
+      "exit_code": 1,
+      "error": "",
+      "error_type": "Empty",
+      "engine_exit_code": 1,
+      "engine_stderr": "Error: unknown variant `guardian`, expected one of `user`, `auto_review`, `guardian_subagent`\nin `approvals_reviewer`\n\n",
+      "finished_utc": "2026-10-05T11:21:41Z"
+    }
+  }
+]

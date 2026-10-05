@@ -1,0 +1,53 @@
+{
+  "started_utc": "2026-10-05T10:20:35.6891117Z",
+  "status": "completed",
+  "identity": "NT AUTHORITY\\SYSTEM",
+  "os": {
+    "Caption": "Microsoft Windows 11 Pro",
+    "Version": "10.0.26200",
+    "BuildNumber": "26200",
+    "OSArchitecture": "ARM 64-bit Processor"
+  },
+  "cpu": [
+    {
+      "Name": "virt-10.0",
+      "Architecture": 12
+    }
+  ],
+  "packages": [
+    {
+      "Name": "OpenAI.Codex",
+      "Version": "26.930.2377.0",
+      "Architecture": 12,
+      "PackageFullName": "OpenAI.Codex_26.930.2377.0_arm64__2p2nqsd0c76g0",
+      "InstallLocation": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.2377.0_arm64__2p2nqsd0c76g0",
+      "Status": 0
+    },
+    {
+      "Name": "OpenAI.Codex",
+      "Version": "26.930.6422.0",
+      "Architecture": 12,
+      "PackageFullName": "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0",
+      "InstallLocation": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0",
+      "Status": 1024
+    }
+  ],
+  "processes": [
+    {
+      "Id": 4420,
+      "ProcessName": "codex-windows-sandbox-service",
+      "Path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.2377.0_arm64__2p2nqsd0c76g0\\app\\resources\\codex-windows-sandbox-service.exe"
+    }
+  ],
+  "users": [
+    {
+      "LocalPath": "C:\\Users\\SabreTest",
+      "Loaded": true
+    }
+  ],
+  "desktop_links": [],
+  "uninstall": [],
+  "machine_policy_present": false,
+  "exit_code": 0,
+  "finished_utc": "2026-10-05T10:20:37.5308452Z"
+}
