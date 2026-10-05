@@ -68,7 +68,7 @@ func TestExplicitLaunchDefaultsToGLMGuardian(t *testing.T) {
 		t.Fatal(err)
 	}
 	status := "Status: experimental"
-	if runtime.GOOS == "darwin" && runtime.GOARCH == "arm64" {
+	if (runtime.GOOS == "darwin" || runtime.GOOS == "windows") && runtime.GOARCH == "arm64" {
 		status = "Status: supported"
 	}
 	for _, want := range []string{"Main: moonshotai/Kimi-K3", "Guardian: zai-org/GLM-5.3-Flash", "Route: adapted", status} {
@@ -152,7 +152,7 @@ func TestQualifiedCLIPairsUsePlatformScopedSupport(t *testing.T) {
 			flags     []string
 			supported bool
 		}{
-			{"qualified pair", nil, runtime.GOOS == "darwin" && runtime.GOARCH == "arm64"},
+			{"qualified pair", nil, runtime.GOARCH == "arm64" && (runtime.GOOS == "darwin" || (runtime.GOOS == "windows" && (main == "deepseek-ai/DeepSeek-V4.1-Flash" || main == "moonshotai/Kimi-K3")))},
 			{"different Guardian", []string{"--guardian-model", main}, false},
 			{"direct route", []string{"--direct"}, false},
 		} {
@@ -206,7 +206,7 @@ func TestHelpExplainsGuardianSelectionContract(t *testing.T) {
 	if err := app.Run([]string{"--help"}); err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{"--guardian-model ID", "zai-org/GLM-5.3-Flash", "native reviewer", "metadata", "--allow-unverified", "deepseek-ai/DeepSeek-V4.1-Flash", "zai-org/GLM-5.3", "Supported desktop pairs", "Supported CLI mains on macOS ARM64", "Windows and other CLI combinations remain Experimental", "Automatic naming remains unsupported", "Choose an app, then a main model", "Fresh interactive launches run first-use setup", "authenticate the catalog before selection", "Interactive bare launches choose Codex CLI or Codex desktop"} {
+	for _, want := range []string{"--guardian-model ID", "zai-org/GLM-5.3-Flash", "native reviewer", "metadata", "--allow-unverified", "deepseek-ai/DeepSeek-V4.1-Flash", "zai-org/GLM-5.3", "Supported desktop pairs", "Supported CLI mains on macOS ARM64", "Windows ARM64 also supports DeepSeek V4.1 Flash and Kimi K3", "Other CLI combinations remain Experimental", "Automatic naming remains unsupported", "Choose an app, then a main model", "Fresh interactive launches run first-use setup", "authenticate the catalog before selection", "Interactive bare launches choose Codex CLI or Codex desktop"} {
 		if !strings.Contains(out.String(), want) {
 			t.Errorf("help missing %q", want)
 		}

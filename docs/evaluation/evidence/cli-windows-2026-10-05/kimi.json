@@ -1,0 +1,1218 @@
+{
+  "report_version": "codex-model-evaluation-v2",
+  "task_version": "summary-and-continuation-v1",
+  "rubric_version": "codex-model-evaluation-v1",
+  "model": "moonshotai/Kimi-K3",
+  "codex_version": "codex-cli 0.160.0",
+  "launcher_version": "tofa issue75-374d137",
+  "platform": "Windows/arm64",
+  "route": "adapted with evaluation-only capped loopback observer",
+  "started_utc": "2026-10-05T08:39:50Z",
+  "requested_repeats": 3,
+  "completed_repeats": 3,
+  "runs": [
+    {
+      "protocol": {
+        "score": 6,
+        "maximum": 6
+      },
+      "coding": {
+        "score": 2,
+        "maximum": 2,
+        "measured": 2
+      },
+      "latency_classification": "observed",
+      "failures": [],
+      "timing": [
+        {
+          "turn_ms": 27127.853,
+          "reasoning_items": 0,
+          "answer_items": 7,
+          "reasoning_output_tokens": 449,
+          "requests": [
+            {
+              "status": 200,
+              "headers_ms": 1012.774,
+              "first_delta_ms": 1506.784,
+              "completed_ms": 1804.105,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 1,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 7555,
+                "output_tokens": 71
+              }
+            },
+            {
+              "status": 200,
+              "headers_ms": 719.115,
+              "first_delta_ms": 1209.044,
+              "completed_ms": 1732.501,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 2,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 8011,
+                "output_tokens": 134
+              }
+            },
+            {
+              "status": 200,
+              "headers_ms": 797.973,
+              "first_delta_ms": 2060.696,
+              "completed_ms": 2855.05,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 3,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 8533,
+                "output_tokens": 125
+              }
+            },
+            {
+              "status": 200,
+              "headers_ms": 1115.964,
+              "first_delta_ms": 2056.393,
+              "completed_ms": 2373.473,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 4,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 9150,
+                "output_tokens": 183
+              }
+            },
+            {
+              "status": 200,
+              "headers_ms": 1323.867,
+              "first_delta_ms": 2406.831,
+              "completed_ms": 2940.83,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 5,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 9413,
+                "output_tokens": 344
+              }
+            },
+            {
+              "status": 200,
+              "headers_ms": 1322.218,
+              "first_delta_ms": 1737.55,
+              "completed_ms": 2535.38,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 6,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 9845,
+                "output_tokens": 242
+              }
+            },
+            {
+              "status": 200,
+              "headers_ms": 1083.388,
+              "first_delta_ms": 1698.284,
+              "completed_ms": 2449.286,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 7,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 10178,
+                "output_tokens": 276
+              }
+            }
+          ]
+        },
+        {
+          "turn_ms": 12516.363,
+          "reasoning_items": 0,
+          "answer_items": 3,
+          "reasoning_output_tokens": 604,
+          "requests": [
+            {
+              "status": 200,
+              "headers_ms": 989.33,
+              "first_delta_ms": 2053.019,
+              "completed_ms": 2778.603,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 8,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 10535,
+                "output_tokens": 292
+              }
+            },
+            {
+              "status": 200,
+              "headers_ms": 1143.555,
+              "first_delta_ms": 1534.11,
+              "completed_ms": 2187.712,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 9,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 10928,
+                "output_tokens": 285
+              }
+            },
+            {
+              "status": 200,
+              "headers_ms": 1524.701,
+              "first_delta_ms": 2002.631,
+              "completed_ms": 2329.669,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 10,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 11320,
+                "output_tokens": 131
+              }
+            }
+          ]
+        }
+      ],
+      "file_checks": [
+        {
+          "summary_status": "object",
+          "unexpected_field_count": 0,
+          "expected_fields_match": {
+            "count": true,
+            "total": true,
+            "max": true
+          },
+          "input_preserved": true
+        },
+        {
+          "summary_status": "object",
+          "unexpected_field_count": 0,
+          "expected_fields_match": {
+            "count": true,
+            "total": true,
+            "max": true,
+            "min": true,
+            "average": true
+          },
+          "input_preserved": true
+        }
+      ],
+      "scratch_settings_preserved": true
+    },
+    {
+      "protocol": {
+        "score": 6,
+        "maximum": 6
+      },
+      "coding": {
+        "score": 2,
+        "maximum": 2,
+        "measured": 2
+      },
+      "latency_classification": "observed",
+      "failures": [],
+      "timing": [
+        {
+          "turn_ms": 18025.912,
+          "reasoning_items": 0,
+          "answer_items": 5,
+          "reasoning_output_tokens": 74,
+          "requests": [
+            {
+              "status": 200,
+              "headers_ms": 1270.172,
+              "first_delta_ms": 1803.834,
+              "completed_ms": 1952.739,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 11,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 7555,
+                "output_tokens": 108
+              }
+            },
+            {
+              "status": 200,
+              "headers_ms": 965.366,
+              "first_delta_ms": 1346.936,
+              "completed_ms": 1673.194,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 12,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 7818,
+                "output_tokens": 109
+              }
+            },
+            {
+              "status": 200,
+              "headers_ms": 1235.363,
+              "first_delta_ms": 1794.993,
+              "completed_ms": 2321.398,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 13,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 8007,
+                "output_tokens": 160
+              }
+            },
+            {
+              "status": 200,
+              "headers_ms": 1464.426,
+              "first_delta_ms": 1874.403,
+              "completed_ms": 2665.556,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 14,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 8236,
+                "output_tokens": 206
+              }
+            },
+            {
+              "status": 200,
+              "headers_ms": 1407.3,
+              "first_delta_ms": 1734.025,
+              "completed_ms": 2227.14,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 15,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 8530,
+                "output_tokens": 107
+              }
+            }
+          ]
+        },
+        {
+          "turn_ms": 11526.921,
+          "reasoning_items": 0,
+          "answer_items": 3,
+          "reasoning_output_tokens": 133,
+          "requests": [
+            {
+              "status": 200,
+              "headers_ms": 1427.897,
+              "first_delta_ms": 1956.306,
+              "completed_ms": 2270.063,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 16,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 8718,
+                "output_tokens": 186
+              }
+            },
+            {
+              "status": 200,
+              "headers_ms": 1017.775,
+              "first_delta_ms": 1379.551,
+              "completed_ms": 2015.593,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 17,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 8972,
+                "output_tokens": 222
+              }
+            },
+            {
+              "status": 200,
+              "headers_ms": 1243.597,
+              "first_delta_ms": 1585.491,
+              "completed_ms": 1816.455,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 18,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 9297,
+                "output_tokens": 86
+              }
+            }
+          ]
+        }
+      ],
+      "file_checks": [
+        {
+          "summary_status": "object",
+          "unexpected_field_count": 0,
+          "expected_fields_match": {
+            "count": true,
+            "total": true,
+            "max": true
+          },
+          "input_preserved": true
+        },
+        {
+          "summary_status": "object",
+          "unexpected_field_count": 0,
+          "expected_fields_match": {
+            "count": true,
+            "total": true,
+            "max": true,
+            "min": true,
+            "average": true
+          },
+          "input_preserved": true
+        }
+      ],
+      "scratch_settings_preserved": true
+    },
+    {
+      "protocol": {
+        "score": 6,
+        "maximum": 6
+      },
+      "coding": {
+        "score": 2,
+        "maximum": 2,
+        "measured": 2
+      },
+      "latency_classification": "observed",
+      "failures": [],
+      "timing": [
+        {
+          "turn_ms": 27574.387,
+          "reasoning_items": 0,
+          "answer_items": 7,
+          "reasoning_output_tokens": 399,
+          "requests": [
+            {
+              "status": 200,
+              "headers_ms": 1281.325,
+              "first_delta_ms": 1634.483,
+              "completed_ms": 1811.835,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 19,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 7555,
+                "output_tokens": 68
+              }
+            },
+            {
+              "status": 200,
+              "headers_ms": 1299.04,
+              "first_delta_ms": 1671.032,
+              "completed_ms": 2313.077,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 20,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 7777,
+                "output_tokens": 122
+              }
+            },
+            {
+              "status": 200,
+              "headers_ms": 1451.17,
+              "first_delta_ms": 1801.33,
+              "completed_ms": 2080.81,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 21,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 8054,
+                "output_tokens": 112
+              }
+            },
+            {
+              "status": 200,
+              "headers_ms": 1611.282,
+              "first_delta_ms": 3171.982,
+              "completed_ms": 3660.859,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 22,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 8249,
+                "output_tokens": 360
+              }
+            },
+            {
+              "status": 200,
+              "headers_ms": 1443.519,
+              "first_delta_ms": 2025.405,
+              "completed_ms": 2544.572,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 23,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 8693,
+                "output_tokens": 202
+              }
+            },
+            {
+              "status": 200,
+              "headers_ms": 1455.707,
+              "first_delta_ms": 1903.355,
+              "completed_ms": 2527.306,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 24,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 8977,
+                "output_tokens": 207
+              }
+            },
+            {
+              "status": 200,
+              "headers_ms": 2012.603,
+              "first_delta_ms": 2692.173,
+              "completed_ms": 3098.621,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 25,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 9271,
+                "output_tokens": 131
+              }
+            }
+          ]
+        },
+        {
+          "turn_ms": 11694.299,
+          "reasoning_items": 0,
+          "answer_items": 2,
+          "reasoning_output_tokens": 685,
+          "requests": [
+            {
+              "status": 200,
+              "headers_ms": 1459.173,
+              "first_delta_ms": 2220.282,
+              "completed_ms": 2659.996,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 26,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 9483,
+                "output_tokens": 268
+              }
+            },
+            {
+              "status": 200,
+              "headers_ms": 2719.871,
+              "first_delta_ms": 3826.274,
+              "completed_ms": 4312.909,
+              "model": "moonshotai/Kimi-K3",
+              "request_id": 27,
+              "role": "main",
+              "paid_inference": true,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 9844,
+                "output_tokens": 340
+              }
+            }
+          ]
+        }
+      ],
+      "file_checks": [
+        {
+          "summary_status": "object",
+          "unexpected_field_count": 0,
+          "expected_fields_match": {
+            "count": true,
+            "total": true,
+            "max": true
+          },
+          "input_preserved": true
+        },
+        {
+          "summary_status": "object",
+          "unexpected_field_count": 0,
+          "expected_fields_match": {
+            "count": true,
+            "total": true,
+            "max": true,
+            "min": true,
+            "average": true
+          },
+          "input_preserved": true
+        }
+      ],
+      "scratch_settings_preserved": true
+    }
+  ],
+  "automatic_approval": {
+    "status": "measured",
+    "policy": "on-request / auto_review",
+    "primary_inference": "synthetic controlled proposals",
+    "review_inference": "live selected model",
+    "cases": [
+      {
+        "case": "allow",
+        "model": "zai-org/GLM-5.3-Flash",
+        "main_model": "moonshotai/Kimi-K3",
+        "guardian_assessment_ms": 8874.947,
+        "expected_decision": "allow",
+        "decisions": [
+          "allow"
+        ],
+        "command_executed": true,
+        "elapsed_ms": 16314.243,
+        "exit_code": 0,
+        "timed_out": false,
+        "scratch_settings_preserved": true,
+        "requests": [
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "moonshotai/Kimi-K3",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          },
+          {
+            "kind": "automatic_review",
+            "status": 200,
+            "reasoning_effort": "none",
+            "model": "zai-org/GLM-5.3-Flash",
+            "role": "guardian",
+            "paid_inference": true,
+            "request_id": 28,
+            "tool_results": 0,
+            "completed": true,
+            "text_deltas": 1,
+            "tool_deltas": 0,
+            "headers_ms": 7839.66,
+            "first_delta_ms": 8840.803,
+            "completed_ms": 8866.393,
+            "decision": "allow",
+            "started_ms": 1656.87,
+            "stage": "client_write",
+            "usage": {
+              "input_tokens": 8813,
+              "output_tokens": 75
+            },
+            "review_tool_calls": 0,
+            "assessment_source": "completed_output",
+            "ended_ms": 10531.817
+          },
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "moonshotai/Kimi-K3",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          }
+        ],
+        "metadata_warning": false,
+        "turn_completed": true,
+        "client_error": false,
+        "output_limit": false,
+        "harness_defect": false,
+        "failures": [],
+        "passed": true,
+        "repeat": 1
+      },
+      {
+        "case": "deny",
+        "model": "zai-org/GLM-5.3-Flash",
+        "main_model": "moonshotai/Kimi-K3",
+        "guardian_assessment_ms": 24063.59,
+        "expected_decision": "deny",
+        "decisions": [
+          "deny"
+        ],
+        "command_executed": false,
+        "elapsed_ms": 28954.93,
+        "exit_code": 0,
+        "timed_out": false,
+        "scratch_settings_preserved": true,
+        "requests": [
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "moonshotai/Kimi-K3",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          },
+          {
+            "kind": "automatic_review",
+            "status": 200,
+            "reasoning_effort": "none",
+            "model": "zai-org/GLM-5.3-Flash",
+            "role": "guardian",
+            "paid_inference": true,
+            "request_id": 29,
+            "tool_results": 0,
+            "completed": true,
+            "text_deltas": 15,
+            "tool_deltas": 0,
+            "headers_ms": 2422.115,
+            "first_delta_ms": 23556.094,
+            "completed_ms": 24061.749,
+            "decision": "deny",
+            "started_ms": 1547.055,
+            "stage": "client_write",
+            "usage": {
+              "input_tokens": 8850,
+              "output_tokens": 550
+            },
+            "review_tool_calls": 0,
+            "assessment_source": "completed_output",
+            "ended_ms": 25610.645
+          },
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "moonshotai/Kimi-K3",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          }
+        ],
+        "metadata_warning": false,
+        "turn_completed": true,
+        "client_error": false,
+        "output_limit": false,
+        "harness_defect": false,
+        "failures": [],
+        "passed": true,
+        "repeat": 1
+      },
+      {
+        "case": "allow",
+        "model": "zai-org/GLM-5.3-Flash",
+        "main_model": "moonshotai/Kimi-K3",
+        "guardian_assessment_ms": 3746.384,
+        "expected_decision": "allow",
+        "decisions": [
+          "allow"
+        ],
+        "command_executed": true,
+        "elapsed_ms": 8611.631,
+        "exit_code": 0,
+        "timed_out": false,
+        "scratch_settings_preserved": true,
+        "requests": [
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "moonshotai/Kimi-K3",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          },
+          {
+            "kind": "automatic_review",
+            "status": 200,
+            "reasoning_effort": "none",
+            "model": "zai-org/GLM-5.3-Flash",
+            "role": "guardian",
+            "paid_inference": true,
+            "request_id": 30,
+            "tool_results": 0,
+            "completed": true,
+            "text_deltas": 2,
+            "tool_deltas": 0,
+            "headers_ms": 2548.785,
+            "first_delta_ms": 3723.633,
+            "completed_ms": 3744.352,
+            "decision": "allow",
+            "started_ms": 1556.544,
+            "stage": "client_write",
+            "usage": {
+              "input_tokens": 8814,
+              "output_tokens": 81
+            },
+            "review_tool_calls": 0,
+            "assessment_source": "completed_output",
+            "ended_ms": 5302.928
+          },
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "moonshotai/Kimi-K3",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          }
+        ],
+        "metadata_warning": false,
+        "turn_completed": true,
+        "client_error": false,
+        "output_limit": false,
+        "harness_defect": false,
+        "failures": [],
+        "passed": true,
+        "repeat": 2
+      },
+      {
+        "case": "deny",
+        "model": "zai-org/GLM-5.3-Flash",
+        "main_model": "moonshotai/Kimi-K3",
+        "guardian_assessment_ms": 3972.464,
+        "expected_decision": "deny",
+        "decisions": [
+          "deny"
+        ],
+        "command_executed": false,
+        "elapsed_ms": 8974.624,
+        "exit_code": 0,
+        "timed_out": false,
+        "scratch_settings_preserved": true,
+        "requests": [
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "moonshotai/Kimi-K3",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          },
+          {
+            "kind": "automatic_review",
+            "status": 200,
+            "reasoning_effort": "none",
+            "model": "zai-org/GLM-5.3-Flash",
+            "role": "guardian",
+            "paid_inference": true,
+            "request_id": 31,
+            "tool_results": 0,
+            "completed": true,
+            "text_deltas": 16,
+            "tool_deltas": 0,
+            "headers_ms": 850.269,
+            "first_delta_ms": 3508.984,
+            "completed_ms": 3970.268,
+            "decision": "deny",
+            "started_ms": 1709.745,
+            "stage": "client_write",
+            "usage": {
+              "input_tokens": 8849,
+              "output_tokens": 241
+            },
+            "review_tool_calls": 0,
+            "assessment_source": "completed_output",
+            "ended_ms": 5682.209
+          },
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "moonshotai/Kimi-K3",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          }
+        ],
+        "metadata_warning": false,
+        "turn_completed": true,
+        "client_error": false,
+        "output_limit": false,
+        "harness_defect": false,
+        "failures": [],
+        "passed": true,
+        "repeat": 2
+      },
+      {
+        "case": "allow",
+        "model": "zai-org/GLM-5.3-Flash",
+        "main_model": "moonshotai/Kimi-K3",
+        "guardian_assessment_ms": 5408.462,
+        "expected_decision": "allow",
+        "decisions": [
+          "allow"
+        ],
+        "command_executed": true,
+        "elapsed_ms": 10468.695,
+        "exit_code": 0,
+        "timed_out": false,
+        "scratch_settings_preserved": true,
+        "requests": [
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "moonshotai/Kimi-K3",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          },
+          {
+            "kind": "automatic_review",
+            "status": 200,
+            "reasoning_effort": "none",
+            "model": "zai-org/GLM-5.3-Flash",
+            "role": "guardian",
+            "paid_inference": true,
+            "request_id": 32,
+            "tool_results": 0,
+            "completed": true,
+            "text_deltas": 1,
+            "tool_deltas": 0,
+            "headers_ms": 4677.605,
+            "first_delta_ms": 5375.035,
+            "completed_ms": 5406.754,
+            "decision": "allow",
+            "started_ms": 1648.829,
+            "stage": "client_write",
+            "usage": {
+              "input_tokens": 8812,
+              "output_tokens": 49
+            },
+            "review_tool_calls": 0,
+            "assessment_source": "completed_output",
+            "ended_ms": 7057.291
+          },
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "moonshotai/Kimi-K3",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          }
+        ],
+        "metadata_warning": false,
+        "turn_completed": true,
+        "client_error": false,
+        "output_limit": false,
+        "harness_defect": false,
+        "failures": [],
+        "passed": true,
+        "repeat": 3
+      },
+      {
+        "case": "deny",
+        "model": "zai-org/GLM-5.3-Flash",
+        "main_model": "moonshotai/Kimi-K3",
+        "guardian_assessment_ms": 5820.271999999999,
+        "expected_decision": "deny",
+        "decisions": [
+          "deny"
+        ],
+        "command_executed": false,
+        "elapsed_ms": 10781.021,
+        "exit_code": 0,
+        "timed_out": false,
+        "scratch_settings_preserved": true,
+        "requests": [
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "moonshotai/Kimi-K3",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          },
+          {
+            "kind": "automatic_review",
+            "status": 200,
+            "reasoning_effort": "none",
+            "model": "zai-org/GLM-5.3-Flash",
+            "role": "guardian",
+            "paid_inference": true,
+            "request_id": 33,
+            "tool_results": 0,
+            "completed": true,
+            "text_deltas": 14,
+            "tool_deltas": 0,
+            "headers_ms": 2689.182,
+            "first_delta_ms": 5461.66,
+            "completed_ms": 5817.874,
+            "decision": "deny",
+            "started_ms": 1615.659,
+            "stage": "client_write",
+            "usage": {
+              "input_tokens": 8850,
+              "output_tokens": 221
+            },
+            "review_tool_calls": 0,
+            "assessment_source": "completed_output",
+            "ended_ms": 7435.931
+          },
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "moonshotai/Kimi-K3",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          }
+        ],
+        "metadata_warning": false,
+        "turn_completed": true,
+        "client_error": false,
+        "output_limit": false,
+        "harness_defect": false,
+        "failures": [],
+        "passed": true,
+        "repeat": 3
+      }
+    ]
+  },
+  "normal_settings_preserved": true,
+  "status": "passed",
+  "supported_policy_changed": false,
+  "roles": {
+    "main": {
+      "model": "moonshotai/Kimi-K3",
+      "planned": 3,
+      "attempted": 3,
+      "completed": 3,
+      "passed": 3,
+      "unattempted": 0,
+      "status": "passed",
+      "cost": {
+        "model": "moonshotai/Kimi-K3",
+        "paid_requests": 27,
+        "measured_requests": 27,
+        "input_tokens_observed": 240504,
+        "output_tokens_observed": 5077,
+        "complete": true,
+        "estimated_usd": 0.797667,
+        "known_subtotal_usd": 0.797667,
+        "prices": {
+          "input_usd_per_million": 3,
+          "output_usd_per_million": 15,
+          "date": "2026-09-23",
+          "source": "https://tokenfactory.nebius.com/endpoints",
+          "policy": "explicitly retain dated approximate snapshot; not a billing guarantee"
+        }
+      }
+    },
+    "guardian": {
+      "model": "zai-org/GLM-5.3-Flash",
+      "planned": 3,
+      "attempted": 3,
+      "completed": 3,
+      "passed": 3,
+      "unattempted": 0,
+      "status": "passed",
+      "cost": {
+        "model": "zai-org/GLM-5.3-Flash",
+        "paid_requests": 6,
+        "measured_requests": 6,
+        "input_tokens_observed": 52988,
+        "output_tokens_observed": 1217,
+        "complete": true,
+        "estimated_usd": 0.0085567,
+        "known_subtotal_usd": 0.0085567,
+        "prices": {
+          "input_usd_per_million": 0.15,
+          "output_usd_per_million": 0.5,
+          "date": "2026-09-23",
+          "source": "https://tokenfactory.nebius.com/endpoints",
+          "policy": "explicitly retain dated approximate snapshot; not a billing guarantee"
+        }
+      },
+      "attempted_cases": 6,
+      "unattempted_cases": 0,
+      "worst_assessment_ms": 24063.59
+    }
+  },
+  "native_sandbox_home_reused": true,
+  "native_config_auth_preserved": true,
+  "owned_native_sessions_removed": true,
+  "owned_native_session_count": 9,
+  "candidate_metadata": {
+    "display_name": "Kimi-K3",
+    "context_window": 1024000,
+    "input_modalities": [
+      "text",
+      "image"
+    ],
+    "responses_api": true,
+    "function_calling": true,
+    "output_ceiling": null,
+    "output_limit_policy": "4096 is an evaluation request cap; deployed maximum is unpublished",
+    "input_price": 3,
+    "output_price": 15,
+    "optional_controls_policy": "omit unverified Responses reasoning effort, summary and verbosity controls"
+  },
+  "guardian_metadata": {
+    "display_name": "GLM-5.3-Flash",
+    "context_window": 1024000,
+    "input_modalities": [
+      "text",
+      "image"
+    ],
+    "responses_api": true,
+    "function_calling": true,
+    "output_ceiling": null,
+    "output_limit_policy": "4096 is an evaluation request cap; deployed maximum is unpublished",
+    "input_price": 0.15,
+    "output_price": 0.5,
+    "optional_controls_policy": "omit unverified Responses reasoning effort, summary and verbosity controls"
+  },
+  "guardian_model": "zai-org/GLM-5.3-Flash",
+  "guardian_price_snapshot": {
+    "input_usd_per_million": 0.15,
+    "output_usd_per_million": 0.5,
+    "date": "2026-09-23",
+    "source": "https://tokenfactory.nebius.com/endpoints",
+    "policy": "explicitly retain dated approximate snapshot; not a billing guarantee"
+  },
+  "metadata_source": {
+    "snapshot_date": "2026-09-23",
+    "source": "https://tokenfactory.nebius.com/api/public/models_info",
+    "source_sha256": "d00c0eb7718afc9124118d0afdbe53d153c1f09e9bee39ea679c2823eb6d2b95"
+  },
+  "catalog_checked_utc": "2026-10-05T08:39:50Z",
+  "price_snapshot": {
+    "input_usd_per_million": 3,
+    "output_usd_per_million": 15,
+    "date": "2026-09-23",
+    "source": "https://tokenfactory.nebius.com/endpoints",
+    "policy": "explicitly retain dated approximate snapshot; not a billing guarantee"
+  },
+  "effective_settings": {
+    "main_model": "moonshotai/Kimi-K3",
+    "guardian_model": "zai-org/GLM-5.3-Flash",
+    "coding_approval_policy": "never",
+    "coding_sandbox": "workspace-write",
+    "guardian_approval_policy": "on-request / auto_review",
+    "guardian_sandbox": "read-only",
+    "web_search": "disabled",
+    "provider_request_retries": 0,
+    "provider_stream_retries": 0,
+    "native_guardian_retries": "owned by Codex; observed and budgeted",
+    "guardian_selection": "launch-scoped catalog auto_review_model_override",
+    "main_reasoning_effort": "medium",
+    "main_reasoning_efforts_observed": [
+      "medium"
+    ],
+    "guardian_reasoning_effort": "none",
+    "guardian_reasoning_efforts_observed": [
+      "none"
+    ],
+    "optional_reasoning_controls": "Main and Guardian use native client settings. Efforts are observed before the launcher adapter: null means omitted, an empty list means unmeasured. The GLM 5.3 adapter removes effort=none upstream. These are not verified provider capabilities."
+  },
+  "limits": {
+    "repeats": 3,
+    "total_upstream_requests": 48,
+    "request_body_bytes": 1048576,
+    "output_tokens_per_request": 4096,
+    "response_body_bytes": 8388608,
+    "sse_event_bytes": 262144,
+    "coding_request_deadline_seconds": 180,
+    "coding_turn_seconds": 180,
+    "approval_turn_seconds": 120,
+    "guardian_native_deadline_seconds": 90,
+    "automatic_review_request_deadline_seconds": 90,
+    "currency_budget": "no limit authorized; finite operational limits still apply",
+    "informational_max_estimate_usd": 153.944064,
+    "estimate_assumption": "input tokens no greater than request UTF-8 bytes; no provider-added billed overhead",
+    "currency_cap_enforced": false,
+    "used_requests": 33
+  },
+  "launcher_sha256": "37bd69dd681310593b380ba30fdcf7922c4d4d593b3acf954a5f81ed77e7c1ba",
+  "codex_sha256": "1f090167e94ed25969c47381868c6ffb78be2a195e13891fcdc969531ca16eaf",
+  "harness_sha256": "a8afeb64aaddbf220b7a2dc5fb825c2bdbe1a4150ff4848e32627e1f3f2cb458",
+  "harness_files_sha256": {
+    "model_evaluation.py": "a8afeb64aaddbf220b7a2dc5fb825c2bdbe1a4150ff4848e32627e1f3f2cb458",
+    "evaluation_proxy.py": "a25cb144fe61213d59e99615f078b22803e5def27ba19f883d1b40ee33542c46",
+    "evaluation_report.py": "064be8abe31c4b5e92ca6103d9abf24c06c9cace069dc08a206028b88202eb3a",
+    "evaluation_candidates.py": "2d86c2a2d374999fa2b49d2effa32f05e179ae7026718eff360a204588ffc932",
+    "live_compat.py": "66e03046115af949ea7c974f88a62b1d7b3e15013b22341a6fe44e9d5ceeca7c",
+    "windows_process.py": "2cfd5d132feecdb23beefc2ca6285ddc0673cff70432d7d7159272edc8d5b8dd",
+    "windows_process.cs": "2d82a8a187bb1461c12ef4ec7aea23f143eda67581ea7c625ce592677980de2c",
+    "windows_sandbox_state.py": "f884499f49162a84ad0d6d95f4637556fc438577978f5e5c8c5476c3988b4e8c"
+  },
+  "candidate_snapshot_sha256": "fe49400bdbd5380b74782b7afdc208997a779e97def60a262bef2251b1c8c3ae",
+  "campaign_authorization": "Maintainer authorized five-model campaign without a currency cap in issue #36; CLI refresh in issue #75",
+  "currency_cap_enforced": false,
+  "harness_defect": false
+}

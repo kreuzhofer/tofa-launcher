@@ -54,8 +54,9 @@ and labelled Experimental. The desktop picker offers every eligible available mo
 --model sets the initial/default main and each conversation keeps its own selection.
 Supported CLI mains on macOS ARM64: deepseek-ai/DeepSeek-V4.1-Flash,
 zai-org/GLM-5.3, moonshotai/Kimi-K3, each with zai-org/GLM-5.3-Flash Guardian
-on the adapted route. Windows and other CLI combinations remain Experimental.
-See docs/evaluation/cli-refresh-2026-10-02.md for baselines and evidence limits.
+on the adapted route. Windows ARM64 also supports DeepSeek V4.1 Flash and Kimi K3
+with that Guardian and route. Other CLI combinations remain Experimental.
+See docs/evaluation/cli-windows-2026-10-05.md for baselines and evidence limits.
 Experimental CLI pairs need consent: confirm Y in the picker, or pass
 --allow-unverified for explicit/scripted models.
 Models in the catalog are not certified by availability.

@@ -227,7 +227,7 @@ class PickerTests(PickerFixture):
         super().setUpClass()
         cls.binary = cls.experimental
 
-    def test_qualified_production_pairs_launch_without_consent_only_on_macos_arm64(self):
+    def test_qualified_production_pairs_follow_native_unix_scope(self):
         self.models.append('zai-org/GLM-5.3')
         for model in (DEEPSEEK, 'zai-org/GLM-5.3', KIMI):
             with self.subTest(model=model):

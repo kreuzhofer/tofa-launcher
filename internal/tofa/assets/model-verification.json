@@ -7,12 +7,13 @@
       "main": "deepseek-ai/DeepSeek-V4.1-Flash",
       "guardian": "zai-org/GLM-5.3-Flash",
       "status": "supported",
-      "evidence": "docs/evaluation/evidence/cli-refresh-2026-10-02/mac-live/deepseek.json",
-      "reason": "Issue #75: three two-turn coding sessions and three Guardian allow/deny pairs passed with settings preserved. Narrow bounded task qualification; see docs/evaluation/cli-refresh-2026-10-02.md.",
+      "evidence": "docs/evaluation/cli-windows-2026-10-05.md",
+      "reason": "Issue #75: three two-turn coding sessions and three Guardian allow/deny pairs passed on each listed platform, with ordinary settings preserved. Windows native evaluation sessions were removed. Narrow bounded task qualification.",
       "platforms": [
-        "darwin/arm64"
+        "darwin/arm64",
+        "windows/arm64"
       ],
-      "scope": "Codex CLI 0.158.0, macOS 26.6.2 ARM64; measured baseline, not an exact-version admission gate. Windows live qualification blocked by missing saved login."
+      "scope": "Codex CLI 0.158.0 on macOS 26.6.2 ARM64 and 0.160.0 on Windows 11 ARM64; measured baselines, not exact-version admission gates."
     },
     {
       "target": "codex",
@@ -21,11 +22,11 @@
       "guardian": "zai-org/GLM-5.3-Flash",
       "status": "supported",
       "evidence": "docs/evaluation/evidence/cli-refresh-2026-10-02/mac-live/glm.json",
-      "reason": "Issue #75: three two-turn coding sessions and three Guardian allow/deny pairs passed with settings preserved. Narrow bounded task qualification; see docs/evaluation/cli-refresh-2026-10-02.md.",
+      "reason": "Issue #75: all three coding sessions and Guardian pairs passed on macOS. Windows passed one of three planned coding sessions, exhausted the 48-request budget during repeat two, and could not measure Guardian inference. See docs/evaluation/cli-windows-2026-10-05.md.",
       "platforms": [
         "darwin/arm64"
       ],
-      "scope": "Codex CLI 0.158.0, macOS 26.6.2 ARM64; measured baseline, not an exact-version admission gate. Windows live qualification blocked by missing saved login."
+      "scope": "Codex CLI 0.158.0 on macOS 26.6.2 ARM64; measured baseline, not an exact-version admission gate. Windows 11 ARM64 evaluation on 0.160.0 exhausted the shared request budget and remains Experimental."
     },
     {
       "target": "codex-desktop",
@@ -56,11 +57,12 @@
       "guardian": "zai-org/GLM-5.3-Flash",
       "status": "supported",
       "platforms": [
-        "darwin/arm64"
+        "darwin/arm64",
+        "windows/arm64"
       ],
-      "evidence": "docs/evaluation/evidence/cli-refresh-2026-10-02/mac-live/kimi.json",
-      "scope": "Codex CLI 0.158.0, macOS 26.6.2 ARM64; measured baseline, not an exact-version admission gate. Windows live qualification blocked by missing saved login.",
-      "reason": "Issue #75: three two-turn coding sessions and three Guardian allow/deny pairs passed with settings preserved. Narrow bounded task qualification; see docs/evaluation/cli-refresh-2026-10-02.md."
+      "evidence": "docs/evaluation/cli-windows-2026-10-05.md",
+      "scope": "Codex CLI 0.158.0 on macOS 26.6.2 ARM64 and 0.160.0 on Windows 11 ARM64; measured baselines, not exact-version admission gates.",
+      "reason": "Issue #75: three two-turn coding sessions and three Guardian allow/deny pairs passed on each listed platform, with ordinary settings preserved. Windows native evaluation sessions were removed. Narrow bounded task qualification."
     },
     {
       "target": "codex",
@@ -69,7 +71,7 @@
       "guardian": "zai-org/GLM-5.3-Flash",
       "status": "experimental",
       "evidence": "docs/evaluation/evidence/cli-refresh-2026-10-02/mac-live/glm-flash.json",
-      "reason": "Coding repeat 2 failed artifact checks; main passed 1/3 planned sessions, Guardian passed 3/3 pairs. Windows live qualification blocked by missing saved login. See docs/evaluation/cli-refresh-2026-10-02.md."
+      "reason": "macOS coding repeat 2 failed artifact checks (1/3 planned sessions passed). Windows first coding turn reached its fixed deadline (0/3 planned sessions passed; usage incomplete). Guardian passed 3/3 pairs on each platform. See docs/evaluation/cli-windows-2026-10-05.md."
     },
     {
       "target": "codex",
@@ -78,7 +80,7 @@
       "guardian": "zai-org/GLM-5.3-Flash",
       "status": "experimental",
       "evidence": "docs/evaluation/evidence/cli-refresh-2026-10-02/mac-live/nemotron.json",
-      "reason": "Main repeat 1 hit the fixed 256 KiB SSE event limit; main passed 0/3 planned sessions, Guardian passed 3/3 pairs. Main usage is incomplete. Windows live qualification blocked by missing saved login. See docs/evaluation/cli-refresh-2026-10-02.md."
+      "reason": "The first main session hit the fixed 256 KiB SSE event limit on both macOS and Windows; main passed 0/3 planned sessions and has incomplete usage on each platform. Guardian passed 3/3 pairs on each. See docs/evaluation/cli-windows-2026-10-05.md."
     }
   ]
 }

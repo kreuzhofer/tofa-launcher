@@ -248,6 +248,7 @@ without another prompt.
 Supported and experimental models appear together, labelled for the exact target,
 route, Guardian and verified platform. On macOS ARM64, the adapted CLI pairs for
 DeepSeek V4.1 Flash, GLM 5.3 and Kimi K3 with GLM 5.3 Flash Guardian are Supported.
+Windows ARM64 supports the DeepSeek V4.1 Flash and Kimi K3 pairs with that Guardian.
 Other CLI combinations remain Experimental. Choosing an experimental CLI entry asks for
 confirmation: **Y** launches once, **N/Enter** returns to the list, and **Esc**
 cancels. `--allow-unverified` skips this extra confirmation. Explicit or scripted
@@ -403,9 +404,11 @@ approval policies and routing-override protections still apply.
 Support decisions use [recorded combination statuses](internal/tofa/assets/model-verification.json)
 for the exact target, route, main/Guardian roles and recorded platform scope. The
 [2026-10-02 CLI refresh](docs/evaluation/cli-refresh-2026-10-02.md) promotes DeepSeek
-V4.1 Flash, GLM 5.3 and Kimi K3 with GLM 5.3 Flash Guardian on macOS ARM64 only.
-Windows live attempts were blocked by missing saved login; synthetic tests do not
-qualify live models. GLM Flash and Nemotron remain Experimental as mains. Other
+V4.1 Flash, GLM 5.3 and Kimi K3 with GLM 5.3 Flash Guardian on macOS ARM64. The
+[2026-10-05 Windows continuation](docs/evaluation/cli-windows-2026-10-05.md) also
+qualifies DeepSeek and Kimi on Windows ARM64 after saved login was supplied.
+GLM 5.3 remains Experimental on Windows; GLM Flash and Nemotron remain
+Experimental as mains on both platforms. Other
 combinations require interactive experimental consent or explicit
 `--allow-unverified`. Changing a role, route or platform does not inherit support.
 Recorded client versions are measured baselines; newer versions are accepted until

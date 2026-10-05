@@ -1,0 +1,46 @@
+{
+  "go_race": {
+    "command": "GORACE=atexit_sleep_ms=0 go test -race ./...",
+    "result": "passed",
+    "package_seconds": 308.093,
+    "note": "Same instrumentation setting as the October 2 validation: removes only the race detector artificial exit sleep; race detection stays enabled and production deadlines are unchanged."
+  },
+  "go_vet": "passed",
+  "python": {
+    "discovered": 252,
+    "passed": 172,
+    "optional_or_platform_skipped": 80,
+    "result": "passed",
+    "seconds": 287.761,
+    "invocation": "All scripts/*_test.py modules; lifecycle DIST/VERSION and terminal BINARY supplied explicitly from a disposable final distribution."
+  },
+  "windows_native_policy": {
+    "result": "passed",
+    "evidence": "windows-policy-final.json",
+    "red_before_green": [
+      "DeepSeek qualified-pair admission failed before its platform record changed, then passed.",
+      "Kimi qualified-pair admission and default-Guardian status failed before its platform record changed, then passed."
+    ],
+    "scope": "Production pair admission, failed mains, platform boundaries, Guardian overrides, direct route and help."
+  },
+  "reviews": {
+    "standards_findings": 0,
+    "spec_findings": 0,
+    "resolved_spec_finding": "Clarified that the production launcher hash matches the prior production freeze, while the installed-client synthetic proof uses a distinct fixture executable sharing the launcher implementation."
+  },
+  "evidence_checks": {
+    "all_five_live_reports_match_frozen_provenance": true,
+    "all_five_began_after_freeze": true,
+    "all_five_normal_and_native_settings_preserved": true,
+    "harness_defects": 0,
+    "owned_sessions_removed": 36,
+    "privacy": "No credential, project identity, user home path or generated-text markers found. Windows report line endings normalized without changing JSON values.",
+    "historical_evidence_and_desktop_records_unchanged": true
+  },
+  "cleanup": {
+    "remaining_campaign_scheduled_tasks": 0,
+    "saved_login_preserved": true,
+    "windows_left_running": true
+  },
+  "release_published": false
+}

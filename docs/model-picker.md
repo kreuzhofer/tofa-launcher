@@ -46,6 +46,8 @@ See the [desktop comparison](evaluation/desktop-comparison-2026-09-29.md).
 Naming remains unsupported for both promoted desktop mains.
 The [CLI refresh](evaluation/cli-refresh-2026-10-02.md) separately promotes DeepSeek,
 GLM 5.3 and Kimi mains with GLM Flash Guardian on the adapted macOS ARM64 route.
+The [Windows continuation](evaluation/cli-windows-2026-10-05.md) also qualifies
+DeepSeek and Kimi with GLM Flash Guardian on the adapted Windows ARM64 route.
 Other CLI platforms and combinations remain Experimental. Platform-restricted
 records cannot supply a Supported badge outside their verified platforms.
 

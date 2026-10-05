@@ -16,7 +16,9 @@ The [support publication and full comparison](desktop-comparison-2026-09-29.md)
 promotes only DeepSeek and GLM desktop mains with GLM Flash Guardian, preserving
 all failures, unknown costs, naming limitations and measured-artifact provenance.
 The [2026-10-02 CLI refresh](cli-refresh-2026-10-02.md) records separately reviewed,
-macOS ARM64 support decisions for three pairs; other CLI combinations remain experimental. The later
+macOS ARM64 support decisions for three pairs. The
+[Windows continuation](cli-windows-2026-10-05.md) qualifies DeepSeek and Kimi pairs
+on Windows ARM64 after login was supplied; other combinations remain experimental. The later
 [GLM Flash and Kimi diagnostic reruns](desktop-retest-2026-09-29.md) separate
 main-output failures from inference deadlines and retain all new observations.
 

@@ -1,0 +1,29 @@
+{
+  "checked_utc": "2026-10-05T08:24:20.787762+00:00",
+  "catalog_exit_code": 0,
+  "availability": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": true,
+    "zai-org/GLM-5.3": true,
+    "zai-org/GLM-5.3-Flash": true,
+    "moonshotai/Kimi-K3": true,
+    "nvidia/Nemotron-3-Ultra-550b-a55b": true
+  },
+  "os": "Windows 11",
+  "os_version": "10.0.26200",
+  "architecture": "arm64",
+  "codex_version": "codex-cli 0.160.0",
+  "codex_sha256": "1f090167e94ed25969c47381868c6ffb78be2a195e13891fcdc969531ca16eaf",
+  "launcher_version": "tofa issue75-374d137",
+  "launcher_sha256": "37bd69dd681310593b380ba30fdcf7922c4d4d593b3acf954a5f81ed77e7c1ba",
+  "harness_files_sha256": {
+    "model_evaluation.py": "a8afeb64aaddbf220b7a2dc5fb825c2bdbe1a4150ff4848e32627e1f3f2cb458",
+    "evaluation_proxy.py": "a25cb144fe61213d59e99615f078b22803e5def27ba19f883d1b40ee33542c46",
+    "evaluation_report.py": "064be8abe31c4b5e92ca6103d9abf24c06c9cace069dc08a206028b88202eb3a",
+    "evaluation_candidates.py": "2d86c2a2d374999fa2b49d2effa32f05e179ae7026718eff360a204588ffc932",
+    "live_compat.py": "66e03046115af949ea7c974f88a62b1d7b3e15013b22341a6fe44e9d5ceeca7c",
+    "windows_process.py": "2cfd5d132feecdb23beefc2ca6285ddc0673cff70432d7d7159272edc8d5b8dd",
+    "windows_process.cs": "2d82a8a187bb1461c12ef4ec7aea23f143eda67581ea7c625ce592677980de2c",
+    "windows_sandbox_state.py": "f884499f49162a84ad0d6d95f4637556fc438577978f5e5c8c5476c3988b4e8c"
+  },
+  "candidate_snapshot_sha256": "fe49400bdbd5380b74782b7afdc208997a779e97def60a262bef2251b1c8c3ae"
+}
