@@ -1,0 +1,7 @@
+{
+  "run": "tofa-template-1948a016fc5e4aedba8cc0fa6a55bea2",
+  "refresh_error": true,
+  "helper_unknown_error": true,
+  "acl_error": false,
+  "rpc_error": true
+}

@@ -85,6 +85,7 @@ class Transport:
         for suffix, content in files.items():
             self.call('file', 'push', self.template, root + suffix, data=content)
         source = (here / 'windows_template_stage.ps1').read_text().replace('__ROOT__', root)
+        source = source.replace('__WINDOW_STYLE__', 'Normal' if request['initialize_sandbox'] else 'Hidden')
         guest = (here / 'windows_template_user.ps1').read_text().replace('__ROOT__', root)
         source = source.replace('__USER_COMMAND__', base64.b64encode(guest.encode('utf-16-le')).decode())
         self.powershell(source)

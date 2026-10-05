@@ -21,7 +21,7 @@ try {
     if($LASTEXITCODE -ne 0){throw 'fixture ACL failed'}
   }
   if(Get-ScheduledTask -TaskName $run -ErrorAction SilentlyContinue){throw 'existing task'}
-  $action=New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-NoProfile -NonInteractive -WindowStyle Hidden -EncodedCommand __USER_COMMAND__'
+  $action=New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-NoProfile -NonInteractive -WindowStyle __WINDOW_STYLE__ -EncodedCommand __USER_COMMAND__'
   $principal=New-ScheduledTaskPrincipal -UserId $request.sid -LogonType Interactive -RunLevel Limited
   $settings=New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Seconds 120)
   Register-ScheduledTask -TaskName $run -Action $action -Principal $principal -Settings $settings|Out-Null

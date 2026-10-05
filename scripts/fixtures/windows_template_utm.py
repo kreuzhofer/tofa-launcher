@@ -2,6 +2,7 @@
 import json
 import base64
 import os
+import re
 from pathlib import Path
 import sys
 
@@ -44,6 +45,7 @@ elif args[:1] == ['exec'] and args[1].lower() == state['vms'][0]['uuid']:
         state['preflight'] = report
         path.write_text(json.dumps(state))
     elif '# tofa-template-stage' in script:
+        state['probe_window_style'] = re.search(r'-WindowStyle (\w+)', script).group(1)
         state['effects'].append({'vm': args[1], 'effect': 'limited_user_probe'})
         if request.get('register_package'):
             state['effects'].append({'vm': args[1], 'effect': 'registered_test_user_client'})

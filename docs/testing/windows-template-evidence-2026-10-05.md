@@ -1,6 +1,6 @@
 # Windows template implementation evidence — 2026-10-05
 
-This records implementation checks for #79, not completed native qualification.
+This records implementation checks and completed native qualification for #79.
 The maintainer explicitly designated the existing `tofa77 Windows ARM64 bridge
 prototype` VM, UUID `EF96CF12-D901-455F-81FF-4C5001E15F80`, as the test template,
 created the `tofa-test` account, and signed in. The account belongs to
@@ -32,7 +32,7 @@ command did not complete. The engine was terminated after its shutdown deadline,
 and the CLI correctly returned failure. An additional local diagnostic showed
 that native execution was waiting on a missing/incompatible sandbox setup marker.
 
-## Bootstrap still required
+## Initial bootstrap failure
 
 The public preparation CLI sent the documented `windowsSandbox/setupStart`
 request with `mode: elevated`. The engine accepted it, but no completion
@@ -43,20 +43,54 @@ prompt when inspected after the attempt. Native helper executables were present.
 The cause of the stalled setup is not established. It is not evidence that the
 newer engine version is incompatible.
 
-The maintainer was asked to complete the app's normal native sandbox bootstrap,
-using explicitly chosen sign-in only if the app requires it to reach setup, and
-then quit Codex. No response completing that step has been recorded yet.
-Desktop trust, Guardian behavior, and live authentication remain unverified.
+The initial request to complete app-driven setup was superseded by the diagnosis
+and native checks below. Desktop trust, Guardian behavior, and live authentication
+remain unverified; they are outside this native slice.
 
-To finish #79's native acceptance after bootstrap, run the public CLI first with
-`--workspace-fixture acl-unmanageable` and verify the native ACL failure despite
-ordinary write access. Then run the default user-owned fixture and require both
-native workspace write/read and genuine outside-write denial. Preserve both
-reports. Neither native acceptance case has passed in this fresh account yet.
+## Consent and completed native acceptance
+
+A diagnostic copy changed only the scheduled task's window style from Hidden to
+Normal. The VM then displayed Windows consent for `codex-windows-sandbox-setup.exe`,
+verified publisher OpenAI OpCo, LLC. The maintainer approved it without completing
+desktop sign-in. This observation supports making explicit initialization visible;
+it does not establish that every previous hidden launch suppressed consent.
+The [visible setup attempt](evidence/windows-template-2026-10-05/attempt-12-visible-setup.json)
+reached its 60-second deadline around approval, so its failure is preserved.
+Subsequent probes establish that native setup completed afterward.
+
+The public CLI's [negative fixture](evidence/windows-template-2026-10-05/attempt-13-negative.json)
+ran as the Limited test user. Ordinary writes succeeded, while owner and WRITE_DAC
+checks were false and the actual sandboxed workspace command failed. The engine
+returned a setup-refresh error without the word `ACL`, so the CLI conservatively
+reported `native_workspace_execution_failed`. A
+[diagnostic repeat](evidence/windows-template-2026-10-05/attempt-15-negative-diagnostic.json)
+confirmed the same failure. Its
+[allowlisted signals](evidence/windows-template-2026-10-05/negative-diagnostic-signals.json)
+record `helper_unknown_error` and `setup refresh had errors`; the
+[correlated sandbox-log check](evidence/windows-template-2026-10-05/negative-acl-log-signal.json)
+confirms `write ACE grant failed` for that run's `acl-fixture` with
+`open ACL target for update`. No unrelated log lines or raw engine output were
+exported. No ownership or permission repair was applied to the fixture.
+
+The public CLI's [user-owned fixture](evidence/windows-template-2026-10-05/attempt-14-positive.json)
+returned `native_ready` with the same installed package and engine. Native
+workspace write/read succeeded; the outside write returned exit code 1 and
+`GetContentWriterUnauthorizedAccessError`, and the outside marker was absent.
+Full access stayed disabled. Both runs removed their markers, exited their owned
+engine, and unregistered their completed task. These results satisfy the actual
+ARM64 native ownership and permission-boundary acceptance cases.
+A [final `template prepare` run](evidence/windows-template-2026-10-05/attempt-16-final-prepare.json)
+with the follow-up code also returned `native_ready` without further consent.
+
+The final runner makes only explicit initialization tasks visible, announces the
+60-second consent window before launching, and directs late approval to a fresh
+status check. A public CLI regression first failed on the hidden task and then
+passed with this change. The [follow-up validation record](evidence/windows-template-2026-10-05/followup-validation.json)
+records the final checks; the original validation record remains historical.
 
 ## Preserved attempts and implementation corrections
 
-All eleven public CLI attempts are retained in
+The original eleven public CLI attempts and follow-up native evidence are retained in
 [`evidence/windows-template-2026-10-05`](evidence/windows-template-2026-10-05).
 Earlier reports reflect earlier implementation revisions and are not silently
 rewritten after fixes. They include initial malformed/missing transport results,
@@ -92,6 +126,6 @@ The tests refused to interfere with it. No Go product code was changed for #79,
 and the host desktop was not stopped to make those tests pass.
 
 The existing ownership investigation and original diagnostic evidence were used
-as implementation inputs and left unchanged. This new implementation has not
-reclassified their prior native success as a success for the fresh `tofa-test`
-account, and does not claim the parent's fresh-clone or desktop/Guardian gates.
+as implementation inputs and left unchanged. The new successful measurements
+belong to the fresh `tofa-test` account. They do not claim the parent's fresh-clone
+or desktop/Guardian gates.

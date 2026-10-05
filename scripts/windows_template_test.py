@@ -177,6 +177,9 @@ class TemplateTests(unittest.TestCase):
         result, report, state = self.invoke('--initialize-sandbox')
         self.assertEqual(result.returncode, 0, report)
         self.assertIn({'vm': TEMPLATE, 'effect': 'native_sandbox_setup_requested'}, state['effects'])
+        self.assertEqual(state['probe_window_style'], 'Normal')
+        self.assertIn('Watch the designated VM', result.stdout)
+        self.assertIn('60 seconds', result.stdout)
 
     def test_malformed_prerequisites_produce_a_durable_failure_before_staging(self):
         for mode in ('bad_sid', 'missing_python', 'unsafe_python', 'bad_reason'):

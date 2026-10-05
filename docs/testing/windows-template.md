@@ -60,18 +60,23 @@ administrator account can therefore pass; an elevated process cannot.
    notification before measurement. It never switches to the unelevated sandbox
    or Full access. Vendor-managed sandbox setup state is retained for subsequent
    checks. Setup consent is a template-bootstrap step, not an unattended-run step.
+   Keep the designated VM visible: this initialization task opens visibly and
+   waits up to 60 seconds for setup, including your response to Windows consent.
+   If you approve near the deadline and preparation reports a timeout, run
+   `template status` with a fresh report path to check whether setup completed.
 
 `--test-auth none` is the explicit authentication choice for this slice. It makes
 no model turns and does not import, inspect, or copy account credentials. Live
 model authentication, desktop trust, and Guardian provisioning remain
 unverified and belong to the later desktop slice. A native pass does not imply
-readiness for those suites. If the app requires an operator-selected account to
-reach its native bootstrap UI, sign in yourself in the dedicated test account;
-the runner neither provisions that authentication nor claims it is absent.
+readiness for those suites. The native setup request and permission checks were
+validated without completing desktop sign-in. The runner neither provisions
+authentication nor claims that existing authentication is absent.
 
 ## Unattended readiness checks
 
-Once bootstrapped and signed in, use a new report path for each check:
+Once bootstrapped and signed into the Windows test account, use a new report path
+for each check:
 
 ```sh
 python3 scripts/windows_test_runner.py template status \

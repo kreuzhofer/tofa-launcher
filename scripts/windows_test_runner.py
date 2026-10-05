@@ -17,7 +17,7 @@ BOOTSTRAP = {
     'native_client_missing_or_ambiguous': 'Install the native ARM64 Codex desktop for the designated test user. Rerun template prepare to verify its package and bundled engine.',
     'python_runtime_missing_or_ambiguous': 'Install one native ARM64 Python 3.11+ runtime with its machine PythonCore registration. Rerun template prepare to verify execution.',
     'native_sandbox_consent_required': 'Rerun template prepare with --initialize-sandbox and approve Windows consent in the designated test account. Setup completion, workspace write/read, and outside-write denial must all pass.',
-    'native_setup_incomplete': 'The native setup API did not complete. Complete the installed app\'s native sandbox bootstrap in the designated test account, then quit the app and rerun template status. A timeout alone does not prove that a consent prompt appeared.',
+    'native_setup_incomplete': 'The native setup API did not complete within 60 seconds. If you approved Windows consent near the deadline, rerun template status to measure readiness. Otherwise rerun template prepare with --initialize-sandbox while watching the designated VM for the OpenAI sandbox setup prompt. A timeout alone does not prove that a consent prompt appeared.',
     'native_client_first_launch_required': 'Open Codex once as the designated test user to initialize its native engine and sandbox. Complete required OS/native consent, then fully quit Codex and rerun template prepare. No login or model credentials are required by this probe.',
 }
 
@@ -214,6 +214,9 @@ def main():
         if options.workspace_fixture == 'acl-unmanageable':
             report['changes'].append('One disposable administrator-owned directory with user Modify but no ACL-management access')
         print('Measuring native sandbox write/read and outside-workspace denial...', flush=True)
+        if options.initialize_sandbox:
+            print('Watch the designated VM: approve the OpenAI Windows sandbox setup prompt. '
+                  'Setup waits up to 60 seconds; this step needs no Codex sign-in.', flush=True)
         task, native = transport.measure(request)
         report['native'] = sanitized_native(native)
         setup_status = native.get('setup_status', 'not_requested')

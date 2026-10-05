@@ -1,0 +1,30 @@
+{
+  "scope": "Follow-up after commit 92c312e; original full-suite results remain in validation.json",
+  "cli_tests": {
+    "command": "python3 scripts/windows_template_test.py -v",
+    "tests": 25,
+    "outcome": "passed"
+  },
+  "python_typecheck": "mypy --check-untyped-defs --platform win32: passed",
+  "native_readiness": {
+    "outcome": "verified",
+    "report": "attempt-16-final-prepare.json"
+  },
+  "native_ownership_regression": {
+    "outcome": "verified",
+    "negative_report": "attempt-13-negative.json",
+    "positive_report": "attempt-14-positive.json",
+    "correlated_acl_failure": "negative-acl-log-signal.json"
+  },
+  "native_setup": {
+    "consent": "operator approved the visible OpenAI sandbox setup UAC prompt",
+    "setup_attempt": "attempt-12-visible-setup.json",
+    "setup_attempt_outcome": "timed out around operator approval; subsequent native checks passed",
+    "desktop_sign_in": "not completed"
+  },
+  "go_race_suite": "Not rerun for this follow-up; original full run failed because existing macOS desktop tests refuse the active host Codex app",
+  "review": {
+    "standards": "no follow-up code findings",
+    "spec": "no follow-up code or native evidence findings"
+  }
+}
