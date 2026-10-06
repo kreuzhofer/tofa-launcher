@@ -1,0 +1,9 @@
+{
+  "operation": "operator_reconciled_early_development_attempt",
+  "run": "tofa-run-a9545eac135541d6836a91cd09ed7966",
+  "clone": {
+    "uuid": "5CCBAC7E-27A8-4725-8F9C-5252815B45AD",
+    "name": "tofa-run-a9545eac135541d6836a91cd09ed7966"
+  },
+  "basis": "Observed before/after UTM inventories: this UUID was the sole new VM, with the exact random run name. Original failed report preserved."
+}

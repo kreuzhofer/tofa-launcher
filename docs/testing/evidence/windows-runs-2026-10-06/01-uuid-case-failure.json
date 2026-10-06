@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "run": "tofa-run-254894cdb5914db587b1c70d416ef49d",
+  "outcome": "failed",
+  "stages": [
+    {
+      "stage": "template_validation",
+      "outcome": "passed"
+    },
+    {
+      "stage": "candidate_validation",
+      "outcome": "passed"
+    },
+    {
+      "stage": "clone_creation",
+      "outcome": "failed",
+      "reason": "vm_transport_failed"
+    }
+  ],
+  "suite": "native-smoke",
+  "retained": false,
+  "cleanup": {
+    "outcome": "not_needed"
+  },
+  "capabilities": {
+    "native_sandbox": "unverified",
+    "desktop_guardian": "unverified"
+  },
+  "template": {
+    "uuid": "ef96cf12-d901-455f-81ff-4c5001e15f80",
+    "state": "stopped"
+  },
+  "requested_candidate": {
+    "version": "v0.1.0-rc.14",
+    "sha256": "1b0a2e7aa7aafc515391e221a16bee5124cf5b09aedf89af779796fae15bdd77",
+    "commit": "14134d43df4cca00bcdf10e49b3dc5ef3122f8d7"
+  },
+  "reason": "vm_transport_failed",
+  "transport_progress_observed": false
+}

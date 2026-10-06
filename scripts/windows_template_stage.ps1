@@ -6,6 +6,17 @@ $request=Get-Content -Raw -LiteralPath ($root+'\request.json')|ConvertFrom-Json
 $run=$request.run
 $result=@{run=$run;phase='completion';ok=$false;completed=$false;unregistered=$false;reason='guest_staging_failed'}
 try {
+  if($request.candidate) {
+    # Protected staging only; execution and integrity measurement remain Limited.
+    $inputFile=[IO.File]::OpenRead($root+'\candidate.exe.gz')
+    try {
+      $gzip=New-Object IO.Compression.GZipStream($inputFile,[IO.Compression.CompressionMode]::Decompress)
+      try {
+        $candidateFile=[IO.File]::Open($root+'\candidate.exe',[IO.FileMode]::CreateNew)
+        try {$gzip.CopyTo($candidateFile)} finally {$candidateFile.Dispose()}
+      } finally {$gzip.Dispose()}
+    } finally {$inputFile.Dispose()}
+  }
   # The root and files were created protected before any upload. Add read-only
   # access for this user; same-volume moves from Public must never be used here.
   & icacls.exe $root /grant:r ('*'+$request.sid+':(OI)(CI)RX')|Out-Null

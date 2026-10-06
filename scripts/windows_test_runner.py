@@ -113,6 +113,9 @@ def sanitized_native(native):
 
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] in ('run', 'status', 'cleanup'):
+        from windows_clone_runner import main as clone_main
+        return clone_main()
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest='command', required=True)
     template = commands.add_parser('template').add_subparsers(dest='operation', required=True)

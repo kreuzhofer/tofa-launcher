@@ -1,0 +1,7 @@
+{
+  "template_stopped": true,
+  "everyday_vm_still_started": true,
+  "successful_clone_absent": true,
+  "early_clone_explicitly_deleted": true,
+  "failed_clone_retained_stopped": true
+}

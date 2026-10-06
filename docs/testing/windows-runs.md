@@ -1,0 +1,100 @@
+# Disposable Windows native smoke runs
+
+The Mac-side `scripts/windows_test_runner.py` CLI implements #80's native slice
+of #78. Its `run`, `status`, and `cleanup` commands share a private local state
+directory. Use the same directory for all runs on this host. Template bootstrap
+is documented in [windows-template.md](windows-template.md).
+
+## Run a selected candidate
+
+Prepare a dedicated Windows 11 ARM64 template with a working native sandbox,
+then shut it down. The intended test user's Interactive/Limited session must
+become available after boot without per-run interaction. Account sign-in setup
+is an explicit one-time operator prerequisite: the runner never sets passwords,
+discovers credentials, or changes login or execution policy. The source must
+be stopped. The runner never stops or provisions its source.
+
+Select an ARM64 launcher executable and its expected version, SHA-256, and
+source commit, for example from the existing qualification download's
+`SHA256SUMS`, `release.json`, and `commit.json`. This suite stages the executable
+in protected clone-local storage; installer, login, and uninstall qualification
+remain separate. The commit is supplied provenance, not independently extracted
+from the executable. The hash, PE architecture, and `tofa --version` output are
+measured again as the limited guest user.
+
+```sh
+python3 scripts/windows_test_runner.py run \
+  --state-dir .qualification/windows-clone-runs \
+  --template YOUR-DEDICATED-TEMPLATE-UUID --dedicated-template \
+  --test-user tofa-test --suite native-smoke \
+  --candidate /path/to/tofa_v0.1.0-rc.14_windows_arm64.exe \
+  --version v0.1.0-rc.14 --sha256 EXPECTED_SHA256 \
+  --candidate-commit EXPECTED_SOURCE_COMMIT
+```
+
+Native smoke needs no model credentials. It rediscovers the installed Codex
+package and engine, checks existing compatibility minimums and the package-to-engine
+hash relationship, creates a user-owned workspace, and requires sandbox write/read
+success and an actual permission denial with no outside marker. New compatible
+client versions remain accepted. This is not desktop or Guardian qualification.
+
+Every run gets a unique directory and clone name. Identity is verified against
+before/after inventories, never inferred from a name alone. UTM's current
+[`clone` implementation](https://github.com/utmapp/UTM/blob/main/utmctl/UTMCtl.swift)
+prints no UUID; that case requires exactly one new inventory UUID with the requested
+run name. A nonempty clone response must itself be a fresh matching UUID. Ownership
+is saved atomically and fsynced before boot. UTM's case-sensitive UUID spelling is
+preserved.
+
+The work deadline defaults to 600 seconds (`--timeout`, 1–1800), with transport
+calls capped at 150 seconds and a separate failure-shutdown budget capped at 60
+seconds. Native tasks have a 120-second limit. Missing guest files and the known
+guest-agent-not-running response are bounded wait conditions. Progress-only
+PowerShell CLIXML is explicitly classified and recorded; arbitrary errors fail.
+Fresh run envelopes, terminal task state, exit status, native assertions, and
+candidate identity must agree. Host exit zero alone cannot establish completion.
+
+## Reports, status, and cleanup
+
+```sh
+python3 scripts/windows_test_runner.py status \
+  --state-dir .qualification/windows-clone-runs
+
+python3 scripts/windows_test_runner.py cleanup \
+  --state-dir .qualification/windows-clone-runs --run tofa-run-EXACT_RUN_ID
+```
+
+`report.json` records stages, run/template/clone identity, requested and measured
+candidate identity, installed client/engine/OS/architecture, assertions, completion,
+diagnostic paths, progress classification, retention, and cleanup. Only validated
+protocol fields leave the guest; raw output, credentials, and unrelated files are
+not collected. Reports stay local; nothing is uploaded.
+
+Native results are saved before cleanup. Normal shutdown is requested explicitly,
+and only the verified stopped owned clone is deleted. Exit zero requires verified
+deletion and a saved final report. Cleanup failure is non-passing. Ordinary failures
+and interruptions attempt normal shutdown and retain the clone and diagnostics.
+No vendor sandbox service or unrelated VM is an owned resource.
+
+Explicit cleanup accepts an owned run ID, not a VM name, UUID, or path. It checks
+private state ownership, refuses symlinked state and mismatched identity, and
+preserves the original report. Each cleanup attempt gets a separate report;
+`lifecycle.json` records current disposal state. Two retained failed clones block
+another run and print a shell-quoted cleanup command.
+
+An exclusive `active.json` serializes run and cleanup operations; status stays
+available. A crash or unresolved clone identity leaves a conservative refusal.
+Do not simply remove the lock to retry: establish that its process ended, inspect
+the durable clone intent and exact inventory, and reconcile ownership first.
+Automated crash recovery is a later ticket. Ambiguous clones are never adopted
+or deleted automatically.
+
+## Checks
+
+`python3 scripts/windows_run_test.py -v` tests the public CLI against controlled
+external VM/guest fixtures, including lifecycle effects, misleading completion,
+privacy, retention, interruption, serialization, and unsafe cleanup. Run
+`python3 scripts/windows_template_test.py -v` for native protocol regressions.
+Fixture passes do not replace real fresh-clone ARM64 acceptance.
+
+See [the real ARM64 acceptance and preserved attempts](windows-runs-evidence-2026-10-06.md).

@@ -173,6 +173,17 @@ def main():
         report['checks']['harness_read_only'] = not any(can_access(path, access)
             for path in (root / 'request.json', root / 'probe.py') for access in (0x2, 0x40000))
         if not report['checks']['harness_read_only']: raise ValueError('unsafe_staging_permissions')
+        if request.get('candidate'):
+            from windows_candidate import verify_candidate
+            candidate = root / 'candidate.exe'
+            if any(can_access(path, access) for path in (candidate, root / 'windows_candidate.py')
+                   for access in (0x2, 0x40000)):
+                raise ValueError('unsafe_staging_permissions')
+            verify_candidate(candidate, request['candidate'])
+            measured = subprocess.run([str(candidate), '--version'], capture_output=True, text=True, timeout=10)
+            if measured.returncode or measured.stderr or measured.stdout.strip() != 'tofa ' + request['candidate']['version']:
+                raise ValueError('candidate_version_mismatch')
+            report['candidate'] = dict(request['candidate'], architecture='ARM64', version_verified=True)
         fixture = request['workspace_fixture'] == 'acl-unmanageable'
         base = Path.home() / request['run']
         safe_directory(base)
@@ -236,7 +247,8 @@ def main():
                    'unexpected_approval_callback', 'engine_timeout', 'engine_version_invalid', 'engine_identity_mismatch',
                    'unsupported_python_runtime', 'limited_user_required', 'sandbox_configuration_failed',
                    'native_workspace_acl_failed', 'native_sandbox_consent_required', 'native_workspace_execution_failed',
-                   'unsafe_staging_permissions', 'native_setup_incomplete'}
+                   'unsafe_staging_permissions', 'native_setup_incomplete', 'invalid_candidate',
+                   'candidate_checksum_mismatch', 'candidate_not_arm64', 'candidate_version_mismatch'}
         report['reason'] = str(error) if str(error) in allowed else 'native_probe_failed'
     except Exception:
         report['reason'] = 'native_probe_failed'

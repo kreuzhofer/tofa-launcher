@@ -3,8 +3,9 @@
 `scripts/windows_test_runner.py` is the Mac-side operator CLI for the first
 slice of [#78](https://github.com/kreuzhofer/tofa-launcher/issues/78), implemented
 for [#79](https://github.com/kreuzhofer/tofa-launcher/issues/79). It prepares and
-measures a designated Windows 11 ARM64 UTM template. It does not yet implement
-fresh-clone runs, desktop/Guardian suites, clone retention, or clone cleanup.
+measures a designated Windows 11 ARM64 UTM template. Fresh-clone native smoke,
+retention, status, and cleanup are documented in [windows-runs.md](windows-runs.md).
+Desktop/Guardian suites remain separate work.
 
 ## Select the template explicitly
 
@@ -146,9 +147,9 @@ markers are removed and the owned engine is allowed to exit normally. A timeout
 or forced engine exit cannot pass. Failed/incomplete tasks and synthetic guest
 artifacts may remain for diagnosis. No VM cleanup is attempted. Host reports
 identify the unique `C:\Users\Public\tofa-template-<run>` staging directory and
-the test user's `tofa-template-<run>` workspace. Full runner serialization and
-crash recovery are later slices of #78; do not run template preparation
-concurrently.
+the test user's `tofa-template-<run>` workspace. Do not run template preparation
+concurrently with clone runs. Clone runs use an exclusive lock and conservative
+crash refusal; automated recovery remains a later slice of #78.
 
 ## Implementation evidence and checks
 

@@ -1,0 +1,46 @@
+{
+  "public_cli_tests": {
+    "command": "python3 scripts/windows_run_test.py -v",
+    "outcome": "passed",
+    "tests": 19
+  },
+  "template_regressions": {
+    "command": "python3 scripts/windows_template_test.py -v",
+    "outcome": "passed",
+    "tests": 25
+  },
+  "full_python_suite": {
+    "command": "env PATH=\"/private/tmp/tofa75-oct05/go/bin:$PATH\" python3 /private/tmp/tofa75-oct05/check-python.py dist v0.0.0-prototype",
+    "tests": 295,
+    "skipped": 80,
+    "outcome": "passed",
+    "note": "All scripts/*_test.py loaded; native/opt-in suites retain their declared skips. Subsequent compression changes covered by final targeted runs."
+  },
+  "python_typechecking": {
+    "host": "mypy --check-untyped-defs --platform darwin: passed",
+    "guest": "mypy --check-untyped-defs --platform win32: passed"
+  },
+  "go_vet": {
+    "command": "go vet ./...",
+    "outcome": "passed",
+    "version": "go1.27.1 darwin/arm64"
+  },
+  "go_race_suite": {
+    "command": "go test -race ./...",
+    "outcome": "failed",
+    "scripts_package": "passed",
+    "reason": "Existing macOS desktop tests refuse the active host Codex app; additional fixture-model metadata and downstream startup failures. No Go files changed; host app preserved."
+  },
+  "review": {
+    "standards": "no remaining findings after inventory validation and shared disposal fix",
+    "spec": "no implementation or native evidence findings; real fresh ARM64 native-smoke acceptance satisfied"
+  },
+  "native_acceptance": {
+    "outcome": "passed",
+    "report": "04-native-pass.json",
+    "suite": "native-smoke",
+    "manual_intervention_during_successful_run": false,
+    "successful_clone_deleted": true,
+    "failed_clone_retained": true
+  }
+}

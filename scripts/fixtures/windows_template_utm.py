@@ -1,5 +1,7 @@
 """External VM fixture; forbidden lifecycle operations fail visibly."""
 import json
+import gzip
+import hashlib
 import base64
 import os
 import re
@@ -10,11 +12,12 @@ path = Path(os.environ['TEMPLATE_FIXTURE_STATE'])
 state = json.loads(path.read_text())
 args = sys.argv[1:]
 request = state.get('request')
+guest_uuid = state.get('guest_uuid', state['vms'][0]['uuid']).lower()
 if args == ['list']:
     print('UUID                                 Status   Name')
     for vm in state['vms']:
         print(vm['uuid'], 'PRIVATE_KEY' if state['mode'] == 'inventory_secret' else vm['status'], vm['name'])
-elif args[:1] == ['exec'] and args[1].lower() == state['vms'][0]['uuid']:
+elif args[:1] == ['exec'] and args[1].lower() == guest_uuid:
     script = base64.b64decode(args[-1]).decode('utf-16-le')
     if '# tofa-template-protected-root' in script:
         state['protected_root'] = script.split("$root='C:\\Users\\Public\\", 1)[1].split("'", 1)[0]
@@ -26,6 +29,9 @@ elif args[:1] == ['exec'] and args[1].lower() == state['vms'][0]['uuid']:
                   'user': {'sid': 'S-1-5-21-123-456-789-1001', 'session': 2},
                   'python': r'C:\Python313ARM\python.exe'}
         if state['mode'] == 'no_session':
+            report.update(ok=False, reason='test_user_sign_in_required', outcome='bootstrap_required')
+        if state['mode'] == 'boot_session_delay' and not state.get('session_waited'):
+            state['session_waited'] = True
             report.update(ok=False, reason='test_user_sign_in_required', outcome='bootstrap_required')
         if state['mode'] == 'register_client':
             if request.get('operation') == 'prepare':
@@ -54,15 +60,18 @@ elif args[:1] == ['exec'] and args[1].lower() == state['vms'][0]['uuid']:
         path.write_text(json.dumps(state))
     else:
         sys.exit('unexpected guest mutation')
-elif args[:2] == ['file', 'push'] and args[2].lower() == state['vms'][0]['uuid']:
+elif args[:2] == ['file', 'push'] and args[2].lower() == guest_uuid:
     if state['mode'] == 'protected_staging' and not state.get('protected_root'):
         sys.exit('cannot stage executable harness in an unprotected location')
     content = sys.stdin.buffer.read()
     if args[3].endswith('\\request.json'):
         state['request'] = json.loads(content)
+    if args[3].endswith('\\candidate.exe.gz'):
+        state['candidate_transfer_sha256'] = hashlib.sha256(gzip.decompress(content)).hexdigest()
+        state['candidate_transfer_size'] = len(content)
     state['effects'].append({'vm': args[2], 'effect': 'staged_owned_file'})
     path.write_text(json.dumps(state))
-elif args[:2] == ['file', 'pull'] and args[2].lower() == state['vms'][0]['uuid']:
+elif args[:2] == ['file', 'pull'] and args[2].lower() == guest_uuid:
     if args[3].endswith('staging.json'):
         print(json.dumps({'run':state['protected_root'], 'phase':'staging', 'ok':True}))
     elif args[3].endswith('\\preflight.json'):
@@ -81,6 +90,8 @@ elif args[:2] == ['file', 'pull'] and args[2].lower() == state['vms'][0]['uuid']
         task = {'run': request['run'], 'phase': 'completion', 'ok': True,
                 'completed': True, 'unregistered': True, 'last_result': 0, 'state': 'Ready'}
         if state['mode'] == 'task_failed': task.update(ok=False, last_result=1)
+        if state['mode'] == 'running_task': task.update(state='Running')
+        if state['mode'] == 'host_zero_no_result': sys.exit(0)
         if state['mode'] == 'task_secret': task.update(state='PRIVATE_KEY', last_result='UNRELATED_CONTENT')
         if state['mode'] == 'stale': task['run'] = 'old-run'
         if state['mode'] == 'missing': sys.exit('PRIVATE_KEY missing completion')
@@ -120,6 +131,9 @@ elif args[:2] == ['file', 'pull'] and args[2].lower() == state['vms'][0]['uuid']
             report.update(ok=False, reason='native_workspace_acl_failed')
             report['checks'].update(workspace_owned_by_user=False, workspace_acl_manageable=False, workspace_write_read=False)
         report['identity'].update(state.get('identity', {}))
+        if request.get('candidate'):
+            report['candidate'] = dict(request['candidate'], architecture='ARM64', version_verified=True)
+            if state['mode'] == 'candidate_mismatch': report['candidate']['sha256'] = 'd' * 64
         print(json.dumps(report))
     else:
         sys.exit('unknown guest report')

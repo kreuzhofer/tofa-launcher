@@ -75,7 +75,9 @@ jobs:
         run: python3 scripts/qualify_macos_test.py -v
       - name: Windows template CLI with controlled UTM fixtures
         if: runner.os != 'Windows'
-        run: python3 scripts/windows_template_test.py -v
+        run: |
+          python3 scripts/windows_template_test.py -v
+          python3 scripts/windows_run_test.py -v
       - name: Parse PowerShell installers
         if: runner.os == 'Windows'
         shell: pwsh

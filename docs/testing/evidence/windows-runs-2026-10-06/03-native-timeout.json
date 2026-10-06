@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "run": "tofa-run-021aba73795846689600b844b99dbbd1",
+  "outcome": "failed",
+  "stages": [
+    {
+      "stage": "template_validation",
+      "outcome": "passed"
+    },
+    {
+      "stage": "candidate_validation",
+      "outcome": "passed"
+    },
+    {
+      "stage": "clone_creation",
+      "outcome": "passed"
+    },
+    {
+      "stage": "boot",
+      "outcome": "passed"
+    },
+    {
+      "stage": "guest_session",
+      "outcome": "passed"
+    },
+    {
+      "stage": "native_smoke",
+      "outcome": "failed",
+      "reason": "transport_timeout"
+    }
+  ],
+  "suite": "native-smoke",
+  "retained": true,
+  "cleanup": {
+    "outcome": "retained",
+    "shutdown": "stopped"
+  },
+  "capabilities": {
+    "native_sandbox": "unverified",
+    "desktop_guardian": "unverified"
+  },
+  "template": {
+    "uuid": "EF96CF12-D901-455F-81FF-4C5001E15F80",
+    "state": "stopped"
+  },
+  "requested_candidate": {
+    "version": "v0.1.0-rc.14",
+    "sha256": "1b0a2e7aa7aafc515391e221a16bee5124cf5b09aedf89af779796fae15bdd77",
+    "commit": "14134d43df4cca00bcdf10e49b3dc5ef3122f8d7"
+  },
+  "ownership_unresolved": false,
+  "clone_identity_source": "unique_inventory_delta",
+  "clone": {
+    "uuid": "DA6F9285-78EA-41E1-A284-C072A113471E",
+    "name": "tofa-run-021aba73795846689600b844b99dbbd1"
+  },
+  "os": {
+    "name": "Windows 11",
+    "architecture": "ARM64",
+    "version": "10.0.26200"
+  },
+  "diagnostics": {
+    "guest_staging": "C:\\Users\\Public\\tofa-run-021aba73795846689600b844b99dbbd1",
+    "guest_workspace": "%USERPROFILE%\\tofa-run-021aba73795846689600b844b99dbbd1"
+  },
+  "reason": "transport_timeout",
+  "transport_progress_observed": false
+}

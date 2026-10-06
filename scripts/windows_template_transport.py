@@ -1,5 +1,6 @@
 """Bounded UTM transport; transport completion is not guest readiness."""
 import base64
+import gzip
 import json
 from pathlib import Path
 import subprocess
@@ -17,8 +18,12 @@ class Transport:
         self.template = template
         self.deadline = time.monotonic() + timeout
         self.progress_observed = False
+        self.prepared_roots = set()
+        self.last_task = None
+        self.operation = 'not_started'
 
     def call(self, *args, data=None):
+        self.operation = '_'.join(args[:2] if args[:1] == ('file',) else args[:1])
         remaining = self.deadline - time.monotonic()
         if remaining <= 0:
             raise Failure('transport_timeout')
@@ -38,6 +43,8 @@ class Transport:
                 pass
         if result.returncode or stderr or b'Error from event:' in result.stdout:
             diagnostic = result.stdout + stderr
+            if args[:1] == ('ip-address',) and b'guest agent is not running' in diagnostic.lower():
+                raise Failure('guest_agent_pending')
             if (args[:2] == ('file', 'pull') and b'OSStatus error -2700' in diagnostic
                     and b'failed to open file' in diagnostic
                     and any(message in diagnostic for message in (b'The system cannot find the file specified.',
@@ -57,9 +64,11 @@ class Transport:
     def preflight(self, request):
         here = Path(__file__).parent
         root = 'C:\\Users\\Public\\' + request['run']
-        self.powershell((here / 'windows_template_root.ps1').read_text().replace('__RUN__', request['run']))
-        staging = envelope(self.wait_file(root + '\\staging.json'), request['run'], 'staging')
-        if not staging['ok']: raise Failure('guest_staging_failed')
+        if root not in self.prepared_roots:
+            self.powershell((here / 'windows_template_root.ps1').read_text().replace('__RUN__', request['run']))
+            staging = envelope(self.wait_file(root + '\\staging.json'), request['run'], 'staging')
+            if not staging['ok']: raise Failure('guest_staging_failed')
+            self.prepared_roots.add(root)
         source = (here / 'windows_template_preflight.ps1').read_text()
         payload = base64.b64encode(json.dumps(request).encode()).decode('ascii')
         self.powershell(source.replace('__REQUEST__', payload))
@@ -77,11 +86,14 @@ class Transport:
                     raise Failure('guest_completion_timeout') from error
                 time.sleep(min(.5, max(0, self.deadline - time.monotonic())))
 
-    def measure(self, request):
+    def measure(self, request, candidate=None):
         root = 'C:\\Users\\Public\\' + request['run']
         here = Path(__file__).parent
         files = {'\\request.json': json.dumps(request).encode(),
                  '\\probe.py': (here / 'windows_template_probe.py').read_bytes()}
+        if candidate is not None:
+            files.update({'\\candidate.exe.gz': gzip.compress(candidate, mtime=0),
+                          '\\windows_candidate.py': (here / 'windows_candidate.py').read_bytes()})
         for suffix, content in files.items():
             self.call('file', 'push', self.template, root + suffix, data=content)
         source = (here / 'windows_template_stage.ps1').read_text().replace('__ROOT__', root)
@@ -90,6 +102,7 @@ class Transport:
         source = source.replace('__USER_COMMAND__', base64.b64encode(guest.encode('utf-16-le')).decode())
         self.powershell(source)
         task = envelope(self.wait_file(root + '\\task.json'), request['run'], 'completion')
+        self.last_task = task
         if task.get('completed') is not True:
             raise Failure('guest_task_incomplete')
         result = envelope(self.call('file', 'pull', self.template, root + '\\result.json'), request['run'], 'native')
