@@ -1,0 +1,30 @@
+{
+  "observations": 262,
+  "category_counts": [
+    {
+      "categories": [
+        "agent_not_running",
+        "agent_timeout",
+        "osstatus_2700"
+      ],
+      "count": 12
+    },
+    {
+      "categories": [
+        "missing_path",
+        "osstatus_2700",
+        "file_open_failed"
+      ],
+      "count": 76
+    },
+    {
+      "categories": [
+        "missing_file",
+        "osstatus_2700",
+        "file_open_failed"
+      ],
+      "count": 174
+    }
+  ],
+  "unexpected_errors": []
+}

@@ -208,6 +208,10 @@ elif args[:2] == ['file', 'pull'] and args[2].lower() == guest_uuid:
                     if state['mode'] == 'guardian_wrong_item': review['completed']['item'] = 2
                     if state['mode'] == 'guardian_deny_effect': review['marker_present'] = True
                     if state['mode'] == 'guardian_failed_command': review['command_status'] = 'failed'
+            if state['mode'] in ('desktop_control_details', 'desktop_control_invalid'):
+                desktop.update(ok=False, reason='desktop_control_unsupported',
+                    control_failure={'action': 'configure', 'stage': 'search', 'error': 'stale_element', 'raw': 'PRIVATE_KEY'})
+                if state['mode'] == 'desktop_control_invalid': desktop['control_failure']['stage'] = 'PRIVATE_KEY'
             if state['mode'] == 'desktop_mixed_completion': desktop['execution']['completed']['turn'] = 2
             if state['mode'] == 'desktop_diagnostics_failed': desktop['checks']['diagnostics_written'] = False
             if state['mode'] == 'desktop_permissions_unverified': desktop['checks']['desktop_permissions_configured'] = False

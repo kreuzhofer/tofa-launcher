@@ -16,6 +16,9 @@
   "spec_review": "no_remaining_implementation_findings",
   "native_diagnostic_allow": "passed",
   "native_diagnostic_deny": "passed",
-  "fresh_clone_acceptance": "pending",
-  "publication": "local_only"
+  "fresh_clone_acceptance": "passed",
+  "publication": "local_only",
+  "native_run": "tofa-run-3221a8b00ce74c97bfc8760ca4799139",
+  "native_report": "../windows-unattended-2026-10-06/attempt-2/report.json",
+  "implementation_commit": "7551622"
 }

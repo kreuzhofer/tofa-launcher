@@ -41,11 +41,14 @@ def observations(directory, *, final=False):
     return result
 
 
-def ui(root, app, action):
+def ui(root, app, action, report):
     request = dict(app, action=action)
     source = (root / 'windows_desktop_ui.ps1').read_text(encoding='utf-8')
     source = source.replace('__REQUEST__', base64.b64encode(json.dumps(request).encode()).decode())
-    return powershell(source, timeout=40 if action == 'configure' else 25).get('ok') is True
+    result = powershell(source, timeout=40 if action == 'configure' else 25)
+    if result.get('ok') is not True:
+        report.setdefault('control_failure', {'action': action, 'stage': result.get('stage'), 'error': result.get('error')})
+    return result.get('ok') is True
 
 
 def desktop_smoke(root, request, identity, workspace, report, checkpoint):
@@ -169,13 +172,13 @@ def desktop_smoke(root, request, identity, workspace, report, checkpoint):
         if not checks['desktop_started'] or not checks['bridge_initialized']: raise ValueError('desktop_startup_failed')
         if not all(checks[key] for key in ('workspace_trusted', 'automatic_review', 'full_access_disabled')):
             raise ValueError('desktop_policy_mismatch')
-        checks['desktop_permissions_configured'] = ui(root, app, 'configure')
+        checks['desktop_permissions_configured'] = ui(root, app, 'configure', report)
         if not checks['desktop_permissions_configured']: raise ValueError('desktop_control_unsupported')
         checkpoint('desktop_command')
         # The bridge gates the actual turn against the returned thread policy
         # and request overrides before forwarding it, including newly created
         # threads that the renderer creates only when Send is invoked.
-        if not ui(root, app, 'submit'): raise ValueError('desktop_control_unsupported')
+        if not ui(root, app, 'submit', report): raise ValueError('desktop_control_unsupported')
         deadline = time.monotonic() + 40
         while time.monotonic() < deadline:
             events = [item for item in observations(owned) if item.get('bridge_pid') == bridge_pid]
@@ -220,7 +223,7 @@ def desktop_smoke(root, request, identity, workspace, report, checkpoint):
             try: checkpoint('desktop_quit')
             except Exception: checks['diagnostics_written'] = False
             try:
-                if app is not None and process.poll() is None and ui(root, app, 'quit'):
+                if app is not None and process.poll() is None and ui(root, app, 'quit', report):
                     checks['normal_quit'] = process.wait(timeout=10) == 0
             except (ValueError, OSError, subprocess.SubprocessError):
                 pass

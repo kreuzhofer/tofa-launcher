@@ -1,0 +1,20 @@
+{
+  "full_python_baseline": {
+    "implementation_commit": "7551622",
+    "tests": 354,
+    "skipped": 80,
+    "outcome": "passed",
+    "evidence": "../windows-guardian-2026-10-06/validation.json"
+  },
+  "after_diagnostic_change": {
+    "desktop_tests": 28,
+    "elapsed_seconds": 109.111,
+    "outcome": "passed",
+    "mypy_modules": 2,
+    "native_injected_ui_failure": "passed",
+    "standards_review": "no_findings",
+    "spec_review": "no_findings"
+  },
+  "consecutive_fresh_acceptance": "pending",
+  "publication": "local_only"
+}

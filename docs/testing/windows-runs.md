@@ -82,7 +82,8 @@ and report. This smoke does not prove a live Guardian decision:
 
 For the bounded Guardian suite, use the same run command with
 `--suite desktop-guardian --test-auth native-session --timeout 1800`.
-Native Windows acceptance of this suite is still pending. It first runs the
+The suite passed [fresh-clone Windows ARM64 acceptance](windows-guardian-evidence-2026-10-06.md).
+It first runs the
 native and desktop smoke stages, then separate desktop allow and deny tasks in
 the same fresh clone. Each task has its own owned bridge and diagnostics.
 
@@ -211,6 +212,8 @@ privacy, retention, interruption, serialization, and unsafe cleanup. Run
 `python3 scripts/windows_desktop_test.py -v` covers desktop classification,
 correlation, policy refusal, cleanup, and recovery through the same CLI. It also
 executes the actual bridge against a controlled external native-engine fixture.
+`python3 scripts/windows_guardian_test.py -v` covers live-review classification,
+command correlation, enforcement, and both-case orchestration through that CLI.
 Fixture passes do not replace real fresh-clone ARM64 acceptance.
 
 See [the real ARM64 acceptance and preserved attempts](windows-runs-evidence-2026-10-06.md).

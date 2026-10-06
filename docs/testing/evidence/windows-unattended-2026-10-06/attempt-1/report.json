@@ -1,0 +1,347 @@
+{
+  "schema": 1,
+  "run": "tofa-run-d2eb36996c0941f2988c17b884254122",
+  "outcome": "failed",
+  "stages": [
+    {
+      "stage": "template_validation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.225
+    },
+    {
+      "stage": "candidate_validation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.013
+    },
+    {
+      "stage": "clone_creation",
+      "outcome": "passed",
+      "elapsed_seconds": 1.251
+    },
+    {
+      "stage": "boot",
+      "outcome": "passed",
+      "elapsed_seconds": 20.014
+    },
+    {
+      "stage": "guest_session",
+      "outcome": "passed",
+      "elapsed_seconds": 11.163
+    },
+    {
+      "stage": "native_smoke",
+      "outcome": "passed",
+      "elapsed_seconds": 42.476
+    },
+    {
+      "stage": "desktop_smoke",
+      "outcome": "failed",
+      "reason": "vm_transport_failed",
+      "elapsed_seconds": 5.074
+    }
+  ],
+  "suite": "desktop-guardian",
+  "retained": true,
+  "cleanup": {
+    "outcome": "retained",
+    "shutdown": "stopped"
+  },
+  "capabilities": {
+    "native_sandbox": "verified",
+    "desktop_guardian": "unverified"
+  },
+  "template": {
+    "uuid": "EF96CF12-D901-455F-81FF-4C5001E15F80",
+    "state": "stopped"
+  },
+  "requested_candidate": {
+    "version": "v0.1.0-rc.14",
+    "sha256": "1b0a2e7aa7aafc515391e221a16bee5124cf5b09aedf89af779796fae15bdd77",
+    "commit": "14134d43df4cca00bcdf10e49b3dc5ef3122f8d7"
+  },
+  "ownership_unresolved": false,
+  "clone_identity_source": "unique_inventory_delta",
+  "clone": {
+    "uuid": "68C704EB-B73C-4F24-A041-A7254D9504E2",
+    "name": "tofa-run-d2eb36996c0941f2988c17b884254122"
+  },
+  "diagnostics": {
+    "guest_staging": "C:\\Users\\Public\\tofa-run-d2eb36996c0941f2988c17b884254122",
+    "guest_workspace": "%USERPROFILE%\\tofa-run-d2eb36996c0941f2988c17b884254122"
+  },
+  "os": {
+    "name": "Windows 11",
+    "architecture": "ARM64",
+    "version": "10.0.26200"
+  },
+  "native": {
+    "identity": {
+      "client_version": "26.930.7945.0",
+      "engine_version": "0.160.1",
+      "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+      "package_engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+      "package": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+      "architecture": "Arm64",
+      "python_version": "3.13.15",
+      "sid": "S-1-5-21-1299817968-325600504-2357610402-1005",
+      "session": 1
+    },
+    "checks": {
+      "limited_user": true,
+      "harness_read_only": true,
+      "workspace_owned_by_user": true,
+      "workspace_acl_manageable": true,
+      "ordinary_write": true,
+      "workspace_write_read": true,
+      "outside_permission_denied": true,
+      "outside_marker_exists": false,
+      "full_access_disabled": true,
+      "engine_exited": true,
+      "markers_removed": true
+    },
+    "execution": {
+      "workspace_exit_code": 0,
+      "outside_exit_code": 1,
+      "outside_denial_signal": "GetContentWriterUnauthorizedAccessError"
+    }
+  },
+  "candidate": {
+    "version": "v0.1.0-rc.14",
+    "sha256": "1b0a2e7aa7aafc515391e221a16bee5124cf5b09aedf89af779796fae15bdd77",
+    "commit": "14134d43df4cca00bcdf10e49b3dc5ef3122f8d7",
+    "architecture": "ARM64",
+    "version_verified": true
+  },
+  "completion": {
+    "completed": true,
+    "unregistered": true,
+    "last_result": 0,
+    "state": "Ready"
+  },
+  "desktop_run": "tofa-run-3c32b63d3c994f3699d7f5832d9a317e",
+  "reason": "vm_transport_failed",
+  "failed_transport_operation": "file_pull",
+  "recovery_diagnostics": {
+    "outcome": "collected",
+    "files": {
+      "progress": {
+        "outcome": "collected",
+        "checkpoints": [
+          {
+            "stage": "user_started",
+            "elapsed_ms": 1
+          },
+          {
+            "stage": "package_discovered",
+            "elapsed_ms": 276
+          },
+          {
+            "stage": "engine_hashed",
+            "elapsed_ms": 7411
+          },
+          {
+            "stage": "engine_discovered",
+            "elapsed_ms": 13316
+          },
+          {
+            "stage": "native_probe_started",
+            "elapsed_ms": 13336
+          },
+          {
+            "stage": "candidate_verification",
+            "elapsed_ms": 14206
+          },
+          {
+            "stage": "workspace_preparation",
+            "elapsed_ms": 15634
+          },
+          {
+            "stage": "engine_initialization",
+            "elapsed_ms": 15855
+          },
+          {
+            "stage": "sandbox_configuration",
+            "elapsed_ms": 16732
+          },
+          {
+            "stage": "workspace_execution",
+            "elapsed_ms": 16752
+          },
+          {
+            "stage": "outside_execution",
+            "elapsed_ms": 17946
+          }
+        ]
+      },
+      "native": {
+        "identity": {
+          "client_version": "26.930.7945.0",
+          "engine_version": "0.160.1",
+          "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+          "package_engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+          "package": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+          "architecture": "Arm64",
+          "python_version": "3.13.15",
+          "sid": "S-1-5-21-1299817968-325600504-2357610402-1005",
+          "session": 1
+        },
+        "checks": {
+          "limited_user": true,
+          "harness_read_only": true,
+          "workspace_owned_by_user": true,
+          "workspace_acl_manageable": true,
+          "ordinary_write": true,
+          "workspace_write_read": true,
+          "outside_permission_denied": true,
+          "outside_marker_exists": false,
+          "full_access_disabled": true,
+          "engine_exited": true,
+          "markers_removed": true
+        },
+        "execution": {
+          "workspace_exit_code": 0,
+          "outside_exit_code": 1,
+          "outside_denial_signal": "GetContentWriterUnauthorizedAccessError"
+        }
+      },
+      "desktop_progress": {
+        "outcome": "unavailable",
+        "reason": "missing_or_invalid"
+      },
+      "desktop": {
+        "outcome": "unavailable",
+        "reason": "missing_or_invalid"
+      }
+    }
+  },
+  "transport_progress_observed": false,
+  "transport_steps": [
+    {
+      "step": "protected_staging",
+      "started_after_seconds": 21.504,
+      "outcome": "passed",
+      "elapsed_seconds": 4.771
+    },
+    {
+      "step": "guest_preflight",
+      "started_after_seconds": 26.275,
+      "outcome": "passed",
+      "elapsed_seconds": 6.391
+    },
+    {
+      "step": "stage_request",
+      "started_after_seconds": 33.374,
+      "outcome": "passed",
+      "elapsed_seconds": 0.109
+    },
+    {
+      "step": "stage_probe",
+      "started_after_seconds": 33.482,
+      "outcome": "passed",
+      "elapsed_seconds": 0.117
+    },
+    {
+      "step": "stage_user",
+      "started_after_seconds": 33.599,
+      "outcome": "passed",
+      "elapsed_seconds": 0.1
+    },
+    {
+      "step": "stage_candidate",
+      "started_after_seconds": 33.699,
+      "outcome": "passed",
+      "elapsed_seconds": 13.343
+    },
+    {
+      "step": "stage_windows_candidate",
+      "started_after_seconds": 47.043,
+      "outcome": "passed",
+      "elapsed_seconds": 0.183
+    },
+    {
+      "step": "prepare_task",
+      "started_after_seconds": 47.226,
+      "outcome": "passed",
+      "elapsed_seconds": 3.649
+    },
+    {
+      "step": "native_task",
+      "started_after_seconds": 50.875,
+      "outcome": "passed",
+      "elapsed_seconds": 0.258
+    },
+    {
+      "step": "collect_task",
+      "started_after_seconds": 51.133,
+      "outcome": "passed",
+      "elapsed_seconds": 23.7
+    },
+    {
+      "step": "collect_native",
+      "started_after_seconds": 74.833,
+      "outcome": "passed",
+      "elapsed_seconds": 0.158
+    },
+    {
+      "step": "protected_staging",
+      "started_after_seconds": 75.144,
+      "outcome": "passed",
+      "elapsed_seconds": 2.096
+    },
+    {
+      "step": "guest_preflight",
+      "started_after_seconds": 77.241,
+      "outcome": "failed",
+      "elapsed_seconds": 2.975
+    }
+  ],
+  "guest_progress": {
+    "outcome": "collected",
+    "checkpoints": [
+      {
+        "stage": "user_started",
+        "elapsed_ms": 1
+      },
+      {
+        "stage": "package_discovered",
+        "elapsed_ms": 276
+      },
+      {
+        "stage": "engine_hashed",
+        "elapsed_ms": 7411
+      },
+      {
+        "stage": "engine_discovered",
+        "elapsed_ms": 13316
+      },
+      {
+        "stage": "native_probe_started",
+        "elapsed_ms": 13336
+      },
+      {
+        "stage": "candidate_verification",
+        "elapsed_ms": 14206
+      },
+      {
+        "stage": "workspace_preparation",
+        "elapsed_ms": 15634
+      },
+      {
+        "stage": "engine_initialization",
+        "elapsed_ms": 15855
+      },
+      {
+        "stage": "sandbox_configuration",
+        "elapsed_ms": 16732
+      },
+      {
+        "stage": "workspace_execution",
+        "elapsed_ms": 16752
+      },
+      {
+        "stage": "outside_execution",
+        "elapsed_ms": 17946
+      }
+    ]
+  }
+}

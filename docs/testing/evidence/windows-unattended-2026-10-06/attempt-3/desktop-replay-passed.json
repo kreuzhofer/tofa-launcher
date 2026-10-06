@@ -1,0 +1,125 @@
+{
+  "run": "tofa-run-f44c98c31e3845cc889600787d0615b9",
+  "workspace_run": "tofa-run-8b3bd31350d2429ab14e912cf5ccbfd5",
+  "task": {
+    "last_result": 0,
+    "state": "Ready",
+    "run": "tofa-run-f44c98c31e3845cc889600787d0615b9",
+    "ok": true,
+    "reason": "completed",
+    "completed": true,
+    "phase": "completion",
+    "unregistered": true
+  },
+  "result": {
+    "run": "tofa-run-f44c98c31e3845cc889600787d0615b9",
+    "phase": "desktop",
+    "ok": true,
+    "reason": "desktop_smoke_passed",
+    "checks": {
+      "authenticated": true,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true,
+      "desktop_started": true,
+      "bridge_initialized": true,
+      "desktop_permissions_configured": true,
+      "command_effect": true,
+      "diagnostics_written": true,
+      "bridge_policy_preserved": true,
+      "normal_quit": true,
+      "owned_children_exited": true,
+      "cli_defaults_unchanged": true,
+      "vendor_service_preserved": true,
+      "readiness_engine_exited": true
+    },
+    "route": "native-desktop-bridge",
+    "execution": {
+      "admitted": {
+        "bridge_pid": 6232,
+        "thread": 2,
+        "turn": 1
+      },
+      "command": {
+        "bridge_pid": 6232,
+        "thread": 2,
+        "turn": 1
+      },
+      "completed": {
+        "bridge_pid": 6232,
+        "thread": 2,
+        "turn": 1
+      }
+    },
+    "identity": {
+      "package": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+      "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+      "model": "gpt-5.6-sol",
+      "provider": "openai",
+      "reviewer": "auto_review",
+      "app_pid": 8692,
+      "bridge_pid": 6232,
+      "engine_pid": 9576,
+      "app_sha256": "5474239dcfa9d1548d8bcd9219b8fd3474f1157f923555e9738f789dd4a81abe",
+      "bridge_sha256": "7ffa3f25af6335ac4d8088bf64252b552c7a7c8b13eb6c566ed85f466fa288da"
+    },
+    "restrictions": {
+      "tool_registration_writes_refused": 2,
+      "unrelated_turns_refused": 1,
+      "native_visualization_roots": 1
+    }
+  },
+  "progress": {
+    "outcome": "collected",
+    "checkpoints": [
+      {
+        "stage": "user_started",
+        "elapsed_ms": 1
+      },
+      {
+        "stage": "package_discovered",
+        "elapsed_ms": 163
+      },
+      {
+        "stage": "engine_hashed",
+        "elapsed_ms": 509
+      },
+      {
+        "stage": "engine_discovered",
+        "elapsed_ms": 798
+      },
+      {
+        "stage": "native_probe_started",
+        "elapsed_ms": 806
+      },
+      {
+        "stage": "desktop_authentication",
+        "elapsed_ms": 806
+      },
+      {
+        "stage": "desktop_preparation",
+        "elapsed_ms": 1846
+      },
+      {
+        "stage": "desktop_startup",
+        "elapsed_ms": 4085
+      },
+      {
+        "stage": "desktop_permissions",
+        "elapsed_ms": 12431
+      },
+      {
+        "stage": "desktop_command",
+        "elapsed_ms": 25260
+      },
+      {
+        "stage": "desktop_quit",
+        "elapsed_ms": 42776
+      },
+      {
+        "stage": "desktop_cleanup",
+        "elapsed_ms": 47664
+      }
+    ]
+  }
+}

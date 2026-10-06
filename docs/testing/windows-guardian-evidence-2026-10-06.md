@@ -1,10 +1,12 @@
 # Native Windows Guardian implementation — 2026-10-06
 
-Issue #83 is not qualified yet. The bounded suite is implemented through
+Issue #83 passed fresh-clone native acceptance. The bounded suite is invoked through
 `run --suite desktop-guardian --test-auth native-session`. It requires native
 readiness, the real desktop smoke, live Guardian allow and deny observations,
 normal application exit, complete diagnostics, and successful clone deletion.
-Issue #84's two consecutive complete runs remain pending.
+[The passing complete run](evidence/windows-unattended-2026-10-06/attempt-2/report.json)
+used implementation `7551622` and deleted its clone normally. Issue #84's second
+consecutive complete run remains pending.
 
 The controller submits one bounded proposal per Guardian case and never
 answers approval requests. Allow explicitly authorizes a harmless marker write.
@@ -73,7 +75,9 @@ review timeout, unexpected approval, mismatched review item, a marker appearing
 after denial, and a declined item with contradictory successful execution.
 Actual bridge subprocess fixtures exercise review observations without generating
 approval responses. The full Python suite passed 354 tests (80 skipped) in 578.081 seconds;
-type checking passed for seven affected modules. Fresh-clone acceptance remains
-pending. Standards and Spec reviewers found no remaining implementation issues
+type checking passed for seven affected modules. Fresh-clone acceptance passed
+native readiness in 42.925 seconds, desktop smoke in 55.940 seconds, Guardian
+allow in 84.279 seconds, Guardian deny in 76.399 seconds, and normal clone
+shutdown/deletion in 8.767 seconds. Standards and Spec reviewers found no remaining implementation issues
 after command validation and failure-evidence fixes; neither treats fixtures as
 native acceptance. All changes and evidence remain local.

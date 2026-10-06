@@ -1,0 +1,22 @@
+{
+  "observations": 702,
+  "category_counts": [
+    {
+      "categories": [
+        "missing_path",
+        "osstatus_2700",
+        "file_open_failed"
+      ],
+      "count": 169
+    },
+    {
+      "categories": [
+        "missing_file",
+        "osstatus_2700",
+        "file_open_failed"
+      ],
+      "count": 533
+    }
+  ],
+  "unexpected_errors": []
+}

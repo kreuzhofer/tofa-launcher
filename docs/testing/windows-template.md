@@ -6,7 +6,8 @@ for [#79](https://github.com/kreuzhofer/tofa-launcher/issues/79). It prepares an
 measures a designated Windows 11 ARM64 UTM template. Fresh-clone native smoke,
 retention, status, and cleanup are documented in [windows-runs.md](windows-runs.md).
 The optional `native-session` readiness check supports the bounded desktop smoke
-suite. Live Guardian qualification remains separate work.
+suite. The separate `desktop-guardian` suite and its measured acceptance are
+documented in [windows-runs.md](windows-runs.md).
 
 ## Select the template explicitly
 

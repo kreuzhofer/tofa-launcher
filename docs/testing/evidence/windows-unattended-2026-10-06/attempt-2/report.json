@@ -1,0 +1,801 @@
+{
+  "schema": 1,
+  "run": "tofa-run-3221a8b00ce74c97bfc8760ca4799139",
+  "outcome": "passed",
+  "stages": [
+    {
+      "stage": "template_validation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.222
+    },
+    {
+      "stage": "candidate_validation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.008
+    },
+    {
+      "stage": "clone_creation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.617
+    },
+    {
+      "stage": "boot",
+      "outcome": "passed",
+      "elapsed_seconds": 18.77
+    },
+    {
+      "stage": "guest_session",
+      "outcome": "passed",
+      "elapsed_seconds": 12.41
+    },
+    {
+      "stage": "native_smoke",
+      "outcome": "passed",
+      "elapsed_seconds": 42.925
+    },
+    {
+      "stage": "desktop_smoke",
+      "outcome": "passed",
+      "elapsed_seconds": 55.94
+    },
+    {
+      "stage": "guardian_allow",
+      "outcome": "passed",
+      "elapsed_seconds": 84.279
+    },
+    {
+      "stage": "guardian_deny",
+      "outcome": "passed",
+      "elapsed_seconds": 76.399
+    },
+    {
+      "stage": "cleanup",
+      "outcome": "passed",
+      "elapsed_seconds": 8.767
+    }
+  ],
+  "suite": "desktop-guardian",
+  "retained": false,
+  "cleanup": {
+    "outcome": "deleted"
+  },
+  "capabilities": {
+    "native_sandbox": "verified",
+    "desktop_guardian": "verified",
+    "desktop_smoke": "verified"
+  },
+  "template": {
+    "uuid": "EF96CF12-D901-455F-81FF-4C5001E15F80",
+    "state": "stopped"
+  },
+  "requested_candidate": {
+    "version": "v0.1.0-rc.14",
+    "sha256": "1b0a2e7aa7aafc515391e221a16bee5124cf5b09aedf89af779796fae15bdd77",
+    "commit": "14134d43df4cca00bcdf10e49b3dc5ef3122f8d7"
+  },
+  "ownership_unresolved": false,
+  "clone_identity_source": "unique_inventory_delta",
+  "clone": {
+    "uuid": "1B6B73A3-3358-4BE9-9245-8458199C3F33",
+    "name": "tofa-run-3221a8b00ce74c97bfc8760ca4799139"
+  },
+  "diagnostics": {
+    "guest_staging": "C:\\Users\\Public\\tofa-run-3221a8b00ce74c97bfc8760ca4799139",
+    "guest_workspace": "%USERPROFILE%\\tofa-run-3221a8b00ce74c97bfc8760ca4799139"
+  },
+  "os": {
+    "name": "Windows 11",
+    "architecture": "ARM64",
+    "version": "10.0.26200"
+  },
+  "native": {
+    "identity": {
+      "client_version": "26.930.7945.0",
+      "engine_version": "0.160.1",
+      "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+      "package_engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+      "package": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+      "architecture": "Arm64",
+      "python_version": "3.13.15",
+      "sid": "S-1-5-21-1299817968-325600504-2357610402-1005",
+      "session": 1
+    },
+    "checks": {
+      "limited_user": true,
+      "harness_read_only": true,
+      "workspace_owned_by_user": true,
+      "workspace_acl_manageable": true,
+      "ordinary_write": true,
+      "workspace_write_read": true,
+      "outside_permission_denied": true,
+      "outside_marker_exists": false,
+      "full_access_disabled": true,
+      "engine_exited": true,
+      "markers_removed": true
+    },
+    "execution": {
+      "workspace_exit_code": 0,
+      "outside_exit_code": 1,
+      "outside_denial_signal": "GetContentWriterUnauthorizedAccessError"
+    }
+  },
+  "candidate": {
+    "version": "v0.1.0-rc.14",
+    "sha256": "1b0a2e7aa7aafc515391e221a16bee5124cf5b09aedf89af779796fae15bdd77",
+    "commit": "14134d43df4cca00bcdf10e49b3dc5ef3122f8d7",
+    "architecture": "ARM64",
+    "version_verified": true
+  },
+  "completion": {
+    "completed": true,
+    "unregistered": true,
+    "last_result": 0,
+    "state": "Ready"
+  },
+  "desktop_run": "tofa-run-adb4632151394367bb6f5a276a4076f9",
+  "desktop": {
+    "ok": true,
+    "reason": "desktop_smoke_passed",
+    "checks": {
+      "authenticated": true,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true,
+      "readiness_engine_exited": true,
+      "bridge_policy_preserved": true,
+      "bridge_initialized": true,
+      "desktop_started": true,
+      "desktop_permissions_configured": true,
+      "command_effect": true,
+      "normal_quit": true,
+      "owned_children_exited": true,
+      "cli_defaults_unchanged": true,
+      "vendor_service_preserved": true,
+      "diagnostics_written": true
+    },
+    "route": "native-desktop-bridge",
+    "restrictions": {
+      "tool_registration_writes_refused": 1,
+      "unrelated_turns_refused": 1,
+      "native_visualization_roots": 1
+    },
+    "identity": {
+      "model": "gpt-5.6-sol",
+      "provider": "openai",
+      "reviewer": "auto_review",
+      "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+      "app_sha256": "5474239dcfa9d1548d8bcd9219b8fd3474f1157f923555e9738f789dd4a81abe",
+      "bridge_sha256": "a7fe2c75dcc1ede60968a383eb184a7607060e37f7de6b474835077785680651",
+      "package": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+      "app_pid": 9788,
+      "bridge_pid": 7016,
+      "engine_pid": 9756
+    },
+    "execution": {
+      "admitted": {
+        "bridge_pid": 7016,
+        "thread": 2,
+        "turn": 1
+      },
+      "command": {
+        "bridge_pid": 7016,
+        "thread": 2,
+        "turn": 1
+      },
+      "completed": {
+        "bridge_pid": 7016,
+        "thread": 2,
+        "turn": 1
+      }
+    }
+  },
+  "guardian": {
+    "allow": {
+      "ok": true,
+      "reason": "desktop_smoke_passed",
+      "checks": {
+        "authenticated": true,
+        "workspace_trusted": true,
+        "automatic_review": true,
+        "full_access_disabled": true,
+        "readiness_engine_exited": true,
+        "bridge_policy_preserved": true,
+        "bridge_initialized": true,
+        "desktop_started": true,
+        "desktop_permissions_configured": true,
+        "command_effect": true,
+        "normal_quit": true,
+        "owned_children_exited": true,
+        "cli_defaults_unchanged": true,
+        "vendor_service_preserved": true,
+        "diagnostics_written": true
+      },
+      "route": "native-desktop-bridge",
+      "restrictions": {
+        "tool_registration_writes_refused": 2,
+        "unrelated_turns_refused": 1,
+        "native_visualization_roots": 1
+      },
+      "identity": {
+        "model": "gpt-5.6-sol",
+        "provider": "openai",
+        "reviewer": "auto_review",
+        "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+        "app_sha256": "5474239dcfa9d1548d8bcd9219b8fd3474f1157f923555e9738f789dd4a81abe",
+        "bridge_sha256": "d390b738b9eb341543edf23d24b6f087295ba85769f1331a5bd07d003a94882f",
+        "shell_sha256": "da8da15a54291d952249ad9c708bbf7b59125b9c91d43ce52ae729e2274c83e8",
+        "package": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+        "app_pid": 9716,
+        "bridge_pid": 10200,
+        "engine_pid": 7772
+      },
+      "execution": {
+        "admitted": {
+          "bridge_pid": 10200,
+          "thread": 1,
+          "turn": 1
+        },
+        "command": {
+          "bridge_pid": 10200,
+          "thread": 1,
+          "turn": 1
+        },
+        "completed": {
+          "bridge_pid": 10200,
+          "thread": 1,
+          "turn": 1
+        }
+      },
+      "guardian": {
+        "decision": "approved",
+        "source": "agent",
+        "command_status": "completed",
+        "marker_present": true,
+        "synthetic_command": true,
+        "execution_succeeded": true,
+        "exit_code_present": true,
+        "started_count": 1,
+        "started": {
+          "bridge_pid": 10200,
+          "thread": 1,
+          "turn": 1,
+          "item": 1,
+          "review": 1
+        },
+        "completed_count": 1,
+        "completed": {
+          "bridge_pid": 10200,
+          "thread": 1,
+          "turn": 1,
+          "item": 1,
+          "review": 1
+        },
+        "command_count": 1,
+        "command": {
+          "bridge_pid": 10200,
+          "thread": 1,
+          "turn": 1,
+          "item": 1
+        }
+      }
+    },
+    "deny": {
+      "ok": true,
+      "reason": "desktop_smoke_passed",
+      "checks": {
+        "authenticated": true,
+        "workspace_trusted": true,
+        "automatic_review": true,
+        "full_access_disabled": true,
+        "readiness_engine_exited": true,
+        "bridge_policy_preserved": true,
+        "bridge_initialized": true,
+        "desktop_started": true,
+        "desktop_permissions_configured": true,
+        "command_effect": false,
+        "normal_quit": true,
+        "owned_children_exited": true,
+        "cli_defaults_unchanged": true,
+        "vendor_service_preserved": true,
+        "diagnostics_written": true,
+        "denial_target_absent": true
+      },
+      "route": "native-desktop-bridge",
+      "restrictions": {
+        "tool_registration_writes_refused": 2,
+        "unrelated_turns_refused": 1,
+        "native_visualization_roots": 1
+      },
+      "identity": {
+        "model": "gpt-5.6-sol",
+        "provider": "openai",
+        "reviewer": "auto_review",
+        "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+        "app_sha256": "5474239dcfa9d1548d8bcd9219b8fd3474f1157f923555e9738f789dd4a81abe",
+        "bridge_sha256": "a7682275d933a1eb3f1bb2c69d194d1423942382fef79f744187247b40622cd8",
+        "shell_sha256": "da8da15a54291d952249ad9c708bbf7b59125b9c91d43ce52ae729e2274c83e8",
+        "package": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+        "app_pid": 5496,
+        "bridge_pid": 8904,
+        "engine_pid": 1188
+      },
+      "execution": {
+        "admitted": {
+          "bridge_pid": 8904,
+          "thread": 1,
+          "turn": 1
+        },
+        "command": {
+          "bridge_pid": 8904,
+          "thread": 1,
+          "turn": 1
+        },
+        "completed": {
+          "bridge_pid": 8904,
+          "thread": 1,
+          "turn": 1
+        }
+      },
+      "guardian": {
+        "decision": "denied",
+        "source": "agent",
+        "command_status": "declined",
+        "marker_present": false,
+        "synthetic_command": true,
+        "execution_succeeded": false,
+        "exit_code_present": false,
+        "started_count": 1,
+        "started": {
+          "bridge_pid": 8904,
+          "thread": 1,
+          "turn": 1,
+          "item": 1,
+          "review": 1
+        },
+        "completed_count": 1,
+        "completed": {
+          "bridge_pid": 8904,
+          "thread": 1,
+          "turn": 1,
+          "item": 1,
+          "review": 1
+        },
+        "command_count": 1,
+        "command": {
+          "bridge_pid": 8904,
+          "thread": 1,
+          "turn": 1,
+          "item": 1
+        }
+      }
+    }
+  },
+  "transport_progress_observed": false,
+  "transport_steps": [
+    {
+      "step": "protected_staging",
+      "started_after_seconds": 19.618,
+      "outcome": "passed",
+      "elapsed_seconds": 5.147
+    },
+    {
+      "step": "guest_preflight",
+      "started_after_seconds": 24.765,
+      "outcome": "passed",
+      "elapsed_seconds": 7.262
+    },
+    {
+      "step": "stage_request",
+      "started_after_seconds": 32.754,
+      "outcome": "passed",
+      "elapsed_seconds": 0.151
+    },
+    {
+      "step": "stage_probe",
+      "started_after_seconds": 32.905,
+      "outcome": "passed",
+      "elapsed_seconds": 0.159
+    },
+    {
+      "step": "stage_user",
+      "started_after_seconds": 33.064,
+      "outcome": "passed",
+      "elapsed_seconds": 0.158
+    },
+    {
+      "step": "stage_candidate",
+      "started_after_seconds": 33.221,
+      "outcome": "passed",
+      "elapsed_seconds": 13.308
+    },
+    {
+      "step": "stage_windows_candidate",
+      "started_after_seconds": 46.529,
+      "outcome": "passed",
+      "elapsed_seconds": 0.172
+    },
+    {
+      "step": "prepare_task",
+      "started_after_seconds": 46.702,
+      "outcome": "passed",
+      "elapsed_seconds": 3.708
+    },
+    {
+      "step": "native_task",
+      "started_after_seconds": 50.409,
+      "outcome": "passed",
+      "elapsed_seconds": 0.267
+    },
+    {
+      "step": "collect_task",
+      "started_after_seconds": 50.677,
+      "outcome": "passed",
+      "elapsed_seconds": 23.991
+    },
+    {
+      "step": "collect_native",
+      "started_after_seconds": 74.667,
+      "outcome": "passed",
+      "elapsed_seconds": 0.142
+    },
+    {
+      "step": "protected_staging",
+      "started_after_seconds": 74.953,
+      "outcome": "passed",
+      "elapsed_seconds": 2.198
+    },
+    {
+      "step": "guest_preflight",
+      "started_after_seconds": 77.152,
+      "outcome": "passed",
+      "elapsed_seconds": 3.575
+    },
+    {
+      "step": "stage_request",
+      "started_after_seconds": 80.729,
+      "outcome": "passed",
+      "elapsed_seconds": 0.147
+    },
+    {
+      "step": "stage_probe",
+      "started_after_seconds": 80.877,
+      "outcome": "passed",
+      "elapsed_seconds": 0.167
+    },
+    {
+      "step": "stage_user",
+      "started_after_seconds": 81.044,
+      "outcome": "passed",
+      "elapsed_seconds": 0.132
+    },
+    {
+      "step": "stage_windows_template_probe",
+      "started_after_seconds": 81.176,
+      "outcome": "passed",
+      "elapsed_seconds": 0.175
+    },
+    {
+      "step": "stage_windows_desktop_runtime",
+      "started_after_seconds": 81.351,
+      "outcome": "passed",
+      "elapsed_seconds": 0.184
+    },
+    {
+      "step": "stage_windows_desktop_bridge",
+      "started_after_seconds": 81.535,
+      "outcome": "passed",
+      "elapsed_seconds": 0.225
+    },
+    {
+      "step": "stage_windows_desktop_ui",
+      "started_after_seconds": 81.759,
+      "outcome": "passed",
+      "elapsed_seconds": 0.153
+    },
+    {
+      "step": "stage_windows_process",
+      "started_after_seconds": 81.912,
+      "outcome": "passed",
+      "elapsed_seconds": 0.139
+    },
+    {
+      "step": "stage_windows_process",
+      "started_after_seconds": 82.051,
+      "outcome": "passed",
+      "elapsed_seconds": 0.166
+    },
+    {
+      "step": "stage_windows_guardian_result",
+      "started_after_seconds": 82.217,
+      "outcome": "passed",
+      "elapsed_seconds": 0.159
+    },
+    {
+      "step": "stage_windows_template_transport",
+      "started_after_seconds": 82.377,
+      "outcome": "passed",
+      "elapsed_seconds": 0.169
+    },
+    {
+      "step": "prepare_task",
+      "started_after_seconds": 82.545,
+      "outcome": "passed",
+      "elapsed_seconds": 2.397
+    },
+    {
+      "step": "desktop_task",
+      "started_after_seconds": 84.942,
+      "outcome": "passed",
+      "elapsed_seconds": 0.196
+    },
+    {
+      "step": "collect_task",
+      "started_after_seconds": 85.138,
+      "outcome": "passed",
+      "elapsed_seconds": 45.446
+    },
+    {
+      "step": "collect_desktop",
+      "started_after_seconds": 130.584,
+      "outcome": "passed",
+      "elapsed_seconds": 0.157
+    },
+    {
+      "step": "protected_staging",
+      "started_after_seconds": 130.893,
+      "outcome": "passed",
+      "elapsed_seconds": 1.923
+    },
+    {
+      "step": "guest_preflight",
+      "started_after_seconds": 132.817,
+      "outcome": "passed",
+      "elapsed_seconds": 2.974
+    },
+    {
+      "step": "stage_request",
+      "started_after_seconds": 135.793,
+      "outcome": "passed",
+      "elapsed_seconds": 0.132
+    },
+    {
+      "step": "stage_probe",
+      "started_after_seconds": 135.925,
+      "outcome": "passed",
+      "elapsed_seconds": 0.143
+    },
+    {
+      "step": "stage_user",
+      "started_after_seconds": 136.068,
+      "outcome": "passed",
+      "elapsed_seconds": 0.149
+    },
+    {
+      "step": "stage_windows_template_probe",
+      "started_after_seconds": 136.217,
+      "outcome": "passed",
+      "elapsed_seconds": 0.168
+    },
+    {
+      "step": "stage_windows_desktop_runtime",
+      "started_after_seconds": 136.384,
+      "outcome": "passed",
+      "elapsed_seconds": 0.192
+    },
+    {
+      "step": "stage_windows_desktop_bridge",
+      "started_after_seconds": 136.576,
+      "outcome": "passed",
+      "elapsed_seconds": 0.199
+    },
+    {
+      "step": "stage_windows_desktop_ui",
+      "started_after_seconds": 136.775,
+      "outcome": "passed",
+      "elapsed_seconds": 0.125
+    },
+    {
+      "step": "stage_windows_process",
+      "started_after_seconds": 136.9,
+      "outcome": "passed",
+      "elapsed_seconds": 0.134
+    },
+    {
+      "step": "stage_windows_process",
+      "started_after_seconds": 137.034,
+      "outcome": "passed",
+      "elapsed_seconds": 0.175
+    },
+    {
+      "step": "stage_windows_guardian_result",
+      "started_after_seconds": 137.209,
+      "outcome": "passed",
+      "elapsed_seconds": 0.141
+    },
+    {
+      "step": "stage_windows_template_transport",
+      "started_after_seconds": 137.35,
+      "outcome": "passed",
+      "elapsed_seconds": 0.158
+    },
+    {
+      "step": "prepare_task",
+      "started_after_seconds": 137.509,
+      "outcome": "passed",
+      "elapsed_seconds": 2.391
+    },
+    {
+      "step": "desktop_task",
+      "started_after_seconds": 139.9,
+      "outcome": "passed",
+      "elapsed_seconds": 0.192
+    },
+    {
+      "step": "collect_task",
+      "started_after_seconds": 140.092,
+      "outcome": "passed",
+      "elapsed_seconds": 74.73
+    },
+    {
+      "step": "collect_desktop",
+      "started_after_seconds": 214.822,
+      "outcome": "passed",
+      "elapsed_seconds": 0.166
+    },
+    {
+      "step": "protected_staging",
+      "started_after_seconds": 215.172,
+      "outcome": "passed",
+      "elapsed_seconds": 2.1
+    },
+    {
+      "step": "guest_preflight",
+      "started_after_seconds": 217.274,
+      "outcome": "passed",
+      "elapsed_seconds": 3.297
+    },
+    {
+      "step": "stage_request",
+      "started_after_seconds": 220.574,
+      "outcome": "passed",
+      "elapsed_seconds": 0.166
+    },
+    {
+      "step": "stage_probe",
+      "started_after_seconds": 220.739,
+      "outcome": "passed",
+      "elapsed_seconds": 0.156
+    },
+    {
+      "step": "stage_user",
+      "started_after_seconds": 220.895,
+      "outcome": "passed",
+      "elapsed_seconds": 0.166
+    },
+    {
+      "step": "stage_windows_template_probe",
+      "started_after_seconds": 221.062,
+      "outcome": "passed",
+      "elapsed_seconds": 0.175
+    },
+    {
+      "step": "stage_windows_desktop_runtime",
+      "started_after_seconds": 221.237,
+      "outcome": "passed",
+      "elapsed_seconds": 0.195
+    },
+    {
+      "step": "stage_windows_desktop_bridge",
+      "started_after_seconds": 221.432,
+      "outcome": "passed",
+      "elapsed_seconds": 0.224
+    },
+    {
+      "step": "stage_windows_desktop_ui",
+      "started_after_seconds": 221.656,
+      "outcome": "passed",
+      "elapsed_seconds": 0.173
+    },
+    {
+      "step": "stage_windows_process",
+      "started_after_seconds": 221.829,
+      "outcome": "passed",
+      "elapsed_seconds": 0.167
+    },
+    {
+      "step": "stage_windows_process",
+      "started_after_seconds": 221.996,
+      "outcome": "passed",
+      "elapsed_seconds": 0.175
+    },
+    {
+      "step": "stage_windows_guardian_result",
+      "started_after_seconds": 222.17,
+      "outcome": "passed",
+      "elapsed_seconds": 0.166
+    },
+    {
+      "step": "stage_windows_template_transport",
+      "started_after_seconds": 222.337,
+      "outcome": "passed",
+      "elapsed_seconds": 0.171
+    },
+    {
+      "step": "prepare_task",
+      "started_after_seconds": 222.508,
+      "outcome": "passed",
+      "elapsed_seconds": 2.572
+    },
+    {
+      "step": "desktop_task",
+      "started_after_seconds": 225.08,
+      "outcome": "passed",
+      "elapsed_seconds": 0.254
+    },
+    {
+      "step": "collect_task",
+      "started_after_seconds": 225.334,
+      "outcome": "passed",
+      "elapsed_seconds": 65.886
+    },
+    {
+      "step": "collect_desktop",
+      "started_after_seconds": 291.22,
+      "outcome": "passed",
+      "elapsed_seconds": 0.182
+    }
+  ],
+  "guest_progress": {
+    "outcome": "collected",
+    "checkpoints": [
+      {
+        "stage": "user_started",
+        "elapsed_ms": 1
+      },
+      {
+        "stage": "package_discovered",
+        "elapsed_ms": 174
+      },
+      {
+        "stage": "engine_hashed",
+        "elapsed_ms": 529
+      },
+      {
+        "stage": "engine_discovered",
+        "elapsed_ms": 797
+      },
+      {
+        "stage": "native_probe_started",
+        "elapsed_ms": 804
+      },
+      {
+        "stage": "desktop_authentication",
+        "elapsed_ms": 804
+      },
+      {
+        "stage": "desktop_preparation",
+        "elapsed_ms": 1859
+      },
+      {
+        "stage": "desktop_startup",
+        "elapsed_ms": 5058
+      },
+      {
+        "stage": "desktop_permissions",
+        "elapsed_ms": 12190
+      },
+      {
+        "stage": "desktop_command",
+        "elapsed_ms": 29484
+      },
+      {
+        "stage": "desktop_quit",
+        "elapsed_ms": 58503
+      },
+      {
+        "stage": "desktop_cleanup",
+        "elapsed_ms": 61605
+      }
+    ]
+  }
+}

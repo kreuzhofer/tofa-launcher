@@ -64,6 +64,16 @@ def sanitized_desktop(value):
                                              for key in ('bridge_pid', 'thread', 'turn')):
             raise Failure('malformed_desktop_result')
         result['execution'][name] = {key: item[key] for key in ('bridge_pid', 'thread', 'turn')}
+    if 'control_failure' in value:
+        fields = {'action': ('configure', 'submit', 'quit'),
+                  'stage': ('identity', 'search', 'pattern', 'expand', 'select', 'invoke'),
+                  'error': ('other', 'missing_control', 'identity_mismatch', 'stale_element',
+                            'invalid_operation', 'element_not_enabled')}
+        detail = value['control_failure']
+        if (value['ok'] is not False or not isinstance(detail, dict)
+                or any(detail.get(key) not in choices for key, choices in fields.items())):
+            raise Failure('malformed_desktop_result')
+        result['control_failure'] = {key: detail[key] for key in fields}
     if 'guardian' in value: result['guardian'] = sanitized_guardian(value['guardian'])
     return result
 

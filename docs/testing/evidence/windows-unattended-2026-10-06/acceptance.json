@@ -1,0 +1,26 @@
+{
+  "issue": 84,
+  "implementation_commit": "7551622",
+  "outcome": "pending_after_second_run_failure",
+  "template": "EF96CF12-D901-455F-81FF-4C5001E15F80",
+  "authentication": "native-session",
+  "suite": "desktop-guardian",
+  "timeout_seconds": 1800,
+  "transport": {
+    "executable": "utmctl",
+    "observer": "diagnostic-transport-observer.py",
+    "observer_sha256": "b75032c2edfa17e9c40a2e09d0ab60791a2e0762d8507f3c3a2e17069b9d0c42",
+    "retries_added": false,
+    "results_modified": false
+  },
+  "runs": [
+    {
+      "run": "tofa-run-3221a8b00ce74c97bfc8760ca4799139",
+      "clone": "1B6B73A3-3358-4BE9-9245-8458199C3F33",
+      "outcome": "passed",
+      "report": "attempt-2/report.json"
+    }
+  ],
+  "prior_recovery_evidence": "../windows-recovery-2026-10-06/validation.json",
+  "publication": "local_only"
+}

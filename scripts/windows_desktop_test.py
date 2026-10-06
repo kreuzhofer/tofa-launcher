@@ -8,6 +8,23 @@ import windows_run_test as fixture
 
 @unittest.skipIf(os.name == 'nt', 'Mac operator CLI requires Unix executable fixtures')
 class DesktopTests(fixture.WindowsRunFixture):
+    def test_control_failure_retains_only_bounded_diagnostic_fields(self):
+        self.change(mode='desktop_control_details')
+        result, report, _ = self.invoke('--suite', 'desktop-smoke', '--test-auth', 'native-session')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(report['reason'], 'desktop_control_unsupported')
+        self.assertEqual(report['desktop'].get('control_failure'),
+                         {'action': 'configure', 'stage': 'search', 'error': 'stale_element'})
+        self.assertNotIn('PRIVATE_KEY', json.dumps(report))
+        self.assertTrue(report['retained'])
+
+    def test_invalid_control_diagnostics_fail_without_exposing_external_content(self):
+        self.change(mode='desktop_control_invalid')
+        result, report, _ = self.invoke('--suite', 'desktop-smoke', '--test-auth', 'native-session')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(report['reason'], 'malformed_desktop_result')
+        self.assertNotIn('PRIVATE_KEY', json.dumps(report))
+
     def test_desktop_tool_environment_batch_preserves_shared_cli_settings(self):
         self.change(mode='desktop_bridge_environment_settings')
         result, report, state = self.invoke('--suite', 'desktop-smoke', '--test-auth', 'native-session')

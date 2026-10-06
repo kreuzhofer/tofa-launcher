@@ -1,0 +1,24 @@
+FF
+======================================================================
+FAIL: test_control_failure_retains_only_bounded_diagnostic_fields (__main__.DesktopTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/daniel/src/github/kreuzhofer/nebius-tofa-cli/scripts/windows_desktop_test.py", line 16, in test_control_failure_retains_only_bounded_diagnostic_fields
+    self.assertEqual(report['desktop'].get('control_failure'),
+AssertionError: None != {'action': 'configure', 'stage': 'search', 'error': 'stale_element'}
+
+======================================================================
+FAIL: test_invalid_control_diagnostics_fail_without_exposing_external_content (__main__.DesktopTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/daniel/src/github/kreuzhofer/nebius-tofa-cli/scripts/windows_desktop_test.py", line 25, in test_invalid_control_diagnostics_fail_without_exposing_external_content
+    self.assertEqual(report['reason'], 'malformed_desktop_result')
+AssertionError: 'desktop_control_unsupported' != 'malformed_desktop_result'
+- desktop_control_unsupported
++ malformed_desktop_result
+
+
+----------------------------------------------------------------------
+Ran 2 tests in 5.346s
+
+FAILED (failures=2)
