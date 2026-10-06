@@ -1,0 +1,54 @@
+{
+  "ownedProcesses": [],
+  "task": {
+    "actionCount": 1,
+    "limit": "PT2M",
+    "lastResult": 267014,
+    "lastRun": "2026-10-06T07:09:57.0000000Z",
+    "state": "Ready"
+  },
+  "files": [
+    {
+      "created": "2026-10-06T07:05:48.4118175Z",
+      "name": "staging.json",
+      "size": 84,
+      "modified": "2026-10-06T07:05:48.4871437Z"
+    },
+    {
+      "created": "2026-10-06T07:07:07.7089922Z",
+      "name": "preflight.json",
+      "size": 349,
+      "modified": "2026-10-06T07:07:07.7697520Z"
+    },
+    {
+      "created": "2026-10-06T07:07:08.5273376Z",
+      "name": "request.json",
+      "size": 402,
+      "modified": "2026-10-06T07:07:08.5971305Z"
+    },
+    {
+      "created": "2026-10-06T07:07:08.8347656Z",
+      "name": "probe.py",
+      "size": 14916,
+      "modified": "2026-10-06T07:07:09.0048694Z"
+    },
+    {
+      "created": "2026-10-06T07:07:09.1852966Z",
+      "name": "candidate.exe",
+      "size": 11508224,
+      "modified": "2026-10-06T07:09:10.5419529Z"
+    },
+    {
+      "created": "2026-10-06T07:09:10.8239177Z",
+      "name": "windows_candidate.py",
+      "size": 748,
+      "modified": "2026-10-06T07:09:10.8622672Z"
+    },
+    {
+      "created": "2026-10-06T07:12:06.0225906Z",
+      "name": "task.json",
+      "size": 196,
+      "modified": "2026-10-06T07:12:06.0439552Z"
+    }
+  ]
+}

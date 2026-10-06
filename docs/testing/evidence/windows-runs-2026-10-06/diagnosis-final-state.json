@@ -1,0 +1,7 @@
+{
+  "clone": "DA6F9285-78EA-41E1-A284-C072A113471E",
+  "state": "stopped",
+  "normal_utm_request": "timed_out_after_90_seconds",
+  "guest_shutdown": "completed_without_force",
+  "original_failure_retained": true
+}

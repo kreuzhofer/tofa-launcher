@@ -1,0 +1,55 @@
+{
+  "run": "tofa-diagnosis-cd30e2b628ba414cb2ad3871efe3c1e3",
+  "task": {
+    "ok": true,
+    "completed": true,
+    "unregistered": true,
+    "state": "Ready",
+    "last_result": 0
+  },
+  "native": {
+    "ok": true,
+    "reason": "native_ready",
+    "checks": {
+      "limited_user": true,
+      "harness_read_only": true,
+      "workspace_owned_by_user": true,
+      "workspace_acl_manageable": true,
+      "ordinary_write": true,
+      "full_access_disabled": true,
+      "workspace_write_read": true,
+      "outside_marker_exists": false,
+      "outside_permission_denied": true,
+      "engine_exited": true,
+      "markers_removed": true
+    },
+    "execution": {
+      "workspace_exit_code": 0,
+      "outside_exit_code": 1,
+      "outside_denial_signal": "GetContentWriterUnauthorizedAccessError"
+    }
+  },
+  "elapsed_seconds": 46.75,
+  "checkpoints": [
+    {
+      "stage": "entered",
+      "utc": "2026-10-06T07:30:01.6696112Z"
+    },
+    {
+      "stage": "package",
+      "utc": "2026-10-06T07:30:02.0536434Z"
+    },
+    {
+      "stage": "hash",
+      "utc": "2026-10-06T07:30:02.2754437Z"
+    },
+    {
+      "stage": "discovered",
+      "utc": "2026-10-06T07:30:15.5452531Z"
+    },
+    {
+      "stage": "probe",
+      "utc": "2026-10-06T07:30:15.5652999Z"
+    }
+  ]
+}

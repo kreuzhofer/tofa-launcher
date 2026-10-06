@@ -29,7 +29,7 @@
     "command": "go test -race ./...",
     "outcome": "failed",
     "scripts_package": "passed",
-    "reason": "Existing macOS desktop tests refuse the active host Codex app; additional fixture-model metadata and downstream startup failures. No Go files changed; host app preserved."
+    "reason": "Existing macOS desktop tests hit the global host-app process guard despite isolated fixture profiles. The fixture-model line is a nonfatal catalog warning; subsequent startup/copy assertions fail because launch was refused."
   },
   "review": {
     "standards": "no remaining findings after inventory validation and shared disposal fix",
@@ -42,5 +42,19 @@
     "manual_intervention_during_successful_run": false,
     "successful_clone_deleted": true,
     "failed_clone_retained": true
+  },
+  "followup_diagnosis": {
+    "original_go_repro": "Two representative tests failed twice; five representative tests passed twice in a disposable checkout excluding only the host ChatGPT.app process matches. Production source unchanged.",
+    "native_replay": {
+      "outcome": "passed",
+      "elapsed_seconds": 46.75,
+      "report": "diagnosis-native-replay.json"
+    },
+    "original_native_failure": "Complete verified transfer; no native result; completion envelope after the original run budget. Exact stalled instruction unavailable because task history was disabled.",
+    "isolated_full_go_race_suite": {
+      "outcome": "passed",
+      "internal_package_seconds": 285.813,
+      "change": "Disposable checkout only: exclude host /Applications/ChatGPT.app/ process matches; keep synthetic fixture processes visible. Production process guard unchanged."
+    }
   }
 }
