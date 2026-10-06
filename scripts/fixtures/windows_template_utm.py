@@ -128,7 +128,7 @@ elif args[:2] == ['file', 'pull'] and args[2].lower() == guest_uuid:
         print(json.dumps(progress))
     elif args[3].endswith('result.json'):
         if request.get('test_auth'):
-            if state['mode'] in ('desktop_bridge_unsafe', 'desktop_bridge_safe', 'desktop_bridge_network', 'desktop_bridge_model', 'desktop_bridge_roots', 'desktop_bridge_environment'):
+            if state['mode'] in ('desktop_bridge_unsafe', 'desktop_bridge_safe', 'desktop_bridge_rerouted', 'desktop_bridge_catalog_model', 'desktop_bridge_visualization', 'desktop_bridge_visualization_canonical', 'desktop_bridge_visualization_other_thread', 'desktop_bridge_visualization_shared', 'desktop_bridge_visualization_reparse', 'desktop_bridge_visualization_owner_wrong', 'desktop_bridge_local_environment', 'desktop_bridge_late_write', 'desktop_bridge_background', 'desktop_bridge_whitespace', 'desktop_bridge_network', 'desktop_bridge_model', 'desktop_bridge_roots', 'desktop_bridge_environment', 'desktop_bridge_settings', 'desktop_bridge_environment_settings', 'desktop_bridge_permission_write', 'desktop_bridge_reviewer_alias'):
                 import runpy
                 bridge_trial = runpy.run_path(str(Path(__file__).with_name('windows_desktop_native.py')))['trial']
                 observation = bridge_trial(state['mode'].removeprefix('desktop_bridge_'))
@@ -137,6 +137,10 @@ elif args[:2] == ['file', 'pull'] and args[2].lower() == guest_uuid:
                 if observation['refused']:
                     print(json.dumps({'run': request['run'], 'phase': 'desktop', 'ok': False,
                                       'reason': 'desktop_policy_mismatch', 'checks': {}}))
+                    sys.exit(0)
+                if observation.get('settings_unchanged') is False:
+                    print(json.dumps({'run': request['run'], 'phase': 'desktop', 'ok': False,
+                                      'reason': 'desktop_cleanup_failed', 'checks': {'cli_defaults_unchanged': False}}))
                     sys.exit(0)
             if state['mode'] == 'desktop_auth_missing':
                 print(json.dumps({'run': request['run'], 'phase': 'desktop', 'ok': False,
@@ -147,17 +151,21 @@ elif args[:2] == ['file', 'pull'] and args[2].lower() == guest_uuid:
             path.write_text(json.dumps(state))
             desktop = {'run': request['run'], 'phase': 'desktop', 'ok': True,
                 'reason': 'desktop_smoke_passed', 'route': 'native-desktop-bridge',
-                'identity': {'model': 'gpt-5.4', 'provider': 'openai', 'reviewer': 'auto_review',
+                'identity': {'model': state.get('bridge_trial', {}).get('model_observed', 'gpt-5.4'), 'provider': 'openai', 'reviewer': 'auto_review',
                              'app_pid': 101, 'bridge_pid': 102, 'engine_pid': 103,
                              'app_sha256': 'c'*64, 'bridge_sha256': 'd'*64,
                              'engine_sha256': 'a'*64, 'package': 'OpenAI.Codex_26.928.21956.0_arm64__2p2nqsd0c76g0'},
                 'checks': {key: True for key in ('authenticated', 'workspace_trusted', 'automatic_review', 'readiness_engine_exited',
-                    'full_access_disabled', 'bridge_initialized', 'desktop_started', 'command_effect', 'normal_quit',
+                    'full_access_disabled', 'bridge_policy_preserved', 'bridge_initialized', 'desktop_started', 'desktop_permissions_configured', 'command_effect', 'normal_quit',
                     'owned_children_exited', 'cli_defaults_unchanged', 'vendor_service_preserved', 'diagnostics_written')}}
+            if 'policy_preserved' in state.get('bridge_trial', {}): desktop['checks']['bridge_policy_preserved'] = state['bridge_trial']['policy_preserved']
+            desktop['restrictions'] = {'native_visualization_roots': state.get('bridge_trial', {}).get('visualization_roots', 0), 'tool_registration_writes_refused': int(state.get('bridge_trial', {}).get('settings_rejected', False)),
+                                       'unrelated_turns_refused': int(state.get('bridge_trial', {}).get('background_blocked', False))}
             desktop['execution'] = {name: {'bridge_pid': 102, 'thread': 1, 'turn': 1}
                                     for name in ('admitted', 'command', 'completed')}
             if state['mode'] == 'desktop_mixed_completion': desktop['execution']['completed']['turn'] = 2
             if state['mode'] == 'desktop_diagnostics_failed': desktop['checks']['diagnostics_written'] = False
+            if state['mode'] == 'desktop_permissions_unverified': desktop['checks']['desktop_permissions_configured'] = False
             if state['mode'] == 'desktop_untrusted': desktop['checks']['workspace_trusted'] = False
             if state['mode'] == 'desktop_wrong_policy': desktop['checks']['automatic_review'] = False
             if state['mode'] == 'desktop_wrong_identity': desktop['identity']['engine_sha256'] = 'b'*64

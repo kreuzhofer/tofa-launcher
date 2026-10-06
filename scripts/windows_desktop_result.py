@@ -5,7 +5,7 @@ from windows_template_transport import Failure
 
 READINESS = ('authenticated', 'workspace_trusted', 'automatic_review', 'full_access_disabled', 'readiness_engine_exited')
 CHECKS = (*READINESS,
-          'bridge_initialized', 'desktop_started', 'command_effect', 'normal_quit',
+          'bridge_policy_preserved', 'bridge_initialized', 'desktop_started', 'desktop_permissions_configured', 'command_effect', 'normal_quit',
           'owned_children_exited', 'cli_defaults_unchanged', 'vendor_service_preserved', 'diagnostics_written')
 REASONS = {'desktop_authentication_required', 'desktop_workspace_invalid', 'desktop_control_unsupported',
            'native_client_busy', 'engine_identity_mismatch', 'wrong_user_session', 'desktop_readiness_failed',
@@ -23,6 +23,14 @@ def sanitized_desktop(value):
             if type(checks[key]) is not bool: raise Failure('malformed_desktop_result')
             result['checks'][key] = checks[key]
     if value.get('route') == 'native-desktop-bridge': result['route'] = value['route']
+    restrictions = value.get('restrictions', {})
+    if not isinstance(restrictions, dict): raise Failure('malformed_desktop_result')
+    result['restrictions'] = {}
+    for key in ('tool_registration_writes_refused', 'unrelated_turns_refused', 'native_visualization_roots'):
+        if key in restrictions:
+            if type(restrictions[key]) is not int or not 0 <= restrictions[key] <= (1 if key == 'native_visualization_roots' else 128):
+                raise Failure('malformed_desktop_result')
+            result['restrictions'][key] = restrictions[key]
     identity = value.get('identity', {})
     if not isinstance(identity, dict): raise Failure('malformed_desktop_result')
     clean = {}
@@ -67,6 +75,8 @@ def validate_desktop_readiness(task, result):
 def validate_desktop(task, result, native):
     validate_desktop_readiness(task, result)
     if result.get('route') != 'native-desktop-bridge' or any(result['checks'].get(key) is not True for key in CHECKS):
+        raise Failure('desktop_assertion_failed')
+    if any(key not in result['restrictions'] for key in ('tool_registration_writes_refused', 'unrelated_turns_refused', 'native_visualization_roots')):
         raise Failure('desktop_assertion_failed')
     identity = result['identity']
     if (any(identity.get(key) != native['identity'][key] for key in ('package', 'engine_sha256'))

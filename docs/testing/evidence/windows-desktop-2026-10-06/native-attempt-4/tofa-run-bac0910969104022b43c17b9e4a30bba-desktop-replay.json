@@ -1,0 +1,88 @@
+{
+  "run": "tofa-run-bac0910969104022b43c17b9e4a30bba",
+  "workspace_run": "tofa-run-f0f6937db66046308cfa5de30e442ff3",
+  "task": {
+    "last_result": 1,
+    "state": "Ready",
+    "run": "tofa-run-bac0910969104022b43c17b9e4a30bba",
+    "ok": false,
+    "reason": "native_task_failed",
+    "completed": true,
+    "phase": "completion",
+    "unregistered": true
+  },
+  "result": {
+    "run": "tofa-run-bac0910969104022b43c17b9e4a30bba",
+    "phase": "desktop",
+    "ok": false,
+    "reason": "desktop_command_failed",
+    "checks": {
+      "authenticated": true,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true,
+      "desktop_started": true,
+      "bridge_initialized": true,
+      "diagnostics_written": true,
+      "normal_quit": true,
+      "owned_children_exited": true,
+      "cli_defaults_unchanged": false,
+      "vendor_service_preserved": true,
+      "readiness_engine_exited": true
+    },
+    "route": "native-desktop-bridge"
+  },
+  "progress": {
+    "outcome": "collected",
+    "checkpoints": [
+      {
+        "stage": "user_started",
+        "elapsed_ms": 2
+      },
+      {
+        "stage": "package_discovered",
+        "elapsed_ms": 248
+      },
+      {
+        "stage": "engine_hashed",
+        "elapsed_ms": 787
+      },
+      {
+        "stage": "engine_discovered",
+        "elapsed_ms": 1206
+      },
+      {
+        "stage": "native_probe_started",
+        "elapsed_ms": 1253
+      },
+      {
+        "stage": "desktop_authentication",
+        "elapsed_ms": 1253
+      },
+      {
+        "stage": "desktop_preparation",
+        "elapsed_ms": 2211
+      },
+      {
+        "stage": "desktop_startup",
+        "elapsed_ms": 4956
+      },
+      {
+        "stage": "desktop_permissions",
+        "elapsed_ms": 13018
+      },
+      {
+        "stage": "desktop_command",
+        "elapsed_ms": 13020
+      },
+      {
+        "stage": "desktop_quit",
+        "elapsed_ms": 63925
+      },
+      {
+        "stage": "desktop_cleanup",
+        "elapsed_ms": 67161
+      }
+    ]
+  }
+}

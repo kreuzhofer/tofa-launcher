@@ -1,0 +1,71 @@
+{
+  "run": "tofa-template-b4418606dc5b431083d0c384961084c5",
+  "phase": "bootstrap",
+  "ok": true,
+  "reason": "settings_shapes_collected",
+  "initialized": true,
+  "effective": {
+    "mcp_present": true,
+    "mcp_empty": false,
+    "environment_present": true,
+    "set_present": true,
+    "set_empty": true
+  },
+  "layers": [
+    {
+      "type": "sessionFlags",
+      "shape": {
+        "mcp_present": true,
+        "mcp_empty": true,
+        "environment_present": true,
+        "set_present": true,
+        "set_empty": true
+      },
+      "version_present": true
+    },
+    {
+      "type": "user",
+      "shape": {
+        "mcp_present": true,
+        "mcp_empty": false,
+        "environment_present": false,
+        "set_present": false,
+        "set_empty": false
+      },
+      "version_present": true
+    },
+    {
+      "type": "enterpriseManaged",
+      "shape": {
+        "mcp_present": false,
+        "mcp_empty": false,
+        "environment_present": false,
+        "set_present": false,
+        "set_empty": false
+      },
+      "version_present": true
+    },
+    {
+      "type": "system",
+      "shape": {
+        "mcp_present": false,
+        "mcp_empty": false,
+        "environment_present": false,
+        "set_present": false,
+        "set_empty": false
+      },
+      "version_present": true
+    }
+  ],
+  "engine_exited": true,
+  "task": {
+    "last_result": 0,
+    "state": "Ready",
+    "run": "tofa-template-b4418606dc5b431083d0c384961084c5",
+    "ok": true,
+    "reason": "completed",
+    "completed": true,
+    "phase": "completion",
+    "unregistered": true
+  }
+}

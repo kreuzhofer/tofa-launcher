@@ -10,7 +10,10 @@ try {
   if($process.StartTime.ToUniversalTime().Ticks -ne $request.started_ticks -or $process.Path -ne $request.executable){throw 'identity changed'}
   $condition=New-Object System.Windows.Automation.PropertyCondition([System.Windows.Automation.AutomationElement]::ProcessIdProperty,[int]$request.pid)
   function Find-Control($names,$kind) {
-    $elements=[System.Windows.Automation.AutomationElement]::RootElement.FindAll([System.Windows.Automation.TreeScope]::Descendants,$condition)
+    $process.Refresh()
+    $scope=[System.Windows.Automation.AutomationElement]::FromHandle($process.MainWindowHandle)
+    if($request.action -eq 'quit'){$scope=[System.Windows.Automation.AutomationElement]::RootElement}
+    $elements=$scope.FindAll([System.Windows.Automation.TreeScope]::Descendants,$condition)
     $matches=@($elements|Where-Object {$_.Current.ControlType -eq $kind -and $_.Current.Name -in $names -and $_.Current.IsEnabled -and !$_.Current.IsOffscreen})
     if($matches.Count -ne 1){return $null}
     return $matches[0]
@@ -28,6 +31,25 @@ try {
       Start-Sleep -Milliseconds 300
     } while([DateTime]::UtcNow -lt $deadline)
     Invoke-Control $button
+  } elseif($request.action -eq 'configure') {
+    $deadline=[DateTime]::UtcNow.AddSeconds(30)
+    do {
+      $permission=Find-Control @('Change permissions') ([System.Windows.Automation.ControlType]::Button)
+      if($null -ne $permission){break}
+      Start-Sleep -Milliseconds 300
+    } while([DateTime]::UtcNow -lt $deadline)
+    if($null -eq $permission){throw 'permission control unavailable'}
+    $expand=$permission.GetCurrentPattern([System.Windows.Automation.ExpandCollapsePattern]::Pattern)
+    $expand.Expand()
+    do {
+      $automatic=Find-Control @('Approve for me','Approve for me Only ask for actions detected as potentially unsafe') ([System.Windows.Automation.ControlType]::MenuItem)
+      if($null -ne $automatic){break}
+      Start-Sleep -Milliseconds 300
+    } while([DateTime]::UtcNow -lt $deadline)
+    if($null -eq $automatic){throw 'automatic review control unavailable'}
+    $selection=$null
+    if($automatic.TryGetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern,[ref]$selection)){$selection.Select()}
+    else {Invoke-Control $automatic}
   } elseif($request.action -eq 'quit') {
     $deadline=[DateTime]::UtcNow.AddSeconds(15)
     do {

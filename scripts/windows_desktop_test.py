@@ -8,6 +8,109 @@ import windows_run_test as fixture
 
 @unittest.skipIf(os.name == 'nt', 'Mac operator CLI requires Unix executable fixtures')
 class DesktopTests(fixture.WindowsRunFixture):
+    def test_desktop_tool_environment_batch_preserves_shared_cli_settings(self):
+        self.change(mode='desktop_bridge_environment_settings')
+        result, report, state = self.invoke('--suite', 'desktop-smoke', '--test-auth', 'native-session')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue(state['bridge_trial']['settings_unchanged'])
+        self.assertTrue(state['bridge_trial']['settings_rejected'])
+        self.assertEqual(report['desktop'].get('restrictions', {}).get('tool_registration_writes_refused'), 1)
+
+    def test_desktop_composer_trailing_newline_preserves_the_exact_synthetic_task(self):
+        self.change(mode='desktop_bridge_whitespace')
+        result, report, state = self.invoke('--suite', 'desktop-smoke', '--test-auth', 'native-session')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(state['bridge_trial'], {'refused': False, 'executed': True, 'exit_code': 0})
+
+    def test_unrelated_background_turn_is_blocked_without_invalidating_the_authorized_task(self):
+        self.change(mode='desktop_bridge_background')
+        result, report, state = self.invoke('--suite', 'desktop-smoke', '--test-auth', 'native-session')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(state['bridge_trial'], {'refused': False, 'executed': True, 'exit_code': 0, 'background_blocked': True})
+
+    def test_unknown_write_after_successful_command_cannot_pass_final_policy_audit(self):
+        self.change(mode='desktop_bridge_late_write')
+        result, report, state = self.invoke('--suite', 'desktop-smoke', '--test-auth', 'native-session')
+        self.assertTrue(state['bridge_trial']['executed'])
+        self.assertTrue(state['bridge_trial']['late_write_refused'])
+        self.assertNotEqual(result.returncode, 0)
+        self.assertTrue(report['retained'])
+
+    def test_builtin_local_environment_is_limited_to_the_owned_workspace(self):
+        self.change(mode='desktop_bridge_local_environment')
+        result, report, state = self.invoke('--suite', 'desktop-smoke', '--test-auth', 'native-session')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(state['bridge_trial'], {'refused': False, 'executed': True, 'exit_code': 0})
+
+    def test_native_thread_visualization_root_stays_scoped_to_the_verified_thread(self):
+        self.change(mode='desktop_bridge_visualization')
+        result, report, state = self.invoke('--suite', 'desktop-smoke', '--test-auth', 'native-session')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(state['bridge_trial'], {'refused': False, 'executed': True, 'exit_code': 0, 'visualization_roots': 1})
+        self.assertEqual(report['desktop']['restrictions']['native_visualization_roots'], 1)
+
+    def test_visualization_scope_rejects_unrelated_shared_redirected_and_wrong_owner_directories(self):
+        for suffix in ('other_thread', 'shared', 'reparse', 'owner_wrong'):
+            with self.subTest(suffix=suffix):
+                self.change(mode='desktop_bridge_visualization_' + suffix)
+                result, report, state = self.invoke('--suite', 'desktop-smoke', '--test-auth', 'native-session')
+                self.assertNotEqual(result.returncode, 0)
+                self.assertFalse(state['bridge_trial']['executed'])
+                self.assertTrue(state['bridge_trial']['refused'])
+                self.assertEqual(self.invoke('--run', report['run'], command='cleanup')[0].returncode, 0)
+
+    def test_desktop_selected_catalog_model_requires_native_effective_identity(self):
+        self.change(mode='desktop_bridge_catalog_model')
+        result, report, state = self.invoke('--suite', 'desktop-smoke', '--test-auth', 'native-session')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue(state['bridge_trial']['executed'])
+        self.assertEqual(state['bridge_trial']['model_observed'], 'gpt-5.5')
+        self.assertEqual(report['desktop']['identity']['model'], 'gpt-5.5')
+
+    def test_native_model_reroute_cannot_qualify_the_original_model_identity(self):
+        self.change(mode='desktop_bridge_rerouted')
+        result, report, state = self.invoke('--suite', 'desktop-smoke', '--test-auth', 'native-session')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertTrue(report['retained'])
+        self.assertFalse(state['bridge_trial']['policy_preserved'])
+
+    def test_native_canonical_sandbox_keeps_the_cwd_implicit(self):
+        self.change(mode='desktop_bridge_visualization_canonical')
+        result, report, state = self.invoke('--suite', 'desktop-smoke', '--test-auth', 'native-session')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue(state['bridge_trial']['policy_preserved'])
+        self.assertEqual(report['desktop']['restrictions']['native_visualization_roots'], 1)
+
+    def test_native_guardian_reviewer_alias_preserves_verified_automatic_review(self):
+        self.change(mode='desktop_bridge_reviewer_alias')
+        result, report, state = self.invoke('--suite', 'desktop-smoke', '--test-auth', 'native-session')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(state['bridge_trial'], {'refused': False, 'executed': True, 'exit_code': 0})
+        self.assertEqual(report['desktop']['identity']['reviewer'], 'auto_review')
+
+    def test_desktop_pass_requires_automated_permission_control_confirmation(self):
+        self.change(mode='desktop_permissions_unverified')
+        result, report, _ = self.invoke('--suite', 'desktop-smoke', '--test-auth', 'native-session')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(report['reason'], 'desktop_assertion_failed')
+
+    def test_desktop_tool_registration_does_not_write_shared_cli_settings(self):
+        self.change(mode='desktop_bridge_settings')
+        result, report, state = self.invoke('--suite', 'desktop-smoke', '--test-auth', 'native-session')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue(state['bridge_trial']['settings_unchanged'])
+        self.assertTrue(state['bridge_trial']['settings_rejected'])
+        self.assertEqual(report['desktop'].get('restrictions', {}).get('tool_registration_writes_refused'), 1)
+        self.assertTrue(report['desktop']['checks']['cli_defaults_unchanged'])
+
+    def test_unsupported_permission_write_is_refused_before_shared_settings_change(self):
+        self.change(mode='desktop_bridge_permission_write')
+        result, report, state = self.invoke('--suite', 'desktop-smoke', '--test-auth', 'native-session')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(report['reason'], 'desktop_policy_mismatch')
+        self.assertEqual(state['bridge_trial'], {'refused': True, 'executed': False, 'exit_code': 0,
+                                                'settings_unchanged': True})
+
     def test_failed_native_readiness_prevents_desktop_trials(self):
         self.change(mode='task_failed')
         result, report, state = self.invoke('--suite', 'desktop-smoke', '--test-auth', 'native-session')

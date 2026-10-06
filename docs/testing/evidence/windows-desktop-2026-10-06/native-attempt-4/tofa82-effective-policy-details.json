@@ -1,0 +1,475 @@
+{
+  "events": [
+    {
+      "event": "start",
+      "bridge_pid": 7008,
+      "pid": 7008,
+      "parent_pid": 2772,
+      "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+      "app_server": true
+    },
+    {
+      "event": "child",
+      "bridge_pid": 7008,
+      "pid": 6424
+    },
+    {
+      "event": "initialized",
+      "bridge_pid": 7008,
+      "ok": true,
+      "main_connection": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "tool_registration_refused",
+      "bridge_pid": 7008
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "thread_ready",
+      "bridge_pid": 7008,
+      "thread": 1,
+      "policy_verified": true,
+      "owned_workspace": true,
+      "requested_model": "gpt-6.1-sol",
+      "native_reviewer": "auto_review",
+      "requested_reviewer": "guardian_subagent",
+      "reviewer_verified": true,
+      "approval_verified": true,
+      "sandbox_verified": true,
+      "roots_verified": true,
+      "environment_verified": true,
+      "model": "gpt-6.1-sol",
+      "provider": "openai",
+      "reviewer": "auto_review"
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "thread_ready",
+      "bridge_pid": 7008,
+      "thread": 2,
+      "policy_verified": false,
+      "owned_workspace": true,
+      "requested_model": "gpt-6-luna",
+      "native_reviewer": "auto_review",
+      "requested_reviewer": null,
+      "reviewer_verified": true,
+      "approval_verified": false,
+      "sandbox_verified": false,
+      "roots_verified": true,
+      "environment_verified": true,
+      "model": "gpt-6-luna",
+      "provider": "openai",
+      "reviewer": "unexpected"
+    },
+    {
+      "event": "unrelated_turn_refused",
+      "bridge_pid": 7008,
+      "reason": "unrelated_turn"
+    },
+    {
+      "event": "native_visualization_scope",
+      "bridge_pid": 7008
+    },
+    {
+      "event": "updated_policy_details",
+      "bridge_pid": 7008,
+      "environment_verified": true,
+      "reviewer": "auto_review",
+      "approval": "on-request",
+      "sandbox_present": true,
+      "sandbox_type": "workspaceWrite",
+      "network_disabled": true,
+      "root_count": 1,
+      "workspace_roots": 0
+    },
+    {
+      "event": "policy_refused",
+      "bridge_pid": 7008,
+      "reason": "native_settings_changed"
+    },
+    {
+      "event": "thread_settings_updated",
+      "bridge_pid": 7008,
+      "thread": 1,
+      "policy_verified": false,
+      "owned_workspace": true,
+      "model": "gpt-5.6-sol",
+      "provider": "openai",
+      "reviewer": "unexpected"
+    },
+    {
+      "event": "turn_admitted",
+      "bridge_pid": 7008,
+      "thread": 1,
+      "turn": 1,
+      "model": "gpt-5.6-sol"
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 7008,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    },
+    {
+      "event": "start",
+      "bridge_pid": 9488,
+      "pid": 9488,
+      "parent_pid": 10344,
+      "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+      "app_server": true
+    },
+    {
+      "event": "child",
+      "bridge_pid": 9488,
+      "pid": 7188
+    },
+    {
+      "event": "initialized",
+      "bridge_pid": 9488,
+      "ok": true,
+      "main_connection": false
+    },
+    {
+      "event": "settings",
+      "bridge_pid": 9488,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true
+    }
+  ]
+}

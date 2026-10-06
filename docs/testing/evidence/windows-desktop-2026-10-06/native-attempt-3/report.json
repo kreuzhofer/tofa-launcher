@@ -1,0 +1,186 @@
+{
+  "schema": 1,
+  "run": "tofa-run-50011105a9064fa3ba63b4f577d93ec6",
+  "outcome": "failed",
+  "stages": [
+    {
+      "stage": "template_validation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.208
+    },
+    {
+      "stage": "candidate_validation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.008
+    },
+    {
+      "stage": "clone_creation",
+      "outcome": "passed",
+      "elapsed_seconds": 1.153
+    },
+    {
+      "stage": "boot",
+      "outcome": "passed",
+      "elapsed_seconds": 85.031
+    },
+    {
+      "stage": "guest_session",
+      "outcome": "passed",
+      "elapsed_seconds": 96.703
+    },
+    {
+      "stage": "native_smoke",
+      "outcome": "failed",
+      "reason": "guest_task_incomplete",
+      "elapsed_seconds": 183.707
+    }
+  ],
+  "suite": "desktop-smoke",
+  "retained": true,
+  "cleanup": {
+    "outcome": "retained",
+    "shutdown": "stopped"
+  },
+  "capabilities": {
+    "native_sandbox": "unverified",
+    "desktop_guardian": "unverified"
+  },
+  "template": {
+    "uuid": "EF96CF12-D901-455F-81FF-4C5001E15F80",
+    "state": "stopped"
+  },
+  "requested_candidate": {
+    "version": "v0.1.0-rc.14",
+    "sha256": "1b0a2e7aa7aafc515391e221a16bee5124cf5b09aedf89af779796fae15bdd77",
+    "commit": "14134d43df4cca00bcdf10e49b3dc5ef3122f8d7"
+  },
+  "ownership_unresolved": false,
+  "clone_identity_source": "unique_inventory_delta",
+  "clone": {
+    "uuid": "F9DEF198-E8D4-49BF-BB23-5748D6109CFA",
+    "name": "tofa-run-50011105a9064fa3ba63b4f577d93ec6"
+  },
+  "diagnostics": {
+    "guest_staging": "C:\\Users\\Public\\tofa-run-50011105a9064fa3ba63b4f577d93ec6",
+    "guest_workspace": "%USERPROFILE%\\tofa-run-50011105a9064fa3ba63b4f577d93ec6"
+  },
+  "os": {
+    "name": "Windows 11",
+    "architecture": "ARM64",
+    "version": "10.0.26200"
+  },
+  "reason": "guest_task_incomplete",
+  "failed_transport_operation": "file_pull",
+  "recovery_diagnostics": {
+    "outcome": "collected",
+    "files": {
+      "progress": {
+        "outcome": "collected",
+        "checkpoints": [
+          {
+            "stage": "user_started",
+            "elapsed_ms": 8
+          },
+          {
+            "stage": "package_discovered",
+            "elapsed_ms": 1528
+          },
+          {
+            "stage": "engine_hashed",
+            "elapsed_ms": 69302
+          }
+        ]
+      },
+      "native": {
+        "outcome": "unavailable",
+        "reason": "missing_or_invalid"
+      }
+    }
+  },
+  "completion": {
+    "completed": false,
+    "unregistered": true,
+    "last_result": 267014,
+    "state": "Ready"
+  },
+  "transport_progress_observed": false,
+  "transport_steps": [
+    {
+      "step": "protected_staging",
+      "started_after_seconds": 86.401,
+      "outcome": "passed",
+      "elapsed_seconds": 52.236
+    },
+    {
+      "step": "guest_preflight",
+      "started_after_seconds": 138.638,
+      "outcome": "passed",
+      "elapsed_seconds": 44.465
+    },
+    {
+      "step": "stage_request",
+      "started_after_seconds": 183.82,
+      "outcome": "passed",
+      "elapsed_seconds": 0.13
+    },
+    {
+      "step": "stage_probe",
+      "started_after_seconds": 183.95,
+      "outcome": "passed",
+      "elapsed_seconds": 0.159
+    },
+    {
+      "step": "stage_user",
+      "started_after_seconds": 184.11,
+      "outcome": "passed",
+      "elapsed_seconds": 0.145
+    },
+    {
+      "step": "stage_candidate",
+      "started_after_seconds": 184.255,
+      "outcome": "passed",
+      "elapsed_seconds": 21.032
+    },
+    {
+      "step": "stage_windows_candidate",
+      "started_after_seconds": 205.29,
+      "outcome": "passed",
+      "elapsed_seconds": 0.185
+    },
+    {
+      "step": "prepare_task",
+      "started_after_seconds": 205.476,
+      "outcome": "passed",
+      "elapsed_seconds": 20.347
+    },
+    {
+      "step": "native_task",
+      "started_after_seconds": 225.823,
+      "outcome": "passed",
+      "elapsed_seconds": 0.606
+    },
+    {
+      "step": "collect_task",
+      "started_after_seconds": 226.429,
+      "outcome": "passed",
+      "elapsed_seconds": 140.248
+    }
+  ],
+  "guest_progress": {
+    "outcome": "collected",
+    "checkpoints": [
+      {
+        "stage": "user_started",
+        "elapsed_ms": 8
+      },
+      {
+        "stage": "package_discovered",
+        "elapsed_ms": 1528
+      },
+      {
+        "stage": "engine_hashed",
+        "elapsed_ms": 69302
+      }
+    ]
+  }
+}

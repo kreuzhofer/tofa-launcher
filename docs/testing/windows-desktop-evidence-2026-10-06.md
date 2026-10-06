@@ -19,8 +19,9 @@ clone were left unchanged.
   readiness, then launches the installed desktop through an owned bridge and
   attempts one synthetic workspace write/read with semantic UI Automation.
 - The bridge checks the returned thread policy and turn overrides before
-  forwarding the synthetic prompt. Full access, network widening, changed
-  models, unrelated workspace roots, and environment substitution are refused.
+  forwarding the synthetic prompt. Full access, network widening, models absent
+  from the native catalog, unrelated workspace roots, and environment substitution
+  are refused. Effective native settings must confirm the selected turn model.
 - Bridge-local thread and turn ordinals correlate admission, command success,
   and turn completion. Unrelated completion cannot qualify the filesystem effect.
 - Normal quit, owned-child exit, unchanged CLI configuration, vendor-service
@@ -56,7 +57,7 @@ controls, a live model command, or a Guardian decision.
 
 ## Native attempts after sign-in
 
-Two fresh-clone attempts failed before desktop model execution; neither is a
+The first two fresh-clone attempts failed before desktop model execution; neither is a
 qualification pass. The source and everyday VM were not changed by either run.
 
 1. [Attempt 1](evidence/windows-desktop-2026-10-06/native-attempt-1/report.json)
@@ -101,3 +102,71 @@ existing ChatGPT authentication, effective synthetic workspace trust, automatic
 review, disabled Full access, and clean readiness-engine exit all passed. The
 dedicated template then shut down normally. Both review axes found no issues
 in the readiness, progress, menu-control, and trust-override fixes.
+
+[Attempt 3](evidence/windows-desktop-2026-10-06/native-attempt-3/report.json)
+failed `guest_task_incomplete` during engine discovery. Boot took 85.031 seconds,
+readiness 96.703 seconds, and the package-engine hash checkpoint arrived at
+69.302 seconds inside the limited task. The task deadline expired before engine
+discovery completed; no desktop turn ran. The clone stopped normally and was
+explicitly deleted after preserving the failure. An unchanged fresh-clone retry
+was started after host regression work had finished to distinguish transient
+resource contention from a reproducible deadline defect.
+
+[Attempt 4](evidence/windows-desktop-2026-10-06/native-attempt-4/report.json)
+passed native readiness in 41 seconds but failed the desktop smoke. Diagnostic
+replays in that retained clone exposed helper/main bridge selection, renderer
+permission selection, a schema-supported `guardian_subagent` reviewer alias,
+and a trailing newline in the submitted synthetic prompt. These replays use
+fresh synthetic workspaces but are not fresh-clone acceptance runs.
+
+The desktop also attempts to write tool registrations into shared CLI settings.
+An initial runtime-layer isolation approach failed its native verification:
+`mcp_servers={}` merges with saved entries instead of clearing them. The final
+bounded bridge explicitly rejects the narrowly recognized registration writes;
+it does not claim that tools were registered or disabled. Unknown or mixed
+shared writes remain fatal. Background title requests are refused before native
+execution. Both expected restrictions have bounded counts in the durable report.
+The synthetic command still requires independently verified native policy,
+correlated execution and effects, normal quit, and unchanged CLI configuration.
+A final audit checks fatal bridge events through owned-process shutdown.
+
+A timed accessibility trace found a 13.843-second query exhausting the initial
+15-second permission wait. Permission setup now has a 30-second bound, refreshes
+the verified window handle, and remains inside the guest's 120-second task limit.
+Subsequent replays selected automatic review and quit normally.
+
+The desktop explicitly selects the built-in `local` environment. Its cwd and
+runtime roots must match the synthetic workspace; configured remote environments
+remain refused. The [native environment implementation](https://github.com/openai/codex/blob/main/codex-rs/exec-server/src/environment_toml.rs)
+reserves the `local` identity. The desktop also requests one dated visualization
+directory tied to the newly created native thread. Validation requires that exact
+thread UUID, a valid date beneath the test profile's visualization directory,
+no path redirection, and the limited user's ownership of the nearest existing directory.
+The additional native writable scope is counted in the report; it is not described
+as workspace-only access, and the runner does not clean unrelated visualization
+storage. Negative tests cover another thread, shared directories, redirects,
+and wrong ownership.
+
+Native model selection can differ between thread startup and a collaboration-mode
+turn. Only models advertised by the native catalog may change the initial model;
+the effective native settings must confirm the selected identity before a pass.
+Observed native rerouting fails qualification. The installed Windows engine's
+schema was generated locally and retained as contract evidence. Native policy
+notifications omit the cwd from their writable-root list because it is implicit;
+the additional visualization root remains subject to the same ownership checks.
+The original overly strict rejection and its fixture regression are preserved.
+
+Native fresh-clone desktop acceptance is still pending; #83 and #84 are not qualified.
+
+The [final diagnostic replay](evidence/windows-desktop-2026-10-06/native-attempt-4/tofa-run-2e76642dbaf54f0095d95166ddbfc1d0-desktop-replay.json)
+passed the real desktop smoke in 52 seconds. Native effective identity was
+`gpt-5.6-sol`, provider `openai`, reviewer `auto_review`. One correlated command
+wrote and read the synthetic marker; normal quit, owned-child exit, final policy
+audit, unchanged CLI settings, and preserved vendor service all passed. The
+[bridge observations](evidence/windows-desktop-2026-10-06/native-attempt-4/tofa82-desktop-passed-bridge.json)
+retain the native model and canonical policy confirmation. This reused diagnostic
+clone does not satisfy the fresh-clone acceptance criterion.
+
+The diagnostic clone was then [explicitly deleted](evidence/windows-desktop-2026-10-06/native-attempt-4/cleanup.json)
+after preserving its attempts. Final Standards and Spec reviews found no new
+implementation issues; both retained the fresh-clone acceptance requirement.

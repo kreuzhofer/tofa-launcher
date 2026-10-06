@@ -1,0 +1,85 @@
+{
+  "run": "tofa-run-178d4510d78a4eb19279bd6d35f8c8b8",
+  "workspace_run": "tofa-run-4293895721aa4757bc66be7ff40b8d87",
+  "task": {
+    "last_result": 1,
+    "state": "Ready",
+    "run": "tofa-run-178d4510d78a4eb19279bd6d35f8c8b8",
+    "ok": false,
+    "reason": "native_task_failed",
+    "completed": true,
+    "phase": "completion",
+    "unregistered": true
+  },
+  "result": {
+    "run": "tofa-run-178d4510d78a4eb19279bd6d35f8c8b8",
+    "phase": "desktop",
+    "ok": false,
+    "reason": "desktop_control_unsupported",
+    "checks": {
+      "authenticated": true,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true,
+      "desktop_started": true,
+      "bridge_initialized": true,
+      "desktop_permissions_configured": false,
+      "diagnostics_written": true,
+      "normal_quit": true,
+      "owned_children_exited": true,
+      "cli_defaults_unchanged": true,
+      "vendor_service_preserved": true,
+      "readiness_engine_exited": true
+    },
+    "route": "native-desktop-bridge"
+  },
+  "progress": {
+    "outcome": "collected",
+    "checkpoints": [
+      {
+        "stage": "user_started",
+        "elapsed_ms": 2
+      },
+      {
+        "stage": "package_discovered",
+        "elapsed_ms": 175
+      },
+      {
+        "stage": "engine_hashed",
+        "elapsed_ms": 545
+      },
+      {
+        "stage": "engine_discovered",
+        "elapsed_ms": 840
+      },
+      {
+        "stage": "native_probe_started",
+        "elapsed_ms": 849
+      },
+      {
+        "stage": "desktop_authentication",
+        "elapsed_ms": 849
+      },
+      {
+        "stage": "desktop_preparation",
+        "elapsed_ms": 1735
+      },
+      {
+        "stage": "desktop_startup",
+        "elapsed_ms": 3947
+      },
+      {
+        "stage": "desktop_permissions",
+        "elapsed_ms": 15723
+      },
+      {
+        "stage": "desktop_quit",
+        "elapsed_ms": 35155
+      },
+      {
+        "stage": "desktop_cleanup",
+        "elapsed_ms": 42015
+      }
+    ]
+  }
+}

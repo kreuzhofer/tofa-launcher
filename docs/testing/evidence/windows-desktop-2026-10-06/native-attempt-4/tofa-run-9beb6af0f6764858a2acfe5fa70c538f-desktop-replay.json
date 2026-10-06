@@ -1,0 +1,95 @@
+{
+  "run": "tofa-run-9beb6af0f6764858a2acfe5fa70c538f",
+  "workspace_run": "tofa-run-2cd3abcbddf14202b34e533ac17d3651",
+  "task": {
+    "last_result": 1,
+    "state": "Ready",
+    "run": "tofa-run-9beb6af0f6764858a2acfe5fa70c538f",
+    "ok": false,
+    "reason": "native_task_failed",
+    "completed": true,
+    "phase": "completion",
+    "unregistered": true
+  },
+  "result": {
+    "run": "tofa-run-9beb6af0f6764858a2acfe5fa70c538f",
+    "phase": "desktop",
+    "ok": false,
+    "reason": "desktop_policy_mismatch",
+    "checks": {
+      "authenticated": true,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true,
+      "desktop_started": true,
+      "bridge_initialized": true,
+      "desktop_permissions_configured": true,
+      "diagnostics_written": true,
+      "bridge_policy_preserved": false,
+      "normal_quit": true,
+      "owned_children_exited": true,
+      "cli_defaults_unchanged": true,
+      "vendor_service_preserved": true,
+      "readiness_engine_exited": true
+    },
+    "route": "native-desktop-bridge",
+    "restrictions": {
+      "tool_registration_writes_refused": 1,
+      "unrelated_turns_refused": 1,
+      "native_visualization_roots": 1
+    }
+  },
+  "progress": {
+    "outcome": "collected",
+    "checkpoints": [
+      {
+        "stage": "user_started",
+        "elapsed_ms": 1
+      },
+      {
+        "stage": "package_discovered",
+        "elapsed_ms": 137
+      },
+      {
+        "stage": "engine_hashed",
+        "elapsed_ms": 450
+      },
+      {
+        "stage": "engine_discovered",
+        "elapsed_ms": 695
+      },
+      {
+        "stage": "native_probe_started",
+        "elapsed_ms": 702
+      },
+      {
+        "stage": "desktop_authentication",
+        "elapsed_ms": 702
+      },
+      {
+        "stage": "desktop_preparation",
+        "elapsed_ms": 1440
+      },
+      {
+        "stage": "desktop_startup",
+        "elapsed_ms": 3325
+      },
+      {
+        "stage": "desktop_permissions",
+        "elapsed_ms": 9634
+      },
+      {
+        "stage": "desktop_command",
+        "elapsed_ms": 28881
+      },
+      {
+        "stage": "desktop_quit",
+        "elapsed_ms": 31935
+      },
+      {
+        "stage": "desktop_cleanup",
+        "elapsed_ms": 35301
+      }
+    ]
+  }
+}

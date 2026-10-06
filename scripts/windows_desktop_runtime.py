@@ -22,17 +22,20 @@ def powershell(source, timeout=20):
     return json.loads(result.stdout.decode('utf-8-sig'))
 
 
-def observations(directory):
+def observations(directory, *, final=False):
     result = []
     for path in directory.glob('bridge-*.jsonl'):
         content = path.read_text(encoding='utf-8')
         lines = content.splitlines()
         for index, line in enumerate(lines):
-            try: result.append(json.loads(line))
+            try: item = json.loads(line)
             except ValueError:
-                if index != len(lines) - 1 or content.endswith('\n'):
+                if final or index != len(lines) - 1 or content.endswith('\n'):
                     raise ValueError('desktop_observation_invalid')
                 # Only an unfinished final line may still be in flight.
+                continue
+            if not isinstance(item, dict): raise ValueError('desktop_observation_invalid')
+            result.append(item)
     return result
 
 
@@ -40,7 +43,7 @@ def ui(root, app, action):
     request = dict(app, action=action)
     source = (root / 'windows_desktop_ui.ps1').read_text(encoding='utf-8')
     source = source.replace('__REQUEST__', base64.b64encode(json.dumps(request).encode()).decode())
-    return powershell(source, timeout=25).get('ok') is True
+    return powershell(source, timeout=40 if action == 'configure' else 25).get('ok') is True
 
 
 def desktop_smoke(root, request, identity, workspace, report, checkpoint):
@@ -75,6 +78,7 @@ def desktop_smoke(root, request, identity, workspace, report, checkpoint):
               "read other files, use the network, or retry outside the sandbox. Stop on any failure.")
     configuration.write_text(json.dumps({'engine': identity['engine'], 'sha256': engine_hash,
                                         'workspace': str(workspace), 'evidence_dir': str(owned),
+                                        'visualization_root': str(Path.home() / '.codex' / 'visualizations'), 'sid': request['sid'],
                                         'prompt': prompt}), encoding='utf-8')
     link = 'codex://threads/new?' + urlencode({'path': str(workspace), 'prompt': prompt})
     env = dict(os.environ, CODEX_CLI_PATH=str(bridge), TOFA_LIVE_PYTHON=request['python'],
@@ -99,16 +103,22 @@ def desktop_smoke(root, request, identity, workspace, report, checkpoint):
             if app is not None and app['executable'].lower() != selected['executable'].lower():
                 raise ValueError('engine_identity_mismatch')
             events = observations(owned)
-            settings = [event for event in events if event.get('event') == 'settings']
-            if app is not None and settings: break
+            main_bridges = {item['bridge_pid'] for item in events if item.get('event') == 'initialized'
+                            and item.get('ok') is True and item.get('main_connection') is True}
+            settings = [event for event in events if event.get('event') == 'settings'
+                        and event.get('bridge_pid') in main_bridges]
+            if app is not None and len(main_bridges) == 1 and settings: break
             time.sleep(.3)
         checks['desktop_started'] = app is not None
         checkpoint('desktop_permissions')
         events = observations(owned)
-        main_bridges = {item['bridge_pid'] for item in events if item.get('event') == 'start' and item.get('app_server') is True}
+        main_bridges = {item['bridge_pid'] for item in events if item.get('event') == 'initialized'
+                        and item.get('ok') is True and item.get('main_connection') is True}
         if len(main_bridges) != 1: raise ValueError('desktop_startup_failed')
         bridge_pid = next(iter(main_bridges))
         events = [item for item in events if item.get('bridge_pid') == bridge_pid]
+        if any(item.get('event') in ('invalid_observation', 'invalid_identity', 'policy_refused') for item in events):
+            raise ValueError('desktop_policy_mismatch')
         checks['bridge_initialized'] = any(item.get('event') == 'initialized' and item.get('ok') is True for item in events)
         settings = [item for item in events if item.get('event') == 'settings']
         for key in ('workspace_trusted', 'automatic_review', 'full_access_disabled'):
@@ -116,6 +126,8 @@ def desktop_smoke(root, request, identity, workspace, report, checkpoint):
         if not checks['desktop_started'] or not checks['bridge_initialized']: raise ValueError('desktop_startup_failed')
         if not all(checks[key] for key in ('workspace_trusted', 'automatic_review', 'full_access_disabled')):
             raise ValueError('desktop_policy_mismatch')
+        checks['desktop_permissions_configured'] = ui(root, app, 'configure')
+        if not checks['desktop_permissions_configured']: raise ValueError('desktop_control_unsupported')
         checkpoint('desktop_command')
         # The bridge gates the actual turn against the returned thread policy
         # and request overrides before forwarding it, including newly created
@@ -134,10 +146,11 @@ def desktop_smoke(root, request, identity, workspace, report, checkpoint):
             time.sleep(.25)
         if len(admitted) != 1 or len(completion) != 1 or completion[0].get('success') is not True:
             raise ValueError('desktop_command_failed')
-        threads = [item for item in events if item.get('event') == 'thread_ready'
+        threads = [item for item in events if item.get('event') in ('thread_ready', 'thread_settings_updated')
                    and item.get('thread') == admitted[0]['thread'] and item.get('policy_verified') is True]
         if not threads: raise ValueError('desktop_policy_mismatch')
         thread = threads[-1]
+        if thread.get('model') != admitted[0].get('model'): raise ValueError('desktop_policy_mismatch')
         commands = [item for item in events if item.get('event') == 'command_completed'
                     and all(item.get(key) == admitted[0].get(key) for key in ('thread', 'turn'))]
         if len(commands) != 1 or commands[0].get('success') is not True or commands[0].get('synthetic_command') is not True:
@@ -156,6 +169,7 @@ def desktop_smoke(root, request, identity, workspace, report, checkpoint):
         if not checks['command_effect']: raise ValueError('desktop_command_failed')
     finally:
         checks['diagnostics_written'] = True
+        checks['bridge_policy_preserved'] = False
         checks['normal_quit'] = False
         try:
             try: checkpoint('desktop_quit')
@@ -171,10 +185,19 @@ def desktop_smoke(root, request, identity, workspace, report, checkpoint):
         checks['owned_children_exited'] = checks['normal_quit'] and process.returncode == 0
         try: checkpoint('desktop_cleanup')
         except Exception: checks['diagnostics_written'] = False
+        try:
+            restricted_events = observations(owned, final=True)
+            checks['bridge_policy_preserved'] = not any(item.get('event') in ('policy_refused', 'invalid_observation', 'invalid_identity') for item in restricted_events)
+            report['restrictions'] = {key: sum(item.get('event') == event for item in restricted_events)
+                for key, event in (('tool_registration_writes_refused', 'tool_registration_refused'),
+                                   ('unrelated_turns_refused', 'unrelated_turn_refused'),
+                                   ('native_visualization_roots', 'native_visualization_scope'))}
+            if any(value > 128 for value in report['restrictions'].values()): raise ValueError('restriction_limit')
+        except (OSError, ValueError): checks['diagnostics_written'] = False
         try: checks['cli_defaults_unchanged'] = original == (hashlib.sha256(config.read_bytes()).hexdigest() if config.exists() else None)
         except OSError: checks['cli_defaults_unchanged'] = False
         try: checks['vendor_service_preserved'] = powershell(service_source) == service
         except (ValueError, OSError, subprocess.SubprocessError): checks['vendor_service_preserved'] = False
     if not all(checks.get(key) is True for key in ('normal_quit', 'owned_children_exited', 'cli_defaults_unchanged',
-                                                  'vendor_service_preserved', 'diagnostics_written')):
+                                                  'vendor_service_preserved', 'diagnostics_written', 'bridge_policy_preserved')):
         raise ValueError('desktop_cleanup_failed')

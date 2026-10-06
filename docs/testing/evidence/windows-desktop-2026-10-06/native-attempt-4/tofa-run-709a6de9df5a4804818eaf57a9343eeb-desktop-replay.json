@@ -1,0 +1,59 @@
+{
+  "run": "tofa-run-709a6de9df5a4804818eaf57a9343eeb",
+  "task": {
+    "last_result": 1,
+    "state": "Ready",
+    "run": "tofa-run-709a6de9df5a4804818eaf57a9343eeb",
+    "ok": false,
+    "reason": "native_task_failed",
+    "completed": true,
+    "phase": "completion",
+    "unregistered": true
+  },
+  "result": {
+    "run": "tofa-run-709a6de9df5a4804818eaf57a9343eeb",
+    "phase": "desktop",
+    "ok": false,
+    "reason": "desktop_readiness_failed",
+    "checks": {
+      "authenticated": true,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true,
+      "readiness_engine_exited": true
+    }
+  },
+  "progress": {
+    "outcome": "collected",
+    "checkpoints": [
+      {
+        "stage": "user_started",
+        "elapsed_ms": 1
+      },
+      {
+        "stage": "package_discovered",
+        "elapsed_ms": 202
+      },
+      {
+        "stage": "engine_hashed",
+        "elapsed_ms": 8001
+      },
+      {
+        "stage": "engine_discovered",
+        "elapsed_ms": 14027
+      },
+      {
+        "stage": "native_probe_started",
+        "elapsed_ms": 14063
+      },
+      {
+        "stage": "desktop_authentication",
+        "elapsed_ms": 14063
+      },
+      {
+        "stage": "desktop_preparation",
+        "elapsed_ms": 15134
+      }
+    ]
+  }
+}
