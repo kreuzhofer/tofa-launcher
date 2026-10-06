@@ -1,0 +1,20 @@
+{
+  "limited_user": true,
+  "cli_config_unchanged": true,
+  "phase": "cli_install",
+  "version": "codex-cli 0.160.1",
+  "command": "%LOCALAPPDATA%\\Programs\\OpenAI\\Codex\\bin\\codex.exe",
+  "architecture": "ARM64",
+  "existing_chatgpt_login": true,
+  "reason": "cli_installed",
+  "run": "tofa-template-602d03c4f707476f9c01a7a269b5a395",
+  "user_path_configured": true,
+  "command_available_before": false,
+  "sha256": "f80d194c1b90c20f5cc8777bca3cacaacb37e8b977509efafe9072ff19a300b1",
+  "ok": true,
+  "task": {
+    "state": "Ready",
+    "exit_code": 0,
+    "unregistered": true
+  }
+}

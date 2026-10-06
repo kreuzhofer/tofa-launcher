@@ -73,6 +73,44 @@ trust, and Guardian behavior are not measured by that choice. A native pass does
 not imply readiness for those suites or establish that authentication is absent.
 Use the following step to verify an existing dedicated desktop login.
 
+## Standalone terminal CLI
+
+The desktop package includes its own `codex.exe`. Desktop qualification discovers
+that engine by absolute path and checks it against the selected package; this
+does not install a `codex` command on the test user's `PATH`.
+
+For terminal use and CLI testing, also install the standalone native Windows CLI
+under the dedicated `tofa-test` account using the
+[official installer](https://learn.chatgpt.com/docs/config-file/environment-variables):
+
+```powershell
+$env:CODEX_NON_INTERACTIVE='1'
+irm https://chatgpt.com/codex/install.ps1 | iex
+```
+
+Open a new PowerShell window and verify:
+
+```powershell
+Get-Command codex
+codex --version
+codex login status
+```
+
+The installer selects Windows ARM64 and adds
+`%LOCALAPPDATA%\Programs\OpenAI\Codex\bin` to that user's PATH. Existing
+terminal processes may need a restart to receive it. The
+[native Windows app and CLI share the same Codex home](https://learn.chatgpt.com/docs/windows/windows-app),
+so check the existing login before requesting another sign-in. Never copy
+credential files. The standalone CLI and desktop-bundled engine are measured
+separately; installing the terminal command does not change which engine the
+desktop suite qualifies.
+
+The dedicated template's 2026-10-06 installation measured native ARM64
+`codex-cli 0.160.1`, a configured user PATH, recognized ChatGPT login, and unchanged
+CLI configuration. See the [installation result](evidence/windows-cli-2026-10-06/install-result.json)
+and [installer provenance](evidence/windows-cli-2026-10-06/provenance.json).
+This command/login check does not qualify model execution or Guardian behavior.
+
 ## One-time desktop authentication
 
 For desktop tests, open the installed Codex application in the dedicated

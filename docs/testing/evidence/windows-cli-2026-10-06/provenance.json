@@ -1,0 +1,13 @@
+{
+  "installer_url": "https://chatgpt.com/codex/install.ps1",
+  "installer_sha256": "3522b77d4485eac014e70fa946787c95fad3874a4e9047557c1e044eb268d13e",
+  "scope": "Dedicated template, tofa-test limited user, standalone Windows ARM64 CLI",
+  "host_collection_attempts": [
+    "Initial observer incorrectly expected UTM exec stdout; installer task continued.",
+    "File transport required waiting for asynchronously created status file.",
+    "Collected terminal task and passing install result."
+  ],
+  "credential_files_read_or_copied": false,
+  "native_login_check": "codex login status reported existing ChatGPT login",
+  "desktop_guardian_acceptance": "pending"
+}
