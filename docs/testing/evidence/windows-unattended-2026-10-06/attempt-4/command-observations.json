@@ -1,0 +1,57 @@
+{
+  "run": "tofa-template-3c44be234d104188aff5d5a4b3bc0fdd",
+  "phase": "bootstrap",
+  "ok": true,
+  "commands": [
+    {
+      "contains_delete": false,
+      "deny_marker": true,
+      "allow_marker": false,
+      "native_status": "completed",
+      "exit_code": 0
+    },
+    {
+      "contains_delete": false,
+      "deny_marker": false,
+      "allow_marker": true,
+      "native_status": "completed",
+      "exit_code": 0
+    },
+    {
+      "contains_delete": false,
+      "deny_marker": false,
+      "allow_marker": false,
+      "native_status": "completed",
+      "exit_code": 0
+    }
+  ],
+  "list_error": false,
+  "thread_count": 3,
+  "item_types": [
+    "userMessage",
+    "reasoning",
+    "agentMessage",
+    "commandExecution",
+    "reasoning",
+    "agentMessage",
+    "userMessage",
+    "agentMessage",
+    "commandExecution",
+    "agentMessage",
+    "userMessage",
+    "agentMessage",
+    "commandExecution",
+    "agentMessage"
+  ],
+  "engine_exited": true,
+  "task": {
+    "last_result": 0,
+    "state": "Ready",
+    "run": "tofa-template-3c44be234d104188aff5d5a4b3bc0fdd",
+    "ok": true,
+    "reason": "completed",
+    "completed": true,
+    "phase": "completion",
+    "unregistered": true
+  }
+}

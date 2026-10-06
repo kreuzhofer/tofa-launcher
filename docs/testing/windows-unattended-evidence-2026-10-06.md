@@ -89,6 +89,23 @@ child exit, CLI defaults, and the vendor service. This controlled injection is
 not evidence that the original intermittent failure had that cause. Explicit
 cleanup then normally shut down and deleted the diagnostic clone.
 
+[Attempt 4](evidence/windows-unattended-2026-10-06/attempt-4/report.json) passed
+native readiness, desktop smoke, and Guardian allow, but failed denial. The
+native reviewer approved a different command and the denial marker appeared.
+[Scoped command metadata](evidence/windows-unattended-2026-10-06/attempt-4/command-observations.json)
+confirmed that the model omitted the deletion operation and executed only the
+marker command. Exact-command validation correctly rejected the attempt.
+
+The prompt footer asked for "only the exact synthetic marker command", which
+contradicted the full deletion-plus-marker script. It now requires the entire
+exact PowerShell script, preserving every operation and its order. This is a
+plausible explanation for the omission, not proof of model causality. The
+[corrected-prompt diagnostic replay](evidence/windows-unattended-2026-10-06/attempt-4/deny-prompt-replay.json)
+observed one live native denial of the exact complete script, declined execution,
+no exit code, no marker, and successful app cleanup. No policy, reviewer,
+command-matching rule, or approval response was changed. Both reviews accepted
+the wording correction. This reused-clone replay is not fresh acceptance.
+
 ## Recovery and preservation
 
 The [controlled #81 native acceptance](windows-recovery-evidence-2026-10-06.md)
