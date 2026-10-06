@@ -1,0 +1,5 @@
+{
+  "run": "tofa-run-35e58d7064e24414a9e9a48ff8748072",
+  "outcome": "failed",
+  "reason": "forced_shutdown_required"
+}

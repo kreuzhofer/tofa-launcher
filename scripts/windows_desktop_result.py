@@ -2,6 +2,7 @@
 import re
 
 from windows_template_transport import Failure
+from windows_guardian_result import sanitized_guardian
 
 READINESS = ('authenticated', 'workspace_trusted', 'automatic_review', 'full_access_disabled', 'readiness_engine_exited')
 CHECKS = (*READINESS,
@@ -10,7 +11,9 @@ CHECKS = (*READINESS,
 REASONS = {'desktop_authentication_required', 'desktop_workspace_invalid', 'desktop_control_unsupported',
            'native_client_busy', 'engine_identity_mismatch', 'wrong_user_session', 'desktop_readiness_failed',
            'desktop_policy_mismatch', 'desktop_startup_failed', 'desktop_command_failed',
-           'desktop_cleanup_failed', 'desktop_smoke_passed', 'desktop_readiness_passed'}
+           'desktop_cleanup_failed', 'desktop_smoke_passed', 'desktop_readiness_passed', 'guardian_review_missing',
+           'guardian_review_denied', 'guardian_review_timed_out', 'guardian_review_aborted',
+           'guardian_target_unavailable', 'guardian_decision_mismatch', 'guardian_enforcement_failed', 'guardian_review_mismatch'}
 
 
 def sanitized_desktop(value):
@@ -18,7 +21,7 @@ def sanitized_desktop(value):
               'checks': {}}
     checks = value.get('checks', {})
     if not isinstance(checks, dict): raise Failure('malformed_desktop_result')
-    for key in CHECKS:
+    for key in (*CHECKS, 'denial_target_absent'):
         if key in checks:
             if type(checks[key]) is not bool: raise Failure('malformed_desktop_result')
             result['checks'][key] = checks[key]
@@ -37,6 +40,7 @@ def sanitized_desktop(value):
     patterns = {'model': r'(?:gpt-[a-z0-9.-]+|o[0-9][a-z0-9.-]*|codex-[a-z0-9.-]+)',
                 'provider': r'openai', 'reviewer': r'auto_review', 'engine_sha256': r'[0-9a-f]{64}',
                 'app_sha256': r'[0-9a-f]{64}', 'bridge_sha256': r'[0-9a-f]{64}',
+                'shell_sha256': r'[0-9a-f]{64}',
                 'package': r'OpenAI\.Codex_\d+\.\d+\.\d+\.\d+_arm64__[a-z0-9]{13}'}
     for key, pattern in patterns.items():
         if key in identity:
@@ -60,6 +64,7 @@ def sanitized_desktop(value):
                                              for key in ('bridge_pid', 'thread', 'turn')):
             raise Failure('malformed_desktop_result')
         result['execution'][name] = {key: item[key] for key in ('bridge_pid', 'thread', 'turn')}
+    if 'guardian' in value: result['guardian'] = sanitized_guardian(value['guardian'])
     return result
 
 
@@ -72,13 +77,15 @@ def validate_desktop_readiness(task, result):
         raise Failure('desktop_readiness_failed')
 
 
-def validate_desktop(task, result, native):
+def validate_desktop(task, result, native, *, guardian_case=None):
     validate_desktop_readiness(task, result)
-    if result.get('route') != 'native-desktop-bridge' or any(result['checks'].get(key) is not True for key in CHECKS):
+    required = tuple(key for key in CHECKS if guardian_case != 'deny' or key != 'command_effect')
+    if result.get('route') != 'native-desktop-bridge' or any(result['checks'].get(key) is not True for key in required):
         raise Failure('desktop_assertion_failed')
     if any(key not in result['restrictions'] for key in ('tool_registration_writes_refused', 'unrelated_turns_refused', 'native_visualization_roots')):
         raise Failure('desktop_assertion_failed')
     identity = result['identity']
+    if guardian_case is not None and not identity.get('shell_sha256'): raise Failure('desktop_identity_mismatch')
     if (any(identity.get(key) != native['identity'][key] for key in ('package', 'engine_sha256'))
             or any(key not in identity for key in ('app_pid', 'bridge_pid', 'engine_pid', 'app_sha256', 'bridge_sha256'))
             or not identity.get('model') or identity.get('provider') != 'openai' or identity.get('reviewer') != 'auto_review'):

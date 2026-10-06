@@ -58,6 +58,7 @@ elif args[:1] == ['exec'] and args[1].lower() == guest_uuid:
         state['preflight'] = report
         path.write_text(json.dumps(state))
     elif '# tofa-template-stage' in script:
+        state['task_execution_seconds'] = int(re.search(r'New-TimeSpan -Seconds (\d+)', script).group(1))
         state['probe_window_style'] = re.search(r'-WindowStyle (\w+)', script).group(1)
         state['task_prepared'] = True
         path.write_text(json.dumps(state))
@@ -110,6 +111,8 @@ elif args[:2] == ['file', 'pull'] and args[2].lower() == guest_uuid:
         task = {'run': request['run'], 'phase': 'completion', 'ok': True,
                 'completed': True, 'unregistered': True, 'last_result': 0, 'state': 'Ready'}
         if state['mode'] == 'task_failed': task.update(ok=False, last_result=1)
+        if state['mode'] == 'slow_native_startup' and state.get('task_execution_seconds', 0) < 180:
+            task.update(ok=False, completed=False, unregistered=False, last_result=267014, state='Running')
         if state['mode'] == 'task_incomplete': task.update(ok=False, completed=False, unregistered=False, last_result=267014, state='Running')
         if state['mode'] == 'running_task': task.update(state='Running')
         if state['mode'] == 'host_zero_no_result': sys.exit(0)
@@ -163,6 +166,48 @@ elif args[:2] == ['file', 'pull'] and args[2].lower() == guest_uuid:
                                        'unrelated_turns_refused': int(state.get('bridge_trial', {}).get('background_blocked', False))}
             desktop['execution'] = {name: {'bridge_pid': 102, 'thread': 1, 'turn': 1}
                                     for name in ('admitted', 'command', 'completed')}
+            if request.get('guardian_case') in ('allow', 'deny'):
+                if state['mode'] != 'guardian_shell_missing': desktop['identity']['shell_sha256'] = 'd' * 64
+                allowed = request['guardian_case'] == 'allow'
+                correlation = {'bridge_pid': 102, 'thread': 1, 'turn': 1, 'item': 1}
+                desktop['guardian'] = {'started': dict(correlation, review=1), 'completed': dict(correlation, review=1),
+                    'started_count': 1, 'completed_count': 1, 'command_count': 1,
+                    'command': correlation, 'decision': 'approved' if allowed else 'denied', 'source': 'agent',
+                    'command_status': 'completed' if allowed else 'declined', 'marker_present': allowed,
+                    'execution_succeeded': allowed, 'exit_code_present': allowed,
+                    'synthetic_command': True}
+                desktop['checks']['command_effect'] = allowed
+                if not allowed: desktop['checks']['denial_target_absent'] = state['mode'] != 'guardian_target_present'
+                review = desktop['guardian']
+                if state['mode'].startswith('guardian_bridge'):
+                    import runpy
+                    trial = runpy.run_path(str(Path(__file__).with_name('windows_desktop_native.py')))['trial']
+                    state['bridge_trial'] = trial('guardian_' + request['guardian_case'] + state['mode'].removeprefix('guardian_bridge'))
+                    path.write_text(json.dumps(state))
+                    events = state['bridge_trial']['guardian_events']
+                    starts = [item for item in events if item['event'] == 'review_started']
+                    completions = [item for item in events if item['event'] == 'review_completed']
+                    commands = [item for item in events if item['event'] == 'command_completed']
+                    if starts and completions and commands:
+                        desktop['identity']['bridge_pid'] = starts[0]['bridge_pid']
+                        desktop['execution'] = {name: {key: starts[0][key] for key in ('bridge_pid', 'thread', 'turn')}
+                                                for name in ('admitted', 'command', 'completed')}
+                        for name, event in (('started', starts[0]), ('completed', completions[0]), ('command', commands[0])):
+                            fields = ('bridge_pid', 'thread', 'turn', 'item') + (() if name == 'command' else ('review',))
+                            review[name] = {key: event[key] for key in fields}
+                        review.update(decision=completions[0]['decision'], source=completions[0]['source'],
+                                      command_status=commands[0]['status'], synthetic_command=starts[0]['synthetic_command'],
+                                      execution_succeeded=commands[0]['success'], exit_code_present=commands[0]['exit_code_present'])
+                    else: review.pop('started')
+                if state['mode'] == 'guardian_missing_review': review.pop('started')
+                if not allowed:
+                    if state['mode'] == 'guardian_acl_error':
+                        review.pop('started'); review.pop('completed'); review['command_status'] = 'failed'
+                    if state['mode'] == 'guardian_review_timeout': review['decision'] = 'timedOut'
+                    if state['mode'] == 'guardian_unexpected_allow': review['decision'] = 'approved'
+                    if state['mode'] == 'guardian_wrong_item': review['completed']['item'] = 2
+                    if state['mode'] == 'guardian_deny_effect': review['marker_present'] = True
+                    if state['mode'] == 'guardian_failed_command': review['command_status'] = 'failed'
             if state['mode'] == 'desktop_mixed_completion': desktop['execution']['completed']['turn'] = 2
             if state['mode'] == 'desktop_diagnostics_failed': desktop['checks']['diagnostics_written'] = False
             if state['mode'] == 'desktop_permissions_unverified': desktop['checks']['desktop_permissions_configured'] = False

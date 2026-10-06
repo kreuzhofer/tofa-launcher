@@ -6,6 +6,7 @@ import ntpath
 import os
 from pathlib import Path
 import re
+import shlex
 import subprocess
 import sys
 import threading
@@ -22,6 +23,8 @@ def main():
     pending: dict[str, tuple[str, dict[str, Any]]] = {}
     threads: dict[str, dict[str, Any]] = {}
     turns: dict[tuple[str, str], int] = {}
+    items: dict[tuple[str, str, str], int] = {}
+    reviews: dict[str, dict[str, Any]] = {}
     catalog_models: set[str] = set()
     admitted: set[str] = set()
     restricted = {'tool_registration_refused': 0, 'unrelated_turn_refused': 0}
@@ -101,6 +104,26 @@ def main():
                 turns[key] = len(turns) + 1
                 record('turn_admitted', thread=threads[thread_id]['ordinal'], turn=turns[key], model=threads[thread_id]['selected_model'])
             return {'thread': threads[thread_id]['ordinal'], 'turn': turns[key]}
+
+        def bind_item(thread_id, turn_id, item_id):
+            if not isinstance(item_id, str) or not item_id: raise ValueError('missing_review_target')
+            key = (thread_id, turn_id, item_id)
+            if key not in items:
+                if len(items) >= 16: raise ValueError('item_limit')
+                items[key] = len(items) + 1
+            return items[key]
+
+        def synthetic_command(command):
+            if config.get('expected_command') is not None:
+                if command == config['expected_command']: return True
+                # Native command/review events use shlex_join(argv), including on Windows.
+                try: arguments = shlex.split(command)
+                except ValueError: return False
+                return (len(arguments) >= 3 and isinstance(config.get('shell_path'), str)
+                        and ntpath.normcase(arguments[0]) == ntpath.normcase(config['shell_path'])
+                        and [value.lower() for value in arguments[1:-2]] in ([], ['-noprofile'], ['-noprofile', '-noninteractive'])
+                        and arguments[-2].lower() in ('-command', '-c') and arguments[-1] == config['expected_command'])
+            return config.get('marker_name', 'tofa-desktop-smoke.txt') in command
 
         def observe(raw, request):
             try:
@@ -231,6 +254,35 @@ def main():
                     record('invalid_identity')
                 if method == 'turn/started':
                     bind_turn(params.get('threadId'), params.get('turn', {}).get('id'))
+                if method in ('item/autoApprovalReview/started', 'item/autoApprovalReview/completed'):
+                    key = (params.get('threadId'), params.get('turnId'))
+                    if key not in turns: return True
+                    correlation = {'thread': threads[key[0]]['ordinal'], 'turn': turns[key],
+                                   'item': bind_item(*key, params.get('targetItemId'))}
+                    action = params.get('action', {})
+                    if (action.get('type') != 'command' or not isinstance(action.get('command'), str)
+                            or not isinstance(action.get('cwd'), str)
+                            or ntpath.normcase(ntpath.normpath(action['cwd'])) != workspace):
+                        raise ValueError('unsupported_review_action')
+                    review_id = params.get('reviewId')
+                    if not isinstance(review_id, str) or not review_id: raise ValueError('missing_review_identity')
+                    signature = hashlib.sha256(action['command'].encode()).hexdigest()
+                    synthetic = synthetic_command(action['command'])
+                    if method.endswith('/started'):
+                        if review_id in reviews or len(reviews) >= 16: raise ValueError('review_limit')
+                        reviews[review_id] = dict(correlation, signature=signature, ordinal=len(reviews) + 1, completed=False)
+                        record('review_started', **correlation, review=reviews[review_id]['ordinal'], synthetic_command=synthetic)
+                    else:
+                        review = reviews.get(review_id, {})
+                        if (review.get('completed') is not False or review.get('signature') != signature
+                                or any(review.get(name) != value for name, value in correlation.items())):
+                            raise ValueError('review_identity_changed')
+                        decision = params.get('review', {}).get('status')
+                        if decision not in ('approved', 'denied', 'timedOut', 'aborted') or params.get('decisionSource') != 'agent':
+                            raise ValueError('unsupported_review_decision')
+                        review['completed'] = True
+                        record('review_completed', **correlation, review=review['ordinal'],
+                               decision=decision, source='agent', synthetic_command=synthetic)
                 if method in ('item/completed', 'turn/completed'):
                     turn_id = params.get('turnId') if method == 'item/completed' else params.get('turn', {}).get('id')
                     key = (params.get('threadId'), turn_id)
@@ -238,8 +290,13 @@ def main():
                     correlation = {'thread': threads[key[0]]['ordinal'], 'turn': turns[key]}
                     if method == 'item/completed' and params.get('item', {}).get('type') == 'commandExecution':
                         item = params['item']
+                        item_ordinal = bind_item(*key, item.get('id'))
+                        signature = hashlib.sha256(item.get('command', '').encode()).hexdigest()
+                        if any(review['item'] == item_ordinal and review['signature'] != signature for review in reviews.values()):
+                            raise ValueError('review_command_changed')
                         record('command_completed', success=item.get('exitCode') == 0,
-                               synthetic_command='tofa-desktop-smoke.txt' in item.get('command', ''), **correlation)
+                               synthetic_command=synthetic_command(item.get('command', '')), exit_code_present=item.get('exitCode') is not None,
+                               item=item_ordinal, status=item.get('status') if item.get('status') in ('completed', 'failed', 'declined') else 'unknown', **correlation)
                     if method == 'turn/completed':
                         record('turn_completed', success=params.get('turn', {}).get('status') == 'completed', **correlation)
                 return True

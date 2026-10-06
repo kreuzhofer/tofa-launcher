@@ -1,0 +1,226 @@
+{
+  "schema": 1,
+  "run": "tofa-run-06befb4aff564ed8bdee8e4788906722",
+  "outcome": "failed",
+  "stages": [
+    {
+      "stage": "template_validation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.245
+    },
+    {
+      "stage": "candidate_validation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.011
+    },
+    {
+      "stage": "clone_creation",
+      "outcome": "passed",
+      "elapsed_seconds": 1.292
+    },
+    {
+      "stage": "boot",
+      "outcome": "passed",
+      "elapsed_seconds": 60.243
+    },
+    {
+      "stage": "guest_session",
+      "outcome": "passed",
+      "elapsed_seconds": 95.875
+    },
+    {
+      "stage": "native_smoke",
+      "outcome": "failed",
+      "reason": "guest_task_incomplete",
+      "elapsed_seconds": 180.645
+    }
+  ],
+  "suite": "desktop-guardian",
+  "retained": true,
+  "cleanup": {
+    "outcome": "retained",
+    "shutdown": "stopped"
+  },
+  "capabilities": {
+    "native_sandbox": "unverified",
+    "desktop_guardian": "unverified"
+  },
+  "template": {
+    "uuid": "EF96CF12-D901-455F-81FF-4C5001E15F80",
+    "state": "stopped"
+  },
+  "requested_candidate": {
+    "version": "v0.1.0-rc.14",
+    "sha256": "1b0a2e7aa7aafc515391e221a16bee5124cf5b09aedf89af779796fae15bdd77",
+    "commit": "14134d43df4cca00bcdf10e49b3dc5ef3122f8d7"
+  },
+  "ownership_unresolved": false,
+  "clone_identity_source": "unique_inventory_delta",
+  "clone": {
+    "uuid": "27892011-C727-4F14-944F-98AE971F09CF",
+    "name": "tofa-run-06befb4aff564ed8bdee8e4788906722"
+  },
+  "diagnostics": {
+    "guest_staging": "C:\\Users\\Public\\tofa-run-06befb4aff564ed8bdee8e4788906722",
+    "guest_workspace": "%USERPROFILE%\\tofa-run-06befb4aff564ed8bdee8e4788906722"
+  },
+  "os": {
+    "name": "Windows 11",
+    "architecture": "ARM64",
+    "version": "10.0.26200"
+  },
+  "reason": "guest_task_incomplete",
+  "failed_transport_operation": "file_pull",
+  "recovery_diagnostics": {
+    "outcome": "collected",
+    "files": {
+      "progress": {
+        "outcome": "collected",
+        "checkpoints": [
+          {
+            "stage": "user_started",
+            "elapsed_ms": 10
+          },
+          {
+            "stage": "package_discovered",
+            "elapsed_ms": 1557
+          },
+          {
+            "stage": "engine_hashed",
+            "elapsed_ms": 61999
+          },
+          {
+            "stage": "engine_discovered",
+            "elapsed_ms": 102589
+          },
+          {
+            "stage": "native_probe_started",
+            "elapsed_ms": 102667
+          },
+          {
+            "stage": "candidate_verification",
+            "elapsed_ms": 107645
+          },
+          {
+            "stage": "workspace_preparation",
+            "elapsed_ms": 111083
+          },
+          {
+            "stage": "engine_initialization",
+            "elapsed_ms": 113285
+          }
+        ]
+      },
+      "native": {
+        "outcome": "unavailable",
+        "reason": "missing_or_invalid"
+      }
+    }
+  },
+  "completion": {
+    "completed": false,
+    "unregistered": true,
+    "last_result": 267014,
+    "state": "Ready"
+  },
+  "transport_progress_observed": false,
+  "transport_steps": [
+    {
+      "step": "protected_staging",
+      "started_after_seconds": 61.794,
+      "outcome": "passed",
+      "elapsed_seconds": 71.678
+    },
+    {
+      "step": "guest_preflight",
+      "started_after_seconds": 133.472,
+      "outcome": "passed",
+      "elapsed_seconds": 24.193
+    },
+    {
+      "step": "stage_request",
+      "started_after_seconds": 158.35,
+      "outcome": "passed",
+      "elapsed_seconds": 0.175
+    },
+    {
+      "step": "stage_probe",
+      "started_after_seconds": 158.525,
+      "outcome": "passed",
+      "elapsed_seconds": 0.284
+    },
+    {
+      "step": "stage_user",
+      "started_after_seconds": 158.808,
+      "outcome": "passed",
+      "elapsed_seconds": 0.154
+    },
+    {
+      "step": "stage_candidate",
+      "started_after_seconds": 158.962,
+      "outcome": "passed",
+      "elapsed_seconds": 19.698
+    },
+    {
+      "step": "stage_windows_candidate",
+      "started_after_seconds": 178.66,
+      "outcome": "passed",
+      "elapsed_seconds": 0.185
+    },
+    {
+      "step": "prepare_task",
+      "started_after_seconds": 178.845,
+      "outcome": "passed",
+      "elapsed_seconds": 20.1
+    },
+    {
+      "step": "native_task",
+      "started_after_seconds": 198.945,
+      "outcome": "passed",
+      "elapsed_seconds": 0.678
+    },
+    {
+      "step": "collect_task",
+      "started_after_seconds": 199.623,
+      "outcome": "passed",
+      "elapsed_seconds": 138.486
+    }
+  ],
+  "guest_progress": {
+    "outcome": "collected",
+    "checkpoints": [
+      {
+        "stage": "user_started",
+        "elapsed_ms": 10
+      },
+      {
+        "stage": "package_discovered",
+        "elapsed_ms": 1557
+      },
+      {
+        "stage": "engine_hashed",
+        "elapsed_ms": 61999
+      },
+      {
+        "stage": "engine_discovered",
+        "elapsed_ms": 102589
+      },
+      {
+        "stage": "native_probe_started",
+        "elapsed_ms": 102667
+      },
+      {
+        "stage": "candidate_verification",
+        "elapsed_ms": 107645
+      },
+      {
+        "stage": "workspace_preparation",
+        "elapsed_ms": 111083
+      },
+      {
+        "stage": "engine_initialization",
+        "elapsed_ms": 113285
+      }
+    ]
+  }
+}

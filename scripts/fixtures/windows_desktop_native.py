@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import shlex
 import tempfile
 
 
@@ -12,6 +13,9 @@ def engine():
     for line in sys.stdin:
         message = json.loads(line)
         method = message.get('method')
+        if method is None and message.get('id') == 'native-approval':
+            with Path(os.environ['DESKTOP_APPROVAL_RESPONSES']).open('a') as stream: stream.write('response\n')
+            continue
         if method == 'model/list':
             result = {'data': [{'id': 'gpt-5.5', 'model': 'gpt-5.5'}], 'nextCursor': None}
         elif method in ('config/batchWrite', 'config/value/write'):
@@ -22,13 +26,34 @@ def engine():
                       'model': 'gpt-5.4', 'modelProvider': 'openai', 'approvalsReviewer': 'auto_review',
                       'approvalPolicy': 'on-request', 'sandbox': {'type': 'workspaceWrite', 'writableRoots': []}}
         elif method == 'turn/start':
+            if os.environ['DESKTOP_TRIAL'].startswith('guardian_'):
+                allowed = os.environ['DESKTOP_TRIAL'].startswith('guardian_allow')
+                correlation = {'threadId': message['params']['threadId'], 'turnId': 'private-turn'}
+                def notify(method, params): print(json.dumps({'method': method, 'params': params}), flush=True)
+                notify('turn/started', {'threadId': correlation['threadId'], 'turn': {'id': 'private-turn'}})
+                print(json.dumps({'id': 'native-approval', 'method': 'item/commandExecution/requestApproval',
+                                  'params': dict(correlation, itemId='private-item')}), flush=True)
+                command = "Set-Content -LiteralPath './tofa-guardian-" + ('allow' if allowed else 'deny') + ".txt' -Value 'synthetic'"
+                if os.environ['DESKTOP_TRIAL'].endswith('_extra'): command += '; Get-Location'
+                if os.environ['DESKTOP_TRIAL'].endswith('_wrapped'):
+                    command = shlex.join([r'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe', '-NoProfile', '-Command', command])
+                review = dict(correlation, reviewId='private-review', targetItemId='private-item',
+                              action={'type': 'command', 'source': 'unifiedExec', 'command': command, 'cwd': os.environ['DESKTOP_WORKSPACE']},
+                              startedAtMs=100)
+                notify('item/autoApprovalReview/started', dict(review, review={'status': 'inProgress'}))
+                notify('item/autoApprovalReview/completed', dict(review, review={'status': 'approved' if allowed else 'denied'},
+                                                               decisionSource='agent', completedAtMs=200))
+                notify('item/completed', dict(correlation, item={'type': 'commandExecution', 'id': 'private-item',
+                     'command': command, 'status': 'completed' if allowed else 'declined',
+                     'exitCode': 0 if allowed or os.environ['DESKTOP_TRIAL'].endswith('_declined_success') else None}))
+                notify('turn/completed', {'threadId': correlation['threadId'], 'turn': {'id': 'private-turn', 'status': 'completed'}})
             if os.environ['DESKTOP_TRIAL'] == 'catalog_model':
                 print(json.dumps({'method': 'thread/settings/updated', 'params': {'threadId': message['params']['threadId'], 'threadSettings': {'cwd': os.environ['DESKTOP_WORKSPACE'], 'model': 'gpt-5.5', 'modelProvider': 'openai', 'approvalPolicy': 'on-request', 'approvalsReviewer': 'auto_review', 'sandboxPolicy': {'type': 'workspaceWrite', 'networkAccess': False, 'writableRoots': []}}}}), flush=True)
             if os.environ['DESKTOP_TRIAL'] == 'visualization_canonical':
                 print(json.dumps({'method': 'thread/settings/updated', 'params': {'threadId': message['params']['threadId'], 'threadSettings': {'cwd': os.environ['DESKTOP_WORKSPACE'], 'model': 'gpt-5.4', 'modelProvider': 'openai', 'approvalPolicy': 'on-request', 'approvalsReviewer': 'auto_review', 'sandboxPolicy': dict(message['params']['sandboxPolicy'], writableRoots=message['params']['sandboxPolicy']['writableRoots'][1:])}}}), flush=True)
             if os.environ['DESKTOP_TRIAL'] == 'rerouted':
                 print(json.dumps({'method': 'model/rerouted', 'params': {'threadId': message['params']['threadId'], 'turnId': 'private-turn', 'fromModel': 'gpt-5.4', 'toModel': 'gpt-5.5', 'reason': 'highRiskCyber'}}), flush=True)
-            Path(os.environ['DESKTOP_EFFECT']).write_text('executed')
+            if not os.environ['DESKTOP_TRIAL'].startswith('guardian_deny'): Path(os.environ['DESKTOP_EFFECT']).write_text('executed')
             result = {'turn': {'id': 'private-turn'}}
         else:
             result = {}
@@ -48,10 +73,14 @@ def trial(override):
         shared = root / 'config.toml'
         shared.write_text('unchanged CLI settings')
         configuration.write_text(json.dumps({'engine': str(native), 'sha256': hashlib.sha256(native.read_bytes()).hexdigest(),
-                                             'evidence_dir': str(root), 'visualization_root': str(root / 'visualizations'), 'sid': 'S-1-5-21-82', 'workspace': str(root), 'prompt': 'synthetic'}))
+                                             'evidence_dir': str(root), 'visualization_root': str(root / 'visualizations'), 'sid': 'S-1-5-21-82', 'workspace': str(root), 'prompt': 'synthetic',
+                                             'marker_name': 'tofa-guardian-' + ('allow' if override.startswith('guardian_allow') else 'deny') + '.txt',
+                                             'shell_path': r'C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe',
+                                             'expected_command': "Set-Content -LiteralPath './tofa-guardian-" + ('allow' if override.startswith('guardian_allow') else 'deny') + ".txt' -Value 'synthetic'" if override.startswith('guardian_') else None}))
         bridge = Path(__file__).resolve().parents[1] / 'windows_desktop_bridge.py'
         env = dict(os.environ, PATH=str(root) + os.pathsep + os.environ['PATH'], TOFA_DESKTOP_PROBE_CONFIG=str(configuration), DESKTOP_WORKSPACE=str(root),
-                   DESKTOP_EFFECT=str(root / 'effect'), DESKTOP_CONFIG=str(shared), DESKTOP_TRIAL=override)
+                   DESKTOP_EFFECT=str(root / 'effect'), DESKTOP_CONFIG=str(shared), DESKTOP_TRIAL=override,
+                   DESKTOP_APPROVAL_RESPONSES=str(root / 'approval-responses'))
         child = subprocess.Popen([sys.executable, str(bridge), '--observe', 'app-server'], env=env,
                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         try:
@@ -110,6 +139,11 @@ def trial(override):
             child.stdin.close()
             child.wait(timeout=5)
             result = {'refused': 'error' in second, 'executed': (root / 'effect').exists(), 'exit_code': child.returncode}
+            if override.startswith('guardian_'):
+                result['guardian_events'] = [json.loads(line) for path in root.glob('bridge-*.jsonl') for line in path.read_text().splitlines()
+                                             if json.loads(line)['event'] in ('review_started', 'review_completed', 'command_completed')]
+                responses = root / 'approval-responses'
+                result['approval_responses'] = len(responses.read_text().splitlines()) if responses.exists() else 0
             if override == 'catalog_model':
                 events = [json.loads(line) for path in root.glob('bridge-*.jsonl') for line in path.read_text().splitlines()]
                 result['model_observed'] = next((item['model'] for item in events if item['event'] == 'thread_settings_updated'), None)

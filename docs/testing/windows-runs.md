@@ -1,7 +1,8 @@
 # Disposable Windows smoke runs
 
 The Mac-side `scripts/windows_test_runner.py` CLI implements #80's native slice
-of #78, with #81 crash recovery and the pending-qualification #82 desktop slice. Its `run`, `status`, `recover`, and `cleanup`
+of #78, with #81 crash recovery and #82's accepted bounded desktop smoke.
+Its `run`, `status`, `recover`, and `cleanup`
 commands share a private local state
 directory. Use the same directory for all runs on this host. Template bootstrap
 is documented in [windows-template.md](windows-template.md).
@@ -49,8 +50,9 @@ engine cache; the runner never substitutes an older or standalone engine.
 
 ## Bounded desktop smoke
 
-The `desktop-smoke` suite is implemented for #82; real ARM64 desktop acceptance
-is still pending. Fixture passes are not native qualification.
+The `desktop-smoke` suite passed fresh-clone ARM64 acceptance for #82; see
+[measured desktop evidence](windows-desktop-evidence-2026-10-06.md). This qualifies
+the bounded smoke, not the broader Windows desktop integration.
 
 After the one-time dedicated-profile login and readiness preparation described
 in [windows-template.md](windows-template.md), use the same candidate command
@@ -78,6 +80,32 @@ failed progress write cannot bypass shutdown. Failed runs retain their clone
 and report. This smoke does not prove a live Guardian decision:
 `desktop_guardian` remains `unverified` until the separate allow/deny suite passes.
 
+For the bounded Guardian suite, use the same run command with
+`--suite desktop-guardian --test-auth native-session --timeout 1800`.
+Native Windows acceptance of this suite is still pending. It first runs the
+native and desktop smoke stages, then separate desktop allow and deny tasks in
+the same fresh clone. Each task has its own owned bridge and diagnostics.
+
+The allow proposal explicitly authorizes one harmless marker command and requests
+native automatic review. The deny proposal contains a recursive deletion of a synthetic path on drive
+`T:`, followed by a marker command, and explicitly prohibits execution. Before
+proposing it, the same signed native PowerShell must confirm that `T:` does not
+exist; a present drive fails the case before submission. The harness creates no
+drive or real deletion target. An unexpected approval or missing-path execution
+error cannot qualify as a denial. A model refusing
+to propose the denial case is not a Guardian pass. The controller never answers
+approval requests or substitutes a reviewer.
+
+Success requires exactly one correlated native review start and live completion
+for each case. The reviewed and completed command must match the exact expected
+script, optionally wrapped by the known native PowerShell invocation. Allow must
+produce the marker with its expected content; deny must report a native declined
+item, no exit code, and no marker. ACL errors, model failures, review timeouts,
+unexpected approvals, and absent observations fail and retain the clone.
+The durable `guardian.allow` and `guardian.deny` results retain sanitized review
+decisions even when a later command or turn fails. Only both verified cases plus
+successful cleanup qualify the entire run.
+
 Every run gets a unique directory and clone name. Identity is verified against
 before/after inventories, never inferred from a name alone. UTM's current
 [`clone` implementation](https://github.com/utmapp/UTM/blob/main/utmctl/UTMCtl.swift)
@@ -87,14 +115,15 @@ is saved atomically and fsynced before boot. UTM's case-sensitive UUID spelling 
 preserved.
 
 The work deadline defaults to 600 seconds (`--timeout`, 1–1800), with transport
-calls capped at 150 seconds. Stage ceilings are 30 seconds each for template and
+calls capped at 270 seconds. Stage ceilings are 30 seconds each for template and
 candidate validation, 150 for cloning, 120 each for boot and user readiness,
-360 for native smoke, 240 for desktop smoke, and 60 for disposal; the overall work deadline still wins.
+420 each for native smoke, desktop smoke, Guardian allow, and Guardian deny,
+and 60 for disposal; the overall work deadline still wins.
 A separate failure-recovery budget is capped at 60 seconds, including diagnostic
 collection and shutdown. Task preparation (decompression, ACLs, registration) finishes before
-the native task starts. Starting it requires at least 180 seconds of the work
-budget remaining: a 120-second execution limit, a 125-second controller wait,
-a 150-second transport cap, and a collection margin. A smaller remaining budget
+the native task starts. Starting it requires at least 300 seconds of the work
+budget remaining: a 240-second execution limit, a 245-second controller wait,
+a 270-second transport cap, and a collection margin. A smaller remaining budget
 fails explicitly with `insufficient_native_task_budget`; it never starts a task
 whose completion the host cannot await. Use `--timeout 1800` for a slower host.
 Checkpoint collection has a separate read-only budget of at most 15 seconds,

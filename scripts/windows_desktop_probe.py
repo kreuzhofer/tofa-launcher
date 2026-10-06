@@ -63,8 +63,13 @@ def main():
     except ValueError as error:
         allowed = {'desktop_authentication_required', 'desktop_workspace_invalid', 'desktop_control_unsupported',
                    'desktop_policy_mismatch', 'desktop_startup_failed', 'desktop_command_failed', 'desktop_cleanup_failed',
-                   'engine_identity_mismatch', 'native_client_busy'}
+                   'engine_identity_mismatch', 'native_client_busy', 'guardian_review_missing',
+                   'guardian_target_unavailable', 'guardian_decision_mismatch', 'guardian_enforcement_failed', 'guardian_review_mismatch'}
         report['reason'] = str(error) if str(error) in allowed else 'desktop_readiness_failed'
+        if report['reason'] == 'desktop_command_failed':
+            decision = report.get('guardian', {}).get('decision')
+            report['reason'] = {'denied': 'guardian_review_denied', 'timedOut': 'guardian_review_timed_out',
+                                'aborted': 'guardian_review_aborted'}.get(decision, report['reason'])
     except Exception:
         report['reason'] = 'desktop_readiness_failed'
     finally:

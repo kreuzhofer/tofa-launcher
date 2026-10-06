@@ -15,13 +15,15 @@ from typing import Any
 from windows_template_transport import Failure, Transport, envelope, progress_envelope
 from windows_candidate import verify_candidate
 from windows_desktop_result import sanitized_desktop, validate_desktop
+from windows_guardian_result import validate_guardian
 from windows_run_lock import InvocationLease
 from windows_test_runner import sanitized_native, validate_native
 
 UUID = r'[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}'
 RUN = r'tofa-run-[0-9a-f]{32}'
 STAGE_SECONDS = {'template_validation': 30, 'candidate_validation': 30, 'clone_creation': 150,
-                 'boot': 120, 'guest_session': 120, 'native_smoke': 360, 'desktop_smoke': 240, 'cleanup': 60}
+                 'boot': 120, 'guest_session': 120, 'native_smoke': 420, 'desktop_smoke': 420,
+                 'guardian_allow': 420, 'guardian_deny': 420, 'cleanup': 60}
 
 
 def initial_report(run, suite='native-smoke'):
@@ -430,8 +432,11 @@ def run_clone(options, directory, report):
         report['completion'] = {key: task[key] for key in ('completed', 'unregistered', 'last_result', 'state')}
         report['capabilities']['native_sandbox'] = 'verified'
         passed()
-        if options.suite != 'native-smoke':
-            begin('desktop_smoke')
+        desktop_cases = ('smoke', 'allow', 'deny') if options.suite == 'desktop-guardian' else (
+            ('smoke',) if options.suite == 'desktop-smoke' else ())
+        for case in desktop_cases:
+            begin('desktop_smoke' if case == 'smoke' else 'guardian_' + case)
+            print('Running desktop smoke...' if case == 'smoke' else 'Running live Guardian ' + case + ' case...', flush=True)
             desktop_run = 'tofa-run-' + uuid.uuid4().hex
             report['desktop_run'] = desktop_run
             save(directory / 'report.json', report)
@@ -439,13 +444,18 @@ def run_clone(options, directory, report):
             validate_preflight(desktop_preflight)
             desktop_request = dict(request, run=desktop_run, workspace_run=report['run'], test_auth=options.test_auth,
                                    candidate=None)
+            if case != 'smoke': desktop_request['guardian_case'] = case
             desktop_task, desktop = transport.measure(desktop_request, desktop=True)
-            report['desktop'] = sanitized_desktop(desktop)
-            validate_desktop(desktop_task, report['desktop'], report['native'])
-            report['capabilities']['desktop_smoke'] = 'verified'
+            result = sanitized_desktop(desktop)
+            if case == 'smoke': report['desktop'] = result
+            else: report.setdefault('guardian', {})[case] = result
+            validate_desktop(desktop_task, result, report['native'], guardian_case=None if case == 'smoke' else case)
+            if case != 'smoke': validate_guardian(result, case)
+            if case == 'smoke': report['capabilities']['desktop_smoke'] = 'verified'
+            if case == 'deny': report['capabilities']['desktop_guardian'] = 'verified'
             passed()
         begin('cleanup')
-        print('Native smoke passed; collecting evidence and disposing of the owned clone...', flush=True)
+        print('Selected suite passed; collecting evidence and disposing of the owned clone...', flush=True)
         dispose_clone(transport, owner)
         report['retained'] = False
         report['cleanup'] = {'outcome': 'deleted'}
@@ -497,7 +507,7 @@ def main():
     parser.add_argument('--version')
     parser.add_argument('--sha256')
     parser.add_argument('--candidate-commit')
-    parser.add_argument('--suite', choices=('native-smoke', 'desktop-smoke'), default='native-smoke')
+    parser.add_argument('--suite', choices=('native-smoke', 'desktop-smoke', 'desktop-guardian'), default='native-smoke')
     parser.add_argument('--test-auth', choices=('native-session',))
     parser.add_argument('--run', help='Exact owned run ID for explicit cleanup')
     options = parser.parse_args()
@@ -542,7 +552,7 @@ def main():
         save(directory / 'report.json', report)
         run_clone(options, directory, report)
         preserve_lock = report.get('ownership_unresolved') is True
-        print(report['outcome'] + ': ' + report.get('reason', 'native smoke completed'))
+        print(report['outcome'] + ': ' + report.get('reason', options.suite + ' completed'))
         print('Report: ' + str(directory / 'report.json'))
         return 0 if report['outcome'] == 'passed' else 1
     except (Failure, OSError, ValueError, KeyError, TypeError, KeyboardInterrupt) as error:

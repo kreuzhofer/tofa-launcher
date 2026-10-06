@@ -9,7 +9,7 @@ import time
 import uuid
 import xml.etree.ElementTree as ET
 
-TASK_EXECUTION_SECONDS = 120
+TASK_EXECUTION_SECONDS = 240
 TASK_WAIT_SECONDS = TASK_EXECUTION_SECONDS + 5
 TRANSPORT_CALL_SECONDS = TASK_WAIT_SECONDS + 25
 MIN_NATIVE_BUDGET = TRANSPORT_CALL_SECONDS + 30
@@ -143,7 +143,7 @@ class Transport:
             files['\\windows_template_probe.py'] = (here / 'windows_template_probe.py').read_bytes()
             files['\\user.ps1'] = files['\\user.ps1'].replace(b"phase='native'", b"phase='desktop'")
             for name in ('windows_desktop_runtime.py', 'windows_desktop_bridge.py', 'windows_desktop_ui.ps1',
-                         'windows_process.py', 'windows_process.cs'):
+                         'windows_process.py', 'windows_process.cs', 'windows_guardian_result.py', 'windows_template_transport.py'):
                 files['\\' + name] = (here / name).read_bytes()
         if candidate is not None:
             files.update({'\\candidate.exe.gz': gzip.compress(candidate, mtime=0),
@@ -162,8 +162,8 @@ class Transport:
             self.powershell(source)
             staged = envelope(self.wait_file(root + '\\task-staging.json'), request['run'], 'task_staging')
             if not staged['ok']: raise Failure('guest_staging_failed')
-        # Provisioning cannot consume the task's 120-second execution budget,
-        # 125-second controller wait, 150-second transport cap, or collection margin.
+        # Provisioning cannot consume the task's 240-second execution budget,
+        # 245-second controller wait, 270-second transport cap, or collection margin.
         if self.deadline - time.monotonic() < MIN_NATIVE_BUDGET:
             raise Failure('insufficient_native_task_budget')
         with self.step('desktop_task' if desktop else 'native_task'):

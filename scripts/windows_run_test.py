@@ -47,7 +47,7 @@ class WindowsRunFixture(unittest.TestCase):
 
     def arguments(self, *extra, command='run'):
         args = [sys.executable, str(SCRIPTS / 'windows_test_runner.py'), command,
-                '--state-dir', str(self.runs), '--utmctl', str(self.utm), '--timeout', '240']
+                '--state-dir', str(self.runs), '--utmctl', str(self.utm), '--timeout', '600']
         if command == 'run':
             args += ['--template', TEMPLATE, '--dedicated-template', '--test-user', 'tofa-test',
                      '--candidate', str(self.candidate), '--version', 'v0.0.1-rc.14',
@@ -66,6 +66,13 @@ class WindowsRunFixture(unittest.TestCase):
 
 
 class RunTests(WindowsRunFixture):
+    def test_slow_engine_discovery_has_a_bounded_complete_task_budget(self):
+        self.change(mode='slow_native_startup')
+        result, report, state = self.invoke('--timeout', '600')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(state['task_execution_seconds'], 240)
+        self.assertEqual(report['cleanup']['outcome'], 'deleted')
+
     def test_guest_package_failure_reports_the_specific_sanitized_prerequisite(self):
         self.change(mode='register_client')
         result, report, state = self.invoke('--timeout', '4')
