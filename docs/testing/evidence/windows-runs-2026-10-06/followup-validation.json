@@ -1,0 +1,91 @@
+{
+  "go_race_suite": {
+    "command": "go test -race ./...",
+    "outcome": "passed",
+    "internal_package_seconds": 304.58,
+    "host_app_left_running": true
+  },
+  "go_vet": {
+    "command": "go vet ./...",
+    "outcome": "passed"
+  },
+  "full_python_suite": {
+    "command": "env PATH=\"/private/tmp/tofa75-oct05/go/bin:$PATH\" python3 /private/tmp/tofa75-oct05/check-python.py dist v0.0.0-prototype",
+    "outcome": "passed",
+    "tests": 300,
+    "seconds": 378.751,
+    "skipped": 80,
+    "loader": "All scripts/*_test.py; lifecycle and terminal fixtures use dist v0.0.0-prototype"
+  },
+  "prior_python_attempt": {
+    "outcome": "failed",
+    "test": "QualificationTests.test_live_timeout_stops_child_and_reports_failure",
+    "observed_error": "KeyError: live",
+    "isolated_replay": "passed",
+    "note": "First full attempt overlapped Go and VM work. The final full suite ran after Go completed. No change to this unrelated test or production qualifier."
+  },
+  "public_clone_tests": {
+    "outcome": "passed",
+    "tests": 23
+  },
+  "template_regressions": {
+    "outcome": "passed",
+    "tests": 25,
+    "uses_default_timeout": true
+  },
+  "runner_typechecks": {
+    "outcome": "passed",
+    "flags": "--check-untyped-defs --follow-imports=silent",
+    "host_platform": "darwin",
+    "host_files": [
+      "windows_test_runner.py",
+      "windows_clone_runner.py",
+      "windows_template_transport.py",
+      "windows_run_test.py",
+      "windows_candidate.py"
+    ],
+    "guest_platform": "win32",
+    "guest_files": [
+      "windows_template_probe.py",
+      "windows_candidate.py"
+    ]
+  },
+  "expanded_fixture_typecheck": {
+    "outcome": "existing_errors",
+    "files": [
+      "scripts/picker_test.py",
+      "scripts/fixtures/windows_template_utm.py"
+    ],
+    "errors": 31,
+    "baseline": "The same expanded check reports 31 errors at ffceb06. No new diagnostic categories; fixture typing cleanup is outside this change."
+  },
+  "powershell_parser": {
+    "outcome": "passed",
+    "report": "05-checkpoint-regression.json",
+    "files": [
+      "windows_template_stage.ps1",
+      "windows_template_wait.ps1",
+      "windows_template_user.ps1"
+    ]
+  },
+  "shell_syntax": {
+    "command": "bash -n scripts/fixtures/desktop_ps.sh",
+    "outcome": "passed"
+  },
+  "native_acceptance": {
+    "outcome": "passed",
+    "consecutive_fresh_runs": 2,
+    "reports": [
+      "06-native-pass.json",
+      "07-native-pass.json"
+    ],
+    "default_timeout_seconds": 600,
+    "manual_intervention_during_runs": false,
+    "successful_clones_deleted": true,
+    "original_failed_clone_retained_stopped": true
+  },
+  "review": {
+    "standards": "no remaining findings",
+    "spec": "no remaining implementation or acceptance findings"
+  }
+}

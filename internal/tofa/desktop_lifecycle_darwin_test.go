@@ -227,7 +227,7 @@ func TestDesktopInstalledUpgradeAndStandalonePurge(t *testing.T) {
 	}
 	assets := t.TempDir()
 	asset := filepath.Join(assets, "tofa_v0.0.0-test_darwin_"+runtime.GOARCH)
-	build := exec.Command("go", "build", "-o", asset, "../../cmd/tofa")
+	build := exec.Command("go", "build", "-ldflags", fmt.Sprintf("-X %q", "github.com/kreuzhofer/tofa-launcher/internal/tofa.desktopProcessCommand="+tofa.DesktopProcessFixture), "-o", asset, "../../cmd/tofa")
 	build.Env = os.Environ()
 	for key, value := range buildEnv {
 		build.Env = append(build.Env, key+"="+value)

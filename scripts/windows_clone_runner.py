@@ -150,8 +150,12 @@ def validate_preflight(preflight):
 def run_clone(options, directory, report):
     stage = 'template_validation'
     transport = Transport(options.utmctl, (options.template or '').lower(), options.timeout)
+    stage_started = time.monotonic()
     def passed():
-        report['stages'].append({'stage': stage, 'outcome': 'passed'})
+        nonlocal stage_started
+        report['stages'].append({'stage': stage, 'outcome': 'passed',
+                                 'elapsed_seconds': round(time.monotonic() - stage_started, 3)})
+        stage_started = time.monotonic()
         save(directory / 'report.json', report)
     owner = None
     try:
@@ -263,7 +267,8 @@ def run_clone(options, directory, report):
         reason = str(error) if isinstance(error, Failure) else ('interrupted' if isinstance(error, KeyboardInterrupt) else 'host_operation_failed')
         report['reason'] = reason
         report['failed_transport_operation'] = transport.operation
-        report['stages'].append({'stage': stage, 'outcome': 'failed', 'reason': reason})
+        report['stages'].append({'stage': stage, 'outcome': 'failed', 'reason': reason,
+                                 'elapsed_seconds': round(time.monotonic() - stage_started, 3)})
         if owner:
             report['cleanup'] = {'outcome': 'retained'}
             save(directory / 'report.json', report)
@@ -283,6 +288,9 @@ def run_clone(options, directory, report):
             else:
                 report['diagnostics_collection'] = 'malformed_task_diagnostics'
         report['transport_progress_observed'] = transport.progress_observed
+        report['transport_steps'] = transport.steps
+        if transport.last_progress is not None:
+            report['guest_progress'] = transport.last_progress
         save(directory / 'report.json', report)
 
 

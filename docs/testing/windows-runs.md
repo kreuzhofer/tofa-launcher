@@ -48,7 +48,14 @@ preserved.
 
 The work deadline defaults to 600 seconds (`--timeout`, 1–1800), with transport
 calls capped at 150 seconds and a separate failure-shutdown budget capped at 60
-seconds. Native tasks have a 120-second limit. Missing guest files and the known
+seconds. Task preparation (decompression, ACLs, registration) finishes before
+the native task starts. Starting it requires at least 180 seconds of the work
+budget remaining: a 120-second execution limit, a 125-second controller wait,
+a 150-second transport cap, and a collection margin. A smaller remaining budget
+fails explicitly with `insufficient_native_task_budget`; it never starts a task
+whose completion the host cannot await. Use `--timeout 1800` for a slower host.
+Checkpoint collection has a separate read-only budget of at most 15 seconds,
+including after a work timeout, before failure shutdown. Missing guest files and the known
 guest-agent-not-running response are bounded wait conditions. Progress-only
 PowerShell CLIXML is explicitly classified and recorded; arbitrary errors fail.
 Fresh run envelopes, terminal task state, exit status, native assertions, and
@@ -64,11 +71,22 @@ python3 scripts/windows_test_runner.py cleanup \
   --state-dir .qualification/windows-clone-runs --run tofa-run-EXACT_RUN_ID
 ```
 
-`report.json` records stages, run/template/clone identity, requested and measured
+`report.json` records stage durations, transport step durations and outcomes,
+guest checkpoints, run/template/clone identity, requested and measured
 candidate identity, installed client/engine/OS/architecture, assertions, completion,
 diagnostic paths, progress classification, retention, and cleanup. Only validated
 protocol fields leave the guest; raw output, credentials, and unrelated files are
 not collected. Reports stay local; nothing is uploaded.
+
+Guest `output/progress.json` is replaced at each checkpoint. It records only
+fixed stage names and elapsed milliseconds: package discovery and hashing,
+engine discovery, candidate verification, workspace setup, engine initialization,
+and the two sandbox executions. The host validates run correlation, stage names,
+and nonnegative, nondecreasing times before collecting it. Missing or invalid
+checkpoints are reported explicitly; they cannot turn a failed run into a pass.
+The protected Limited-user harness is staged as `user.ps1` and read by a small
+encoded scriptblock command, avoiding UTM's command-length limit without changing
+execution policy.
 
 Native results are saved before cleanup. Normal shutdown is requested explicitly,
 and only the verified stopped owned clone is deleted. Exit zero requires verified

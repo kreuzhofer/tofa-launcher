@@ -141,7 +141,13 @@ progress-only CLIXML is classified explicitly; other stderr fails transport.
 Only UTM's known missing-file/path result is retried while awaiting a fresh
 envelope. Guest script execution policy is not changed.
 
-The default host deadline is 180 seconds, configurable with `--timeout` (1–600).
+The default host deadline is 600 seconds, configurable with `--timeout` (1–600).
+Preparation completes before task execution. The host requires 180 seconds
+remaining before starting the 120-second Limited task, with a 125-second
+controller wait and a 150-second transport cap. A shorter remaining budget fails
+explicitly before starting the task. This replaces the former 180-second default,
+which left no reliable provisioning margin. Diagnostic checkpoint collection has
+its own read-only budget of at most 15 seconds.
 Guest tasks have a 120-second execution limit. Completed tasks are unregistered;
 markers are removed and the owned engine is allowed to exit normally. A timeout
 or forced engine exit cannot pass. Failed/incomplete tasks and synthetic guest

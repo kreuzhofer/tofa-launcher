@@ -157,3 +157,61 @@ The supported explanation is cumulative provisioning/transport delay exhausting
 the original bounded wait, with no completed native verdict. The later successful
 run changed both transfer compression and the total deadline, so it cannot by
 itself establish which change resolved that earlier timing failure.
+
+## Follow-up fixes and repeatability
+
+Offline macOS desktop tests now use a process inventory restricted to their own
+temporary app tree. The test binary, installer fixture builds, and picker fixture
+builds share that executable seam. The streaming shell fixture also works under
+the partial-installation test's file-size limit. Release builds still execute
+`/bin/ps`; there is no runtime environment override. Explicit installed-Electron
+qualification restores the actual system inventory. The incumbent-refusal test
+continues to start and detect a real synthetic desktop process.
+
+The Windows runner now records elapsed host stages and transport steps plus
+validated guest checkpoints. It separates preparation from task execution and
+requires 180 seconds remaining before starting a 120-second task. Template
+commands now default to 600 seconds, matching clone runs; their tests exercise
+the default directly. Checkpoint collection has a separate 15-second read-only
+budget, including after transport failure. The source template and original
+retained timeout clone are unchanged.
+
+The first acceptance of these changes found a new harness defect, preserved as
+[attempt 05](evidence/windows-runs-2026-10-06/05-checkpoint-scope-failure.json).
+Only `user_started` was recorded before `native_prerequisites_failed`.
+The encoded command invokes a nested scriptblock: initializing `$points` locally
+while appending to `$script:points` left the latter uninitialized. The first
+append created a hashtable; the second raised `System.ArgumentException` on
+duplicate keys. A [minimal guest reproduction](evidence/windows-runs-2026-10-06/05-checkpoint-regression.json)
+failed with one point, then passed with two after initializing the same explicit
+script scope. All three modified PowerShell scripts parsed with zero errors.
+The [public native-readiness replay](evidence/windows-runs-2026-10-06/05-native-replay.json)
+then passed on that same owned clone. Its original report was preserved before
+[explicit cleanup](evidence/windows-runs-2026-10-06/05-explicit-cleanup.json),
+freeing the disposable slot for two new fresh-clone runs.
+
+Both consecutive runs then passed unattended with the default 600-second budget:
+
+| Run | Recorded stage time | Native task result | Cleanup |
+| --- | ---: | --- | --- |
+| [06](evidence/windows-runs-2026-10-06/06-native-pass.json) | 95.110 s | Ready, exit 0, completed and unregistered | Owned clone deleted |
+| [07](evidence/windows-runs-2026-10-06/07-native-pass.json) | 101.831 s | Ready, exit 0, completed and unregistered | Owned clone deleted |
+
+Each measured the same rc.14 ARM64 candidate, required native sandbox write/read
+and an actual denied outside write, and collected all eleven guest checkpoints.
+These are native-smoke results only. The [final inventory facts](evidence/windows-runs-2026-10-06/followup-final-state.json)
+confirm both successful clones and the new diagnostic clone are absent, the
+dedicated template and original failed clone are stopped, the everyday VM remains
+started, and the runner is unlocked.
+
+[Final validation](evidence/windows-runs-2026-10-06/followup-validation.json):
+the full Go race suite passed with the host app open (internal package 304.580 s),
+and the full Python suite passed 300 tests with 80 declared skips (378.751 s).
+Go vet, scoped host/guest runner typechecks, shell syntax, and guest PowerShell
+parsing passed. Standards and Spec reviews have no remaining findings.
+The first broad Python attempt reported a missing `live` field in an unrelated
+one-second timeout test; that test passed alone and in the final full run after
+Go completed. An expanded optional fixture typecheck reported the same 31
+pre-existing errors as the baseline; it is recorded separately from passing
+runner typechecks. [Code hashes](evidence/windows-runs-2026-10-06/followup-code-sha256.json)
+identify the implementation used for these runs.

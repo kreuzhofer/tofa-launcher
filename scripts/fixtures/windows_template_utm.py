@@ -52,6 +52,11 @@ elif args[:1] == ['exec'] and args[1].lower() == guest_uuid:
         path.write_text(json.dumps(state))
     elif '# tofa-template-stage' in script:
         state['probe_window_style'] = re.search(r'-WindowStyle (\w+)', script).group(1)
+        state['task_prepared'] = True
+        path.write_text(json.dumps(state))
+    elif '# tofa-template-wait' in script:
+        if not state.get('task_prepared'): sys.exit('task must be staged before execution')
+        if state['mode'] == 'native_transport_failure': sys.exit('PRIVATE_KEY UNRELATED_CONTENT')
         state['effects'].append({'vm': args[1], 'effect': 'limited_user_probe'})
         if request.get('register_package'):
             state['effects'].append({'vm': args[1], 'effect': 'registered_test_user_client'})
@@ -72,7 +77,7 @@ elif args[:2] == ['file', 'push'] and args[2].lower() == guest_uuid:
     state['effects'].append({'vm': args[2], 'effect': 'staged_owned_file'})
     path.write_text(json.dumps(state))
 elif args[:2] == ['file', 'pull'] and args[2].lower() == guest_uuid:
-    if args[3].endswith('staging.json'):
+    if args[3].endswith('\\staging.json'):
         print(json.dumps({'run':state['protected_root'], 'phase':'staging', 'ok':True}))
     elif args[3].endswith('\\preflight.json'):
         if state['mode'] == 'delayed' and not state.get('polled'):
@@ -81,6 +86,8 @@ elif args[:2] == ['file', 'pull'] and args[2].lower() == guest_uuid:
             sys.stderr.write("Error from event: OSStatus error -2700.\nfailed to open file 'owned-report': The system cannot find the file specified.\n")
             sys.exit(0)
         print(json.dumps(state['preflight']))
+    elif args[3].endswith('task-staging.json'):
+        print(json.dumps({'run': request['run'], 'phase': 'task_staging', 'ok': True}))
     elif args[3].endswith('task.json'):
         if state['mode'] == 'delayed_task' and not state.get('polled'):
             state['polled'] = True
@@ -90,6 +97,7 @@ elif args[:2] == ['file', 'pull'] and args[2].lower() == guest_uuid:
         task = {'run': request['run'], 'phase': 'completion', 'ok': True,
                 'completed': True, 'unregistered': True, 'last_result': 0, 'state': 'Ready'}
         if state['mode'] == 'task_failed': task.update(ok=False, last_result=1)
+        if state['mode'] == 'task_incomplete': task.update(ok=False, completed=False, unregistered=False, last_result=267014, state='Running')
         if state['mode'] == 'running_task': task.update(state='Running')
         if state['mode'] == 'host_zero_no_result': sys.exit(0)
         if state['mode'] == 'task_secret': task.update(state='PRIVATE_KEY', last_result='UNRELATED_CONTENT')
@@ -97,6 +105,14 @@ elif args[:2] == ['file', 'pull'] and args[2].lower() == guest_uuid:
         if state['mode'] == 'missing': sys.exit('PRIVATE_KEY missing completion')
         if state['mode'] == 'malformed': print('not json'); sys.exit(0)
         print(json.dumps(task))
+    elif args[3].endswith('progress.json'):
+        progress = {'run': request['run'], 'phase': 'progress', 'ok': True,
+                    'checkpoints': [{'stage': 'user_started', 'elapsed_ms': 0},
+                                    {'stage': 'package_discovered', 'elapsed_ms': 400}]}
+        if state['mode'] == 'progress_secret': progress['checkpoints'][1]['stage'] = 'PRIVATE_KEY'
+        if state['mode'] == 'progress_stale': progress['run'] = 'old-run'
+        if state['mode'] == 'progress_negative': progress['checkpoints'][0]['elapsed_ms'] = -1
+        print(json.dumps(progress))
     elif args[3].endswith('result.json'):
         report = {'run': request['run'], 'phase': 'native', 'ok': True,
             'setup_status': 'completed' if request.get('initialize_sandbox') else 'not_requested',

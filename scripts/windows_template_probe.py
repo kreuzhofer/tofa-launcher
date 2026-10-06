@@ -153,6 +153,14 @@ def main():
               'reason': 'native_probe_failed', 'checks': {}, 'execution': {}}
     engine = None
     markers = []
+    started = time.monotonic()
+    progress = json.loads((root / 'output/progress.json').read_text(encoding='utf-8-sig'))
+    offset = progress['checkpoints'][-1]['elapsed_ms']
+    def checkpoint(stage):
+        progress['checkpoints'].append({'stage': stage, 'elapsed_ms': offset + int((time.monotonic() - started) * 1000)})
+        temporary = root / 'output/progress.tmp'
+        temporary.write_text(json.dumps(progress), encoding='utf-8')
+        os.replace(temporary, root / 'output/progress.json')
     try:
         identity = json.loads((root / 'output/identity.json').read_text(encoding='utf-8-sig'))
         executable = Path(identity.pop('engine'))
@@ -171,9 +179,10 @@ def main():
         if not report['checks']['limited_user']:
             raise ValueError('limited_user_required')
         report['checks']['harness_read_only'] = not any(can_access(path, access)
-            for path in (root / 'request.json', root / 'probe.py') for access in (0x2, 0x40000))
+            for path in (root / 'request.json', root / 'probe.py', root / 'user.ps1') for access in (0x2, 0x40000))
         if not report['checks']['harness_read_only']: raise ValueError('unsafe_staging_permissions')
         if request.get('candidate'):
+            checkpoint('candidate_verification')
             from windows_candidate import verify_candidate
             candidate = root / 'candidate.exe'
             if any(can_access(path, access) for path in (candidate, root / 'windows_candidate.py')
@@ -184,6 +193,7 @@ def main():
             if measured.returncode or measured.stderr or measured.stdout.strip() != 'tofa ' + request['candidate']['version']:
                 raise ValueError('candidate_version_mismatch')
             report['candidate'] = dict(request['candidate'], architecture='ARM64', version_verified=True)
+        checkpoint('workspace_preparation')
         fixture = request['workspace_fixture'] == 'acl-unmanageable'
         base = Path.home() / request['run']
         safe_directory(base)
@@ -201,6 +211,7 @@ def main():
         marker = workspace / 'sandbox.txt'
         outside_marker = outside / 'must-not-exist.txt'
         markers.extend([marker, outside_marker])
+        checkpoint('engine_initialization')
         engine = NativeEngine(executable, workspace)
         initialized = engine.call('initialize', {'clientInfo': {'name': 'tofa_template_readiness', 'version': '1'},
                                                   'capabilities': {'experimentalApi': True}})
@@ -212,11 +223,13 @@ def main():
             except (queue.Empty, ValueError):
                 ready = False
             if not ready: raise ValueError('native_setup_incomplete')
+        checkpoint('sandbox_configuration')
         config = engine.call('config/read', {'includeLayers': False}).get('result', {}).get('config', {})
         report['checks']['full_access_disabled'] = (config.get('sandbox_mode') == 'workspace-write'
                                                     and (config.get('windows') or {}).get('sandbox') == 'elevated')
         if not report['checks']['full_access_disabled']: raise ValueError('sandbox_configuration_failed')
         quoted = str(marker).replace("'", "''")
+        checkpoint('workspace_execution')
         executed = engine.execute(workspace, "Set-Content -LiteralPath '" + quoted
                                   + "' -Value 'tofa-sandbox-ok' -NoNewline;Get-Content -Raw -LiteralPath '" + quoted + "'")
         result = executed.get('result', {})
@@ -232,6 +245,7 @@ def main():
             if re.search(r'sandbox.*(not initialized|setup required|not set up)', error, re.I):
                 raise ValueError('native_sandbox_consent_required')
             raise ValueError('native_workspace_execution_failed')
+        checkpoint('outside_execution')
         denied = engine.execute(workspace, "Set-Content -LiteralPath '" + str(outside_marker).replace("'", "''")
                                 + "' -Value 'unexpected-write' -NoNewline").get('result', {})
         report['execution']['outside_exit_code'] = denied.get('exitCode')

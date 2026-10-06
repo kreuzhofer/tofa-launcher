@@ -38,7 +38,7 @@ class TemplateTests(unittest.TestCase):
         result = subprocess.run([sys.executable, str(SCRIPTS / 'windows_test_runner.py'),
             'template', operation, '--template', template, '--dedicated-template',
             '--test-user', 'test-machine\\tofa-test', '--test-auth', 'none',
-            '--utmctl', str(self.utm), '--output', str(self.report), '--timeout', '3', *extra],
+            '--utmctl', str(self.utm), '--output', str(self.report), *extra],
             env=self.env, capture_output=True, text=True, timeout=15)
         self.assertTrue(self.report.exists(), result.stdout + result.stderr)
         report = json.loads(self.report.read_text())

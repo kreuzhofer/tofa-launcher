@@ -251,13 +251,16 @@ func refuseDesktopOwner(profile string) error {
 	return nil
 }
 
+// Fixed in release builds; offline tests supply a process inventory fixture.
+var desktopProcessCommand = "/bin/ps"
+
 // A native launch race can leave a live desktop without SingletonLock. Refuse
 // that incumbent as well; a process snapshot is only a refusal check, never
 // evidence that this launcher owns the profile.
 func refuseDesktopProcesses(ctx context.Context, profile string) error {
 	ctx, cancel := context.WithTimeout(ctx, 2*time.Second)
 	defer cancel()
-	output, err := exec.CommandContext(ctx, "/bin/ps", "-axww", "-o", "args=").Output()
+	output, err := exec.CommandContext(ctx, desktopProcessCommand, "-axww", "-o", "args=").Output()
 	if err != nil {
 		return errors.New("could not check for an existing desktop; launch cancelled")
 	}

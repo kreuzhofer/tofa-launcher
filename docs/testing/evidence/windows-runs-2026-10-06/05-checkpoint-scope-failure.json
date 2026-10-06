@@ -1,0 +1,163 @@
+{
+  "schema": 1,
+  "run": "tofa-run-48536bab2eee4d558d2def813031958d",
+  "outcome": "failed",
+  "stages": [
+    {
+      "stage": "template_validation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.204
+    },
+    {
+      "stage": "candidate_validation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.006
+    },
+    {
+      "stage": "clone_creation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.67
+    },
+    {
+      "stage": "boot",
+      "outcome": "passed",
+      "elapsed_seconds": 21.878
+    },
+    {
+      "stage": "guest_session",
+      "outcome": "passed",
+      "elapsed_seconds": 15.304
+    },
+    {
+      "stage": "native_smoke",
+      "outcome": "failed",
+      "reason": "native_prerequisites_failed",
+      "elapsed_seconds": 35.883
+    }
+  ],
+  "suite": "native-smoke",
+  "retained": true,
+  "cleanup": {
+    "outcome": "retained",
+    "shutdown": "stopped"
+  },
+  "capabilities": {
+    "native_sandbox": "unverified",
+    "desktop_guardian": "unverified"
+  },
+  "template": {
+    "uuid": "EF96CF12-D901-455F-81FF-4C5001E15F80",
+    "state": "stopped"
+  },
+  "requested_candidate": {
+    "version": "v0.1.0-rc.14",
+    "sha256": "1b0a2e7aa7aafc515391e221a16bee5124cf5b09aedf89af779796fae15bdd77",
+    "commit": "14134d43df4cca00bcdf10e49b3dc5ef3122f8d7"
+  },
+  "ownership_unresolved": false,
+  "clone_identity_source": "unique_inventory_delta",
+  "clone": {
+    "uuid": "3E4B00F6-A4BF-4F29-B1E0-5CC9AA2D1ADF",
+    "name": "tofa-run-48536bab2eee4d558d2def813031958d"
+  },
+  "diagnostics": {
+    "guest_staging": "C:\\Users\\Public\\tofa-run-48536bab2eee4d558d2def813031958d",
+    "guest_workspace": "%USERPROFILE%\\tofa-run-48536bab2eee4d558d2def813031958d"
+  },
+  "os": {
+    "name": "Windows 11",
+    "architecture": "ARM64",
+    "version": "10.0.26200"
+  },
+  "native": {
+    "identity": {},
+    "checks": {},
+    "execution": {}
+  },
+  "reason": "native_prerequisites_failed",
+  "failed_transport_operation": "file_pull",
+  "completion": {
+    "completed": true,
+    "unregistered": true,
+    "last_result": 2,
+    "state": "Ready"
+  },
+  "transport_progress_observed": false,
+  "transport_steps": [
+    {
+      "step": "protected_staging",
+      "started_after_seconds": 22.76,
+      "outcome": "passed",
+      "elapsed_seconds": 10.262
+    },
+    {
+      "step": "guest_preflight",
+      "started_after_seconds": 33.022,
+      "outcome": "passed",
+      "elapsed_seconds": 5.04
+    },
+    {
+      "step": "stage_request",
+      "started_after_seconds": 38.813,
+      "outcome": "passed",
+      "elapsed_seconds": 0.108
+    },
+    {
+      "step": "stage_probe",
+      "started_after_seconds": 38.921,
+      "outcome": "passed",
+      "elapsed_seconds": 0.133
+    },
+    {
+      "step": "stage_user",
+      "started_after_seconds": 39.054,
+      "outcome": "passed",
+      "elapsed_seconds": 0.133
+    },
+    {
+      "step": "stage_candidate",
+      "started_after_seconds": 39.187,
+      "outcome": "passed",
+      "elapsed_seconds": 13.159
+    },
+    {
+      "step": "stage_windows_candidate",
+      "started_after_seconds": 52.346,
+      "outcome": "passed",
+      "elapsed_seconds": 0.126
+    },
+    {
+      "step": "prepare_task",
+      "started_after_seconds": 52.473,
+      "outcome": "passed",
+      "elapsed_seconds": 4.797
+    },
+    {
+      "step": "native_task",
+      "started_after_seconds": 57.271,
+      "outcome": "passed",
+      "elapsed_seconds": 0.188
+    },
+    {
+      "step": "collect_task",
+      "started_after_seconds": 57.458,
+      "outcome": "passed",
+      "elapsed_seconds": 16.229
+    },
+    {
+      "step": "collect_native",
+      "started_after_seconds": 73.687,
+      "outcome": "passed",
+      "elapsed_seconds": 0.125
+    }
+  ],
+  "guest_progress": {
+    "outcome": "collected",
+    "checkpoints": [
+      {
+        "stage": "user_started",
+        "elapsed_ms": 4
+      }
+    ]
+  }
+}

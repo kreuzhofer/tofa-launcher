@@ -369,6 +369,7 @@ func TestDesktopInstalledAppShellIsolation(t *testing.T) {
 	if !filepath.IsAbs(installed) {
 		t.Fatal("TOFA_TEST_DESKTOP_APP must be absolute")
 	}
+	tofa.UseRealDesktopProcessesForTest(t)
 	bundle, _ := desktopFixture(t, "normal")
 	root, err := os.MkdirTemp("/tmp", "tofa-installed-")
 	if err != nil {

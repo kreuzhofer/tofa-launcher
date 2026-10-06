@@ -38,7 +38,11 @@ class PickerFixture(unittest.TestCase):
         cls.build = tempfile.TemporaryDirectory()
         cls.experimental = pathlib.Path(cls.build.name) / 'experimental-launcher'
         cls.production = pathlib.Path(cls.build.name) / 'production-launcher'
-        subprocess.run(['go', 'build', '-o', str(cls.production), './scripts/fixtures/picker_launcher'], cwd=ROOT, check=True)
+        process_flags = []
+        if os.environ.get('FIXTURE_DESKTOP_BUNDLE'):
+            fixture = ROOT / 'scripts/fixtures/desktop_ps.sh'
+            process_flags = ['-ldflags', '-X ' + json.dumps('github.com/kreuzhofer/tofa-launcher/internal/tofa.desktopProcessCommand=' + str(fixture))]
+        subprocess.run(['go', 'build', *process_flags, '-o', str(cls.production), './scripts/fixtures/picker_launcher'], cwd=ROOT, check=True)
         cls.binary = cls.production
         # Synthetic support records are compiled only into this test executable.
         # Production assets remain untouched. A separate empty snapshot keeps
@@ -51,10 +55,10 @@ class PickerFixture(unittest.TestCase):
         overlay = pathlib.Path(cls.build.name) / 'overlay.json'
         overlay.write_text(json.dumps({'Replace': {str(ROOT / 'internal/tofa/assets/model-verification.json'): str(snapshot)}}))
         snapshot.write_text(json.dumps({'records': []}))
-        subprocess.run(['go', 'build', '-overlay', str(overlay), '-o', str(cls.experimental), './scripts/fixtures/picker_launcher'], cwd=ROOT, check=True)
+        subprocess.run(['go', 'build', *process_flags, '-overlay', str(overlay), '-o', str(cls.experimental), './scripts/fixtures/picker_launcher'], cwd=ROOT, check=True)
         snapshot.write_text(json.dumps({'records': records}))
         cls.supported = pathlib.Path(cls.build.name) / 'supported-launcher'
-        subprocess.run(['go', 'build', '-overlay', str(overlay), '-o', str(cls.supported), './scripts/fixtures/picker_launcher'], cwd=ROOT, check=True)
+        subprocess.run(['go', 'build', *process_flags, '-overlay', str(overlay), '-o', str(cls.supported), './scripts/fixtures/picker_launcher'], cwd=ROOT, check=True)
 
     @classmethod
     def tearDownClass(cls):

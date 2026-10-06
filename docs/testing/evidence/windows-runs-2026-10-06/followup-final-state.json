@@ -1,0 +1,8 @@
+{
+  "template_stopped": true,
+  "everyday_vm_still_started": true,
+  "successful_clones_absent": true,
+  "new_diagnostic_clone_absent": true,
+  "original_failed_clone_retained_stopped": true,
+  "runner_unlocked": true
+}

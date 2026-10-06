@@ -1,0 +1,11 @@
+{
+  "internal/tofa/desktop_profile_darwin.go": "bd3c790572f71b9f54f8250fb1f0be91bbf2047028cae85c6f5a1eb2db8130ba",
+  "internal/tofa/desktop_process_fixture_darwin_test.go": "4058a6ca87299689ce18db7f6ee2f6f22b2bacc07b3fbbb8b64cfbb88e715464",
+  "scripts/fixtures/desktop_ps.sh": "901f31d41215c25d315174cbda4e06ba5cdeb99f682bbc163245f9e162522226",
+  "scripts/windows_clone_runner.py": "f82bee9f56b6a5a2c3eb023f5ac52524b129709b1fc8675116f7ba45702498eb",
+  "scripts/windows_template_transport.py": "062669423059b1d7a8a18b89d7be233e209faf416273066c806bc8270c17685d",
+  "scripts/windows_template_stage.ps1": "ae83e8b55eb62ea95c4b545d663dd399f697f45674685abcdb7153cbe85628a8",
+  "scripts/windows_template_wait.ps1": "a23abe67dcef17c2453ee015d22dce924a526fc7c2101699f8b20771df348c04",
+  "scripts/windows_template_user.ps1": "669a6071a6b93aa3581a5b422dc8f4d0a7dfcfa0a5063c139ec945b8444a1ade",
+  "scripts/windows_template_probe.py": "5af19dd1dc48c07ec77ba4aa76379f6761e55127bfd1d2fd2ecb8ca7307f2832"
+}

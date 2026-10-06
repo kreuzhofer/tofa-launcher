@@ -1,0 +1,237 @@
+{
+  "schema": 1,
+  "run": "tofa-run-38d5364355ef4ecbafc4c6769ce864f7",
+  "outcome": "passed",
+  "stages": [
+    {
+      "stage": "template_validation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.203
+    },
+    {
+      "stage": "candidate_validation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.008
+    },
+    {
+      "stage": "clone_creation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.593
+    },
+    {
+      "stage": "boot",
+      "outcome": "passed",
+      "elapsed_seconds": 20.154
+    },
+    {
+      "stage": "guest_session",
+      "outcome": "passed",
+      "elapsed_seconds": 12.621
+    },
+    {
+      "stage": "native_smoke",
+      "outcome": "passed",
+      "elapsed_seconds": 60.754
+    },
+    {
+      "stage": "cleanup",
+      "outcome": "passed",
+      "elapsed_seconds": 7.498
+    }
+  ],
+  "suite": "native-smoke",
+  "retained": false,
+  "cleanup": {
+    "outcome": "deleted"
+  },
+  "capabilities": {
+    "native_sandbox": "verified",
+    "desktop_guardian": "unverified"
+  },
+  "template": {
+    "uuid": "EF96CF12-D901-455F-81FF-4C5001E15F80",
+    "state": "stopped"
+  },
+  "requested_candidate": {
+    "version": "v0.1.0-rc.14",
+    "sha256": "1b0a2e7aa7aafc515391e221a16bee5124cf5b09aedf89af779796fae15bdd77",
+    "commit": "14134d43df4cca00bcdf10e49b3dc5ef3122f8d7"
+  },
+  "ownership_unresolved": false,
+  "clone_identity_source": "unique_inventory_delta",
+  "clone": {
+    "uuid": "B569FCBC-B2EE-49A5-8AAF-1FE174F1B473",
+    "name": "tofa-run-38d5364355ef4ecbafc4c6769ce864f7"
+  },
+  "diagnostics": {
+    "guest_staging": "C:\\Users\\Public\\tofa-run-38d5364355ef4ecbafc4c6769ce864f7",
+    "guest_workspace": "%USERPROFILE%\\tofa-run-38d5364355ef4ecbafc4c6769ce864f7"
+  },
+  "os": {
+    "name": "Windows 11",
+    "architecture": "ARM64",
+    "version": "10.0.26200"
+  },
+  "native": {
+    "identity": {
+      "client_version": "26.930.6422.0",
+      "engine_version": "0.160.0",
+      "engine_sha256": "c98b873f74c4c2ae392c9b90474d9d4a17405a1d893951b4893305002bb7582a",
+      "package_engine_sha256": "c98b873f74c4c2ae392c9b90474d9d4a17405a1d893951b4893305002bb7582a",
+      "package": "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0",
+      "architecture": "Arm64",
+      "python_version": "3.13.15",
+      "sid": "S-1-5-21-1299817968-325600504-2357610402-1005",
+      "session": 1
+    },
+    "checks": {
+      "limited_user": true,
+      "harness_read_only": true,
+      "workspace_owned_by_user": true,
+      "workspace_acl_manageable": true,
+      "ordinary_write": true,
+      "workspace_write_read": true,
+      "outside_permission_denied": true,
+      "outside_marker_exists": false,
+      "full_access_disabled": true,
+      "engine_exited": true,
+      "markers_removed": true
+    },
+    "execution": {
+      "workspace_exit_code": 0,
+      "outside_exit_code": 1,
+      "outside_denial_signal": "GetContentWriterUnauthorizedAccessError"
+    }
+  },
+  "candidate": {
+    "version": "v0.1.0-rc.14",
+    "sha256": "1b0a2e7aa7aafc515391e221a16bee5124cf5b09aedf89af779796fae15bdd77",
+    "commit": "14134d43df4cca00bcdf10e49b3dc5ef3122f8d7",
+    "architecture": "ARM64",
+    "version_verified": true
+  },
+  "completion": {
+    "completed": true,
+    "unregistered": true,
+    "last_result": 0,
+    "state": "Ready"
+  },
+  "transport_progress_observed": false,
+  "transport_steps": [
+    {
+      "step": "protected_staging",
+      "started_after_seconds": 20.958,
+      "outcome": "passed",
+      "elapsed_seconds": 5.913
+    },
+    {
+      "step": "guest_preflight",
+      "started_after_seconds": 26.871,
+      "outcome": "passed",
+      "elapsed_seconds": 6.706
+    },
+    {
+      "step": "stage_request",
+      "started_after_seconds": 34.303,
+      "outcome": "passed",
+      "elapsed_seconds": 0.099
+    },
+    {
+      "step": "stage_probe",
+      "started_after_seconds": 34.402,
+      "outcome": "passed",
+      "elapsed_seconds": 0.133
+    },
+    {
+      "step": "stage_user",
+      "started_after_seconds": 34.536,
+      "outcome": "passed",
+      "elapsed_seconds": 0.1
+    },
+    {
+      "step": "stage_candidate",
+      "started_after_seconds": 34.636,
+      "outcome": "passed",
+      "elapsed_seconds": 13.073
+    },
+    {
+      "step": "stage_windows_candidate",
+      "started_after_seconds": 47.709,
+      "outcome": "passed",
+      "elapsed_seconds": 0.129
+    },
+    {
+      "step": "prepare_task",
+      "started_after_seconds": 47.841,
+      "outcome": "passed",
+      "elapsed_seconds": 4.169
+    },
+    {
+      "step": "native_task",
+      "started_after_seconds": 52.01,
+      "outcome": "passed",
+      "elapsed_seconds": 0.188
+    },
+    {
+      "step": "collect_task",
+      "started_after_seconds": 52.198,
+      "outcome": "passed",
+      "elapsed_seconds": 41.908
+    },
+    {
+      "step": "collect_native",
+      "started_after_seconds": 94.106,
+      "outcome": "passed",
+      "elapsed_seconds": 0.108
+    }
+  ],
+  "guest_progress": {
+    "outcome": "collected",
+    "checkpoints": [
+      {
+        "stage": "user_started",
+        "elapsed_ms": 3
+      },
+      {
+        "stage": "package_discovered",
+        "elapsed_ms": 1119
+      },
+      {
+        "stage": "engine_hashed",
+        "elapsed_ms": 15262
+      },
+      {
+        "stage": "engine_discovered",
+        "elapsed_ms": 23013
+      },
+      {
+        "stage": "native_probe_started",
+        "elapsed_ms": 23049
+      },
+      {
+        "stage": "candidate_verification",
+        "elapsed_ms": 24233
+      },
+      {
+        "stage": "workspace_preparation",
+        "elapsed_ms": 27608
+      },
+      {
+        "stage": "engine_initialization",
+        "elapsed_ms": 28011
+      },
+      {
+        "stage": "sandbox_configuration",
+        "elapsed_ms": 28236
+      },
+      {
+        "stage": "workspace_execution",
+        "elapsed_ms": 28265
+      },
+      {
+        "stage": "outside_execution",
+        "elapsed_ms": 29717
+      }
+    ]
+  }
+}

@@ -4,7 +4,7 @@ $ProgressPreference='SilentlyContinue'
 $root='__ROOT__'
 $request=Get-Content -Raw -LiteralPath ($root+'\request.json')|ConvertFrom-Json
 $run=$request.run
-$result=@{run=$run;phase='completion';ok=$false;completed=$false;unregistered=$false;reason='guest_staging_failed'}
+$result=@{run=$run;phase='task_staging';ok=$false;completed=$false;unregistered=$false;reason='guest_staging_failed'}
 try {
   if($request.candidate) {
     # Protected staging only; execution and integrity measurement remain Limited.
@@ -34,23 +34,9 @@ try {
   if(Get-ScheduledTask -TaskName $run -ErrorAction SilentlyContinue){throw 'existing task'}
   $action=New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-NoProfile -NonInteractive -WindowStyle __WINDOW_STYLE__ -EncodedCommand __USER_COMMAND__'
   $principal=New-ScheduledTaskPrincipal -UserId $request.sid -LogonType Interactive -RunLevel Limited
-  $settings=New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Seconds 120)
+  $settings=New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Seconds __TASK_SECONDS__)
   Register-ScheduledTask -TaskName $run -Action $action -Principal $principal -Settings $settings|Out-Null
-  Start-ScheduledTask -TaskName $run
-  $deadline=[DateTime]::UtcNow.AddSeconds(125)
-  do {
-    Start-Sleep -Milliseconds 500
-    $task=Get-ScheduledTask -TaskName $run
-  } while(([DateTime]::UtcNow -lt $deadline) -and (($task.State -eq 'Running') -or !(Test-Path ($root+'\output\result.json'))))
-  $result.state=[string]$task.State
-  $result.last_result=(Get-ScheduledTaskInfo -TaskName $run).LastTaskResult
-  $result.completed=(Test-Path ($root+'\output\result.json')) -and ($task.State -ne 'Running')
-  if($task.State -ne 'Running') {
-    Unregister-ScheduledTask -TaskName $run -Confirm:$false
-    $result.unregistered=$true
-  }
-  $result.ok=$result.completed -and $result.unregistered -and ($result.last_result -eq 0)
-  $result.reason=if($result.ok){'completed'}else{'native_task_failed'}
+  $result.ok=$true
+  $result.reason='staged'
 } catch {}
-if(Test-Path ($root+'\output\result.json')) {Copy-Item -LiteralPath ($root+'\output\result.json') -Destination ($root+'\result.json')}
-$result|ConvertTo-Json -Compress|Set-Content -Encoding UTF8 ($root+'\task.json')
+$result|ConvertTo-Json -Compress|Set-Content -Encoding UTF8 ($root+'\task-staging.json')

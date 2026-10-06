@@ -47,7 +47,7 @@ class RunTests(unittest.TestCase):
 
     def invoke(self, *extra, command='run'):
         args = [sys.executable, str(SCRIPTS / 'windows_test_runner.py'), command,
-                '--state-dir', str(self.runs), '--utmctl', str(self.utm), '--timeout', '4']
+                '--state-dir', str(self.runs), '--utmctl', str(self.utm), '--timeout', '240']
         if command == 'run':
             args += ['--template', TEMPLATE, '--dedicated-template', '--test-user', 'tofa-test',
                      '--candidate', str(self.candidate), '--version', 'v0.0.1-rc.14',
@@ -128,7 +128,7 @@ class RunTests(unittest.TestCase):
 
     def test_boot_and_session_readiness_are_awaited(self):
         self.change(mode='boot_session_delay')
-        result, report, state = self.invoke('--timeout', '8')
+        result, report, state = self.invoke()
         self.assertEqual(result.returncode, 0, report)
         self.assertTrue(state['boot_waited'])
         self.assertTrue(state['session_waited'])
@@ -248,6 +248,49 @@ class RunTests(unittest.TestCase):
         self.assertEqual(report['completion']['last_result'], 1)
         self.assertEqual(report['completion']['state'], 'Ready')
         self.assertTrue(report['diagnostics']['guest_staging'].endswith(report['run']))
+
+    def test_incomplete_task_records_guest_checkpoints_and_host_timings(self):
+        self.change(mode='task_incomplete')
+        result, report, state = self.invoke()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(report['reason'], 'guest_task_incomplete')
+        self.assertEqual(report['guest_progress']['checkpoints'][-1],
+                         {'stage': 'package_discovered', 'elapsed_ms': 400})
+        for stage in report['stages']:
+            self.assertGreaterEqual(stage['elapsed_seconds'], 0)
+        self.assertEqual(report['stages'][-1]['outcome'], 'failed')
+        self.assertIn('stage_candidate', [step['step'] for step in report['transport_steps']])
+        self.assertTrue(report['retained'])
+        self.assertEqual(state['vms'][-1]['status'], 'stopped')
+
+    def test_native_task_is_not_started_without_its_full_completion_budget(self):
+        result, report, state = self.invoke('--timeout', '10')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(report['reason'], 'insufficient_native_task_budget')
+        self.assertFalse(any(effect['effect'] == 'limited_user_probe' for effect in state['effects']))
+        self.assertTrue(report['retained'])
+        self.assertEqual(state['vms'][-1]['status'], 'stopped')
+
+    def test_transport_failure_collects_checkpoints_before_retaining_clone(self):
+        self.change(mode='native_transport_failure')
+        result, report, state = self.invoke()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(report['reason'], 'vm_transport_failed')
+        self.assertEqual(report['guest_progress']['outcome'], 'collected')
+        self.assertEqual(report['transport_steps'][-1]['step'], 'native_task')
+        self.assertEqual(report['transport_steps'][-1]['outcome'], 'failed')
+        self.assertEqual(state['vms'][-1]['status'], 'stopped')
+
+    def test_invalid_guest_checkpoints_fail_without_leaking_content(self):
+        for mode in ('progress_secret', 'progress_stale', 'progress_negative'):
+            with self.subTest(mode=mode):
+                self.change(mode=mode)
+                result, report, _ = self.invoke()
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(report['reason'], 'guest_progress_invalid')
+                self.assertNotIn('checkpoints', report['guest_progress'])
+                cleaned, _, _ = self.invoke('--run', report['run'], command='cleanup')
+                self.assertEqual(cleaned.returncode, 0)
 
     def test_concurrent_run_is_refused_and_interruption_retains_the_owned_clone(self):
         self.change(mode='boot_hang')

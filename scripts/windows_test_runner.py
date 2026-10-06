@@ -127,7 +127,7 @@ def main():
         command.add_argument('--test-auth', choices=('none',), required=True, help='Model-free native checks need no authentication')
         command.add_argument('--utmctl', default='/Applications/UTM.app/Contents/MacOS/utmctl')
         command.add_argument('--output', type=Path, required=True, help='New local JSON report; existing reports are never overwritten')
-        command.add_argument('--timeout', type=int, default=180)
+        command.add_argument('--timeout', type=int, default=600)
         command.add_argument('--initialize-sandbox', action='store_true', help='One-time prepare only: request native elevated sandbox setup; Windows consent may be required')
         command.add_argument('--workspace-fixture', choices=('user-owned', 'acl-unmanageable'), default='user-owned',
                              help='Negative native regression: a disposable workspace allowing writes but denying ACL management')
