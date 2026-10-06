@@ -14,13 +14,14 @@ from typing import Any
 
 from windows_template_transport import Failure, Transport, envelope, progress_envelope
 from windows_candidate import verify_candidate
+from windows_desktop_result import sanitized_desktop, validate_desktop
 from windows_run_lock import InvocationLease
 from windows_test_runner import sanitized_native, validate_native
 
 UUID = r'[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}'
 RUN = r'tofa-run-[0-9a-f]{32}'
 STAGE_SECONDS = {'template_validation': 30, 'candidate_validation': 30, 'clone_creation': 150,
-                 'boot': 120, 'guest_session': 120, 'native_smoke': 360, 'cleanup': 60}
+                 'boot': 120, 'guest_session': 120, 'native_smoke': 360, 'desktop_smoke': 240, 'cleanup': 60}
 
 
 def initial_report(run, suite='native-smoke'):
@@ -170,23 +171,28 @@ def cleanup_command(options, run):
                       'cleanup', '--state-dir', str(options.state_dir), '--run', run, '--utmctl', options.utmctl])
 
 
-def collect_recovery_diagnostics(transport, owner):
+def collect_recovery_diagnostics(transport, owner, desktop_run=None):
     result: dict[str, Any] = {'outcome': 'unavailable', 'files': {}}
     deadline = transport.deadline
     transport.deadline = min(deadline, time.monotonic() + min(15, max(0, deadline - time.monotonic()) / 4))
     try:
         vm = owned_vm(transport, owner)
         if vm['state'] != 'started': return result
-        root = 'C:\\Users\\Public\\' + owner['run']
-        for name, phase in (('output\\progress.json', 'progress'), ('result.json', 'native')):
+        files = [(owner['run'], 'output\\progress.json', 'progress', 'progress'),
+                 (owner['run'], 'result.json', 'native', 'native')]
+        if isinstance(desktop_run, str) and re.fullmatch(RUN, desktop_run) and desktop_run != owner['run']:
+            files.extend([(desktop_run, 'output\\progress.json', 'progress', 'desktop_progress'),
+                          (desktop_run, 'result.json', 'desktop', 'desktop')])
+        for run, name, phase, key in files:
+            root = 'C:\\Users\\Public\\' + run
             try:
                 raw = transport.call('file', 'pull', vm['uuid'], root + '\\' + name)
-                value = (progress_envelope(raw, owner['run']) if phase == 'progress'
-                         else sanitized_native(envelope(raw, owner['run'], phase)))
-                result['files'][phase] = value
+                value = (progress_envelope(raw, run) if phase == 'progress'
+                         else (sanitized_desktop if phase == 'desktop' else sanitized_native)(envelope(raw, run, phase)))
+                result['files'][key] = value
                 result['outcome'] = 'collected'
             except (Failure, OSError, ValueError, TypeError):
-                result['files'][phase] = {'outcome': 'unavailable', 'reason': 'missing_or_invalid'}
+                result['files'][key] = {'outcome': 'unavailable', 'reason': 'missing_or_invalid'}
     except (Failure, OSError, ValueError, TypeError):
         result['reason'] = 'diagnostic_inventory_unavailable'
     finally:
@@ -232,7 +238,7 @@ def recover_abandoned(options, lease):
         else:
             result.update(retained=True, cleanup='retained', shutdown='failed')
             try:
-                result['diagnostics'] = collect_recovery_diagnostics(transport, owner)
+                result['diagnostics'] = collect_recovery_diagnostics(transport, owner, report.get('desktop_run'))
                 result['shutdown'] = stop_clone(transport, owner)
             except (Failure, OSError, KeyboardInterrupt):
                 result['outcome'] = 'failed'
@@ -312,6 +318,8 @@ def run_clone(options, directory, report):
             print('Retained clone limit reached. Run: ' + report['cleanup_action'], flush=True)
             raise Failure('retained_clone_limit')
         if not options.dedicated_template: raise Failure('dedicated_template_designation_required')
+        if options.suite != 'native-smoke' and options.test_auth != 'native-session':
+            raise Failure('explicit_test_authentication_required')
         if not re.fullmatch(UUID, transport.template): raise Failure('template_uuid_required')
         if not re.fullmatch(r'(?:[A-Za-z0-9_.-]+\\)?[A-Za-z0-9_.-]+', options.test_user or ''):
             raise Failure('explicit_local_test_user_required')
@@ -401,6 +409,20 @@ def run_clone(options, directory, report):
         report['completion'] = {key: task[key] for key in ('completed', 'unregistered', 'last_result', 'state')}
         report['capabilities']['native_sandbox'] = 'verified'
         passed()
+        if options.suite != 'native-smoke':
+            begin('desktop_smoke')
+            desktop_run = 'tofa-run-' + uuid.uuid4().hex
+            report['desktop_run'] = desktop_run
+            save(directory / 'report.json', report)
+            desktop_preflight = transport.preflight({'run': desktop_run, 'user': options.test_user, 'operation': 'status'})
+            validate_preflight(desktop_preflight)
+            desktop_request = dict(request, run=desktop_run, workspace_run=report['run'], test_auth=options.test_auth,
+                                   candidate=None)
+            desktop_task, desktop = transport.measure(desktop_request, desktop=True)
+            report['desktop'] = sanitized_desktop(desktop)
+            validate_desktop(desktop_task, report['desktop'], report['native'])
+            report['capabilities']['desktop_smoke'] = 'verified'
+            passed()
         begin('cleanup')
         print('Native smoke passed; collecting evidence and disposing of the owned clone...', flush=True)
         dispose_clone(transport, owner)
@@ -420,7 +442,7 @@ def run_clone(options, directory, report):
             save(directory / 'report.json', report)
             recovery = Transport(options.utmctl, owner['clone']['uuid'], min(options.timeout, 60), options.lease_descriptor)
             try:
-                report['recovery_diagnostics'] = collect_recovery_diagnostics(recovery, owner)
+                report['recovery_diagnostics'] = collect_recovery_diagnostics(recovery, owner, report.get('desktop_run'))
                 shutdown = stop_clone(recovery, owner)
                 report['cleanup']['shutdown'] = 'forced' if reason == 'forced_shutdown_required' else shutdown
             except (Failure, OSError, KeyboardInterrupt):
@@ -454,7 +476,8 @@ def main():
     parser.add_argument('--version')
     parser.add_argument('--sha256')
     parser.add_argument('--candidate-commit')
-    parser.add_argument('--suite', choices=('native-smoke',), default='native-smoke')
+    parser.add_argument('--suite', choices=('native-smoke', 'desktop-smoke'), default='native-smoke')
+    parser.add_argument('--test-auth', choices=('native-session',))
     parser.add_argument('--run', help='Exact owned run ID for explicit cleanup')
     options = parser.parse_args()
     if not 1 <= options.timeout <= 1800: parser.error('timeout must be 1–1800 seconds')

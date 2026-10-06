@@ -80,4 +80,7 @@ elif args[0] in ('start', 'stop', 'delete'):
 else:
     if state['mode'] == 'crash_during_trial' and args[:2] == ['file', 'pull'] and args[-1].endswith('task.json'):
         os.kill(os.getppid(), signal.SIGKILL)
+    if (state['mode'] == 'crash_during_desktop' and args[:2] == ['file', 'pull'] and args[-1].endswith('task.json')
+            and state.get('request', {}).get('test_auth')):
+        os.kill(os.getppid(), signal.SIGKILL)
     runpy.run_path(str(Path(__file__).with_name('windows_template_utm.py')), run_name='__main__')

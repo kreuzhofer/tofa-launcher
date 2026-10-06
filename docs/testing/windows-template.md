@@ -5,7 +5,8 @@ slice of [#78](https://github.com/kreuzhofer/tofa-launcher/issues/78), implement
 for [#79](https://github.com/kreuzhofer/tofa-launcher/issues/79). It prepares and
 measures a designated Windows 11 ARM64 UTM template. Fresh-clone native smoke,
 retention, status, and cleanup are documented in [windows-runs.md](windows-runs.md).
-Desktop/Guardian suites remain separate work.
+The optional `native-session` readiness check supports the bounded desktop smoke
+suite. Live Guardian qualification remains separate work.
 
 ## Select the template explicitly
 
@@ -66,13 +67,37 @@ administrator account can therefore pass; an elevated process cannot.
    If you approve near the deadline and preparation reports a timeout, run
    `template status` with a fresh report path to check whether setup completed.
 
-`--test-auth none` is the explicit authentication choice for this slice. It makes
-no model turns and does not import, inspect, or copy account credentials. Live
-model authentication, desktop trust, and Guardian provisioning remain
-unverified and belong to the later desktop slice. A native pass does not imply
-readiness for those suites. The native setup request and permission checks were
-validated without completing desktop sign-in. The runner neither provisions
-authentication nor claims that existing authentication is absent.
+`--test-auth none` selects model-free readiness. It makes no model turns and
+does not import, inspect, or copy account credentials. Authentication, desktop
+trust, and Guardian behavior are not measured by that choice. A native pass does
+not imply readiness for those suites or establish that authentication is absent.
+Use the following step to verify an existing dedicated desktop login.
+
+## One-time desktop authentication
+
+For desktop tests, open the installed Codex application in the dedicated
+`tofa-test` Windows session and sign in to the intended test ChatGPT account.
+Fully quit Codex, including its tray process. Authentication remains in that
+user profile and is inherited by ordinary VM cloning; the runner never exports,
+imports, or reads credential files. A missing or expired session requires this
+one-time sign-in again in the designated template.
+
+With that template still running, verify the explicit authentication choice:
+
+```sh
+python3 scripts/windows_test_runner.py template prepare \
+  --template YOUR-DEDICATED-TEMPLATE-UUID --dedicated-template \
+  --test-user tofa-test --test-auth native-session \
+  --output /tmp/template-desktop-prepare-1.json
+```
+
+This first measures native sandbox readiness, then uses the installed engine's
+account metadata to confirm an existing ChatGPT session. Runtime configuration
+marks only the synthetic workspace trusted, selects automatic review, and retains
+workspace-write policy. It does not change shared CLI defaults or make a model
+turn. `desktop_ready` establishes these prerequisites, not a desktop or Guardian
+acceptance pass. Shut down the template before a routine clone run. The Windows
+test session must become available after clone boot without manual sign-in.
 
 ## Unattended readiness checks
 
@@ -116,11 +141,11 @@ changes unrelated directories to make this check pass.
 
 ## Reports and limits
 
-Exit 0 means `native_ready`: all native assertions and correlated task completion
-passed. Nonzero reports distinguish `missing_prerequisites`, `bootstrap_required`,
+Exit 0 means `native_ready`, or `desktop_ready` when `--test-auth native-session`
+is selected: all requested readiness assertions and correlated task completion passed. Nonzero reports distinguish `missing_prerequisites`, `bootstrap_required`,
 and other failures, with a stable reason and concrete bootstrap instructions where
-applicable. Desktop trust, Guardian behavior, and authentication remain separate
-capabilities. CLI progress names the current stage.
+applicable. Desktop trust and authentication are measured only with the explicit
+`native-session` choice. Guardian behavior remains a separate capability. CLI progress names the current stage.
 
 Reports record the actual OS/architecture, selected package/version, engine
 version and package-matching SHA-256, runtime version, user SID/session, assertions,

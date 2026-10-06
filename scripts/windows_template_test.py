@@ -82,6 +82,15 @@ class TemplateTests(unittest.TestCase):
         self.assertTrue(all(effect['vm'] == TEMPLATE for effect in state['effects']))
         self.assertEqual([vm['status'] for vm in state['vms']], ['started', 'started'])
 
+    def test_native_session_preparation_verifies_desktop_permissions_without_trials(self):
+        result, report, state = self.invoke('--test-auth', 'native-session')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(report['outcome'], 'desktop_ready')
+        self.assertEqual(report['capabilities']['test_authentication'], 'verified')
+        self.assertEqual(report['capabilities']['desktop_trust'], 'verified')
+        self.assertEqual(report['capabilities']['desktop_guardian'], 'unverified')
+        self.assertFalse(any(effect['effect'] == 'desktop_started' for effect in state['effects']))
+
     def test_existing_report_is_preserved_before_any_guest_changes(self):
         self.report.write_text('{"earlier_attempt": "failed"}')
         result, report, state = self.invoke()

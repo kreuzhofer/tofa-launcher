@@ -9,9 +9,11 @@ import sys
 import uuid
 from typing import Any
 from windows_template_transport import Failure, Transport
+from windows_desktop_result import sanitized_desktop, validate_desktop_readiness
 
 
 BOOTSTRAP = {
+    'desktop_authentication_required': 'Sign in to Codex in the dedicated template as the designated test user, then fully quit it including its tray process. Rerun template prepare with --test-auth native-session. Credentials stay in that profile and are never exported by the runner.',
     'test_user_missing': 'Create and enable the designated local test account in Windows Settings, then sign in to it. Rerun template prepare to verify its SID and session.',
     'test_user_sign_in_required': 'Sign in to the designated test user and wait for its desktop. Rerun template prepare; exactly one interactive session must be discovered.',
     'native_client_missing_or_ambiguous': 'Install the native ARM64 Codex desktop for the designated test user. Rerun template prepare to verify its package and bundled engine.',
@@ -124,7 +126,8 @@ def main():
         command.add_argument('--template', required=True, help='Exact UTM UUID; display names are not accepted')
         command.add_argument('--dedicated-template', action='store_true', help='Explicitly designate this VM for test preparation')
         command.add_argument('--test-user', required=True, help=r'Intended Windows account, e.g. MACHINE\tofa-test')
-        command.add_argument('--test-auth', choices=('none',), required=True, help='Model-free native checks need no authentication')
+        command.add_argument('--test-auth', choices=('none', 'native-session'), required=True,
+                             help='none checks the native sandbox; native-session also checks prepared desktop authentication and permissions')
         command.add_argument('--utmctl', default='/Applications/UTM.app/Contents/MacOS/utmctl')
         command.add_argument('--output', type=Path, required=True, help='New local JSON report; existing reports are never overwritten')
         command.add_argument('--timeout', type=int, default=600)
@@ -235,12 +238,28 @@ def main():
         report['stages'].append({'stage': 'native_readiness', 'outcome': 'passed'})
         report['capabilities']['native_sandbox'] = 'verified'
         report['outcome'] = 'native_ready'
+        if options.test_auth == 'native-session':
+            report['outcome'] = 'failed'
+            desktop_run = 'tofa-template-' + uuid.uuid4().hex
+            report['desktop_run'] = desktop_run
+            ready = transport.preflight({'run': desktop_run, 'user': options.test_user, 'operation': 'status'})
+            if not ready['ok'] or ready.get('user') != preflight.get('user'):
+                raise Failure('wrong_user_session')
+            desktop_request = dict(request, run=desktop_run, workspace_run=report['run'],
+                                   test_auth='native-session', desktop_readiness_only=True,
+                                   initialize_sandbox=False, register_package=None)
+            desktop_task, desktop = transport.measure(desktop_request, desktop=True)
+            report['desktop'] = sanitized_desktop(desktop)
+            validate_desktop_readiness(desktop_task, report['desktop'])
+            report['capabilities'].update(test_authentication='verified', desktop_trust='verified')
+            report['stages'].append({'stage': 'desktop_readiness', 'outcome': 'passed'})
+            report['outcome'] = 'desktop_ready'
     except Failure as error:
         report['reason'] = str(error)
         report['stages'].append({'stage': 'readiness', 'outcome': 'failed', 'reason': str(error)})
         if str(error) in BOOTSTRAP:
             report['bootstrap'] = [BOOTSTRAP[str(error)]]
-            if str(error) in ('native_sandbox_consent_required', 'native_client_first_launch_required', 'native_setup_incomplete'): report['outcome'] = 'bootstrap_required'
+            if str(error) in ('native_sandbox_consent_required', 'native_client_first_launch_required', 'native_setup_incomplete', 'desktop_authentication_required'): report['outcome'] = 'bootstrap_required'
     except (OSError, ValueError, subprocess.TimeoutExpired):
         report['reason'] = 'host_operation_failed'
     except KeyboardInterrupt:
@@ -248,9 +267,9 @@ def main():
     with report_stream as stream:
         json.dump(report, stream, indent=2)
         stream.write('\n')
-    print(report['outcome'] + ': ' + report.get('reason', 'native readiness measured'))
+    print(report['outcome'] + ': ' + report.get('reason', 'requested readiness measured'))
     print('Report: ' + str(options.output))
-    return 0 if report['outcome'] == 'native_ready' else 1
+    return 0 if report['outcome'] in ('native_ready', 'desktop_ready') else 1
 
 
 if __name__ == '__main__':

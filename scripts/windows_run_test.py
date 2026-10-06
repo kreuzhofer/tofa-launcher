@@ -16,7 +16,7 @@ EVERYDAY = 'bbbbbbbb-2222-4222-8222-222222222222'
 
 
 @unittest.skipIf(os.name == 'nt', 'Mac operator CLI requires Unix executable fixtures')
-class RunTests(unittest.TestCase):
+class WindowsRunFixture(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix='tofa run ')
         self.addCleanup(self.temp.cleanup)
@@ -64,6 +64,8 @@ class RunTests(unittest.TestCase):
             self.assertNotIn(secret, result.stdout + result.stderr + json.dumps(report))
         return result, report, json.loads(self.state.read_text())
 
+
+class RunTests(WindowsRunFixture):
     def test_running_source_is_rejected_without_mutation(self):
         state = json.loads(self.state.read_text())
         state['vms'][0]['status'] = 'started'

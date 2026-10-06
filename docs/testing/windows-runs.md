@@ -1,7 +1,7 @@
-# Disposable Windows native smoke runs
+# Disposable Windows smoke runs
 
 The Mac-side `scripts/windows_test_runner.py` CLI implements #80's native slice
-of #78, with #81 crash recovery. Its `run`, `status`, `recover`, and `cleanup`
+of #78, with #81 crash recovery and the pending-qualification #82 desktop slice. Its `run`, `status`, `recover`, and `cleanup`
 commands share a private local state
 directory. Use the same directory for all runs on this host. Template bootstrap
 is documented in [windows-template.md](windows-template.md).
@@ -39,6 +39,37 @@ hash relationship, creates a user-owned workspace, and requires sandbox write/re
 success and an actual permission denial with no outside marker. New compatible
 client versions remain accepted. This is not desktop or Guardian qualification.
 
+## Bounded desktop smoke
+
+The `desktop-smoke` suite is implemented for #82; real ARM64 desktop acceptance
+is still pending. Fixture passes are not native qualification.
+
+After the one-time dedicated-profile login and readiness preparation described
+in [windows-template.md](windows-template.md), use the same candidate command
+above with `--suite desktop-smoke --test-auth native-session`. The source must
+still be stopped. Each clone first passes the complete native smoke stage, then
+stages a separate limited-user desktop task and preserves its correlation ID.
+
+The suite discovers the current user's installed package and manifest executable,
+launches that real application with an owned bridge, and submits one bounded
+synthetic workspace write/read using semantic UI Automation controls. Unsupported
+controls fail as `desktop_control_unsupported`; they do not prompt for manual
+per-run interaction. Existing unrelated desktop processes are refused.
+
+The bridge retains the installed native provider and reviewer. It gates the
+synthetic turn on the returned thread permissions and explicit turn overrides
+before forwarding it. Full access is refused. Matching bridge, thread, and turn
+ordinals bind the admitted turn, successful command, and successful completion;
+the workspace marker must also have its exact expected contents. Raw prompts,
+conversation IDs, credentials, and unrelated output are not collected.
+
+A pass additionally requires normal application quit, owned child exit,
+unchanged CLI configuration, preserved vendor service state, complete diagnostics,
+and successful clone disposal. Job Objects bound the owned process tree; a
+failed progress write cannot bypass shutdown. Failed runs retain their clone
+and report. This smoke does not prove a live Guardian decision:
+`desktop_guardian` remains `unverified` until the separate allow/deny suite passes.
+
 Every run gets a unique directory and clone name. Identity is verified against
 before/after inventories, never inferred from a name alone. UTM's current
 [`clone` implementation](https://github.com/utmapp/UTM/blob/main/utmctl/UTMCtl.swift)
@@ -50,7 +81,7 @@ preserved.
 The work deadline defaults to 600 seconds (`--timeout`, 1–1800), with transport
 calls capped at 150 seconds. Stage ceilings are 30 seconds each for template and
 candidate validation, 150 for cloning, 120 each for boot and user readiness,
-360 for native smoke, and 60 for disposal; the overall work deadline still wins.
+360 for native smoke, 240 for desktop smoke, and 60 for disposal; the overall work deadline still wins.
 A separate failure-recovery budget is capped at 60 seconds, including diagnostic
 collection and shutdown. Task preparation (decompression, ACLs, registration) finishes before
 the native task starts. Starting it requires at least 180 seconds of the work
@@ -121,7 +152,7 @@ refusal identifies the run. A recorded PID alone never proves liveness.
 
 `recover` (also run automatically before new work) records abandoned work as
 failed, preserves its earlier report, collects available run-correlated checkpoints
-and native diagnostics, and shuts down only the verified owned clone. Recovery
+and native diagnostics (plus separate desktop checkpoints/results when staged), and shuts down only the verified owned clone. Recovery
 attempts have separate reports and incomplete shutdown remains retryable. A crash
 after deletion is recognized as `already_absent`; initialization before any clone
 intent is safely finalized. Repeated recovery when idle does nothing.
@@ -140,6 +171,9 @@ targets.
 external VM/guest fixtures, including lifecycle effects, misleading completion,
 privacy, retention, interruption, serialization, and unsafe cleanup. Run
 `python3 scripts/windows_template_test.py -v` for native protocol regressions.
+`python3 scripts/windows_desktop_test.py -v` covers desktop classification,
+correlation, policy refusal, cleanup, and recovery through the same CLI. It also
+executes the actual bridge against a controlled external native-engine fixture.
 Fixture passes do not replace real fresh-clone ARM64 acceptance.
 
 See [the real ARM64 acceptance and preserved attempts](windows-runs-evidence-2026-10-06.md).

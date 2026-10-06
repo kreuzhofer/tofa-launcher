@@ -1,0 +1,38 @@
+{
+  "status": "implementation_checkpoint_native_acceptance_pending",
+  "base_commit": "d136b93",
+  "full_python_suite": {
+    "command": "env PATH=\"/private/tmp/tofa75-oct05/go/bin:$PATH\" python3 /private/tmp/tofa75-oct05/check-python.py dist v0.0.0-prototype",
+    "outcome": "passed",
+    "tests": 327,
+    "skipped": 80,
+    "elapsed_seconds": 428.697,
+    "log": "python-suite.txt"
+  },
+  "final_desktop_tests": {
+    "command": "python3 scripts/windows_desktop_test.py",
+    "outcome": "passed",
+    "tests": 12,
+    "elapsed_seconds": 47.746,
+    "log": "desktop-tests.txt",
+    "note": "Includes final additional workspace-root and environment-override regressions added while the full suite was running."
+  },
+  "template_tests": {
+    "command": "python3 scripts/windows_template_test.py",
+    "outcome": "passed",
+    "tests": 26,
+    "elapsed_seconds": 23.829
+  },
+  "type_check": {
+    "outcome": "passed",
+    "files": 7,
+    "check_untyped_defs": true
+  },
+  "diff_check": "passed",
+  "standards_review": "no_remaining_findings",
+  "spec_review": "no_remaining_implementation_findings",
+  "native_desktop": "pending_template_login_and_shutdown",
+  "native_guardian": "not_run",
+  "powershell_parser": "pending_windows_execution",
+  "publication": "local_only"
+}

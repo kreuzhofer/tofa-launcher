@@ -1,0 +1,18 @@
+{
+  ".github/workflows/prototype.yml": "f619a6f7c0c3bf8c108ce66fcacd59ce3221a9bca5f15308135c9991ed6fa818",
+  "scripts/fixtures/windows_run_utm.py": "7e56d9aa19617f4588051babe88abb29dd673501e3d22b60809bf61ebb326aeb",
+  "scripts/fixtures/windows_template_utm.py": "5011cd39d5d274e440df89cf6532231e31a98bb6e29946ab62d0e23232bfacf6",
+  "scripts/fixtures/windows_desktop_native.py": "61d23aea6f5c70c77258944a48a82d5cbf0bd6e53a921531d5c08c969d1d9328",
+  "scripts/windows_clone_runner.py": "075eec74766fb8ed47f01e4e8ca3a6af0c0327767a3876844268344c226d2827",
+  "scripts/windows_run_test.py": "391c5b3348dd813abb39ec61f9816ddd305ccb194b34593f7d530bf2da6ff97b",
+  "scripts/windows_template_probe.py": "2fee22aa737131df27bdf08c8b91e321f0b7a850d1e7120103ccb671d95cf7cd",
+  "scripts/windows_template_test.py": "4030cc03b5d40d00ebc595062f7f6239d9a9260879d04871d11510c30df20e0e",
+  "scripts/windows_template_transport.py": "4c322b6ba6583f1d8976d156b025e7bff3a1dd104c81a78c6dff7a9d79c8412d",
+  "scripts/windows_test_runner.py": "a8e4bb398e98e35b17116627b965b5e065094599eed9cd4f0d5403c74bec50c8",
+  "scripts/windows_desktop_test.py": "db643e4bc7c05c70d49271a386bc5a925641d71cd049262338639d97bde69292",
+  "scripts/windows_desktop_result.py": "a32ec9c5e09955ff937822e057cb9fe3d4e518fa3408ec9b637e133536ec424a",
+  "scripts/windows_desktop_probe.py": "b4646d47a58e3af63708604ed14fc496027a8d654b732c1d24fec53d72b1789f",
+  "scripts/windows_desktop_runtime.py": "a9052f8e58b7a944e2965ee1a3a5ca650c670ba2651e2846fab63f61f3cc5adf",
+  "scripts/windows_desktop_bridge.py": "d2b3445309997cdc755888845e8076a25a131743f7d0777aa49030be14e2a2b6",
+  "scripts/windows_desktop_ui.ps1": "5ebf8c567447ef952ef5becf2a3c573859964333c6b7cf5b1db7bd249dd46877"
+}

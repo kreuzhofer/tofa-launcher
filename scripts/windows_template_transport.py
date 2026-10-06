@@ -110,10 +110,10 @@ class Transport:
                     raise Failure('guest_completion_timeout') from error
                 time.sleep(min(.5, max(0, self.deadline - time.monotonic())))
 
-    def measure(self, request, candidate=None):
+    def measure(self, request, candidate=None, desktop=False):
         completed = False
         try:
-            result = self.measure_native(request, candidate)
+            result = self.measure_task(request, candidate, desktop)
             completed = True
             return result
         finally:
@@ -129,12 +129,19 @@ class Transport:
                 if completed:
                     raise Failure('guest_progress_invalid') from None
 
-    def measure_native(self, request, candidate=None):
+    def measure_task(self, request, candidate=None, desktop=False):
         root = 'C:\\Users\\Public\\' + request['run']
         here = Path(__file__).parent
         files = {'\\request.json': json.dumps(request).encode(),
                  '\\probe.py': (here / 'windows_template_probe.py').read_bytes(),
                  '\\user.ps1': (here / 'windows_template_user.ps1').read_text().replace('__ROOT__', root).encode('utf-8')}
+        if desktop:
+            files['\\probe.py'] = (here / 'windows_desktop_probe.py').read_bytes()
+            files['\\windows_template_probe.py'] = (here / 'windows_template_probe.py').read_bytes()
+            files['\\user.ps1'] = files['\\user.ps1'].replace(b"phase='native'", b"phase='desktop'")
+            for name in ('windows_desktop_runtime.py', 'windows_desktop_bridge.py', 'windows_desktop_ui.ps1',
+                         'windows_process.py', 'windows_process.cs'):
+                files['\\' + name] = (here / name).read_bytes()
         if candidate is not None:
             files.update({'\\candidate.exe.gz': gzip.compress(candidate, mtime=0),
                           '\\windows_candidate.py': (here / 'windows_candidate.py').read_bytes()})
@@ -156,7 +163,7 @@ class Transport:
         # 125-second controller wait, 150-second transport cap, or collection margin.
         if self.deadline - time.monotonic() < MIN_NATIVE_BUDGET:
             raise Failure('insufficient_native_task_budget')
-        with self.step('native_task'):
+        with self.step('desktop_task' if desktop else 'native_task'):
             controller = (here / 'windows_template_wait.ps1').read_text().replace('__ROOT__', root)
             self.powershell(controller.replace('__WAIT_SECONDS__', str(TASK_WAIT_SECONDS)))
         with self.step('collect_task'):
@@ -164,8 +171,9 @@ class Transport:
         self.last_task = task
         if task.get('completed') is not True:
             raise Failure('guest_task_incomplete')
-        with self.step('collect_native'):
-            result = envelope(self.call('file', 'pull', self.template, root + '\\result.json'), request['run'], 'native')
+        with self.step('collect_desktop' if desktop else 'collect_native'):
+            result = envelope(self.call('file', 'pull', self.template, root + '\\result.json'), request['run'],
+                              'desktop' if desktop else 'native')
         return task, result
 
 
@@ -174,7 +182,8 @@ def progress_envelope(raw, run):
     allowed = {'user_started', 'package_discovered', 'engine_hashed', 'engine_discovered',
                'native_probe_started', 'candidate_verification', 'workspace_preparation',
                'engine_initialization', 'sandbox_configuration', 'workspace_execution',
-               'outside_execution'}
+               'outside_execution', 'desktop_authentication', 'desktop_preparation', 'desktop_startup',
+               'desktop_permissions', 'desktop_command', 'desktop_quit', 'desktop_cleanup'}
     points = value.get('checkpoints')
     if value['ok'] is not True or not isinstance(points, list) or not 1 <= len(points) <= len(allowed):
         raise Failure('malformed_guest_progress')

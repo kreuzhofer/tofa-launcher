@@ -47,7 +47,7 @@ def workspace_owner(path):
 
 
 class NativeEngine:
-    def __init__(self, executable, workspace):
+    def __init__(self, executable, workspace, additional_settings=()):
         env = {key: value for key, value in os.environ.items()
                if not key.upper().startswith(('CODEX_', 'OPENAI_', 'TOFA_')) and key.upper() != 'PSMODULEPATH'}
         env['CODEX_HOME'] = str(Path.home() / '.codex')
@@ -56,7 +56,7 @@ class NativeEngine:
         for setting in ('windows.sandbox="elevated"', 'sandbox_mode="workspace-write"',
                         'approval_policy="never"', 'mcp_servers={}', 'plugins={}', 'hooks={}',
                         'features.plugins=false', 'features.hooks=false', 'features.memories=false',
-                        'history.persistence="none"', 'project_doc_max_bytes=0'):
+                        'history.persistence="none"', 'project_doc_max_bytes=0', *additional_settings):
             args.extend(['-c', setting])
         self.process = subprocess.Popen(args, cwd=workspace, env=env, stdin=subprocess.PIPE,
             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, encoding='utf-8',
