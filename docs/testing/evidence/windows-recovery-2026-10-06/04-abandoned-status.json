@@ -1,0 +1,86 @@
+{
+  "locked": true,
+  "runner_state": "abandoned",
+  "active": {
+    "operation": "run",
+    "run": "tofa-run-c92a3cb57004462fb3782f4ea4956560"
+  },
+  "runs": [
+    {
+      "run": "tofa-run-021aba73795846689600b844b99dbbd1",
+      "outcome": "failed",
+      "retained": true,
+      "clone": {
+        "uuid": "DA6F9285-78EA-41E1-A284-C072A113471E",
+        "name": "tofa-run-021aba73795846689600b844b99dbbd1"
+      },
+      "cleanup": "retained",
+      "cleanup_action": "/Library/Developer/CommandLineTools/usr/bin/python3 /Users/daniel/src/github/kreuzhofer/nebius-tofa-cli/scripts/windows_test_runner.py cleanup --state-dir /Users/daniel/src/github/kreuzhofer/nebius-tofa-cli/.qualification/windows-clone-runs --run tofa-run-021aba73795846689600b844b99dbbd1 --utmctl /Applications/UTM.app/Contents/MacOS/utmctl"
+    },
+    {
+      "run": "tofa-run-254894cdb5914db587b1c70d416ef49d",
+      "outcome": "failed",
+      "retained": false,
+      "clone": null,
+      "cleanup": "not_needed"
+    },
+    {
+      "run": "tofa-run-38d5364355ef4ecbafc4c6769ce864f7",
+      "outcome": "passed",
+      "retained": false,
+      "clone": {
+        "uuid": "B569FCBC-B2EE-49A5-8AAF-1FE174F1B473",
+        "name": "tofa-run-38d5364355ef4ecbafc4c6769ce864f7"
+      },
+      "cleanup": "deleted"
+    },
+    {
+      "run": "tofa-run-48536bab2eee4d558d2def813031958d",
+      "outcome": "failed",
+      "retained": false,
+      "clone": {
+        "uuid": "3E4B00F6-A4BF-4F29-B1E0-5CC9AA2D1ADF",
+        "name": "tofa-run-48536bab2eee4d558d2def813031958d"
+      },
+      "cleanup": "deleted"
+    },
+    {
+      "run": "tofa-run-56e432507b104e749cedf9a1a10f0e4e",
+      "outcome": "passed",
+      "retained": false,
+      "clone": {
+        "uuid": "6EF997C5-6E57-43F6-AB40-1E8A1417DD94",
+        "name": "tofa-run-56e432507b104e749cedf9a1a10f0e4e"
+      },
+      "cleanup": "deleted"
+    },
+    {
+      "run": "tofa-run-a9545eac135541d6836a91cd09ed7966",
+      "outcome": "failed",
+      "retained": false,
+      "clone": null,
+      "cleanup": "deleted"
+    },
+    {
+      "run": "tofa-run-c92a3cb57004462fb3782f4ea4956560",
+      "outcome": "running",
+      "retained": true,
+      "clone": {
+        "uuid": "123D5613-1DDB-432A-B8F2-3C3F8DFBE365",
+        "name": "tofa-run-c92a3cb57004462fb3782f4ea4956560"
+      },
+      "cleanup": "not_needed",
+      "cleanup_action": "/Library/Developer/CommandLineTools/usr/bin/python3 /Users/daniel/src/github/kreuzhofer/nebius-tofa-cli/scripts/windows_test_runner.py cleanup --state-dir /Users/daniel/src/github/kreuzhofer/nebius-tofa-cli/.qualification/windows-clone-runs --run tofa-run-c92a3cb57004462fb3782f4ea4956560 --utmctl /Applications/UTM.app/Contents/MacOS/utmctl"
+    },
+    {
+      "run": "tofa-run-f782494f301d491d86538156622b40e7",
+      "outcome": "passed",
+      "retained": false,
+      "clone": {
+        "uuid": "3E2738DE-3834-4CA5-991E-F6BCCFF27667",
+        "name": "tofa-run-f782494f301d491d86538156622b40e7"
+      },
+      "cleanup": "deleted"
+    }
+  ]
+}

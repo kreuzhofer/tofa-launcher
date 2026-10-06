@@ -1,0 +1,48 @@
+{
+  "issue": 81,
+  "python_full_suite": {
+    "outcome": "passed",
+    "tests": 314,
+    "skipped": 80,
+    "seconds": 357.303
+  },
+  "restricted_suite_attempt": {
+    "outcome": "failed",
+    "reason": "sandbox denied Go cache, process and loopback fixture access",
+    "tests": 273,
+    "failures": 12,
+    "errors": 54,
+    "skipped": 80
+  },
+  "template_targeted": {
+    "outcome": "passed",
+    "tests": 25
+  },
+  "mypy": {
+    "outcome": "passed",
+    "files": [
+      "windows_clone_runner.py",
+      "windows_run_lock.py",
+      "windows_run_test.py",
+      "windows_template_transport.py"
+    ],
+    "flags": [
+      "--check-untyped-defs",
+      "--follow-imports=silent",
+      "--platform",
+      "darwin"
+    ]
+  },
+  "review": {
+    "standards": {
+      "outstanding_findings": 0,
+      "fixed": "Diagnostic inventory failure could skip shutdown; observed red and green public CLI regression."
+    },
+    "spec": {
+      "outstanding_findings": 0,
+      "native_acceptance": "passed"
+    }
+  },
+  "real_arm64_acceptance": "passed",
+  "publication": "local only"
+}

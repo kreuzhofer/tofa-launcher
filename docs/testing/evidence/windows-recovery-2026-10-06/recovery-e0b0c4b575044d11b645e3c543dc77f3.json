@@ -1,0 +1,20 @@
+{
+  "run": "tofa-run-c92a3cb57004462fb3782f4ea4956560",
+  "outcome": "recovered",
+  "retained": true,
+  "cleanup": "retained",
+  "shutdown": "forced",
+  "diagnostics": {
+    "outcome": "unavailable",
+    "files": {
+      "progress": {
+        "outcome": "unavailable",
+        "reason": "missing_or_invalid"
+      },
+      "native": {
+        "outcome": "unavailable",
+        "reason": "missing_or_invalid"
+      }
+    }
+  }
+}

@@ -10,13 +10,23 @@ import shlex
 import sys
 import time
 import uuid
+from typing import Any
 
-from windows_template_transport import Failure, Transport
+from windows_template_transport import Failure, Transport, envelope, progress_envelope
 from windows_candidate import verify_candidate
+from windows_run_lock import InvocationLease
 from windows_test_runner import sanitized_native, validate_native
 
 UUID = r'[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}'
 RUN = r'tofa-run-[0-9a-f]{32}'
+STAGE_SECONDS = {'template_validation': 30, 'candidate_validation': 30, 'clone_creation': 150,
+                 'boot': 120, 'guest_session': 120, 'native_smoke': 360, 'cleanup': 60}
+
+
+def initial_report(run, suite='native-smoke'):
+    return {'schema': 1, 'run': run, 'outcome': 'running', 'stages': [], 'suite': suite,
+            'retained': False, 'cleanup': {'outcome': 'not_needed'},
+            'capabilities': {'native_sandbox': 'unverified', 'desktop_guardian': 'unverified'}}
 
 
 def inventory(transport):
@@ -35,7 +45,7 @@ def inventory(transport):
 
 
 def save(path, value):
-    temporary = path.with_suffix('.tmp')
+    temporary = path.with_name(path.name + '.' + uuid.uuid4().hex + '.tmp')
     with temporary.open('x', encoding='utf-8') as stream:
         os.chmod(temporary, 0o600)
         json.dump(value, stream, indent=2)
@@ -50,12 +60,16 @@ def save(path, value):
         os.close(descriptor)
 
 
-def owned_vm(transport, owner):
+def owned_vm(transport, owner, allow_missing=False):
     clone = owner['clone']
     if (not re.fullmatch(UUID, clone['uuid'].lower()) or clone['uuid'].lower() == owner['template']['uuid'].lower()
             or clone['name'] != owner['run'] or not re.fullmatch(r'tofa-run-[0-9a-f]{32}', owner['run'])):
         raise Failure('unsafe_cleanup_target')
-    vm = inventory(transport).get(clone['uuid'].lower())
+    current = inventory(transport)
+    if owner['template']['uuid'].lower() not in current:
+        raise Failure('incomplete_vm_inventory')
+    vm = current.get(clone['uuid'].lower())
+    if vm is None and allow_missing: return None
     if vm is None or vm['name'] != clone['name']:
         raise Failure('clone_identity_mismatch')
     return vm
@@ -63,14 +77,32 @@ def owned_vm(transport, owner):
 
 def stop_clone(transport, owner):
     vm = owned_vm(transport, owner)
-    if vm['state'] != 'stopped':
+    if vm['state'] == 'stopped': return 'stopped'
+    deadline = transport.deadline
+    # Reserve half the remaining shutdown budget for verified forced shutdown.
+    transport.deadline = time.monotonic() + max(0, deadline - time.monotonic()) / 2
+    try:
         transport.call('stop', vm['uuid'], '--request')
+        while owned_vm(transport, owner)['state'] != 'stopped':
+            time.sleep(.5)
+        return 'stopped'
+    except Failure:
+        pass
+    finally:
+        transport.deadline = deadline
+    vm = owned_vm(transport, owner)
+    if vm['state'] == 'stopped': return 'stopped'
+    transport.call('stop', vm['uuid'], '--force')
     while owned_vm(transport, owner)['state'] != 'stopped':
         time.sleep(.5)
+    return 'forced'
 
 
-def dispose_clone(transport, owner):
-    stop_clone(transport, owner)
+def dispose_clone(transport, owner, allow_missing=False):
+    if owned_vm(transport, owner, allow_missing=allow_missing) is None:
+        return 'already_absent'
+    if stop_clone(transport, owner) == 'forced':
+        raise Failure('forced_shutdown_required')
     owned_vm(transport, owner)
     transport.call('delete', owner['clone']['uuid'])
     remaining = inventory(transport)
@@ -78,6 +110,7 @@ def dispose_clone(transport, owner):
         raise Failure('incomplete_vm_inventory')
     if owner['clone']['uuid'].lower() in remaining:
         raise Failure('clone_delete_incomplete')
+    return 'deleted'
 
 
 def read_record(path):
@@ -100,6 +133,10 @@ def owned_runs(root):
     runs = []
     for path in sorted(root.glob('tofa-run-*')):
         directory = run_directory(root, path.name)
+        if not (directory / 'report.json').exists():
+            runs.append({'run': path.name, 'outcome': 'initializing',
+                         'retained': (directory / 'ownership.json').exists(), 'cleanup': 'unknown', 'clone': None})
+            continue
         report = read_record(directory / 'report.json')
         retained = report.get('retained') is True
         cleanup = report.get('cleanup', {}).get('outcome', 'unknown')
@@ -111,15 +148,119 @@ def owned_runs(root):
     return runs
 
 
+def runner_state(root, lease):
+    if not lease.held: return 'active'
+    if not (root / 'active.json').exists(): return 'idle'
+    active = read_record(root / 'active.json')
+    if active.get('schema') != 2 or active.get('lease') != lease.identity:
+        return 'ambiguous'
+    return 'abandoned'
+
+
+def active_identity(root):
+    if not (root / 'active.json').exists(): return None
+    active = read_record(root / 'active.json')
+    if not re.fullmatch(RUN, active.get('run') or '') or active.get('operation') not in ('run', 'cleanup'):
+        return {'operation': 'unknown', 'run': 'unknown'}
+    return {key: active[key] for key in ('operation', 'run')}
+
+
+def cleanup_command(options, run):
+    return shlex.join([sys.executable, str(Path(__file__).with_name('windows_test_runner.py')),
+                      'cleanup', '--state-dir', str(options.state_dir), '--run', run, '--utmctl', options.utmctl])
+
+
+def collect_recovery_diagnostics(transport, owner):
+    result: dict[str, Any] = {'outcome': 'unavailable', 'files': {}}
+    deadline = transport.deadline
+    transport.deadline = min(deadline, time.monotonic() + min(15, max(0, deadline - time.monotonic()) / 4))
+    try:
+        vm = owned_vm(transport, owner)
+        if vm['state'] != 'started': return result
+        root = 'C:\\Users\\Public\\' + owner['run']
+        for name, phase in (('output\\progress.json', 'progress'), ('result.json', 'native')):
+            try:
+                raw = transport.call('file', 'pull', vm['uuid'], root + '\\' + name)
+                value = (progress_envelope(raw, owner['run']) if phase == 'progress'
+                         else sanitized_native(envelope(raw, owner['run'], phase)))
+                result['files'][phase] = value
+                result['outcome'] = 'collected'
+            except (Failure, OSError, ValueError, TypeError):
+                result['files'][phase] = {'outcome': 'unavailable', 'reason': 'missing_or_invalid'}
+    except (Failure, OSError, ValueError, TypeError):
+        result['reason'] = 'diagnostic_inventory_unavailable'
+    finally:
+        transport.deadline = deadline
+    return result
+
+
+def recover_abandoned(options, lease):
+    state = runner_state(options.state_dir, lease)
+    if state == 'idle': return {'outcome': 'no_recovery_needed'}
+    if state != 'abandoned':
+        raise Failure('active_or_abandoned_invocation: inspect status; unresolved invocation ownership')
+    active = read_record(options.state_dir / 'active.json')
+    if not re.fullmatch(RUN, active.get('run') or '') or active.get('operation') not in ('run', 'cleanup'):
+        raise Failure('unsafe_recovery_record')
+    path = options.state_dir / active['run']
+    if not path.exists() and not path.is_symlink() and active['operation'] == 'run':
+        path.mkdir(mode=0o700)
+    directory = run_directory(options.state_dir, active.get('run'))
+    if not (directory / 'report.json').exists():
+        if active['operation'] != 'run' or any((directory / name).exists() for name in ('ownership.json', 'clone-intent.json')):
+            raise Failure('ambiguous_clone_ownership')
+        save(directory / 'report.json', initial_report(active['run']))
+    report = read_record(directory / 'report.json')
+    if report.get('run') != active['run']: raise Failure('unsafe_recovery_record')
+    result = {'run': active['run'], 'outcome': 'recovered', 'retained': False}
+    if report['outcome'] == 'running':
+        save(directory / ('abandoned-report-' + uuid.uuid4().hex + '.json'), report)
+        report.update(outcome='failed', reason='runner_abandoned')
+        save(directory / 'report.json', report)
+    if (directory / 'ownership.json').exists():
+        owner = read_record(directory / 'ownership.json')
+        if owner.get('run') != active['run'] or (report.get('clone') is not None and report['clone'] != owner.get('clone')):
+            raise Failure('unsafe_recovery_record')
+        intent = read_record(directory / 'clone-intent.json')
+        if (intent.get('run') != owner['run'] or intent.get('template') != owner.get('template')
+                or owner['clone']['uuid'].lower() in intent.get('existing_uuids', [])):
+            raise Failure('unsafe_recovery_record')
+        report.update(clone=owner['clone'], ownership_unresolved=False)
+        transport = Transport(options.utmctl, owner['clone']['uuid'], min(options.timeout, 60), options.lease_descriptor)
+        if owned_vm(transport, owner, allow_missing=True) is None:
+            result['cleanup'] = 'already_absent'
+        else:
+            result.update(retained=True, cleanup='retained', shutdown='failed')
+            try:
+                result['diagnostics'] = collect_recovery_diagnostics(transport, owner)
+                result['shutdown'] = stop_clone(transport, owner)
+            except (Failure, OSError, KeyboardInterrupt):
+                result['outcome'] = 'failed'
+    elif (directory / 'clone-intent.json').exists() or report.get('ownership_unresolved'):
+        raise Failure('ambiguous_clone_ownership')
+    if report.get('reason') == 'runner_abandoned':
+        report['retained'] = result['retained']
+        report['cleanup'] = {'outcome': result.get('cleanup', 'not_needed')}
+        if result.get('shutdown'): report['cleanup']['shutdown'] = result['shutdown']
+        save(directory / 'report.json', report)
+    save(directory / ('recovery-' + uuid.uuid4().hex + '.json'), result)
+    save(directory / 'lifecycle.json', {'retained': result['retained'],
+                                      'cleanup': result.get('cleanup', 'not_needed')})
+    if result['outcome'] != 'recovered': raise Failure('recovery_incomplete: owned clone retained; retry recover')
+    (options.state_dir / 'active.json').unlink()
+    return result
+
+
 def cleanup_run(options):
     directory = run_directory(options.state_dir, options.run)
     owner = read_record(directory / 'ownership.json')
     if owner.get('run') != options.run: raise Failure('unsafe_cleanup_target')
-    transport = Transport(options.utmctl, owner['clone']['uuid'], options.timeout)
+    transport = Transport(options.utmctl, owner['clone']['uuid'], min(options.timeout, 60), options.lease_descriptor)
     result = {'run': options.run, 'outcome': 'failed'}
     try:
-        dispose_clone(transport, owner)
+        disposition = dispose_clone(transport, owner, allow_missing=True)
         result['outcome'] = 'deleted'
+        result['already_absent'] = disposition == 'already_absent'
         save(directory / 'lifecycle.json', {'retained': False, 'cleanup': 'deleted'})
     except Failure as error:
         result['reason'] = str(error)
@@ -149,7 +290,13 @@ def validate_preflight(preflight):
 
 def run_clone(options, directory, report):
     stage = 'template_validation'
-    transport = Transport(options.utmctl, (options.template or '').lower(), options.timeout)
+    transport = Transport(options.utmctl, (options.template or '').lower(), options.timeout, options.lease_descriptor)
+    work_deadline = transport.deadline
+    transport.deadline = min(work_deadline, time.monotonic() + STAGE_SECONDS[stage])
+    def begin(name):
+        nonlocal stage
+        stage = name
+        transport.deadline = min(work_deadline, time.monotonic() + STAGE_SECONDS[name])
     stage_started = time.monotonic()
     def passed():
         nonlocal stage_started
@@ -161,8 +308,7 @@ def run_clone(options, directory, report):
     try:
         retained = [run for run in owned_runs(options.state_dir) if run['retained']]
         if len(retained) >= 2:
-            report['cleanup_action'] = shlex.join([sys.executable, str(Path(__file__).with_name('windows_test_runner.py')),
-                'cleanup', '--state-dir', str(options.state_dir), '--run', retained[0]['run'], '--utmctl', options.utmctl])
+            report['cleanup_action'] = cleanup_command(options, retained[0]['run'])
             print('Retained clone limit reached. Run: ' + report['cleanup_action'], flush=True)
             raise Failure('retained_clone_limit')
         if not options.dedicated_template: raise Failure('dedicated_template_designation_required')
@@ -175,7 +321,7 @@ def run_clone(options, directory, report):
         report['template'] = {'uuid': source['uuid'], 'state': source['state']}
         if source['state'] != 'stopped': raise Failure('template_must_be_stopped')
         passed()
-        stage = 'candidate_validation'
+        begin('candidate_validation')
         candidate = {'version': options.version, 'sha256': options.sha256, 'commit': options.candidate_commit}
         if (not re.fullmatch(r'v\d+\.\d+\.\d+-[A-Za-z0-9.-]+', options.version or '')
                 or not re.fullmatch(r'[0-9a-f]{64}', options.sha256 or '')
@@ -187,7 +333,7 @@ def run_clone(options, directory, report):
             raise Failure(str(error)) from error
         report['requested_candidate'] = candidate
         passed()
-        stage = 'clone_creation'
+        begin('clone_creation')
         print('Creating a fresh clone from the stopped designated template...', flush=True)
         report['ownership_unresolved'] = True
         save(directory / 'report.json', report)
@@ -215,7 +361,7 @@ def run_clone(options, directory, report):
         report['ownership_unresolved'] = False
         report['retained'] = True
         passed()
-        stage = 'boot'
+        begin('boot')
         print('Booting the verified clone and waiting for its guest agent...', flush=True)
         owned_vm(transport, owner)
         transport.template = identity
@@ -231,7 +377,7 @@ def run_clone(options, directory, report):
                 if str(error) != 'guest_agent_pending': raise
             time.sleep(.5)
         passed()
-        stage = 'guest_session'
+        begin('guest_session')
         report['diagnostics'] = {'guest_staging': 'C:\\Users\\Public\\' + report['run'],
                                  'guest_workspace': '%USERPROFILE%\\' + report['run']}
         print('Waiting for the intended Windows user session...', flush=True)
@@ -241,7 +387,7 @@ def run_clone(options, directory, report):
             time.sleep(.5)
         report['os'] = validate_preflight(preflight)
         passed()
-        stage = 'native_smoke'
+        begin('native_smoke')
         request = {'run': report['run'], 'sid': preflight['user']['sid'], 'session': preflight['user']['session'],
                    'python': preflight['python'], 'workspace_fixture': 'user-owned', 'initialize_sandbox': False,
                    'candidate': candidate}
@@ -255,7 +401,7 @@ def run_clone(options, directory, report):
         report['completion'] = {key: task[key] for key in ('completed', 'unregistered', 'last_result', 'state')}
         report['capabilities']['native_sandbox'] = 'verified'
         passed()
-        stage = 'cleanup'
+        begin('cleanup')
         print('Native smoke passed; collecting evidence and disposing of the owned clone...', flush=True)
         dispose_clone(transport, owner)
         report['retained'] = False
@@ -272,10 +418,11 @@ def run_clone(options, directory, report):
         if owner:
             report['cleanup'] = {'outcome': 'retained'}
             save(directory / 'report.json', report)
-            recovery = Transport(options.utmctl, owner['clone']['uuid'], min(options.timeout, 60))
+            recovery = Transport(options.utmctl, owner['clone']['uuid'], min(options.timeout, 60), options.lease_descriptor)
             try:
-                stop_clone(recovery, owner)
-                report['cleanup']['shutdown'] = 'stopped'
+                report['recovery_diagnostics'] = collect_recovery_diagnostics(recovery, owner)
+                shutdown = stop_clone(recovery, owner)
+                report['cleanup']['shutdown'] = 'forced' if reason == 'forced_shutdown_required' else shutdown
             except (Failure, OSError, KeyboardInterrupt):
                 report['cleanup']['shutdown'] = 'failed'
     finally:
@@ -296,7 +443,7 @@ def run_clone(options, directory, report):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('command', choices=('run', 'status', 'cleanup'))
+    parser.add_argument('command', choices=('run', 'status', 'cleanup', 'recover'))
     parser.add_argument('--state-dir', type=Path, required=True)
     parser.add_argument('--utmctl', default='/Applications/UTM.app/Contents/MacOS/utmctl')
     parser.add_argument('--timeout', type=int, default=600)
@@ -315,31 +462,38 @@ def main():
     signal.signal(signal.SIGTERM, interrupt)
     locked = False
     preserve_lock = False
+    lease = None
     try:
         if options.state_dir.is_symlink(): raise Failure('unsafe_state_directory')
         options.state_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
         options.state_dir = options.state_dir.resolve()
         if options.state_dir.stat().st_uid != os.getuid() or options.state_dir.stat().st_mode & 0o077:
             raise Failure('unsafe_state_directory')
+        lease = InvocationLease(options.state_dir)
+        options.lease_descriptor = lease.descriptor
+        state = runner_state(options.state_dir, lease)
         if options.command == 'status':
-            print(json.dumps({'locked': (options.state_dir / 'active.json').exists(), 'runs': owned_runs(options.state_dir)}, indent=2))
+            runs = owned_runs(options.state_dir)
+            for item in runs:
+                if item['retained']: item['cleanup_action'] = cleanup_command(options, item['run'])
+            print(json.dumps({'locked': state != 'idle', 'runner_state': state,
+                              'active': active_identity(options.state_dir),
+                              'runs': runs}, indent=2))
             return 0
-        try:
-            descriptor = os.open(options.state_dir / 'active.json', os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
-        except FileExistsError:
-            raise Failure('active_or_abandoned_invocation: inspect status; resolve active.json before further mutations') from None
+        if not lease.held:
+            raise Failure('active_invocation: ' + json.dumps(active_identity(options.state_dir)))
+        recovered = recover_abandoned(options, lease)
+        if options.command == 'recover':
+            print(json.dumps(recovered))
+            return 0
+        run = options.run if options.command == 'cleanup' else 'tofa-run-' + uuid.uuid4().hex
+        save(options.state_dir / 'active.json', {'schema': 2, 'lease': lease.identity,
+                                               'pid': os.getpid(), 'operation': options.command, 'run': run})
         locked = True
-        with os.fdopen(descriptor, 'w') as stream:
-            json.dump({'pid': os.getpid(), 'operation': options.command}, stream)
-            stream.flush()
-            os.fsync(stream.fileno())
         if options.command == 'cleanup': return cleanup_run(options)
-        run = 'tofa-run-' + uuid.uuid4().hex
         directory = options.state_dir / run
         directory.mkdir(mode=0o700)
-        report = {'schema': 1, 'run': run, 'outcome': 'running', 'stages': [], 'suite': options.suite,
-                  'retained': False, 'cleanup': {'outcome': 'not_needed'},
-                  'capabilities': {'native_sandbox': 'unverified', 'desktop_guardian': 'unverified'}}
+        report = initial_report(run, options.suite)
         preserve_lock = True
         save(directory / 'report.json', report)
         run_clone(options, directory, report)
@@ -352,3 +506,4 @@ def main():
         return 1
     finally:
         if locked and not preserve_lock: (options.state_dir / 'active.json').unlink()
+        if lease is not None: lease.close()

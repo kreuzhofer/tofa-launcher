@@ -1,0 +1,5 @@
+{
+  "returncode": 1,
+  "stdout": "Retained clone limit reached. Run: /Library/Developer/CommandLineTools/usr/bin/python3 /Users/daniel/src/github/kreuzhofer/nebius-tofa-cli/scripts/windows_test_runner.py cleanup --state-dir /Users/daniel/src/github/kreuzhofer/nebius-tofa-cli/.qualification/windows-clone-runs --run tofa-run-021aba73795846689600b844b99dbbd1 --utmctl /Applications/UTM.app/Contents/MacOS/utmctl\nfailed: retained_clone_limit\nReport: /Users/daniel/src/github/kreuzhofer/nebius-tofa-cli/.qualification/windows-clone-runs/tofa-run-6f9bb8d9d42a475cbcee6d2438a79a8f/report.json\n",
+  "stderr": ""
+}

@@ -154,8 +154,8 @@ or forced engine exit cannot pass. Failed/incomplete tasks and synthetic guest
 artifacts may remain for diagnosis. No VM cleanup is attempted. Host reports
 identify the unique `C:\Users\Public\tofa-template-<run>` staging directory and
 the test user's `tofa-template-<run>` workspace. Do not run template preparation
-concurrently with clone runs. Clone runs use an exclusive lock and conservative
-crash refusal; automated recovery remains a later slice of #78.
+concurrently with clone runs. Clone runs use a kernel-held invocation lease and
+the bounded recovery workflow documented in [windows-runs.md](windows-runs.md).
 
 ## Implementation evidence and checks
 

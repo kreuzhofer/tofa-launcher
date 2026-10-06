@@ -1,0 +1,5 @@
+{
+  "returncode": 0,
+  "stdout": "{\"run\": \"tofa-run-c92a3cb57004462fb3782f4ea4956560\", \"outcome\": \"deleted\", \"already_absent\": true}\n",
+  "stderr": ""
+}

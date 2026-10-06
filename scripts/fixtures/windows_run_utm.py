@@ -3,6 +3,7 @@ import json
 import os
 from pathlib import Path
 import runpy
+import signal
 import sys
 import uuid
 
@@ -10,6 +11,10 @@ path = Path(os.environ['TEMPLATE_FIXTURE_STATE'])
 state = json.loads(path.read_text())
 args = sys.argv[1:]
 if args == ['list']:
+    if state['mode'] == 'diagnostic_inventory_failure':
+        state['recovery_lists'] = state.get('recovery_lists', 0) + 1
+        path.write_text(json.dumps(state))
+        if state['recovery_lists'] == 2: sys.exit('PRIVATE_KEY inventory failed')
     if state.get('delete_attempted') and state['mode'] == 'empty_inventory_after_delete': sys.exit(0)
     print('UUID                                 Status   Name')
     if state.get('delete_attempted') and state['mode'] == 'header_only_after_delete': sys.exit(0)
@@ -45,7 +50,17 @@ elif args[0] in ('start', 'stop', 'delete'):
         state['ownership_before_boot'] = True
         vm['status'] = 'started'
     elif args[0] == 'stop':
-        if args[2:] != ['--request']: sys.exit('expected normal shutdown')
+        if args[2:] not in (['--request'], ['--force']): sys.exit('unexpected shutdown mode')
+        if args[2:] == ['--request'] and state['mode'] in ('shutdown_refused', 'shutdown_hang', 'force_refused'):
+            state['effects'].append({'vm': args[1], 'effect': 'request_refused'})
+            path.write_text(json.dumps(state))
+            if state['mode'] == 'shutdown_hang':
+                import time
+                time.sleep(30)
+            sys.exit('PRIVATE_KEY shutdown refused')
+        if args[2:] == ['--force']:
+            if state['mode'] == 'force_refused': sys.exit('PRIVATE_KEY force refused')
+            state['effects'].append({'vm': args[1], 'effect': 'forced'})
         vm['status'] = 'stopped'
     else:
         if state['mode'] == 'delete_failure': sys.exit('PRIVATE_KEY deletion failed')
@@ -56,5 +71,13 @@ elif args[0] in ('start', 'stop', 'delete'):
             state['vms'].remove(vm)
     state['effects'].append({'vm': args[1], 'effect': args[0]})
     path.write_text(json.dumps(state))
+    if (args[0] == 'start' and state['mode'] in ('crash_after_boot', 'crash_with_inflight_transport')
+            or args[0] == 'delete' and state['mode'] == 'crash_after_delete'):
+        os.kill(os.getppid(), signal.SIGKILL)
+        if state['mode'] == 'crash_with_inflight_transport':
+            import time
+            time.sleep(2)
 else:
+    if state['mode'] == 'crash_during_trial' and args[:2] == ['file', 'pull'] and args[-1].endswith('task.json'):
+        os.kill(os.getppid(), signal.SIGKILL)
     runpy.run_path(str(Path(__file__).with_name('windows_template_utm.py')), run_name='__main__')

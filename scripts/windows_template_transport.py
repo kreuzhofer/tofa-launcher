@@ -19,7 +19,7 @@ class Failure(Exception):
 
 
 class Transport:
-    def __init__(self, executable, template, timeout):
+    def __init__(self, executable, template, timeout, lease_descriptor=None):
         self.executable = executable
         self.template = template
         self.deadline = time.monotonic() + timeout
@@ -30,6 +30,7 @@ class Transport:
         self.started = time.monotonic()
         self.steps = []
         self.last_progress = None
+        self.lease_descriptor = lease_descriptor
 
     @contextmanager
     def step(self, name):
@@ -49,6 +50,7 @@ class Transport:
             raise Failure('transport_timeout')
         try:
             result = subprocess.run([self.executable, *args], input=data, capture_output=True,
+                                    pass_fds=(() if self.lease_descriptor is None else (self.lease_descriptor,)),
                                     timeout=min(remaining, TRANSPORT_CALL_SECONDS))
         except subprocess.TimeoutExpired as error:
             raise Failure('transport_timeout') from error
@@ -117,7 +119,7 @@ class Transport:
         finally:
             # A timed-out work budget must not hide the last guest checkpoint.
             # This read-only collection has its own bounded 15-second budget.
-            diagnostics = Transport(self.executable, self.template, 15)
+            diagnostics = Transport(self.executable, self.template, 15, self.lease_descriptor)
             try:
                 raw = diagnostics.call('file', 'pull', self.template,
                                        'C:\\Users\\Public\\' + request['run'] + '\\output\\progress.json')

@@ -1,0 +1,8 @@
+{
+  "scripts/windows_clone_runner.py": "49f6b9985c73b1258a2a70bb53fe20818d86092a23e353a7a5c770d23922e597",
+  "scripts/windows_run_lock.py": "818544e6a5b9de9c2f3614527b97d94ff15ee1c7b45c36e8ba18edec93139202",
+  "scripts/windows_run_test.py": "bcb6e7c51f978af2e170b1240b7fbdcf8656b32265a73167141dcf6dd77bb8d8",
+  "scripts/windows_test_runner.py": "2c53d1a77f0c2bb16e41c722b2d8e9455509c80c4cae806f309c45dcf3192b18",
+  "scripts/windows_template_transport.py": "e1e0b46cd5732f0f38cfa75b0761402aa3755e583d68e87a0a1cec5a5fa1ff8e",
+  "scripts/fixtures/windows_run_utm.py": "f6a3eeea3d8d630fa2c614b811f2a26b31e7811b9f2671b9967482168fc7f6bc"
+}

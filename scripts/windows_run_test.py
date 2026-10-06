@@ -45,7 +45,7 @@ class RunTests(unittest.TestCase):
         state.update(values)
         self.state.write_text(json.dumps(state))
 
-    def invoke(self, *extra, command='run'):
+    def arguments(self, *extra, command='run'):
         args = [sys.executable, str(SCRIPTS / 'windows_test_runner.py'), command,
                 '--state-dir', str(self.runs), '--utmctl', str(self.utm), '--timeout', '240']
         if command == 'run':
@@ -53,7 +53,11 @@ class RunTests(unittest.TestCase):
                      '--candidate', str(self.candidate), '--version', 'v0.0.1-rc.14',
                      '--sha256', hashlib.sha256(self.candidate.read_bytes()).hexdigest(),
                      '--candidate-commit', 'c' * 40, '--suite', 'native-smoke']
-        result = subprocess.run(args + list(extra), env=self.env, capture_output=True, text=True, timeout=20)
+        return args + list(extra)
+
+    def invoke(self, *extra, command='run'):
+        result = subprocess.run(self.arguments(*extra, command=command), env=self.env,
+                                capture_output=True, text=True, timeout=20)
         reports = list(self.runs.glob('tofa-run-*/report.json'))
         report = json.loads(max(reports, key=lambda p: p.stat().st_mtime_ns).read_text()) if reports else {}
         for secret in ('PRIVATE_KEY', 'UNRELATED_CONTENT'):
@@ -312,8 +316,12 @@ class RunTests(unittest.TestCase):
             time.sleep(.05)
         status, _, _ = self.invoke(command='status')
         self.assertEqual(json.loads(status.stdout)['runs'][0]['outcome'], 'running')
+        active = json.loads(status.stdout)['active']
+        self.assertEqual(active['operation'], 'run')
+        self.assertEqual(active['run'], json.loads(reports[0].read_text())['run'])
         result, _, state = self.invoke()
         self.assertNotEqual(result.returncode, 0)
+        self.assertIn(active['run'], result.stderr)
         self.assertEqual(len(state['vms']), 3)
         process.terminate()
         output, errors = process.communicate(timeout=15)
@@ -340,6 +348,187 @@ class RunTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, report)
         self.assertEqual(state['candidate_transfer_sha256'], report['candidate']['sha256'])
         self.assertLess(state['candidate_transfer_size'], self.candidate.stat().st_size)
+
+    def test_crashed_runner_is_recovered_as_a_retained_failure(self):
+        self.change(mode='crash_after_boot')
+        result, report, state = self.invoke()
+        self.assertNotEqual(result.returncode, 0)
+        run = report['run']
+        self.assertEqual(state['vms'][-1]['status'], 'started')
+        status, _, _ = self.invoke(command='status')
+        self.assertEqual(json.loads(status.stdout)['runner_state'], 'abandoned')
+        recovered, report, state = self.invoke(command='recover')
+        self.assertEqual(recovered.returncode, 0, recovered.stdout + recovered.stderr)
+        self.assertEqual(report['outcome'], 'failed')
+        self.assertEqual(report['reason'], 'runner_abandoned')
+        self.assertTrue(report['retained'])
+        self.assertEqual(state['vms'][-1]['status'], 'stopped')
+        self.assertTrue(list((self.runs / run).glob('recovery-*.json')))
+        self.assertFalse((self.runs / 'active.json').exists())
+        self.assertEqual([vm['status'] for vm in state['vms'][:2]], ['stopped', 'started'])
+        again, _, _ = self.invoke(command='recover')
+        self.assertEqual(again.returncode, 0)
+        self.change(mode='success')
+        next_run, _, state = self.invoke()
+        self.assertEqual(next_run.returncode, 0, next_run.stdout + next_run.stderr)
+        self.assertEqual(len(state['vms']), 3)
+
+    def test_explicit_cleanup_is_idempotent_and_preserves_failure_history(self):
+        self.change(mode='task_failed')
+        _, report, _ = self.invoke()
+        history = (self.runs / report['run'] / 'report.json').read_bytes()
+        first, _, state = self.invoke('--run', report['run'], command='cleanup')
+        self.assertEqual(first.returncode, 0)
+        effects = state['effects']
+        again, _, state = self.invoke('--run', report['run'], command='cleanup')
+        self.assertEqual(again.returncode, 0, again.stdout + again.stderr)
+        self.assertTrue(json.loads(again.stdout)['already_absent'])
+        self.assertEqual(state['effects'], effects)
+        self.assertEqual((self.runs / report['run'] / 'report.json').read_bytes(), history)
+
+    def test_recovery_recognizes_deletion_completed_before_host_crash(self):
+        self.change(mode='crash_after_delete')
+        result, report, state = self.invoke()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(len(state['vms']), 2)
+        recovered, report, state = self.invoke(command='recover')
+        self.assertEqual(recovered.returncode, 0, recovered.stdout + recovered.stderr)
+        self.assertEqual(report['outcome'], 'failed')
+        self.assertEqual(report['reason'], 'runner_abandoned')
+        self.assertFalse(report['retained'])
+        self.assertEqual(report['cleanup']['outcome'], 'already_absent')
+        status, _, _ = self.invoke(command='status')
+        self.assertFalse(json.loads(status.stdout)['runs'][0]['retained'])
+
+    def test_abandoned_lease_recovers_even_when_recorded_pid_is_alive(self):
+        self.change(mode='crash_after_boot')
+        self.invoke()
+        marker = self.runs / 'active.json'
+        active = json.loads(marker.read_text())
+        active['pid'] = os.getpid()
+        marker.write_text(json.dumps(active))
+        recovered, report, _ = self.invoke(command='recover')
+        self.assertEqual(recovered.returncode, 0, recovered.stderr)
+        self.assertEqual(report['reason'], 'runner_abandoned')
+
+    def test_replaced_lease_never_authorizes_recovery(self):
+        self.change(mode='crash_after_boot')
+        _, _, before = self.invoke()
+        (self.runs / 'invocation.lock').rename(self.runs / 'old.lock')
+        result, _, after = self.invoke(command='recover')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(before['effects'], after['effects'])
+        self.assertTrue((self.runs / 'active.json').exists())
+
+    def test_normal_shutdown_refusal_forces_only_owned_clone_and_retains_disk(self):
+        self.change(mode='shutdown_refused')
+        result, report, state = self.invoke()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(report['reason'], 'forced_shutdown_required')
+        self.assertTrue(report['retained'])
+        self.assertEqual(report['cleanup']['shutdown'], 'forced')
+        self.assertEqual(state['vms'][-1]['status'], 'stopped')
+        self.assertFalse(any(item['effect'] == 'delete' for item in state['effects']))
+        self.assertEqual([vm['status'] for vm in state['vms'][:2]], ['stopped', 'started'])
+
+    def test_recovery_bounds_hanging_shutdown_and_records_force(self):
+        self.change(mode='crash_after_boot')
+        self.invoke()
+        self.change(mode='shutdown_hang')
+        started = time.monotonic()
+        result, report, state = self.invoke('--timeout', '4', command='recover')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertLess(time.monotonic() - started, 6)
+        self.assertEqual(report['cleanup']['shutdown'], 'forced')
+        self.assertTrue(report['retained'])
+        self.assertEqual(state['vms'][-1]['status'], 'stopped')
+
+    def test_failed_recovery_is_durable_and_retryable(self):
+        self.change(mode='crash_after_boot')
+        _, report, _ = self.invoke()
+        self.change(mode='force_refused')
+        result, report, _ = self.invoke(command='recover')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(report['outcome'], 'failed')
+        self.assertEqual(report['reason'], 'runner_abandoned')
+        attempts = list((self.runs / report['run']).glob('recovery-*.json'))
+        self.assertEqual(json.loads(attempts[0].read_text())['shutdown'], 'failed')
+        self.assertEqual(json.loads(attempts[0].read_text())['diagnostics']['outcome'], 'unavailable')
+        self.assertTrue((self.runs / 'active.json').exists())
+        self.change(mode='success')
+        result, _, state = self.invoke(command='recover')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(state['vms'][-1]['status'], 'stopped')
+        self.assertTrue(attempts[0].exists())
+
+    def test_recovered_failures_count_toward_retention_limit(self):
+        self.change(mode='crash_after_boot')
+        self.invoke()
+        self.invoke()
+        self.change(mode='success')
+        result, report, state = self.invoke()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(report['reason'], 'retained_clone_limit')
+        self.assertEqual(len(state['vms']), 4)
+        status, _, _ = self.invoke(command='status')
+        self.assertIn('cleanup --state-dir', status.stdout)
+
+    def test_crash_before_initial_report_can_be_recovered_without_vm_actions(self):
+        self.change(mode='crash_after_boot')
+        _, report, _ = self.invoke()
+        # Reproduce the durable state at the earlier initialization window.
+        directory = self.runs / report['run']
+        for path in directory.iterdir(): path.unlink()
+        self.change(vms=json.loads(self.state.read_text())['vms'][:2], effects=[])
+        result, report, state = self.invoke(command='recover')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(report['reason'], 'runner_abandoned')
+        self.assertFalse(report['retained'])
+        self.assertEqual(state['effects'], [])
+
+    def test_ownership_saved_before_report_update_is_recoverable(self):
+        self.change(mode='crash_after_boot')
+        _, report, _ = self.invoke()
+        path = self.runs / report['run'] / 'report.json'
+        report.pop('clone')
+        report.update(ownership_unresolved=True, retained=False)
+        path.write_text(json.dumps(report))
+        result, report, state = self.invoke(command='recover')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(report['retained'])
+        self.assertEqual(state['vms'][-1]['status'], 'stopped')
+
+    def test_recovery_collects_trial_checkpoints_without_turning_abandoned_run_into_pass(self):
+        self.change(mode='crash_during_trial')
+        result, report, _ = self.invoke()
+        self.assertNotEqual(result.returncode, 0)
+        recovered, report, _ = self.invoke(command='recover')
+        self.assertEqual(recovered.returncode, 0, recovered.stderr)
+        diagnostics = json.loads(recovered.stdout)['diagnostics']
+        self.assertEqual(diagnostics['files']['progress']['outcome'], 'collected')
+        self.assertEqual(report['outcome'], 'failed')
+
+    def test_inflight_transport_holds_lease_after_runner_is_killed(self):
+        self.change(mode='crash_with_inflight_transport')
+        process = subprocess.Popen(self.arguments(), env=self.env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        process.wait(timeout=5)
+        result, _, _ = self.invoke(command='recover')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn('active_invocation', result.stderr)
+        time.sleep(2)
+        recovered, _, state = self.invoke(command='recover')
+        self.assertEqual(recovered.returncode, 0, recovered.stderr)
+        self.assertEqual(state['vms'][-1]['status'], 'stopped')
+
+    def test_diagnostic_inventory_failure_does_not_skip_owned_shutdown(self):
+        self.change(mode='crash_after_boot')
+        self.invoke()
+        self.change(mode='diagnostic_inventory_failure')
+        result, report, state = self.invoke(command='recover')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(json.loads(result.stdout)['diagnostics']['outcome'], 'unavailable')
+        self.assertEqual(state['vms'][-1]['status'], 'stopped')
+        self.assertTrue(report['retained'])
 
 
 if __name__ == '__main__':

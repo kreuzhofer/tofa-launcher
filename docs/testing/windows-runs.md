@@ -1,7 +1,8 @@
 # Disposable Windows native smoke runs
 
 The Mac-side `scripts/windows_test_runner.py` CLI implements #80's native slice
-of #78. Its `run`, `status`, and `cleanup` commands share a private local state
+of #78, with #81 crash recovery. Its `run`, `status`, `recover`, and `cleanup`
+commands share a private local state
 directory. Use the same directory for all runs on this host. Template bootstrap
 is documented in [windows-template.md](windows-template.md).
 
@@ -47,8 +48,11 @@ is saved atomically and fsynced before boot. UTM's case-sensitive UUID spelling 
 preserved.
 
 The work deadline defaults to 600 seconds (`--timeout`, 1–1800), with transport
-calls capped at 150 seconds and a separate failure-shutdown budget capped at 60
-seconds. Task preparation (decompression, ACLs, registration) finishes before
+calls capped at 150 seconds. Stage ceilings are 30 seconds each for template and
+candidate validation, 150 for cloning, 120 each for boot and user readiness,
+360 for native smoke, and 60 for disposal; the overall work deadline still wins.
+A separate failure-recovery budget is capped at 60 seconds, including diagnostic
+collection and shutdown. Task preparation (decompression, ACLs, registration) finishes before
 the native task starts. Starting it requires at least 180 seconds of the work
 budget remaining: a 120-second execution limit, a 125-second controller wait,
 a 150-second transport cap, and a collection margin. A smaller remaining budget
@@ -65,6 +69,9 @@ candidate identity must agree. Host exit zero alone cannot establish completion.
 
 ```sh
 python3 scripts/windows_test_runner.py status \
+  --state-dir .qualification/windows-clone-runs
+
+python3 scripts/windows_test_runner.py recover \
   --state-dir .qualification/windows-clone-runs
 
 python3 scripts/windows_test_runner.py cleanup \
@@ -89,23 +96,43 @@ encoded scriptblock command, avoiding UTM's command-length limit without changin
 execution policy.
 
 Native results are saved before cleanup. Normal shutdown is requested explicitly,
-and only the verified stopped owned clone is deleted. Exit zero requires verified
-deletion and a saved final report. Cleanup failure is non-passing. Ordinary failures
-and interruptions attempt normal shutdown and retain the clone and diagnostics.
+and only the verified stopped owned clone is deleted. Half the remaining shutdown
+budget is reserved for force-stop if normal shutdown fails. Identity is checked
+again before force-stop. A clone that requires forced shutdown is retained and
+cannot produce a passing run, even if its smoke checks passed. Exit zero requires
+verified deletion and a saved final report. Ordinary failures and interruptions
+collect available sanitized diagnostics, attempt bounded normal then forced
+shutdown, and retain the clone and diagnostics.
 No vendor sandbox service or unrelated VM is an owned resource.
 
 Explicit cleanup accepts an owned run ID, not a VM name, UUID, or path. It checks
 private state ownership, refuses symlinked state and mismatched identity, and
 preserves the original report. Each cleanup attempt gets a separate report;
-`lifecycle.json` records current disposal state. Two retained failed clones block
-another run and print a shell-quoted cleanup command.
+`lifecycle.json` records current disposal state. Repeating cleanup after verified
+deletion reports `already_absent` without additional mutation. Two retained failed
+clones (including recovered crashes) block another run. Both admission refusal
+and status provide shell-quoted cleanup commands.
 
-An exclusive `active.json` serializes run and cleanup operations; status stays
-available. A crash or unresolved clone identity leaves a conservative refusal.
-Do not simply remove the lock to retry: establish that its process ended, inspect
-the durable clone intent and exact inventory, and reconcile ownership first.
-Automated crash recovery is a later ticket. Ambiguous clones are never adopted
-or deleted automatically.
+A kernel-held `invocation.lock` serializes run, recovery, and cleanup operations;
+in-flight transport commands inherit the lease so recovery cannot race them after
+a host crash. `active.json` binds the run and operation to that lock's filesystem
+identity. Status reports `active`, `abandoned`, `ambiguous`, or `idle`; an active
+refusal identifies the run. A recorded PID alone never proves liveness.
+
+`recover` (also run automatically before new work) records abandoned work as
+failed, preserves its earlier report, collects available run-correlated checkpoints
+and native diagnostics, and shuts down only the verified owned clone. Recovery
+attempts have separate reports and incomplete shutdown remains retryable. A crash
+after deletion is recognized as `already_absent`; initialization before any clone
+intent is safely finalized. Repeated recovery when idle does nothing.
+
+Legacy markers, a replaced lock, unresolved clone intent without durable ownership,
+or mismatched VM identity fail closed. Never remove the marker or select a clone
+by name to bypass this refusal. Establish exact ownership independently before
+manual reconciliation. An ownership record saved before the associated report
+update can be reconciled using the durable intent and UUID. The source template,
+everyday VM, unrelated processes, and native vendor services are never recovery
+targets.
 
 ## Checks
 
