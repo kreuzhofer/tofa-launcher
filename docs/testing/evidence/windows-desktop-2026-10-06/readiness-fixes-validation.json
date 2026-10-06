@@ -1,0 +1,32 @@
+{
+  "status": "readiness_fixes_verified_desktop_acceptance_pending",
+  "base_commit": "21ba3dc",
+  "full_python_suite": {
+    "tests": 330,
+    "skipped": 80,
+    "elapsed_seconds": 423.659,
+    "outcome": "passed",
+    "log": "readiness-fixes-python-suite.txt"
+  },
+  "type_check": {
+    "outcome": "passed",
+    "files": 5
+  },
+  "reviews": {
+    "standards": "no_findings",
+    "spec": "no_findings"
+  },
+  "native_template": "desktop_ready",
+  "native_bootstrap": "normal_quit_and_owned_exit_passed",
+  "native_desktop": "fresh_clone_attempt_in_progress",
+  "native_guardian": "not_run",
+  "publication": "local_only",
+  "sources": {
+    "scripts/windows_clone_runner.py": "ecd37225ac728d932ef71cd5510d1dad14a97f8fa7361f59d870b095e124ef11",
+    "scripts/windows_template_transport.py": "1aa8e1eaecd1785e10c111db7d6e871e08172a89701d7a8d12d57694dd51195d",
+    "scripts/windows_desktop_runtime.py": "35c59282eef3cbe78bf01905afdaa061190e95a178f73890fc85ce2893ffc81f",
+    "scripts/windows_desktop_ui.ps1": "b471c109c9a61cb95baa6cafd1ad0fc9981f2ecff5983b47be87fd648c4d26e2",
+    "scripts/windows_desktop_probe.py": "93bca0fe53518f70c90e6bfcfb7e161c817499a6ecdd4e10ce423f86d61c7ed3",
+    "scripts/windows_desktop_bridge.py": "da0e265bea1e11cf55a0ee4c2dd7bd769ba896209c70fd34dc8180cc254f7f3b"
+  }
+}

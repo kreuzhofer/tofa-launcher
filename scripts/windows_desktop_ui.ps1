@@ -29,13 +29,21 @@ try {
     } while([DateTime]::UtcNow -lt $deadline)
     Invoke-Control $button
   } elseif($request.action -eq 'quit') {
-    $menu=Find-Control @('File','&File') ([System.Windows.Automation.ControlType]::MenuItem)
+    $deadline=[DateTime]::UtcNow.AddSeconds(15)
+    do {
+      $menu=Find-Control @('File','&File') ([System.Windows.Automation.ControlType]::MenuItem)
+      if($null -ne $menu){break}
+      Start-Sleep -Milliseconds 300
+    } while([DateTime]::UtcNow -lt $deadline)
     if($null -eq $menu){throw 'file menu unavailable'}
     $expand=$null
     if($menu.TryGetCurrentPattern([System.Windows.Automation.ExpandCollapsePattern]::Pattern,[ref]$expand)){$expand.Expand()}
     else {Invoke-Control $menu}
-    Start-Sleep -Milliseconds 300
-    $quit=Find-Control @('Quit ChatGPT','Quit Codex','Quit','Exit','Exit ChatGPT') ([System.Windows.Automation.ControlType]::MenuItem)
+    do {
+      $quit=Find-Control @('Quit ChatGPT','Quit ChatGPT Ctrl+Q','Quit Codex','Quit','Exit','Exit ChatGPT') ([System.Windows.Automation.ControlType]::MenuItem)
+      if($null -ne $quit){break}
+      Start-Sleep -Milliseconds 300
+    } while([DateTime]::UtcNow -lt $deadline)
     Invoke-Control $quit
   } else {throw 'unsupported action'}
   $result.ok=$true

@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "run": "tofa-template-5ebce4af7f0643548062c8edcd72d9ed",
+  "operation": "prepare",
+  "outcome": "failed",
+  "capabilities": {
+    "native_sandbox": "verified",
+    "desktop_trust": "unverified",
+    "desktop_guardian": "unverified",
+    "test_authentication": "unverified"
+  },
+  "authentication_choice": "native-session",
+  "stages": [
+    {
+      "stage": "template_identity",
+      "outcome": "passed"
+    },
+    {
+      "stage": "prerequisites",
+      "outcome": "passed"
+    },
+    {
+      "stage": "native_readiness",
+      "outcome": "passed"
+    },
+    {
+      "stage": "readiness",
+      "outcome": "failed",
+      "reason": "desktop_policy_mismatch"
+    }
+  ],
+  "changes": [
+    "SYSTEM-protected diagnostic staging directory and fresh prerequisite report",
+    "Limited interactive task",
+    "Synthetic workspace and outside directory; test markers removed on completion"
+  ],
+  "template": {
+    "uuid": "EF96CF12-D901-455F-81FF-4C5001E15F80",
+    "state": "started"
+  },
+  "diagnostics": {
+    "guest_staging": "C:\\Users\\Public\\tofa-template-5ebce4af7f0643548062c8edcd72d9ed",
+    "guest_workspace": "%USERPROFILE%\\tofa-template-5ebce4af7f0643548062c8edcd72d9ed"
+  },
+  "os": {
+    "name": "Windows 11",
+    "architecture": "ARM64",
+    "version": "10.0.26200"
+  },
+  "workspace_fixture": "user-owned",
+  "native": {
+    "identity": {
+      "client_version": "26.930.7945.0",
+      "engine_version": "0.160.1",
+      "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+      "package_engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+      "package": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+      "architecture": "Arm64",
+      "python_version": "3.13.15",
+      "sid": "S-1-5-21-1299817968-325600504-2357610402-1005",
+      "session": 1
+    },
+    "checks": {
+      "limited_user": true,
+      "harness_read_only": true,
+      "workspace_owned_by_user": true,
+      "workspace_acl_manageable": true,
+      "ordinary_write": true,
+      "workspace_write_read": true,
+      "outside_permission_denied": true,
+      "outside_marker_exists": false,
+      "full_access_disabled": true,
+      "engine_exited": true,
+      "markers_removed": true
+    },
+    "execution": {
+      "workspace_exit_code": 0,
+      "outside_exit_code": 1,
+      "outside_denial_signal": "GetContentWriterUnauthorizedAccessError"
+    },
+    "setup_status": "not_requested"
+  },
+  "completion": {
+    "completed": true,
+    "unregistered": true,
+    "last_result": 0,
+    "state": "Ready"
+  },
+  "transport_progress_observed": false,
+  "desktop_run": "tofa-template-a3f8d46051e749a7bc5473abe90abea0",
+  "desktop": {
+    "ok": false,
+    "reason": "desktop_policy_mismatch",
+    "checks": {
+      "authenticated": true,
+      "workspace_trusted": false,
+      "automatic_review": true,
+      "full_access_disabled": true,
+      "readiness_engine_exited": true
+    },
+    "identity": {},
+    "execution": {}
+  },
+  "reason": "desktop_policy_mismatch"
+}

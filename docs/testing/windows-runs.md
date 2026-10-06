@@ -39,6 +39,14 @@ hash relationship, creates a user-owned workspace, and requires sandbox write/re
 success and an actual permission denial with no outside marker. New compatible
 client versions remain accepted. This is not desktop or Guardian qualification.
 
+After boot, the runner waits for the intended user session and allows up to
+30 seconds for transient native package registration to settle, within the
+overall readiness deadline. Each poll reads a distinct result file; delayed
+guest commands cannot reuse an earlier result. Readiness waits and the final
+specific prerequisite failure are retained in the report. An app update may
+require another one-time desktop launch in the template to initialize its new
+engine cache; the runner never substitutes an older or standalone engine.
+
 ## Bounded desktop smoke
 
 The `desktop-smoke` suite is implemented for #82; real ARM64 desktop acceptance

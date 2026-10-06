@@ -1,0 +1,23 @@
+{
+  "run": "tofa-template-21cf5b25f40e4cb6943a9b19a95aa2a6",
+  "phase": "bootstrap",
+  "ok": false,
+  "normal_quit": false,
+  "reason": "bootstrap_failed",
+  "last_ps": {
+    "exit": 0,
+    "stderr": "#< CLIXML\r\n<Objs Version=\"1.1.0.1\" xmlns=\"http://schemas.microsoft.com/powershell/2004/04\"><Obj S=\"progress\" RefId=\"0\"><TN RefId=\"0\"><T>System.Management.Automation.PSCustomObject</T><T>System.Object</T></TN><MS><I64 N=\"SourceId\">1</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj><Obj S=\"progress\" RefId=\"1\"><TNRef RefId=\"0\" /><MS><I64 N=\"SourceId\">2</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj><Obj S=\"progress\" RefId=\"2\"><TNRef RefId=\"0\" /><MS><I64 N=\"SourceId\">2</I64><PR N=\"Record\"><AV>Preparing modules for first use.</AV><AI>0</AI><Nil /><PI>-1</PI><PC>-1</PC><T>Completed</T><SR>-1</SR><SD> </SD></PR></MS></Obj></Objs>",
+    "stdout": "{\r\n    \"engine\":  \"C:\\\\Program Files\\\\WindowsApps\\\\OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0\\\\app\\\\resources\\\\codex.exe\",\r\n    \"executable\":  \"C:\\\\Program Files\\\\WindowsApps\\\\OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0\\\\app\\\\ChatGPT.exe\",\r\n    \"package\":  \"OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0\"\r\n}\r\n"
+  },
+  "error_type": "ValueError",
+  "task": {
+    "last_result": 1,
+    "state": "Ready",
+    "run": "tofa-template-21cf5b25f40e4cb6943a9b19a95aa2a6",
+    "ok": false,
+    "reason": "native_task_failed",
+    "completed": true,
+    "phase": "completion",
+    "unregistered": true
+  }
+}

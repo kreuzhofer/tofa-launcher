@@ -1,0 +1,64 @@
+{
+  "run": "tofa-template-50fda7719e3247b6be52af745631fd28",
+  "phase": "bootstrap",
+  "ok": false,
+  "reason": "trust_not_verified",
+  "initialized": true,
+  "effective": {
+    "kind": "dict",
+    "synthetic_entries": [
+      {
+        "path": "\"C:\\\\Users\\\\tofa-test\\\\tofa-template-50fda7719e3247b6be52af745631fd28\\\\workspace\"",
+        "trust_level": "trusted",
+        "matches": false
+      }
+    ]
+  },
+  "layers": [
+    {
+      "type": "sessionFlags",
+      "projects": {
+        "kind": "dict",
+        "synthetic_entries": [
+          {
+            "path": "\"C:\\\\Users\\\\tofa-test\\\\tofa-template-50fda7719e3247b6be52af745631fd28\\\\workspace\"",
+            "trust_level": "trusted",
+            "matches": false
+          }
+        ]
+      }
+    },
+    {
+      "type": "user",
+      "projects": {
+        "kind": "dict",
+        "synthetic_entries": []
+      }
+    },
+    {
+      "type": "enterpriseManaged",
+      "projects": {
+        "kind": "dict",
+        "synthetic_entries": []
+      }
+    },
+    {
+      "type": "system",
+      "projects": {
+        "kind": "dict",
+        "synthetic_entries": []
+      }
+    }
+  ],
+  "engine_exited": true,
+  "task": {
+    "last_result": 1,
+    "state": "Ready",
+    "run": "tofa-template-50fda7719e3247b6be52af745631fd28",
+    "ok": false,
+    "reason": "native_task_failed",
+    "completed": true,
+    "phase": "completion",
+    "unregistered": true
+  }
+}

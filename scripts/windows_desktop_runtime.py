@@ -14,6 +14,7 @@ from windows_template_probe import safe_directory
 
 
 def powershell(source, timeout=20):
+    source = "$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';" + source
     encoded = base64.b64encode(source.encode('utf-16-le')).decode('ascii')
     result = subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-EncodedCommand', encoded],
                             capture_output=True, timeout=timeout, creationflags=subprocess.CREATE_NO_WINDOW)  # type: ignore[attr-defined]  # Windows-only guest.

@@ -1,0 +1,119 @@
+{
+  "run": "tofa-template-7582db1615814fff8d4e157c9d8eba85",
+  "phase": "bootstrap",
+  "ok": true,
+  "normal_quit": true,
+  "reason": "bootstrap_passed",
+  "package": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+  "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+  "matching_engine_cached": true,
+  "app_pid": 7604,
+  "ui_census": {
+    "types": [
+      {
+        "count": 1,
+        "type": "ControlType.Window"
+      },
+      {
+        "count": 8,
+        "type": "ControlType.Pane"
+      },
+      {
+        "count": 1,
+        "type": "ControlType.Document"
+      },
+      {
+        "count": 35,
+        "type": "ControlType.Group"
+      },
+      {
+        "count": 1,
+        "type": "ControlType.Hyperlink"
+      },
+      {
+        "count": 35,
+        "type": "ControlType.Button"
+      },
+      {
+        "count": 5,
+        "type": "ControlType.Image"
+      },
+      {
+        "count": 1,
+        "type": "ControlType.MenuBar"
+      },
+      {
+        "count": 4,
+        "type": "ControlType.MenuItem"
+      },
+      {
+        "count": 2,
+        "type": "ControlType.List"
+      },
+      {
+        "count": 2,
+        "type": "ControlType.ListItem"
+      },
+      {
+        "count": 1,
+        "type": "ControlType.Separator"
+      },
+      {
+        "count": 4,
+        "type": "ControlType.StatusBar"
+      },
+      {
+        "count": 1,
+        "type": "ControlType.ToolBar"
+      },
+      {
+        "count": 5,
+        "type": "ControlType.Text"
+      },
+      {
+        "count": 1,
+        "type": "ControlType.Edit"
+      }
+    ],
+    "menus": [
+      {
+        "name": "File",
+        "offscreen": false,
+        "enabled": true
+      },
+      {
+        "name": "Edit",
+        "offscreen": false,
+        "enabled": true
+      },
+      {
+        "name": "View",
+        "offscreen": false,
+        "enabled": true
+      },
+      {
+        "name": "Help",
+        "offscreen": false,
+        "enabled": true
+      }
+    ]
+  },
+  "ui_result": {
+    "ok": true,
+    "reason": "invoked"
+  },
+  "ui_after_quit": {
+    "types": [],
+    "menus": []
+  },
+  "task": {
+    "last_result": 0,
+    "state": "Ready",
+    "run": "tofa-template-7582db1615814fff8d4e157c9d8eba85",
+    "ok": true,
+    "reason": "completed",
+    "completed": true,
+    "phase": "completion",
+    "unregistered": true
+  }
+}

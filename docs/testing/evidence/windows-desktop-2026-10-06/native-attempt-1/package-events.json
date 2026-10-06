@@ -1,0 +1,642 @@
+[
+  {
+    "time": "2026-10-06T10:25:08.4956007Z",
+    "level": 5,
+    "id": 822,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:08.4951549Z",
+    "level": 5,
+    "id": 821,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:08.4868462Z",
+    "level": 4,
+    "id": 613,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:08.4528460Z",
+    "level": 5,
+    "id": 472,
+    "packages": [
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0",
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g00924fc1a"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:08.4476430Z",
+    "level": 4,
+    "id": 400,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:08.4472688Z",
+    "level": 3,
+    "id": 728,
+    "packages": []
+  },
+  {
+    "time": "2026-10-06T10:25:08.4019497Z",
+    "level": 3,
+    "id": 728,
+    "packages": []
+  },
+  {
+    "time": "2026-10-06T10:25:08.2814282Z",
+    "level": 5,
+    "id": 617,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:08.2728215Z",
+    "level": 5,
+    "id": 617,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:08.2697696Z",
+    "level": 5,
+    "id": 10007,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:08.2697559Z",
+    "level": 5,
+    "id": 617,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:08.2697331Z",
+    "level": 5,
+    "id": 10007,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:08.2696386Z",
+    "level": 5,
+    "id": 617,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:08.0950448Z",
+    "level": 5,
+    "id": 9627,
+    "packages": [
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:08.0805942Z",
+    "level": 5,
+    "id": 5507,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:08.0805734Z",
+    "level": 5,
+    "id": 5507,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:08.0805433Z",
+    "level": 5,
+    "id": 5507,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:08.0805203Z",
+    "level": 5,
+    "id": 5507,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:08.0766497Z",
+    "level": 5,
+    "id": 617,
+    "packages": [
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:08.0192153Z",
+    "level": 5,
+    "id": 617,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:07.9374611Z",
+    "level": 4,
+    "id": 647,
+    "packages": [
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:07.8635913Z",
+    "level": 5,
+    "id": 9627,
+    "packages": [
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:07.8633456Z",
+    "level": 5,
+    "id": 9626,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:07.7087218Z",
+    "level": 5,
+    "id": 10000,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:07.7086624Z",
+    "level": 5,
+    "id": 617,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:07.7067035Z",
+    "level": 5,
+    "id": 10000,
+    "packages": [
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:07.7064888Z",
+    "level": 5,
+    "id": 617,
+    "packages": [
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:07.6604719Z",
+    "level": 5,
+    "id": 455,
+    "packages": [
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0",
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:07.6598514Z",
+    "level": 4,
+    "id": 855,
+    "packages": [
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0",
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:07.6437575Z",
+    "level": 4,
+    "id": 854,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:07.6428986Z",
+    "level": 4,
+    "id": 607,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:25:07.6416775Z",
+    "level": 5,
+    "id": 10002,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:24:37.4752720Z",
+    "level": 4,
+    "id": 400,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:24:37.2912150Z",
+    "level": 4,
+    "id": 679,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:24:37.2907115Z",
+    "level": 4,
+    "id": 607,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:24:37.2891071Z",
+    "level": 5,
+    "id": 10002,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:24:37.2641066Z",
+    "level": 4,
+    "id": 604,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:23:02.5097152Z",
+    "level": 4,
+    "id": 400,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:23:02.3190217Z",
+    "level": 4,
+    "id": 642,
+    "packages": [
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:23:02.3190184Z",
+    "level": 5,
+    "id": 617,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:23:02.3015549Z",
+    "level": 4,
+    "id": 679,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:23:02.3009485Z",
+    "level": 4,
+    "id": 607,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:23:02.2981634Z",
+    "level": 5,
+    "id": 10002,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:23:02.2666171Z",
+    "level": 4,
+    "id": 604,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:10:07.2154889Z",
+    "level": 4,
+    "id": 613,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:10:07.1814121Z",
+    "level": 4,
+    "id": 400,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:10:07.1812873Z",
+    "level": 5,
+    "id": 617,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:10:06.7914924Z",
+    "level": 4,
+    "id": 607,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T10:10:06.7902085Z",
+    "level": 5,
+    "id": 10002,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:26:14.8337638Z",
+    "level": 4,
+    "id": 613,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:26:14.8335157Z",
+    "level": 2,
+    "id": 404,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:26:14.8276094Z",
+    "level": 2,
+    "id": 401,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:26:14.7622393Z",
+    "level": 5,
+    "id": 617,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:26:14.7427057Z",
+    "level": 2,
+    "id": 419,
+    "packages": [
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:26:14.7281401Z",
+    "level": 5,
+    "id": 617,
+    "packages": [
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:26:14.6968456Z",
+    "level": 5,
+    "id": 10000,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:26:14.6956501Z",
+    "level": 5,
+    "id": 617,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:26:14.6836560Z",
+    "level": 4,
+    "id": 638,
+    "packages": [
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0",
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:26:14.6770254Z",
+    "level": 5,
+    "id": 9641,
+    "packages": []
+  },
+  {
+    "time": "2026-10-06T09:26:14.6749679Z",
+    "level": 5,
+    "id": 9645,
+    "packages": [
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:26:14.6215216Z",
+    "level": 5,
+    "id": 455,
+    "packages": [
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0",
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:26:14.6164646Z",
+    "level": 4,
+    "id": 855,
+    "packages": [
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0",
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:26:14.5900518Z",
+    "level": 4,
+    "id": 854,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:26:14.5877091Z",
+    "level": 4,
+    "id": 607,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:26:14.5867046Z",
+    "level": 5,
+    "id": 10002,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:26:14.5498519Z",
+    "level": 4,
+    "id": 603,
+    "packages": []
+  },
+  {
+    "time": "2026-10-06T09:26:14.3174203Z",
+    "level": 4,
+    "id": 613,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:26:14.2727486Z",
+    "level": 4,
+    "id": 400,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:26:14.2726362Z",
+    "level": 5,
+    "id": 617,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:26:14.1184185Z",
+    "level": 5,
+    "id": 8101,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:26:14.1184033Z",
+    "level": 5,
+    "id": 8106,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:26:14.1173867Z",
+    "level": 5,
+    "id": 8100,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:17:03.7650757Z",
+    "level": 4,
+    "id": 574,
+    "packages": [
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0",
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:17:03.7537094Z",
+    "level": 4,
+    "id": 607,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:17:03.7532765Z",
+    "level": 5,
+    "id": 10002,
+    "packages": [
+      "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:15:50.5759891Z",
+    "level": 4,
+    "id": 400,
+    "packages": [
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:15:50.5489597Z",
+    "level": 5,
+    "id": 627,
+    "packages": [
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:15:50.5476636Z",
+    "level": 4,
+    "id": 607,
+    "packages": [
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:15:50.5472118Z",
+    "level": 5,
+    "id": 10002,
+    "packages": [
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0"
+    ]
+  },
+  {
+    "time": "2026-10-06T09:15:50.5431665Z",
+    "level": 4,
+    "id": 603,
+    "packages": [
+      "OpenAI.Codex_26.930.6422.0_arm64__2p2nqsd0c76g0"
+    ]
+  }
+]

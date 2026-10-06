@@ -1,0 +1,246 @@
+{
+  "run": "tofa-template-db9e973b1dd84a8788086d2cc4b38608",
+  "phase": "bootstrap",
+  "ok": false,
+  "normal_quit": false,
+  "reason": "bootstrap_incomplete",
+  "package": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+  "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+  "matching_engine_cached": true,
+  "app_pid": 860,
+  "ui_census": {
+    "types": [
+      {
+        "count": 1,
+        "type": "ControlType.Window"
+      },
+      {
+        "count": 8,
+        "type": "ControlType.Pane"
+      },
+      {
+        "count": 1,
+        "type": "ControlType.Document"
+      },
+      {
+        "count": 35,
+        "type": "ControlType.Group"
+      },
+      {
+        "count": 1,
+        "type": "ControlType.Hyperlink"
+      },
+      {
+        "count": 35,
+        "type": "ControlType.Button"
+      },
+      {
+        "count": 5,
+        "type": "ControlType.Image"
+      },
+      {
+        "count": 1,
+        "type": "ControlType.MenuBar"
+      },
+      {
+        "count": 4,
+        "type": "ControlType.MenuItem"
+      },
+      {
+        "count": 2,
+        "type": "ControlType.List"
+      },
+      {
+        "count": 2,
+        "type": "ControlType.ListItem"
+      },
+      {
+        "count": 1,
+        "type": "ControlType.Separator"
+      },
+      {
+        "count": 4,
+        "type": "ControlType.StatusBar"
+      },
+      {
+        "count": 1,
+        "type": "ControlType.ToolBar"
+      },
+      {
+        "count": 5,
+        "type": "ControlType.Text"
+      },
+      {
+        "count": 1,
+        "type": "ControlType.Edit"
+      }
+    ],
+    "menus": [
+      {
+        "name": "File",
+        "offscreen": false,
+        "enabled": true
+      },
+      {
+        "name": "Edit",
+        "offscreen": false,
+        "enabled": true
+      },
+      {
+        "name": "View",
+        "offscreen": false,
+        "enabled": true
+      },
+      {
+        "name": "Help",
+        "offscreen": false,
+        "enabled": true
+      }
+    ]
+  },
+  "ui_result": {
+    "ok": false,
+    "error": "control unavailable",
+    "reason": "desktop_control_unsupported"
+  },
+  "ui_after_quit": {
+    "types": [
+      {
+        "count": 1,
+        "type": "ControlType.Window"
+      },
+      {
+        "count": 8,
+        "type": "ControlType.Pane"
+      },
+      {
+        "count": 1,
+        "type": "ControlType.Document"
+      },
+      {
+        "count": 37,
+        "type": "ControlType.Group"
+      },
+      {
+        "count": 1,
+        "type": "ControlType.Hyperlink"
+      },
+      {
+        "count": 35,
+        "type": "ControlType.Button"
+      },
+      {
+        "count": 5,
+        "type": "ControlType.Image"
+      },
+      {
+        "count": 1,
+        "type": "ControlType.MenuBar"
+      },
+      {
+        "count": 11,
+        "type": "ControlType.MenuItem"
+      },
+      {
+        "count": 2,
+        "type": "ControlType.List"
+      },
+      {
+        "count": 2,
+        "type": "ControlType.ListItem"
+      },
+      {
+        "count": 4,
+        "type": "ControlType.Separator"
+      },
+      {
+        "count": 4,
+        "type": "ControlType.StatusBar"
+      },
+      {
+        "count": 1,
+        "type": "ControlType.ToolBar"
+      },
+      {
+        "count": 5,
+        "type": "ControlType.Text"
+      },
+      {
+        "count": 1,
+        "type": "ControlType.Edit"
+      },
+      {
+        "count": 1,
+        "type": "ControlType.Menu"
+      }
+    ],
+    "menus": [
+      {
+        "name": "File",
+        "offscreen": false,
+        "enabled": true
+      },
+      {
+        "name": "Edit",
+        "offscreen": false,
+        "enabled": true
+      },
+      {
+        "name": "View",
+        "offscreen": false,
+        "enabled": true
+      },
+      {
+        "name": "Help",
+        "offscreen": false,
+        "enabled": true
+      },
+      {
+        "name": "New Window",
+        "offscreen": false,
+        "enabled": true
+      },
+      {
+        "name": "New Chat Ctrl+N",
+        "offscreen": false,
+        "enabled": true
+      },
+      {
+        "name": "New Temporary Chat Ctrl+Shift+N",
+        "offscreen": false,
+        "enabled": false
+      },
+      {
+        "name": "Open Folder. Ctrl+O",
+        "offscreen": false,
+        "enabled": true
+      },
+      {
+        "name": "Close Ctrl+W",
+        "offscreen": false,
+        "enabled": true
+      },
+      {
+        "name": "Log Out",
+        "offscreen": false,
+        "enabled": true
+      },
+      {
+        "name": "Quit ChatGPT Ctrl+Q",
+        "offscreen": false,
+        "enabled": true
+      }
+    ]
+  },
+  "forced_owned_cleanup": true,
+  "task": {
+    "last_result": 1,
+    "state": "Ready",
+    "run": "tofa-template-db9e973b1dd84a8788086d2cc4b38608",
+    "ok": false,
+    "reason": "native_task_failed",
+    "completed": true,
+    "phase": "completion",
+    "unregistered": true
+  }
+}

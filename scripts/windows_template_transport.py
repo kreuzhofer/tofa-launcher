@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import subprocess
 import time
+import uuid
 import xml.etree.ElementTree as ET
 
 TASK_EXECUTION_SECONDS = 120
@@ -92,11 +93,13 @@ class Transport:
                 staging = envelope(self.wait_file(root + '\\staging.json'), request['run'], 'staging')
                 if not staging['ok']: raise Failure('guest_staging_failed')
             self.prepared_roots.add(root)
-        source = (here / 'windows_template_preflight.ps1').read_text()
+        # UTM exec starts asynchronously: never accept an older poll's file.
+        output_name = uuid.uuid4().hex + '-preflight.json'
+        source = (here / 'windows_template_preflight.ps1').read_text().replace('\\preflight.json', '\\' + output_name)
         payload = base64.b64encode(json.dumps(request).encode()).decode('ascii')
         with self.step('guest_preflight'):
             self.powershell(source.replace('__REQUEST__', payload))
-            raw = self.wait_file(root + '\\preflight.json')
+            raw = self.wait_file(root + '\\' + output_name)
             return envelope(raw, request['run'], 'preflight')
 
     def wait_file(self, path):

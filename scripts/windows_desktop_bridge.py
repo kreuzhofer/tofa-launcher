@@ -148,7 +148,7 @@ def main():
         if 'app-server' in arguments:
             for value in ('windows.sandbox="elevated"', 'sandbox_mode="workspace-write"',
                           'approval_policy="on-request"', 'approvals_reviewer="auto_review"',
-                          'projects.' + json.dumps(config['workspace']) + '.trust_level="trusted"'):
+                          'projects={' + json.dumps(config['workspace']) + '={trust_level="trusted"}}'):
                 arguments.extend(['-c', value])
         record('start', pid=os.getpid(), parent_pid=os.getppid(), engine_sha256=config['sha256'],
                app_server='app-server' in arguments)

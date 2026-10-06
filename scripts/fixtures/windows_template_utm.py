@@ -33,6 +33,13 @@ elif args[:1] == ['exec'] and args[1].lower() == guest_uuid:
         if state['mode'] == 'boot_session_delay' and not state.get('session_waited'):
             state['session_waited'] = True
             report.update(ok=False, reason='test_user_sign_in_required', outcome='bootstrap_required')
+        if state['mode'] == 'stale_preflight_poll':
+            state['preflight_calls'] = state.get('preflight_calls', 0) + 1
+            if state['preflight_calls'] == 1: report.update(ok=False, reason='test_user_sign_in_required')
+        if state['mode'] == 'package_registration_delay':
+            state['package_checks'] = state.get('package_checks', 0) + 1
+            if state['package_checks'] == 1:
+                report.update(ok=False, reason='native_client_missing_or_ambiguous')
         if state['mode'] == 'register_client':
             if request.get('operation') == 'prepare':
                 report['register_package'] = r'C:\Program Files\WindowsApps\OpenAI.Codex_26.928.21956.0_arm64__2p2nqsd0c76g0'
@@ -79,13 +86,19 @@ elif args[:2] == ['file', 'push'] and args[2].lower() == guest_uuid:
 elif args[:2] == ['file', 'pull'] and args[2].lower() == guest_uuid:
     if args[3].endswith('\\staging.json'):
         print(json.dumps({'run':state['protected_root'], 'phase':'staging', 'ok':True}))
-    elif args[3].endswith('\\preflight.json'):
+    elif args[3].endswith('preflight.json'):
         if state['mode'] == 'delayed' and not state.get('polled'):
             state['polled'] = True
             path.write_text(json.dumps(state))
             sys.stderr.write("Error from event: OSStatus error -2700.\nfailed to open file 'owned-report': The system cannot find the file specified.\n")
             sys.exit(0)
-        print(json.dumps(state['preflight']))
+        if state['mode'] == 'stale_preflight_poll':
+            cached = state.setdefault('cached_preflights', {})
+            cached.setdefault(args[3], state['preflight'])
+            path.write_text(json.dumps(state))
+            print(json.dumps(cached[args[3]]))
+        else:
+            print(json.dumps(state['preflight']))
     elif args[3].endswith('task-staging.json'):
         print(json.dumps({'run': request['run'], 'phase': 'task_staging', 'ok': True}))
     elif args[3].endswith('task.json'):

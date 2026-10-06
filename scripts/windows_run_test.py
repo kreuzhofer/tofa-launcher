@@ -66,6 +66,30 @@ class WindowsRunFixture(unittest.TestCase):
 
 
 class RunTests(WindowsRunFixture):
+    def test_guest_package_failure_reports_the_specific_sanitized_prerequisite(self):
+        self.change(mode='register_client')
+        result, report, state = self.invoke('--timeout', '4')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(report['reason'], 'native_client_missing_or_ambiguous')
+        self.assertTrue(report['retained'])
+        self.assertEqual(state['vms'][-1]['status'], 'stopped')
+
+    def test_package_registration_can_settle_within_bounded_boot_readiness(self):
+        self.change(mode='package_registration_delay')
+        result, report, state = self.invoke()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(report['readiness_waits'][0]['reason'], 'native_client_missing_or_ambiguous')
+        self.assertGreaterEqual(state['package_checks'], 2)
+        self.assertEqual(report['cleanup']['outcome'], 'deleted')
+
+    def test_readiness_poll_waits_for_a_fresh_result_instead_of_a_stale_file(self):
+        self.change(mode='stale_preflight_poll')
+        result, report, _ = self.invoke('--timeout', '5')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(report['reason'], 'insufficient_native_task_budget')
+        self.assertIn({'stage': 'guest_session', 'outcome': 'passed'},
+                      [{key: item[key] for key in ('stage', 'outcome')} for item in report['stages']])
+
     def test_running_source_is_rejected_without_mutation(self):
         state = json.loads(self.state.read_text())
         state['vms'][0]['status'] = 'started'

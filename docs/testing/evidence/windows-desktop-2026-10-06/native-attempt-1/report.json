@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "run": "tofa-run-7491fda9713e458aae2c4ecfc80822d6",
+  "outcome": "failed",
+  "stages": [
+    {
+      "stage": "template_validation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.327
+    },
+    {
+      "stage": "candidate_validation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.015
+    },
+    {
+      "stage": "clone_creation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.803
+    },
+    {
+      "stage": "boot",
+      "outcome": "passed",
+      "elapsed_seconds": 19.197
+    },
+    {
+      "stage": "guest_session",
+      "outcome": "failed",
+      "reason": "guest_prerequisites_failed",
+      "elapsed_seconds": 13.35
+    }
+  ],
+  "suite": "desktop-smoke",
+  "retained": true,
+  "cleanup": {
+    "outcome": "retained",
+    "shutdown": "stopped"
+  },
+  "capabilities": {
+    "native_sandbox": "unverified",
+    "desktop_guardian": "unverified"
+  },
+  "template": {
+    "uuid": "EF96CF12-D901-455F-81FF-4C5001E15F80",
+    "state": "stopped"
+  },
+  "requested_candidate": {
+    "version": "v0.1.0-rc.14",
+    "sha256": "1b0a2e7aa7aafc515391e221a16bee5124cf5b09aedf89af779796fae15bdd77",
+    "commit": "14134d43df4cca00bcdf10e49b3dc5ef3122f8d7"
+  },
+  "ownership_unresolved": false,
+  "clone_identity_source": "unique_inventory_delta",
+  "clone": {
+    "uuid": "A2C92888-1120-4C11-8F57-0C9EC8EE1CC8",
+    "name": "tofa-run-7491fda9713e458aae2c4ecfc80822d6"
+  },
+  "diagnostics": {
+    "guest_staging": "C:\\Users\\Public\\tofa-run-7491fda9713e458aae2c4ecfc80822d6",
+    "guest_workspace": "%USERPROFILE%\\tofa-run-7491fda9713e458aae2c4ecfc80822d6"
+  },
+  "reason": "guest_prerequisites_failed",
+  "failed_transport_operation": "file_pull",
+  "recovery_diagnostics": {
+    "outcome": "unavailable",
+    "files": {
+      "progress": {
+        "outcome": "unavailable",
+        "reason": "missing_or_invalid"
+      },
+      "native": {
+        "outcome": "unavailable",
+        "reason": "missing_or_invalid"
+      }
+    }
+  },
+  "transport_progress_observed": false,
+  "transport_steps": [
+    {
+      "step": "protected_staging",
+      "started_after_seconds": 20.344,
+      "outcome": "passed",
+      "elapsed_seconds": 5.274
+    },
+    {
+      "step": "guest_preflight",
+      "started_after_seconds": 25.618,
+      "outcome": "passed",
+      "elapsed_seconds": 8.075
+    }
+  ]
+}

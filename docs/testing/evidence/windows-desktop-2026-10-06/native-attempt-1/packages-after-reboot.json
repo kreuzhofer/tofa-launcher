@@ -1,0 +1,17 @@
+{
+  "sid": "S-1-5-21-1299817968-325600504-2357610402-1005",
+  "selected": [
+    {
+      "status": "Ok",
+      "architecture": "Arm64",
+      "package": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    }
+  ],
+  "all": [
+    {
+      "status": "Ok",
+      "architecture": "Arm64",
+      "package": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+    }
+  ]
+}

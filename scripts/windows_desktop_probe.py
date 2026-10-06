@@ -37,7 +37,7 @@ def main():
             raise ValueError('desktop_workspace_invalid')
         engine = NativeEngine(identity['engine'], workspace, (
             'approval_policy="on-request"', 'approvals_reviewer="auto_review"',
-            'projects.' + json.dumps(str(workspace)) + '.trust_level="trusted"'))
+            'projects={' + json.dumps(str(workspace)) + '={trust_level="trusted"}}'))
         initialized = engine.call('initialize', {'clientInfo': {'name': 'tofa_desktop_readiness', 'version': '1'},
                                                'capabilities': {'experimentalApi': True}})
         if 'result' not in initialized: raise ValueError('desktop_readiness_failed')

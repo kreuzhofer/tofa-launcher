@@ -1,0 +1,25 @@
+{
+  "engines": [
+    {
+      "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0\\app\\resources\\codex.exe",
+      "sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+      "version": "codex-cli 0.160.1"
+    },
+    {
+      "path": "%USERPROFILE%\\AppData\\Local\\OpenAI\\Codex\\bin\\adbebd79223f9e27\\codex.exe",
+      "sha256": "c98b873f74c4c2ae392c9b90474d9d4a17405a1d893951b4893305002bb7582a",
+      "version": "codex-cli 0.160.0"
+    },
+    {
+      "path": "%USERPROFILE%\\.codex\\packages\\app-server-daemon\\releases\\0.160.1-aarch64-pc-windows-msvc\\bin\\codex.exe",
+      "sha256": "f80d194c1b90c20f5cc8777bca3cacaacb37e8b977509efafe9072ff19a300b1",
+      "version": "codex-cli 0.160.1"
+    },
+    {
+      "path": "%USERPROFILE%\\.codex\\packages\\standalone\\releases\\0.160.1-aarch64-pc-windows-msvc\\bin\\codex.exe",
+      "sha256": "f80d194c1b90c20f5cc8777bca3cacaacb37e8b977509efafe9072ff19a300b1",
+      "version": "codex-cli 0.160.1"
+    }
+  ],
+  "package": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0"
+}

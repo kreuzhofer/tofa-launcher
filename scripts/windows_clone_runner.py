@@ -277,7 +277,11 @@ def cleanup_run(options):
 
 
 def validate_preflight(preflight):
-    if not preflight['ok']: raise Failure('guest_prerequisites_failed')
+    if not preflight['ok']:
+        reason = preflight.get('reason')
+        allowed = {'unsupported_guest', 'test_user_missing', 'test_user_sign_in_required',
+                   'native_client_missing_or_ambiguous', 'python_runtime_missing_or_ambiguous'}
+        raise Failure(reason if isinstance(reason, str) and reason in allowed else 'guest_prerequisites_failed')
     os_identity, user = preflight.get('os'), preflight.get('user')
     if (not isinstance(os_identity, dict) or os_identity.get('name') != 'Windows 11'
             or os_identity.get('architecture') != 'ARM64'
@@ -389,10 +393,27 @@ def run_clone(options, directory, report):
         report['diagnostics'] = {'guest_staging': 'C:\\Users\\Public\\' + report['run'],
                                  'guest_workspace': '%USERPROFILE%\\' + report['run']}
         print('Waiting for the intended Windows user session...', flush=True)
+        pending_reason = None
+        package_deadline = None
         while True:
-            preflight = transport.preflight({'run': report['run'], 'user': options.test_user, 'operation': 'status'})
-            if preflight['ok'] or preflight.get('reason') != 'test_user_sign_in_required': break
-            time.sleep(.5)
+            try:
+                preflight = transport.preflight({'run': report['run'], 'user': options.test_user, 'operation': 'status'})
+            except Failure as error:
+                if pending_reason and str(error) in ('transport_timeout', 'guest_completion_timeout'):
+                    raise Failure(pending_reason) from error
+                raise
+            reason = preflight.get('reason')
+            if preflight['ok'] or reason not in ('test_user_sign_in_required', 'native_client_missing_or_ambiguous'): break
+            pending_reason = reason
+            if reason == 'native_client_missing_or_ambiguous' and package_deadline is None:
+                package_deadline = min(transport.deadline, time.monotonic() + 30)
+                transport.deadline = package_deadline
+                print('Waiting up to 30 seconds for native package registration after boot...', flush=True)
+            report.setdefault('readiness_waits', []).append({'reason': reason,
+                'elapsed_seconds': round(time.monotonic() - stage_started, 3)})
+            save(directory / 'report.json', report)
+            if time.monotonic() >= transport.deadline: raise Failure(reason)
+            time.sleep(min(.5, max(0, transport.deadline - time.monotonic())))
         report['os'] = validate_preflight(preflight)
         passed()
         begin('native_smoke')
