@@ -1,8 +1,9 @@
-# Windows desktop implementation checkpoint — 2026-10-06
+# Windows desktop smoke acceptance — 2026-10-06
 
-Issue #82 has an implemented bounded desktop harness and operator-CLI fixture
-coverage. **Real Windows ARM64 desktop acceptance is pending.** This checkpoint
-must not be used to close #82 or claim Guardian qualification for #83–84.
+Issue #82 passed real Windows ARM64 desktop acceptance in a fresh clone through
+the public operator CLI. [Attempt 6](evidence/windows-desktop-2026-10-06/native-attempt-6/report.json)
+passed every stage and deleted its clone. This does not claim Guardian
+qualification for #83–84. Implementation and evidence remain local.
 
 The operator completed native app/CLI sign-in and sandbox setup under
 `tofa-test`, then closed the apps. The template was normally shut down before
@@ -156,7 +157,8 @@ notifications omit the cwd from their writable-root list because it is implicit;
 the additional visualization root remains subject to the same ownership checks.
 The original overly strict rejection and its fixture regression are preserved.
 
-Native fresh-clone desktop acceptance is still pending; #83 and #84 are not qualified.
+At this diagnostic checkpoint, native fresh-clone desktop acceptance was still
+pending. The subsequent acceptance result is recorded below.
 
 The [final diagnostic replay](evidence/windows-desktop-2026-10-06/native-attempt-4/tofa-run-2e76642dbaf54f0095d95166ddbfc1d0-desktop-replay.json)
 passed the real desktop smoke in 52 seconds. Native effective identity was
@@ -170,3 +172,30 @@ clone does not satisfy the fresh-clone acceptance criterion.
 The diagnostic clone was then [explicitly deleted](evidence/windows-desktop-2026-10-06/native-attempt-4/cleanup.json)
 after preserving its attempts. Final Standards and Spec reviews found no new
 implementation issues; both retained the fresh-clone acceptance requirement.
+
+## Fresh-clone acceptance
+
+[Attempt 5](evidence/windows-desktop-2026-10-06/native-attempt-5/report.json)
+failed while pulling the protected staging result. Its retained clone contained
+a successful staging result, and 20 repeated staging probes passed. The exact
+original transport error was not captured, so its cause remains unconfirmed.
+The clone was explicitly deleted after preserving the report and diagnostic results.
+
+The unchanged implementation at `855cea9` then passed in a distinct fresh clone:
+`tofa-run-faeec9194bea43ecb6a8379b1f36afa9`. A transparent UTM observer recorded
+only sanitized error categories while forwarding the original transport results;
+it did not retry or suppress errors. Source template and everyday VM were preserved.
+Boot took 21.177 seconds, user-session checks 13.570, native smoke 45.367,
+desktop smoke 70.972, and successful normal shutdown/deletion 5.774 seconds.
+
+The native effective main was `gpt-5.6-sol`, provider `openai`, reviewer
+`auto_review`. Desktop package was `OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0`;
+the complete measured hashes, candidate identity, OS, and per-stage results are
+in the report. No manual action was needed. A single correlated command wrote
+and read the marker; all desktop policy, normal-exit, process cleanup, CLI-settings,
+vendor-service, and diagnostic checks passed.
+
+[Final regression validation](evidence/windows-desktop-2026-10-06/validation-final.json)
+passed 344 tests with 80 platform-dependent skips in 532.316 seconds. Type checking
+passed for the three changed Python production modules. Standards and Spec reviews
+found no remaining implementation issues. The earlier failures remain preserved.

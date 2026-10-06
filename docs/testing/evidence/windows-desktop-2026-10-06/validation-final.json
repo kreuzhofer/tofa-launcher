@@ -14,6 +14,8 @@
   },
   "standards_review": "no_remaining_findings",
   "spec_review": "no_remaining_implementation_findings",
-  "native_fresh_clone": "pending",
-  "publication": "local_only"
+  "native_fresh_clone": "passed",
+  "publication": "local_only",
+  "native_run": "tofa-run-faeec9194bea43ecb6a8379b1f36afa9",
+  "implementation_commit": "855cea9"
 }

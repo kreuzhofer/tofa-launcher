@@ -1,0 +1,102 @@
+[
+  {
+    "attempt": 0,
+    "outcome": "passed",
+    "pending_polls": 8
+  },
+  {
+    "attempt": 1,
+    "outcome": "passed",
+    "pending_polls": 5
+  },
+  {
+    "attempt": 2,
+    "outcome": "passed",
+    "pending_polls": 5
+  },
+  {
+    "attempt": 3,
+    "outcome": "passed",
+    "pending_polls": 5
+  },
+  {
+    "attempt": 4,
+    "outcome": "passed",
+    "pending_polls": 5
+  },
+  {
+    "attempt": 5,
+    "outcome": "passed",
+    "pending_polls": 6
+  },
+  {
+    "attempt": 6,
+    "outcome": "passed",
+    "pending_polls": 5
+  },
+  {
+    "attempt": 7,
+    "outcome": "passed",
+    "pending_polls": 6
+  },
+  {
+    "attempt": 8,
+    "outcome": "passed",
+    "pending_polls": 6
+  },
+  {
+    "attempt": 9,
+    "outcome": "passed",
+    "pending_polls": 5
+  },
+  {
+    "attempt": 10,
+    "outcome": "passed",
+    "pending_polls": 5
+  },
+  {
+    "attempt": 11,
+    "outcome": "passed",
+    "pending_polls": 5
+  },
+  {
+    "attempt": 12,
+    "outcome": "passed",
+    "pending_polls": 4
+  },
+  {
+    "attempt": 13,
+    "outcome": "passed",
+    "pending_polls": 5
+  },
+  {
+    "attempt": 14,
+    "outcome": "passed",
+    "pending_polls": 5
+  },
+  {
+    "attempt": 15,
+    "outcome": "passed",
+    "pending_polls": 5
+  },
+  {
+    "attempt": 16,
+    "outcome": "passed",
+    "pending_polls": 5
+  },
+  {
+    "attempt": 17,
+    "outcome": "passed",
+    "pending_polls": 5
+  },
+  {
+    "attempt": 18,
+    "outcome": "passed",
+    "pending_polls": 6
+  },
+  {
+    "attempt": 19,
+    "outcome": "passed",
+    "pending_polls": 5
+  }
+]

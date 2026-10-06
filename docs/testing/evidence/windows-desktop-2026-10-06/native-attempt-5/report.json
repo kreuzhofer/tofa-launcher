@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "run": "tofa-run-5567dc65bebd4cd6868d17403e1af89e",
+  "outcome": "failed",
+  "stages": [
+    {
+      "stage": "template_validation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.244
+    },
+    {
+      "stage": "candidate_validation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.012
+    },
+    {
+      "stage": "clone_creation",
+      "outcome": "passed",
+      "elapsed_seconds": 1.25
+    },
+    {
+      "stage": "boot",
+      "outcome": "passed",
+      "elapsed_seconds": 20.095
+    },
+    {
+      "stage": "guest_session",
+      "outcome": "failed",
+      "reason": "vm_transport_failed",
+      "elapsed_seconds": 8.904
+    }
+  ],
+  "suite": "desktop-smoke",
+  "retained": true,
+  "cleanup": {
+    "outcome": "retained",
+    "shutdown": "stopped"
+  },
+  "capabilities": {
+    "native_sandbox": "unverified",
+    "desktop_guardian": "unverified"
+  },
+  "template": {
+    "uuid": "EF96CF12-D901-455F-81FF-4C5001E15F80",
+    "state": "stopped"
+  },
+  "requested_candidate": {
+    "version": "v0.1.0-rc.14",
+    "sha256": "1b0a2e7aa7aafc515391e221a16bee5124cf5b09aedf89af779796fae15bdd77",
+    "commit": "14134d43df4cca00bcdf10e49b3dc5ef3122f8d7"
+  },
+  "ownership_unresolved": false,
+  "clone_identity_source": "unique_inventory_delta",
+  "clone": {
+    "uuid": "B2564164-75B7-4D65-86FC-CC64124E9785",
+    "name": "tofa-run-5567dc65bebd4cd6868d17403e1af89e"
+  },
+  "diagnostics": {
+    "guest_staging": "C:\\Users\\Public\\tofa-run-5567dc65bebd4cd6868d17403e1af89e",
+    "guest_workspace": "%USERPROFILE%\\tofa-run-5567dc65bebd4cd6868d17403e1af89e"
+  },
+  "reason": "vm_transport_failed",
+  "failed_transport_operation": "file_pull",
+  "recovery_diagnostics": {
+    "outcome": "unavailable",
+    "files": {
+      "progress": {
+        "outcome": "unavailable",
+        "reason": "missing_or_invalid"
+      },
+      "native": {
+        "outcome": "unavailable",
+        "reason": "missing_or_invalid"
+      }
+    }
+  },
+  "transport_progress_observed": false,
+  "transport_steps": [
+    {
+      "step": "protected_staging",
+      "started_after_seconds": 21.602,
+      "outcome": "failed",
+      "elapsed_seconds": 8.903
+    }
+  ]
+}
