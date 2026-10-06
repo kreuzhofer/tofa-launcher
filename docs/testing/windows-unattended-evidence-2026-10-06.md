@@ -1,10 +1,52 @@
 # Unattended Windows clone acceptance — 2026-10-06
 
-The first complete fresh-clone acceptance passed against implementation
-`7551622`; the next run failed before its model turn, so issue #84 still requires
-two consecutive complete passes. The full Python suite passed 354 tests (80 skipped),
-and type checking passed for seven affected modules. Standards and Spec review
-found no remaining implementation findings. Implementation and evidence are local.
+Issue #84 passed two consecutive unattended fresh-clone runs on implementation
+`23948f4`. Both used the same stopped prepared template, passed the full native,
+desktop, and Guardian suite, and normally deleted their distinct clones. No manual
+typing, trust choice, approval selection, or consent occurred during either run.
+Earlier attempts remain preserved below.
+
+The full Python baseline passed 354 tests (80 skipped). After the diagnostic
+change, all 28 affected desktop tests passed; after the prompt correction, all
+nine Guardian tests passed. Type checking and Standards/Spec reviews passed.
+The [validation record](evidence/windows-unattended-2026-10-06/validation.json)
+distinguishes those checks from native acceptance.
+
+## Final consecutive runs
+
+| Stage (seconds) | [Run 1: attempt 5](evidence/windows-unattended-2026-10-06/attempt-5/report.json) | [Run 2: attempt 6](evidence/windows-unattended-2026-10-06/attempt-6/report.json) |
+| --- | ---: | ---: |
+| Boot | 19.372 | 19.170 |
+| Limited-user session | 12.807 | 12.432 |
+| Native sandbox | 43.399 | 43.050 |
+| Desktop smoke | 58.774 | 63.219 |
+| Guardian allow | 94.305 | 71.569 |
+| Guardian deny | 72.616 | 79.674 |
+| Normal shutdown and deletion | 6.494 | 5.808 |
+
+Both runs measured Windows 11 ARM64 `10.0.26200`, Codex package
+`26.930.7945.0`, native engine `0.160.1`, main model `gpt-5.6-sol`, provider
+`openai`, and native reviewer `auto_review`. The ARM64 candidate was
+`v0.1.0-rc.14`; its measured SHA-256 was
+`1b0a2e7aa7aafc515391e221a16bee5124cf5b09aedf89af779796fae15bdd77`.
+Candidate source commit `14134d43df4cca00bcdf10e49b3dc5ef3122f8d7` is supplied
+provenance, not independently extracted from the executable. Reports preserve
+measured app, engine, native shell, and per-run bridge hashes and exact clone IDs.
+
+Each allow case recorded one correlated live native approval and the expected
+command effect. Each deny case recorded one correlated live native denial,
+exact-script matching, declined execution, no exit code, and no marker. Native
+outside-workspace ACL denial was measured separately. All permission, normal
+app quit, owned-child exit, diagnostics, shared CLI settings, and vendor-service
+checks passed. The controller never answered native approval requests.
+
+The [before](evidence/windows-unattended-2026-10-06/inventory-final-before.txt),
+[between](evidence/windows-unattended-2026-10-06/inventory-final-between.txt), and
+[after](evidence/windows-unattended-2026-10-06/inventory-final-after.txt) inventories
+match exactly: source stopped, everyday Windows VM running, and prior retained
+failure and Ubuntu VM unchanged. Final status is idle, with both successful
+clones deleted and only the previously retained failure remaining. No credential
+file was read, and no account settings were changed by the controller.
 
 ## Prepared source and command
 
@@ -18,7 +60,7 @@ preparation is reused; routine runs do not start or modify the source. The
 and expired-login recovery without credential export or import.
 
 Both acceptance invocations use the same public CLI and real UTM transport.
-A temporary [diagnostic observer](evidence/windows-unattended-2026-10-06/diagnostic-transport-observer.py)
+A temporary [diagnostic observer](evidence/windows-unattended-2026-10-06/diagnostic-transport-observer-v2.py)
 forwards UTM stdout, stderr, and exit status unchanged, while recording sanitized
 error categories. It adds no retries or suppressed errors. It also enables private
 capture of unexpected synthetic-result `file_pull` stderr under `/private/tmp`;
@@ -32,8 +74,8 @@ concurrency evidence uses the ordinary direct UTM transport from #81, whose
 lease-inheritance implementation is unchanged and whose regression tests passed.
 The [corrected diagnostic observer](evidence/windows-unattended-2026-10-06/diagnostic-transport-observer-v2.py)
 forwards inherited descriptors; a controlled external-child check observed lost
-lease inheritance before the fix and preserved inheritance afterward. Future
-acceptance uses that corrected observer. Routine operators should use the default transport in [windows-runs.md](windows-runs.md),
+lease inheritance before the fix and preserved inheritance afterward. The final
+acceptance sequence uses that corrected observer. Routine operators should use the default transport in [windows-runs.md](windows-runs.md),
 not this diagnostic wrapper. The observer is
 installed at `/private/tmp/tofa84-observe-utm` for these invocations:
 
@@ -106,6 +148,16 @@ no exit code, no marker, and successful app cleanup. No policy, reviewer,
 command-matching rule, or approval response was changed. Both reviews accepted
 the wording correction. This reused-clone replay is not fresh acceptance.
 
+[Attempt 5](evidence/windows-unattended-2026-10-06/attempt-5/report.json) passed
+the complete suite on `23948f4` and normally deleted its clone. It is the first
+run of the final consecutive-pass sequence, using the corrected prompt, bounded
+UI diagnostics, and lease-preserving diagnostic observer.
+
+[Attempt 6](evidence/windows-unattended-2026-10-06/attempt-6/report.json) immediately
+followed attempt 5 on unchanged implementation `23948f4` and the same prepared
+source. It also passed all stages and normally deleted its distinct clone,
+completing the consecutive acceptance requirement.
+
 ## Recovery and preservation
 
 The [controlled #81 native acceptance](windows-recovery-evidence-2026-10-06.md)
@@ -129,7 +181,7 @@ and distinctions between setup and suite failures are documented in
 
 ## Scope
 
-The acceptance target is the Mac-hosted provisioner and bounded native desktop
+The qualified boundary is the Mac-hosted provisioner and bounded native desktop
 suite on Windows 11 ARM64 in UTM, using the measured native OpenAI route. Versions
 and hashes identify these observations; they are not new exact-version gates.
 The broader Windows desktop integration, Nebius model/Guardian catalog support,

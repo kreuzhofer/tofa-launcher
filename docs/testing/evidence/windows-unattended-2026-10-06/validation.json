@@ -15,8 +15,7 @@
     "standards_review": "no_findings",
     "spec_review": "no_findings"
   },
-  "consecutive_fresh_acceptance": "pending",
-  "publication": "local_only",
+  "consecutive_fresh_acceptance": "passed",
   "after_prompt_correction": {
     "guardian_tests": 9,
     "elapsed_seconds": 63.742,
@@ -24,5 +23,16 @@
     "native_exact_denial_replay": "passed",
     "standards_review": "no_findings",
     "spec_review": "no_findings"
+  },
+  "implementation_commit": "23948f4",
+  "runs": [
+    "tofa-run-32f7493cdc75472db4bedb1ee87879dc",
+    "tofa-run-8d98f7459d984a06a2097e5ca6982361"
+  ],
+  "publication_at_capture": "local_only",
+  "final_review": {
+    "standards": "no_findings",
+    "spec": "no_findings",
+    "publication_requirement": "pending"
   }
 }

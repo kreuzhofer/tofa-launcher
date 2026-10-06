@@ -1,0 +1,30 @@
+{
+  "locked": false,
+  "runner_state": "idle",
+  "active": null,
+  "retained_runs": [
+    "tofa-run-021aba73795846689600b844b99dbbd1"
+  ],
+  "accepted_runs": [
+    {
+      "run": "tofa-run-32f7493cdc75472db4bedb1ee87879dc",
+      "outcome": "passed",
+      "retained": false,
+      "clone": {
+        "uuid": "15753BC3-7E62-4DEE-BFAE-6FD01328FC89",
+        "name": "tofa-run-32f7493cdc75472db4bedb1ee87879dc"
+      },
+      "cleanup": "deleted"
+    },
+    {
+      "run": "tofa-run-8d98f7459d984a06a2097e5ca6982361",
+      "outcome": "passed",
+      "retained": false,
+      "clone": {
+        "uuid": "AF2FE2AF-D160-426D-BFE6-4F532CE87B6E",
+        "name": "tofa-run-8d98f7459d984a06a2097e5ca6982361"
+      },
+      "cleanup": "deleted"
+    }
+  ]
+}

@@ -1,26 +1,36 @@
 {
   "issue": 84,
-  "implementation_commit": "7551622",
-  "outcome": "pending_after_second_run_failure",
+  "implementation_commit": "23948f4",
+  "outcome": "passed",
   "template": "EF96CF12-D901-455F-81FF-4C5001E15F80",
   "authentication": "native-session",
   "suite": "desktop-guardian",
   "timeout_seconds": 1800,
   "transport": {
     "executable": "utmctl",
-    "observer": "diagnostic-transport-observer.py",
-    "observer_sha256": "b75032c2edfa17e9c40a2e09d0ab60791a2e0762d8507f3c3a2e17069b9d0c42",
+    "observer": "diagnostic-transport-observer-v2.py",
+    "observer_sha256": "465e9915478956a2879d24d5237c3e42460a506369888095c9190f9ebd97c611",
     "retries_added": false,
-    "results_modified": false
+    "results_modified": false,
+    "lease_forwarded": true
   },
   "runs": [
     {
-      "run": "tofa-run-3221a8b00ce74c97bfc8760ca4799139",
-      "clone": "1B6B73A3-3358-4BE9-9245-8458199C3F33",
+      "run": "tofa-run-32f7493cdc75472db4bedb1ee87879dc",
+      "clone": "15753BC3-7E62-4DEE-BFAE-6FD01328FC89",
       "outcome": "passed",
-      "report": "attempt-2/report.json"
+      "report": "attempt-5/report.json"
+    },
+    {
+      "run": "tofa-run-8d98f7459d984a06a2097e5ca6982361",
+      "clone": "AF2FE2AF-D160-426D-BFE6-4F532CE87B6E",
+      "outcome": "passed",
+      "report": "attempt-6/report.json"
     }
   ],
   "prior_recovery_evidence": "../windows-recovery-2026-10-06/validation.json",
-  "publication": "local_only"
+  "inventory_preserved": true,
+  "routine_manual_interventions": 0,
+  "unexpected_private_transfer_capture_created": false,
+  "publication_at_capture": "local_only"
 }

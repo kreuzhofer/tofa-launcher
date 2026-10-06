@@ -1,0 +1,5 @@
+UUID                                 Status   Name
+545C23DD-356D-434A-B2AE-48277320BF34 started  Sabre Windows 11 ARM64
+EF96CF12-D901-455F-81FF-4C5001E15F80 stopped  tofa77 Windows ARM64 bridge prototype
+DA6F9285-78EA-41E1-A284-C072A113471E stopped  tofa-run-021aba73795846689600b844b99dbbd1
+9071AD4D-C2CE-4510-9790-79DF20230CB9 stopped  Ubuntu Desktop ARM64 Testbed

@@ -5,8 +5,9 @@ Issue #83 passed fresh-clone native acceptance. The bounded suite is invoked thr
 readiness, the real desktop smoke, live Guardian allow and deny observations,
 normal application exit, complete diagnostics, and successful clone deletion.
 [The passing complete run](evidence/windows-unattended-2026-10-06/attempt-2/report.json)
-used implementation `7551622` and deleted its clone normally. Issue #84's second
-consecutive complete run remains pending.
+used implementation `7551622` and deleted its clone normally. Subsequent
+[two consecutive complete runs](windows-unattended-evidence-2026-10-06.md) passed
+on `23948f4`, completing #84 after the diagnostic and prompt corrections.
 
 The controller submits one bounded proposal per Guardian case and never
 answers approval requests. Allow explicitly authorizes a harmless marker write.

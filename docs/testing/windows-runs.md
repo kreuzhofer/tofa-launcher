@@ -216,4 +216,5 @@ executes the actual bridge against a controlled external native-engine fixture.
 command correlation, enforcement, and both-case orchestration through that CLI.
 Fixture passes do not replace real fresh-clone ARM64 acceptance.
 
-See [the real ARM64 acceptance and preserved attempts](windows-runs-evidence-2026-10-06.md).
+See [native smoke acceptance](windows-runs-evidence-2026-10-06.md) and
+[the two consecutive complete unattended runs](windows-unattended-evidence-2026-10-06.md).
