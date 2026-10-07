@@ -237,6 +237,7 @@ elif args[:2] == ['file', 'pull'] and args[2].lower() == guest_uuid:
                         {'event': 'thread_settings_updated', 'model': 'tofa-catalog-b', 'provider': 'tofa-catalog', 'policy_verified': True},
                         {'event': 'turn_completed', 'success': True}]}
                 if state['mode'] == 'catalog_no_protocol': desktop['catalog']['events'] = []
+                if request.get('guided_catalog'): desktop['catalog']['picker']['mode'] = 'guided'
                 if state['mode'] == 'catalog_headless': desktop['catalog'].pop('picker')
                 if state['mode'] == 'catalog_changed_cli': desktop['catalog']['checks']['cli_during'] = False
                 if state['mode'] == 'catalog_wrong_request': desktop['catalog']['requests'][0]['model'] = 'tofa-catalog-a'

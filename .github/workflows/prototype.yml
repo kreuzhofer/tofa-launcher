@@ -84,7 +84,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          foreach ($file in @('scripts/install.ps1','scripts/uninstall.ps1','scripts/windows_test.ps1','scripts/windows_lifecycle_test.ps1','scripts/qualify_windows_install.ps1','scripts/windows_template_root.ps1','scripts/windows_template_preflight.ps1','scripts/windows_template_stage.ps1','scripts/windows_template_wait.ps1','scripts/windows_template_user.ps1','scripts/windows_desktop_ui.ps1','scripts/windows_catalog_ui.ps1')) {
+          foreach ($file in @('scripts/install.ps1','scripts/uninstall.ps1','scripts/windows_test.ps1','scripts/windows_lifecycle_test.ps1','scripts/qualify_windows_install.ps1','scripts/windows_template_root.ps1','scripts/windows_template_preflight.ps1','scripts/windows_template_stage.ps1','scripts/windows_template_wait.ps1','scripts/windows_template_user.ps1','scripts/windows_desktop_ui.ps1','scripts/windows_catalog_ui.ps1','scripts/windows_catalog_review.ps1')) {
             $tokens = $null; $errors = $null
             [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$tokens, [ref]$errors) | Out-Null
             if ($errors) { throw ($errors | Out-String) }

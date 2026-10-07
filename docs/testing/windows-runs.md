@@ -74,6 +74,37 @@ defaults are measured. Missing interactive evidence fails and retains the clone;
 a completed experiment keeps the production gate blocked. Tool-registration and
 background refusals remain restrictions, never product qualification.
 
+### Guided catalog review
+
+For a human build review, use the wizard below. Preparation, candidate checks,
+native readiness, evidence validation, and owned-clone cleanup remain automatic.
+The Windows console guides native setup and the picker; it never asks for an API
+key. Existing background/tool restrictions and native approval enforcement remain
+in effect.
+
+```sh
+bash scripts/review_windows_catalog.sh \
+  --template STOPPED_TEST_TEMPLATE_UUID --test-user TEST_USER \
+  --candidate PATH_TO_WINDOWS_ARM64_EXE --version VERSION \
+  --sha256 SHA256 --candidate-commit COMMIT
+```
+
+Open the newly named `tofa-run-...` clone in UTM. After readiness and smoke checks,
+the **TOFA: guided Windows catalog review** console opens inside Windows. It walks
+you through native setup, confirming both synthetic models, choosing B/High and
+**Approve for me**, then sending the exact supplied prompt once. Leave the app
+open while the runner collects and validates evidence. The local provider returns
+an empty completion; visible answer text is not part of the check.
+
+The human portion has a 15-minute deadline within a 20-minute guest task and a
+30-minute overall run. Cancellation or timeout fails, stops and retains the owned
+clone. A failed report includes its explicit cleanup command. The human picker
+attestation is recorded as `mode: guided`; it cannot replace the required native
+policy, B/high provider request, successful turn, or concurrent-CLI containment
+checks. A passed synthetic experiment still leaves production qualification
+blocked. For direct runner use, add `--guided-catalog` to `run --suite
+desktop-catalog --test-auth native-session --timeout 1800`.
+
 ## Bounded desktop smoke
 
 The `desktop-smoke` suite passed fresh-clone ARM64 acceptance for #82; see

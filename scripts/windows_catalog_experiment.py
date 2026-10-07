@@ -11,6 +11,7 @@ import time
 from urllib.parse import urlencode
 
 from windows_catalog_protocol import MODELS, PROVIDER
+from windows_catalog_result import finalize_completion
 from windows_desktop_runtime import observations, powershell, ui
 from windows_ownership_experiment import inspect, wait_app
 from windows_ownership_contract import refusal
@@ -72,6 +73,22 @@ def provider_handler(evidence):
                 evidence['provider_refusals'] += 1
                 self.send_error(400)
     return Provider
+
+
+def guided_review(root, owned, app, supervisor):
+    output = owned / 'human-review.json'
+    control = (root / 'windows_catalog_review.ps1').read_text().replace('__REQUEST__',
+        base64.b64encode(json.dumps(dict(app, output=str(output))).encode()).decode())
+    args = ['powershell.exe', '-NoProfile', '-EncodedCommand', base64.b64encode(control.encode('utf-16-le')).decode()]
+    guide = subprocess.Popen(supervised(args, supervisor), creationflags=subprocess.CREATE_NEW_CONSOLE)
+    try:
+        if guide.wait(timeout=900) != 0: raise ValueError('catalog_picker_failed')
+        selection = json.loads(output.read_text(encoding='utf-8-sig'))
+        if selection != {'ok': True, 'stage': 'complete', 'choices': list(MODELS), 'mode': 'guided'}:
+            raise ValueError('catalog_picker_failed')
+        return selection
+    finally:
+        stop(guide)
 
 
 def experiment(root, request, identity, workspace, report):
@@ -148,16 +165,20 @@ def experiment(root, request, identity, workspace, report):
         else: raise ValueError('catalog_protocol_failed')
         evidence['stage'] = 'picker'
         save()
-        control = (root / 'windows_catalog_ui.ps1').read_text().replace('__REQUEST__', base64.b64encode(json.dumps(app).encode()).decode())
-        selection = powershell(control, timeout=45)
-        evidence['picker'] = selection
-        save()
-        if not selection.get('ok'): raise ValueError('catalog_picker_failed')
         cli_model = 'synthetic-cli-concurrent'
         changed = cli.call('config/value/write', {'keyPath': 'model', 'value': cli_model, 'mergeStrategy': 'replace'})
         checks['cli_during'] = 'result' in changed and cli_defaults()
-        if not ui(root, app, 'configure', report): raise ValueError('catalog_picker_failed')
-        if not ui(root, app, 'submit', report): raise ValueError('catalog_picker_failed')
+        if request.get('guided_catalog'):
+            selection = guided_review(root, owned, app, supervisor)
+        else:
+            control = (root / 'windows_catalog_ui.ps1').read_text().replace('__REQUEST__', base64.b64encode(json.dumps(app).encode()).decode())
+            selection = powershell(control, timeout=45)
+        evidence['picker'] = selection
+        save()
+        if not selection.get('ok'): raise ValueError('catalog_picker_failed')
+        if not request.get('guided_catalog'):
+            if not ui(root, app, 'configure', report): raise ValueError('catalog_picker_failed')
+            if not ui(root, app, 'submit', report): raise ValueError('catalog_picker_failed')
         evidence['stage'] = 'request'
         save()
         events = []
@@ -167,8 +188,6 @@ def experiment(root, request, identity, workspace, report):
             if any(item.get('event') == 'turn_completed' for item in events): break
             time.sleep(.25)
         checks['provider_scope_preserved'] = evidence['provider_refusals'] == 0 and evidence['authorization_absent']
-        checks['selected_request'] = evidence['requests'] == [{'model': MODELS[1], 'effort': 'high', 'path': '/responses'}]
-        checks['native_turn_completed'] = any(item.get('event') == 'turn_completed' and item.get('success') for item in events)
         checks['cli_after_selection'] = cli_defaults()
         evidence['stage'] = 'settings'
         save()
@@ -227,6 +246,7 @@ def experiment(root, request, identity, workspace, report):
                 evidence['events'] = observations(owned, final=True)
                 checks['diagnostics_written'] = True
             except Exception: checks['diagnostics_written'] = False
+            finalize_completion(evidence)
             save()
     evidence['stage'] = 'complete'
     save()

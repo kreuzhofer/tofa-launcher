@@ -9,6 +9,15 @@ CHECKS = ('provider_closed', 'diagnostics_written', 'provider_scope_preserved', 
 STAGES = ('preparation', 'desktop', 'picker', 'request', 'settings', 'cleanup', 'complete')
 
 
+def finalize_completion(value):
+    """Measure completion from the final, quiescent native/provider evidence."""
+    value['checks']['selected_request'] = value.get('requests') == [
+        {'model': 'tofa-catalog-b', 'effort': 'high', 'path': '/responses'}]
+    value['checks']['native_turn_completed'] = any(
+        event.get('event') == 'turn_completed' and event.get('success') is True
+        for event in value.get('events', []))
+
+
 def sanitize(value):
     if not isinstance(value, dict) or value.get('production_gate') != 'blocked' or value.get('stage') not in STAGES:
         raise Failure('malformed_catalog_result')
@@ -36,6 +45,9 @@ def sanitize(value):
                 or picker.get('stage') not in ('identity', 'model_button', 'model_choice', 'reasoning_button', 'reasoning_choice', 'complete')):
             raise Failure('malformed_catalog_result')
         result['picker'] = {key: picker[key] for key in ('ok', 'stage')}
+        if 'mode' in picker:
+            if picker['mode'] not in ('guided', 'automated'): raise Failure('malformed_catalog_result')
+            result['picker']['mode'] = picker['mode']
         choices = picker.get('choices', [])
         if not isinstance(choices, list) or len(choices) > 2 or any(choice not in ('tofa-catalog-a', 'tofa-catalog-b') for choice in choices):
             raise Failure('malformed_catalog_result')
@@ -107,6 +119,6 @@ def validate(value):
                and 'model' in event.get('keys', []) and 'tofa-catalog-b' in event.get('values', []) for event in protocol):
         raise Failure('catalog_observation_failed')
     if (value['stage'] != 'complete' or any(value['checks'].get(key) is not True for key in CHECKS)
-            or value.get('picker') != {'ok': True, 'stage': 'complete', 'choices': ['tofa-catalog-a', 'tofa-catalog-b']}
+            or {key: value.get('picker', {}).get(key) for key in ('ok', 'stage', 'choices')} != {'ok': True, 'stage': 'complete', 'choices': ['tofa-catalog-a', 'tofa-catalog-b']}
             or value['requests'] != [{'model': 'tofa-catalog-b', 'effort': 'high', 'path': '/responses'}]):
         raise Failure('catalog_observation_failed')

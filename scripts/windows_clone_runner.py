@@ -308,7 +308,8 @@ def run_clone(options, directory, report):
     def begin(name):
         nonlocal stage
         stage = name
-        transport.deadline = min(work_deadline, time.monotonic() + STAGE_SECONDS[name])
+        seconds = 1500 if name == 'desktop_smoke' and options.guided_catalog else STAGE_SECONDS[name]
+        transport.deadline = min(work_deadline, time.monotonic() + seconds)
     stage_started = time.monotonic()
     def passed():
         nonlocal stage_started
@@ -445,6 +446,9 @@ def run_clone(options, directory, report):
             desktop_request = dict(request, run=desktop_run, workspace_run=report['run'], test_auth=options.test_auth,
                                    candidate=None, ownership_experiment=options.suite == 'desktop-ownership',
                                    catalog_experiment=options.suite == 'desktop-catalog')
+            if options.guided_catalog:
+                desktop_request['guided_catalog'] = True
+                print('Guided review: open UTM clone ' + report['run'] + '. Follow its Windows review console; allow up to 15 minutes for the human steps.', flush=True)
             if case != 'smoke': desktop_request['guardian_case'] = case
             desktop_task, desktop = transport.measure(desktop_request, desktop=True)
             result = sanitized_desktop(desktop)
@@ -522,8 +526,11 @@ def main():
     parser.add_argument('--candidate-commit')
     parser.add_argument('--suite', choices=('native-smoke', 'desktop-smoke', 'desktop-guardian', 'desktop-ownership', 'desktop-catalog'), default='native-smoke')
     parser.add_argument('--test-auth', choices=('native-session',))
+    parser.add_argument('--guided-catalog', action='store_true', help='guide a human through desktop-catalog setup and selection in the owned clone')
     parser.add_argument('--run', help='Exact owned run ID for explicit cleanup')
     options = parser.parse_args()
+    if options.guided_catalog and (options.command != 'run' or options.suite != 'desktop-catalog'):
+        parser.error('--guided-catalog requires run --suite desktop-catalog')
     if not 1 <= options.timeout <= 1800: parser.error('timeout must be 1–1800 seconds')
     def interrupt(*unused): raise KeyboardInterrupt
     signal.signal(signal.SIGTERM, interrupt)

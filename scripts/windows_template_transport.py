@@ -133,6 +133,8 @@ class Transport:
                     raise Failure('guest_progress_invalid') from None
 
     def measure_task(self, request, candidate=None, desktop=False):
+        guided = desktop and request.get('guided_catalog') is True
+        task_seconds = 1200 if guided else TASK_EXECUTION_SECONDS
         root = 'C:\\Users\\Public\\' + request['run']
         here = Path(__file__).parent
         files = {'\\request.json': json.dumps(request).encode(),
@@ -145,7 +147,7 @@ class Transport:
             for name in ('windows_desktop_runtime.py', 'windows_desktop_bridge.py', 'windows_desktop_ui.ps1',
                          'windows_process.py', 'windows_process.cs', 'windows_guardian_result.py', 'windows_template_transport.py',
                          'windows_ownership_experiment.py', 'windows_ownership_contract.py', 'windows_ownership_inspect.ps1',
-                         'windows_catalog_experiment.py', 'windows_catalog_protocol.py', 'windows_catalog_ui.ps1'):
+                         'windows_catalog_experiment.py', 'windows_catalog_protocol.py', 'windows_catalog_result.py', 'windows_catalog_ui.ps1', 'windows_catalog_review.ps1'):
                 files['\\' + name] = (here / name).read_bytes()
         if candidate is not None:
             files.update({'\\candidate.exe.gz': gzip.compress(candidate, mtime=0),
@@ -154,8 +156,8 @@ class Transport:
             with self.step('stage_' + suffix[1:].split('.')[0]):
                 self.call('file', 'push', self.template, root + suffix, data=content)
         source = (here / 'windows_template_stage.ps1').read_text().replace('__ROOT__', root)
-        source = source.replace('__TASK_SECONDS__', str(TASK_EXECUTION_SECONDS))
-        source = source.replace('__WINDOW_STYLE__', 'Normal' if request['initialize_sandbox'] else 'Hidden')
+        source = source.replace('__TASK_SECONDS__', str(task_seconds))
+        source = source.replace('__WINDOW_STYLE__', 'Normal' if request['initialize_sandbox'] or guided else 'Hidden')
         # Read the protected harness as a scriptblock, retaining the encoded-command
         # execution contract without nesting its full base64 payload in UTM argv.
         guest = "& ([scriptblock]::Create([IO.File]::ReadAllText('" + root + "\\user.ps1')))"
@@ -166,11 +168,11 @@ class Transport:
             if not staged['ok']: raise Failure('guest_staging_failed')
         # Provisioning cannot consume the task's 240-second execution budget,
         # 245-second controller wait, 270-second transport cap, or collection margin.
-        if self.deadline - time.monotonic() < MIN_NATIVE_BUDGET:
+        if self.deadline - time.monotonic() < task_seconds + (MIN_NATIVE_BUDGET - TASK_EXECUTION_SECONDS):
             raise Failure('insufficient_native_task_budget')
         with self.step('desktop_task' if desktop else 'native_task'):
             controller = (here / 'windows_template_wait.ps1').read_text().replace('__ROOT__', root)
-            self.powershell(controller.replace('__WAIT_SECONDS__', str(TASK_WAIT_SECONDS)))
+            self.powershell(controller.replace('__WAIT_SECONDS__', str(task_seconds + 5)))
         with self.step('collect_task'):
             task = envelope(self.wait_file(root + '\\task.json'), request['run'], 'completion')
         self.last_task = task

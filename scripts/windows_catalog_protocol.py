@@ -25,7 +25,7 @@ class CatalogProtocol:
             if depth > 8: return
             if isinstance(value, dict):
                 for key, child in value.items():
-                    if key in ('thread_source', 'turn_trigger') and child in ('thread_title', 'thread_summary'):
+                    if key in ('thread_source', 'turn_trigger', 'threadSource', 'turnTrigger') and child in ('thread_title', 'thread_summary'):
                         markers.add(child)
                     visit(child, depth + 1)
             elif isinstance(value, list):

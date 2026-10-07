@@ -13,6 +13,18 @@ import windows_run_test as fixture
 
 
 class CatalogProviderTests(unittest.TestCase):
+    def test_final_native_evidence_replaces_early_completion_snapshot(self):
+        from windows_catalog_result import finalize_completion
+        evidence = {'checks': {'selected_request': False, 'native_turn_completed': False},
+                    'requests': [{'model': 'tofa-catalog-b', 'effort': 'high', 'path': '/responses'}],
+                    'events': [{'event': 'turn_completed', 'success': True}]}
+        finalize_completion(evidence)
+        self.assertEqual(evidence['checks'], {'selected_request': True, 'native_turn_completed': True})
+        evidence['requests'].append({'model': 'tofa-catalog-a', 'effort': 'low', 'path': '/responses'})
+        evidence['events'] = []
+        finalize_completion(evidence)
+        self.assertEqual(evidence['checks'], {'selected_request': False, 'native_turn_completed': False})
+
     def test_malformed_http_bodies_are_counted_and_refused(self):
         from http.client import HTTPConnection
         from http.server import ThreadingHTTPServer
@@ -41,6 +53,31 @@ class CatalogProviderTests(unittest.TestCase):
 
 
 class CatalogRunnerTests(fixture.WindowsRunFixture):
+    def test_guided_review_has_a_visible_bounded_task_and_keeps_native_gates(self):
+        self.change(mode='catalog_complete')
+        result, report, state = self.invoke('--suite', 'desktop-catalog', '--guided-catalog',
+                                            '--test-auth', 'native-session', '--timeout', '1800')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(state['probe_window_style'], 'Normal')
+        self.assertEqual(state['task_execution_seconds'], 1200)
+        self.assertEqual(report['desktop']['catalog']['picker']['mode'], 'guided')
+        self.assertEqual(report['desktop']['catalog']['production_gate'], 'blocked')
+
+    def test_guided_confirmation_cannot_replace_request_or_protocol_evidence(self):
+        for mode in ('wrong_request', 'no_protocol'):
+            with self.subTest(mode=mode):
+                self.change(mode='catalog_' + mode)
+                result, report, _ = self.invoke('--suite', 'desktop-catalog', '--guided-catalog',
+                                                '--test-auth', 'native-session', '--timeout', '1800')
+                self.assertNotEqual(result.returncode, 0)
+                self.assertTrue(report['retained'])
+                self.assertEqual(self.invoke('--run', report['run'], command='cleanup')[0].returncode, 0)
+
+    def test_guided_mode_rejects_other_suites_before_creating_a_clone(self):
+        result, _, state = self.invoke('--guided-catalog')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(state['effects'], [])
+
     def test_completed_synthetic_experiment_keeps_production_blocked(self):
         self.change(mode='catalog_complete')
         result, report, _ = self.invoke('--suite', 'desktop-catalog', '--test-auth', 'native-session')
@@ -69,6 +106,14 @@ class CatalogRunnerTests(fixture.WindowsRunFixture):
 
 @unittest.skipIf(os.name == 'nt', 'External executable fixture uses a Unix shebang')
 class CatalogBridgeTests(unittest.TestCase):
+    def test_native_title_metadata_is_classified_but_remains_refused(self):
+        responses, _ = self.exchange([{'id': 1, 'method': 'turn/start', 'params': {
+            'threadId': 'background', 'turnTrigger': 'thread_title',
+            'input': [{'type': 'text', 'text': 'Unrelated title request'}]}}])
+        self.assertIn('error', responses[0])
+        self.assertTrue(any(event.get('event') == 'catalog_background_turn_refused'
+                            and event.get('category') == 'title' for event in self.events))
+
     def exchange(self, messages, native_mode='valid'):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary).resolve()

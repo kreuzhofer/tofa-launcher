@@ -1,0 +1,5 @@
+?   	github.com/kreuzhofer/tofa-launcher/cmd/tofa	[no test files]
+ok  	github.com/kreuzhofer/tofa-launcher/internal/tofa	(cached)
+ok  	github.com/kreuzhofer/tofa-launcher/scripts	1.664s
+?   	github.com/kreuzhofer/tofa-launcher/scripts/fixtures/evaluation_launcher	[no test files]
+?   	github.com/kreuzhofer/tofa-launcher/scripts/fixtures/picker_launcher	[no test files]

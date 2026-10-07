@@ -1,0 +1,14 @@
+{
+  "runner_state": "idle",
+  "locked": false,
+  "run": {
+    "run": "tofa-run-9ecfc526289644598f44ab035f906114",
+    "outcome": "failed",
+    "retained": false,
+    "clone": {
+      "uuid": "4287E6FF-A80A-482F-A060-B12B0A39DB74",
+      "name": "tofa-run-9ecfc526289644598f44ab035f906114"
+    },
+    "cleanup": "deleted"
+  }
+}

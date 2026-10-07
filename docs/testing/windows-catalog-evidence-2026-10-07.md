@@ -1,5 +1,9 @@
 # Windows desktop catalog and default-write experiment — 2026-10-07
 
+The later [guided human review](windows-catalog-guided-evidence-2026-10-07.md)
+establishes the selected B/high native request and policy that were missing here.
+This document retains the original unattended failures and their scope.
+
 Issue [#86](https://github.com/kreuzhofer/tofa-launcher/issues/86), under
 [#77](https://github.com/kreuzhofer/tofa-launcher/issues/77).
 

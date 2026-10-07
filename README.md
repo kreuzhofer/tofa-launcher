@@ -607,3 +607,11 @@ $Uninstaller = Invoke-RestMethod "https://github.com/kreuzhofer/tofa-launcher/re
 
 Append `-Purge` to also remove saved preferences and credentials. Failed native-store
 cleanup is reported rather than treated as successful deletion.
+
+For a guided Windows desktop catalog build review in an owned UTM clone, run
+[`scripts/review_windows_catalog.sh`](scripts/review_windows_catalog.sh) with the
+candidate and stopped test-template arguments in the
+[Windows review guide](docs/testing/windows-runs.md#guided-catalog-review).
+Preparation and evidence checks are automated; native setup and picker review are
+performed by the reviewer. This remains a synthetic experiment, not production
+Windows or Token Factory qualification.
