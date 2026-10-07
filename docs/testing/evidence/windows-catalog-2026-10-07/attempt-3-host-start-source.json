@@ -1,0 +1,11 @@
+{
+  "scripts/windows_catalog_ui.ps1": "619246711dcdec2786aa04dd5bafe2b7dc8d996be528c4168e2ad5876b74708d",
+  "scripts/windows_catalog_result.py": "4a2e79c43faf7ba0840b8cc2fa8b7f063b5fb38414d4bb7d1ce02e0c72afeeaf",
+  "scripts/windows_catalog_test.py": "6ff5a4974c49811f7e9a6f023c8808e2230007aff5e38619fe251f0df4a9f636",
+  "scripts/windows_catalog_experiment.py": "cf15557db996c8e5199d2f0a81166e5e1d3579b4b2cda49f1666e0dd53e3bb6a",
+  "scripts/windows_catalog_protocol.py": "6ed803ff02d95df164d039a37f1cb7b0c35c3c550aab3629eee783134b11c311",
+  "scripts/windows_desktop_bridge.py": "e6fc2908737cd90bd9a8a8a186078ff2f9b91368b51e807cac90300dbeac2787",
+  "scripts/windows_desktop_probe.py": "2dc2b5dff797eead8490e32ae9237900bd63949e8761fffcbb0e3b147f9e7523",
+  "scripts/windows_template_probe.py": "bf42a038ae912809d27163f08bfe34f2a8e385704f5821eb56c9feb572aaeb4b",
+  "scripts/windows_template_transport.py": "9df6f63e008ea1d42528cf95c6b81f8b964287c7a86ded1c9c25364581af54a4"
+}

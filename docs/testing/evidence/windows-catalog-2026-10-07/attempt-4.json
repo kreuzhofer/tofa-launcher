@@ -1,0 +1,1128 @@
+{
+  "schema": 1,
+  "run": "tofa-run-655a7d7cf65c46e8bdf66e32a9fb1f75",
+  "outcome": "failed",
+  "stages": [
+    {
+      "stage": "template_validation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.21
+    },
+    {
+      "stage": "candidate_validation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.007
+    },
+    {
+      "stage": "clone_creation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.611
+    },
+    {
+      "stage": "boot",
+      "outcome": "passed",
+      "elapsed_seconds": 19.751
+    },
+    {
+      "stage": "guest_session",
+      "outcome": "passed",
+      "elapsed_seconds": 14.939
+    },
+    {
+      "stage": "native_smoke",
+      "outcome": "passed",
+      "elapsed_seconds": 44.3
+    },
+    {
+      "stage": "desktop_smoke",
+      "outcome": "failed",
+      "reason": "catalog_observation_failed",
+      "elapsed_seconds": 160.239
+    }
+  ],
+  "suite": "desktop-catalog",
+  "retained": true,
+  "cleanup": {
+    "outcome": "retained",
+    "shutdown": "stopped"
+  },
+  "capabilities": {
+    "native_sandbox": "verified",
+    "desktop_guardian": "unverified"
+  },
+  "template": {
+    "uuid": "EF96CF12-D901-455F-81FF-4C5001E15F80",
+    "state": "stopped"
+  },
+  "requested_candidate": {
+    "version": "v0.1.0-rc.14",
+    "sha256": "1b0a2e7aa7aafc515391e221a16bee5124cf5b09aedf89af779796fae15bdd77",
+    "commit": "14134d43df4cca00bcdf10e49b3dc5ef3122f8d7"
+  },
+  "ownership_unresolved": false,
+  "clone_identity_source": "unique_inventory_delta",
+  "clone": {
+    "uuid": "354884A3-6598-42EE-8D4A-038F7652DDFB",
+    "name": "tofa-run-655a7d7cf65c46e8bdf66e32a9fb1f75"
+  },
+  "diagnostics": {
+    "guest_staging": "C:\\Users\\Public\\tofa-run-655a7d7cf65c46e8bdf66e32a9fb1f75",
+    "guest_workspace": "%USERPROFILE%\\tofa-run-655a7d7cf65c46e8bdf66e32a9fb1f75"
+  },
+  "os": {
+    "name": "Windows 11",
+    "architecture": "ARM64",
+    "version": "10.0.26200"
+  },
+  "native": {
+    "identity": {
+      "client_version": "26.930.7945.0",
+      "engine_version": "0.160.1",
+      "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+      "package_engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+      "package": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+      "architecture": "Arm64",
+      "python_version": "3.13.15",
+      "sid": "S-1-5-21-1299817968-325600504-2357610402-1005",
+      "session": 1
+    },
+    "checks": {
+      "limited_user": true,
+      "harness_read_only": true,
+      "workspace_owned_by_user": true,
+      "workspace_acl_manageable": true,
+      "ordinary_write": true,
+      "workspace_write_read": true,
+      "outside_permission_denied": true,
+      "outside_marker_exists": false,
+      "full_access_disabled": true,
+      "engine_exited": true,
+      "markers_removed": true
+    },
+    "execution": {
+      "workspace_exit_code": 0,
+      "outside_exit_code": 1,
+      "outside_denial_signal": "GetContentWriterUnauthorizedAccessError"
+    }
+  },
+  "candidate": {
+    "version": "v0.1.0-rc.14",
+    "sha256": "1b0a2e7aa7aafc515391e221a16bee5124cf5b09aedf89af779796fae15bdd77",
+    "commit": "14134d43df4cca00bcdf10e49b3dc5ef3122f8d7",
+    "architecture": "ARM64",
+    "version_verified": true
+  },
+  "completion": {
+    "completed": true,
+    "unregistered": true,
+    "last_result": 1,
+    "state": "Ready"
+  },
+  "desktop_run": "tofa-run-fa62c9669a7541228a5ae75d5e2cbe5e",
+  "desktop": {
+    "ok": false,
+    "reason": "catalog_observation_failed",
+    "checks": {
+      "authenticated": true,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true,
+      "readiness_engine_exited": true,
+      "bridge_policy_preserved": true,
+      "bridge_initialized": true,
+      "desktop_started": true,
+      "desktop_permissions_configured": true,
+      "command_effect": true,
+      "normal_quit": true,
+      "owned_children_exited": true,
+      "cli_defaults_unchanged": true,
+      "vendor_service_preserved": true,
+      "diagnostics_written": true
+    },
+    "route": "native-desktop-bridge",
+    "restrictions": {
+      "tool_registration_writes_refused": 1,
+      "unrelated_turns_refused": 1,
+      "native_visualization_roots": 1
+    },
+    "identity": {
+      "model": "gpt-5.6-sol",
+      "provider": "openai",
+      "reviewer": "auto_review",
+      "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+      "app_sha256": "5474239dcfa9d1548d8bcd9219b8fd3474f1157f923555e9738f789dd4a81abe",
+      "bridge_sha256": "dcf6912f2e3dee69e2c50ffc59429ffa7e355087de3d5efad5fa38fa6fa40128",
+      "package": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+      "app_pid": 10164,
+      "bridge_pid": 5996,
+      "engine_pid": 8608
+    },
+    "execution": {
+      "admitted": {
+        "bridge_pid": 5996,
+        "thread": 2,
+        "turn": 1
+      },
+      "command": {
+        "bridge_pid": 5996,
+        "thread": 2,
+        "turn": 1
+      },
+      "completed": {
+        "bridge_pid": 5996,
+        "thread": 2,
+        "turn": 1
+      }
+    },
+    "catalog": {
+      "production_gate": "blocked",
+      "stage": "complete",
+      "checks": {
+        "provider_closed": true,
+        "diagnostics_written": true,
+        "provider_scope_preserved": true,
+        "cli_before": true,
+        "cli_during": true,
+        "cli_after_selection": true,
+        "selected_request": false,
+        "native_turn_completed": false,
+        "mixed_refused": true,
+        "mixed_atomic": true,
+        "unrelated_native": true,
+        "cli_after_writes": true,
+        "replay_exited": true,
+        "normal_quit": true,
+        "cli_after_shutdown": true,
+        "cli_exited": true,
+        "ordinary_config_preserved": true,
+        "vendor_service_preserved": true,
+        "owned_apps_exited": true
+      },
+      "last_work_stage": "settings",
+      "requests": [],
+      "picker": {
+        "ok": true,
+        "stage": "complete",
+        "choices": [
+          "tofa-catalog-a",
+          "tofa-catalog-b"
+        ]
+      },
+      "identity": {
+        "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+        "app_sha256": "5474239dcfa9d1548d8bcd9219b8fd3474f1157f923555e9738f789dd4a81abe"
+      },
+      "protocol": [
+        {
+          "event": "catalog_home",
+          "expected": true
+        },
+        {
+          "event": "catalog_other_write_refused",
+          "keys": [
+            "other",
+            "other"
+          ]
+        },
+        {
+          "event": "policy_refused",
+          "reason": "shared_write_unsupported"
+        },
+        {
+          "event": "catalog_other_write_refused",
+          "keys": [
+            "other"
+          ]
+        },
+        {
+          "event": "policy_refused",
+          "reason": "shared_write_unsupported"
+        },
+        {
+          "event": "catalog_advertised",
+          "models": [
+            "tofa-catalog-a",
+            "tofa-catalog-b"
+          ],
+          "complete": true
+        },
+        {
+          "event": "tool_registration_refused"
+        },
+        {
+          "event": "catalog_advertised",
+          "models": [
+            "tofa-catalog-a",
+            "tofa-catalog-b"
+          ],
+          "complete": true
+        },
+        {
+          "event": "catalog_default_write",
+          "method": "config/batchWrite",
+          "keys": [
+            "model",
+            "model_reasoning_effort"
+          ],
+          "values": [
+            "tofa-catalog-b",
+            "low"
+          ],
+          "disposition": "pending",
+          "reload": true,
+          "versioned": false
+        },
+        {
+          "event": "catalog_layer_check",
+          "user_layers": 1,
+          "matching_layers": 1,
+          "version_present": true,
+          "exact_path": true,
+          "extended_path": false
+        },
+        {
+          "event": "catalog_default_write",
+          "method": "config/batchWrite",
+          "keys": [
+            "model",
+            "model_reasoning_effort"
+          ],
+          "values": [
+            "tofa-catalog-b",
+            "low"
+          ],
+          "disposition": "session_override",
+          "reload": true,
+          "versioned": false
+        },
+        {
+          "event": "tool_registration_refused"
+        },
+        {
+          "event": "catalog_native_identity_refused",
+          "model": "gpt-5.5",
+          "provider": "tofa-catalog"
+        },
+        {
+          "event": "invalid_identity"
+        },
+        {
+          "event": "catalog_default_write",
+          "method": "config/batchWrite",
+          "keys": [
+            "model",
+            "model_reasoning_effort"
+          ],
+          "values": [
+            "tofa-catalog-b",
+            "high"
+          ],
+          "disposition": "pending",
+          "reload": true,
+          "versioned": false
+        },
+        {
+          "event": "catalog_layer_check",
+          "user_layers": 1,
+          "matching_layers": 1,
+          "version_present": true,
+          "exact_path": true,
+          "extended_path": false
+        },
+        {
+          "event": "catalog_default_write",
+          "method": "config/batchWrite",
+          "keys": [
+            "model",
+            "model_reasoning_effort"
+          ],
+          "values": [
+            "tofa-catalog-b",
+            "high"
+          ],
+          "disposition": "session_override",
+          "reload": true,
+          "versioned": false
+        },
+        {
+          "event": "thread_ready",
+          "model": "tofa-catalog-b",
+          "provider": "tofa-catalog",
+          "policy_verified": false,
+          "reviewer_verified": false,
+          "approval_verified": true,
+          "sandbox_verified": false,
+          "native_sandbox": "readOnly"
+        },
+        {
+          "event": "thread_ready",
+          "model": "tofa-catalog-a",
+          "provider": "tofa-catalog",
+          "policy_verified": false,
+          "reviewer_verified": true,
+          "approval_verified": false,
+          "sandbox_verified": false,
+          "native_sandbox": "readOnly"
+        },
+        {
+          "event": "catalog_background_turn_refused",
+          "category": "unclassified"
+        },
+        {
+          "event": "unrelated_turn_refused",
+          "reason": "unrelated_turn"
+        },
+        {
+          "event": "synthetic_guard",
+          "thread_verified": false,
+          "sandbox_verified": true,
+          "model_verified": true
+        },
+        {
+          "event": "policy_refused",
+          "reason": "synthetic_policy"
+        },
+        {
+          "event": "catalog_other_write_refused",
+          "keys": [
+            "other"
+          ]
+        },
+        {
+          "event": "policy_refused",
+          "reason": "shared_write_unsupported"
+        },
+        {
+          "event": "catalog_home",
+          "expected": true
+        },
+        {
+          "event": "catalog_default_write",
+          "method": "config/batchWrite",
+          "keys": [
+            "model",
+            "other"
+          ],
+          "values": [
+            "tofa-catalog-b",
+            "other"
+          ],
+          "disposition": "refused",
+          "reload": true,
+          "versioned": false
+        },
+        {
+          "event": "catalog_unrelated_write",
+          "disposition": "native"
+        },
+        {
+          "event": "catalog_home",
+          "expected": true
+        }
+      ]
+    }
+  },
+  "reason": "catalog_observation_failed",
+  "failed_transport_operation": "file_pull",
+  "recovery_diagnostics": {
+    "outcome": "collected",
+    "files": {
+      "progress": {
+        "outcome": "collected",
+        "checkpoints": [
+          {
+            "stage": "user_started",
+            "elapsed_ms": 2
+          },
+          {
+            "stage": "package_discovered",
+            "elapsed_ms": 279
+          },
+          {
+            "stage": "engine_hashed",
+            "elapsed_ms": 8311
+          },
+          {
+            "stage": "engine_discovered",
+            "elapsed_ms": 15425
+          },
+          {
+            "stage": "native_probe_started",
+            "elapsed_ms": 15495
+          },
+          {
+            "stage": "candidate_verification",
+            "elapsed_ms": 16393
+          },
+          {
+            "stage": "workspace_preparation",
+            "elapsed_ms": 17115
+          },
+          {
+            "stage": "engine_initialization",
+            "elapsed_ms": 17356
+          },
+          {
+            "stage": "sandbox_configuration",
+            "elapsed_ms": 18391
+          },
+          {
+            "stage": "workspace_execution",
+            "elapsed_ms": 18412
+          },
+          {
+            "stage": "outside_execution",
+            "elapsed_ms": 19585
+          }
+        ]
+      },
+      "native": {
+        "identity": {
+          "client_version": "26.930.7945.0",
+          "engine_version": "0.160.1",
+          "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+          "package_engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+          "package": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+          "architecture": "Arm64",
+          "python_version": "3.13.15",
+          "sid": "S-1-5-21-1299817968-325600504-2357610402-1005",
+          "session": 1
+        },
+        "checks": {
+          "limited_user": true,
+          "harness_read_only": true,
+          "workspace_owned_by_user": true,
+          "workspace_acl_manageable": true,
+          "ordinary_write": true,
+          "workspace_write_read": true,
+          "outside_permission_denied": true,
+          "outside_marker_exists": false,
+          "full_access_disabled": true,
+          "engine_exited": true,
+          "markers_removed": true
+        },
+        "execution": {
+          "workspace_exit_code": 0,
+          "outside_exit_code": 1,
+          "outside_denial_signal": "GetContentWriterUnauthorizedAccessError"
+        }
+      },
+      "desktop_progress": {
+        "outcome": "collected",
+        "checkpoints": [
+          {
+            "stage": "user_started",
+            "elapsed_ms": 2
+          },
+          {
+            "stage": "package_discovered",
+            "elapsed_ms": 234
+          },
+          {
+            "stage": "engine_hashed",
+            "elapsed_ms": 600
+          },
+          {
+            "stage": "engine_discovered",
+            "elapsed_ms": 888
+          },
+          {
+            "stage": "native_probe_started",
+            "elapsed_ms": 897
+          },
+          {
+            "stage": "desktop_authentication",
+            "elapsed_ms": 897
+          },
+          {
+            "stage": "desktop_preparation",
+            "elapsed_ms": 1813
+          },
+          {
+            "stage": "desktop_startup",
+            "elapsed_ms": 4338
+          },
+          {
+            "stage": "desktop_permissions",
+            "elapsed_ms": 17358
+          },
+          {
+            "stage": "desktop_command",
+            "elapsed_ms": 29285
+          },
+          {
+            "stage": "desktop_quit",
+            "elapsed_ms": 52511
+          },
+          {
+            "stage": "desktop_cleanup",
+            "elapsed_ms": 55725
+          }
+        ]
+      },
+      "desktop": {
+        "ok": false,
+        "reason": "catalog_observation_failed",
+        "checks": {
+          "authenticated": true,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true,
+          "readiness_engine_exited": true,
+          "bridge_policy_preserved": true,
+          "bridge_initialized": true,
+          "desktop_started": true,
+          "desktop_permissions_configured": true,
+          "command_effect": true,
+          "normal_quit": true,
+          "owned_children_exited": true,
+          "cli_defaults_unchanged": true,
+          "vendor_service_preserved": true,
+          "diagnostics_written": true
+        },
+        "route": "native-desktop-bridge",
+        "restrictions": {
+          "tool_registration_writes_refused": 1,
+          "unrelated_turns_refused": 1,
+          "native_visualization_roots": 1
+        },
+        "identity": {
+          "model": "gpt-5.6-sol",
+          "provider": "openai",
+          "reviewer": "auto_review",
+          "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+          "app_sha256": "5474239dcfa9d1548d8bcd9219b8fd3474f1157f923555e9738f789dd4a81abe",
+          "bridge_sha256": "dcf6912f2e3dee69e2c50ffc59429ffa7e355087de3d5efad5fa38fa6fa40128",
+          "package": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+          "app_pid": 10164,
+          "bridge_pid": 5996,
+          "engine_pid": 8608
+        },
+        "execution": {
+          "admitted": {
+            "bridge_pid": 5996,
+            "thread": 2,
+            "turn": 1
+          },
+          "command": {
+            "bridge_pid": 5996,
+            "thread": 2,
+            "turn": 1
+          },
+          "completed": {
+            "bridge_pid": 5996,
+            "thread": 2,
+            "turn": 1
+          }
+        },
+        "catalog": {
+          "production_gate": "blocked",
+          "stage": "complete",
+          "checks": {
+            "provider_closed": true,
+            "diagnostics_written": true,
+            "provider_scope_preserved": true,
+            "cli_before": true,
+            "cli_during": true,
+            "cli_after_selection": true,
+            "selected_request": false,
+            "native_turn_completed": false,
+            "mixed_refused": true,
+            "mixed_atomic": true,
+            "unrelated_native": true,
+            "cli_after_writes": true,
+            "replay_exited": true,
+            "normal_quit": true,
+            "cli_after_shutdown": true,
+            "cli_exited": true,
+            "ordinary_config_preserved": true,
+            "vendor_service_preserved": true,
+            "owned_apps_exited": true
+          },
+          "last_work_stage": "settings",
+          "requests": [],
+          "picker": {
+            "ok": true,
+            "stage": "complete",
+            "choices": [
+              "tofa-catalog-a",
+              "tofa-catalog-b"
+            ]
+          },
+          "identity": {
+            "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+            "app_sha256": "5474239dcfa9d1548d8bcd9219b8fd3474f1157f923555e9738f789dd4a81abe"
+          },
+          "protocol": [
+            {
+              "event": "catalog_home",
+              "expected": true
+            },
+            {
+              "event": "catalog_other_write_refused",
+              "keys": [
+                "other",
+                "other"
+              ]
+            },
+            {
+              "event": "policy_refused",
+              "reason": "shared_write_unsupported"
+            },
+            {
+              "event": "catalog_other_write_refused",
+              "keys": [
+                "other"
+              ]
+            },
+            {
+              "event": "policy_refused",
+              "reason": "shared_write_unsupported"
+            },
+            {
+              "event": "catalog_advertised",
+              "models": [
+                "tofa-catalog-a",
+                "tofa-catalog-b"
+              ],
+              "complete": true
+            },
+            {
+              "event": "tool_registration_refused"
+            },
+            {
+              "event": "catalog_advertised",
+              "models": [
+                "tofa-catalog-a",
+                "tofa-catalog-b"
+              ],
+              "complete": true
+            },
+            {
+              "event": "catalog_default_write",
+              "method": "config/batchWrite",
+              "keys": [
+                "model",
+                "model_reasoning_effort"
+              ],
+              "values": [
+                "tofa-catalog-b",
+                "low"
+              ],
+              "disposition": "pending",
+              "reload": true,
+              "versioned": false
+            },
+            {
+              "event": "catalog_layer_check",
+              "user_layers": 1,
+              "matching_layers": 1,
+              "version_present": true,
+              "exact_path": true,
+              "extended_path": false
+            },
+            {
+              "event": "catalog_default_write",
+              "method": "config/batchWrite",
+              "keys": [
+                "model",
+                "model_reasoning_effort"
+              ],
+              "values": [
+                "tofa-catalog-b",
+                "low"
+              ],
+              "disposition": "session_override",
+              "reload": true,
+              "versioned": false
+            },
+            {
+              "event": "tool_registration_refused"
+            },
+            {
+              "event": "catalog_native_identity_refused",
+              "model": "gpt-5.5",
+              "provider": "tofa-catalog"
+            },
+            {
+              "event": "invalid_identity"
+            },
+            {
+              "event": "catalog_default_write",
+              "method": "config/batchWrite",
+              "keys": [
+                "model",
+                "model_reasoning_effort"
+              ],
+              "values": [
+                "tofa-catalog-b",
+                "high"
+              ],
+              "disposition": "pending",
+              "reload": true,
+              "versioned": false
+            },
+            {
+              "event": "catalog_layer_check",
+              "user_layers": 1,
+              "matching_layers": 1,
+              "version_present": true,
+              "exact_path": true,
+              "extended_path": false
+            },
+            {
+              "event": "catalog_default_write",
+              "method": "config/batchWrite",
+              "keys": [
+                "model",
+                "model_reasoning_effort"
+              ],
+              "values": [
+                "tofa-catalog-b",
+                "high"
+              ],
+              "disposition": "session_override",
+              "reload": true,
+              "versioned": false
+            },
+            {
+              "event": "thread_ready",
+              "model": "tofa-catalog-b",
+              "provider": "tofa-catalog",
+              "policy_verified": false,
+              "reviewer_verified": false,
+              "approval_verified": true,
+              "sandbox_verified": false,
+              "native_sandbox": "readOnly"
+            },
+            {
+              "event": "thread_ready",
+              "model": "tofa-catalog-a",
+              "provider": "tofa-catalog",
+              "policy_verified": false,
+              "reviewer_verified": true,
+              "approval_verified": false,
+              "sandbox_verified": false,
+              "native_sandbox": "readOnly"
+            },
+            {
+              "event": "catalog_background_turn_refused",
+              "category": "unclassified"
+            },
+            {
+              "event": "unrelated_turn_refused",
+              "reason": "unrelated_turn"
+            },
+            {
+              "event": "synthetic_guard",
+              "thread_verified": false,
+              "sandbox_verified": true,
+              "model_verified": true
+            },
+            {
+              "event": "policy_refused",
+              "reason": "synthetic_policy"
+            },
+            {
+              "event": "catalog_other_write_refused",
+              "keys": [
+                "other"
+              ]
+            },
+            {
+              "event": "policy_refused",
+              "reason": "shared_write_unsupported"
+            },
+            {
+              "event": "catalog_home",
+              "expected": true
+            },
+            {
+              "event": "catalog_default_write",
+              "method": "config/batchWrite",
+              "keys": [
+                "model",
+                "other"
+              ],
+              "values": [
+                "tofa-catalog-b",
+                "other"
+              ],
+              "disposition": "refused",
+              "reload": true,
+              "versioned": false
+            },
+            {
+              "event": "catalog_unrelated_write",
+              "disposition": "native"
+            },
+            {
+              "event": "catalog_home",
+              "expected": true
+            }
+          ]
+        }
+      }
+    }
+  },
+  "transport_progress_observed": false,
+  "transport_steps": [
+    {
+      "step": "protected_staging",
+      "started_after_seconds": 20.58,
+      "outcome": "passed",
+      "elapsed_seconds": 9.672
+    },
+    {
+      "step": "guest_preflight",
+      "started_after_seconds": 30.252,
+      "outcome": "passed",
+      "elapsed_seconds": 5.266
+    },
+    {
+      "step": "stage_request",
+      "started_after_seconds": 36.266,
+      "outcome": "passed",
+      "elapsed_seconds": 0.094
+    },
+    {
+      "step": "stage_probe",
+      "started_after_seconds": 36.36,
+      "outcome": "passed",
+      "elapsed_seconds": 0.133
+    },
+    {
+      "step": "stage_user",
+      "started_after_seconds": 36.493,
+      "outcome": "passed",
+      "elapsed_seconds": 0.108
+    },
+    {
+      "step": "stage_candidate",
+      "started_after_seconds": 36.601,
+      "outcome": "passed",
+      "elapsed_seconds": 13.209
+    },
+    {
+      "step": "stage_windows_candidate",
+      "started_after_seconds": 49.81,
+      "outcome": "passed",
+      "elapsed_seconds": 0.107
+    },
+    {
+      "step": "prepare_task",
+      "started_after_seconds": 49.918,
+      "outcome": "passed",
+      "elapsed_seconds": 3.925
+    },
+    {
+      "step": "native_task",
+      "started_after_seconds": 53.843,
+      "outcome": "passed",
+      "elapsed_seconds": 0.18
+    },
+    {
+      "step": "collect_task",
+      "started_after_seconds": 54.023,
+      "outcome": "passed",
+      "elapsed_seconds": 25.569
+    },
+    {
+      "step": "collect_native",
+      "started_after_seconds": 79.592,
+      "outcome": "passed",
+      "elapsed_seconds": 0.1
+    },
+    {
+      "step": "protected_staging",
+      "started_after_seconds": 79.819,
+      "outcome": "passed",
+      "elapsed_seconds": 1.773
+    },
+    {
+      "step": "guest_preflight",
+      "started_after_seconds": 81.592,
+      "outcome": "passed",
+      "elapsed_seconds": 3.342
+    },
+    {
+      "step": "stage_request",
+      "started_after_seconds": 84.935,
+      "outcome": "passed",
+      "elapsed_seconds": 0.099
+    },
+    {
+      "step": "stage_probe",
+      "started_after_seconds": 85.034,
+      "outcome": "passed",
+      "elapsed_seconds": 0.125
+    },
+    {
+      "step": "stage_user",
+      "started_after_seconds": 85.159,
+      "outcome": "passed",
+      "elapsed_seconds": 0.125
+    },
+    {
+      "step": "stage_windows_template_probe",
+      "started_after_seconds": 85.284,
+      "outcome": "passed",
+      "elapsed_seconds": 0.133
+    },
+    {
+      "step": "stage_windows_desktop_runtime",
+      "started_after_seconds": 85.417,
+      "outcome": "passed",
+      "elapsed_seconds": 0.151
+    },
+    {
+      "step": "stage_windows_desktop_bridge",
+      "started_after_seconds": 85.568,
+      "outcome": "passed",
+      "elapsed_seconds": 0.166
+    },
+    {
+      "step": "stage_windows_desktop_ui",
+      "started_after_seconds": 85.734,
+      "outcome": "passed",
+      "elapsed_seconds": 0.125
+    },
+    {
+      "step": "stage_windows_process",
+      "started_after_seconds": 85.859,
+      "outcome": "passed",
+      "elapsed_seconds": 0.1
+    },
+    {
+      "step": "stage_windows_process",
+      "started_after_seconds": 85.959,
+      "outcome": "passed",
+      "elapsed_seconds": 0.125
+    },
+    {
+      "step": "stage_windows_guardian_result",
+      "started_after_seconds": 86.084,
+      "outcome": "passed",
+      "elapsed_seconds": 0.116
+    },
+    {
+      "step": "stage_windows_template_transport",
+      "started_after_seconds": 86.2,
+      "outcome": "passed",
+      "elapsed_seconds": 0.117
+    },
+    {
+      "step": "stage_windows_ownership_experiment",
+      "started_after_seconds": 86.317,
+      "outcome": "passed",
+      "elapsed_seconds": 0.116
+    },
+    {
+      "step": "stage_windows_ownership_contract",
+      "started_after_seconds": 86.434,
+      "outcome": "passed",
+      "elapsed_seconds": 0.117
+    },
+    {
+      "step": "stage_windows_ownership_inspect",
+      "started_after_seconds": 86.551,
+      "outcome": "passed",
+      "elapsed_seconds": 0.117
+    },
+    {
+      "step": "stage_windows_catalog_experiment",
+      "started_after_seconds": 86.667,
+      "outcome": "passed",
+      "elapsed_seconds": 0.133
+    },
+    {
+      "step": "stage_windows_catalog_protocol",
+      "started_after_seconds": 86.801,
+      "outcome": "passed",
+      "elapsed_seconds": 0.109
+    },
+    {
+      "step": "stage_windows_catalog_ui",
+      "started_after_seconds": 86.909,
+      "outcome": "passed",
+      "elapsed_seconds": 0.125
+    },
+    {
+      "step": "prepare_task",
+      "started_after_seconds": 87.034,
+      "outcome": "passed",
+      "elapsed_seconds": 2.8
+    },
+    {
+      "step": "desktop_task",
+      "started_after_seconds": 89.834,
+      "outcome": "passed",
+      "elapsed_seconds": 0.181
+    },
+    {
+      "step": "collect_task",
+      "started_after_seconds": 90.015,
+      "outcome": "passed",
+      "elapsed_seconds": 149.816
+    },
+    {
+      "step": "collect_desktop",
+      "started_after_seconds": 239.831,
+      "outcome": "passed",
+      "elapsed_seconds": 0.117
+    }
+  ],
+  "guest_progress": {
+    "outcome": "collected",
+    "checkpoints": [
+      {
+        "stage": "user_started",
+        "elapsed_ms": 2
+      },
+      {
+        "stage": "package_discovered",
+        "elapsed_ms": 234
+      },
+      {
+        "stage": "engine_hashed",
+        "elapsed_ms": 600
+      },
+      {
+        "stage": "engine_discovered",
+        "elapsed_ms": 888
+      },
+      {
+        "stage": "native_probe_started",
+        "elapsed_ms": 897
+      },
+      {
+        "stage": "desktop_authentication",
+        "elapsed_ms": 897
+      },
+      {
+        "stage": "desktop_preparation",
+        "elapsed_ms": 1813
+      },
+      {
+        "stage": "desktop_startup",
+        "elapsed_ms": 4338
+      },
+      {
+        "stage": "desktop_permissions",
+        "elapsed_ms": 17358
+      },
+      {
+        "stage": "desktop_command",
+        "elapsed_ms": 29285
+      },
+      {
+        "stage": "desktop_quit",
+        "elapsed_ms": 52511
+      },
+      {
+        "stage": "desktop_cleanup",
+        "elapsed_ms": 55725
+      }
+    ]
+  }
+}

@@ -27,6 +27,10 @@ def main():
     reviews: dict[str, dict[str, Any]] = {}
     catalog_models: set[str] = set()
     admitted: set[str] = set()
+    provider = 'tofa-catalog' if config.get('catalog') else 'openai'
+    def valid_model(value):
+        if config.get('catalog'): return value in ('tofa-catalog-a', 'tofa-catalog-b')
+        return isinstance(value, str) and re.fullmatch(r'(?:gpt-[a-z0-9.-]+|o[0-9][a-z0-9.-]*|codex-[a-z0-9.-]+)', value) is not None
     restricted = {'tool_registration_refused': 0, 'unrelated_turn_refused': 0}
     lock, stdout_lock = threading.Lock(), threading.Lock()
     workspace = ntpath.normcase(ntpath.normpath(config['workspace']))
@@ -42,6 +46,12 @@ def main():
             with stdout_lock:
                 sys.stdout.buffer.write(raw)
                 sys.stdout.buffer.flush()
+
+        catalog = None
+        if config.get('catalog'):
+            from windows_catalog_protocol import CatalogProtocol
+            catalog = CatalogProtocol(config['catalog'], record, write)
+            record('catalog_home', expected=ntpath.normcase(ntpath.normpath(os.environ.get('CODEX_HOME', ''))) == ntpath.normcase(str(Path(config['catalog']['config_file']).parent)))
 
         def roots_safe(paths):
             return isinstance(paths, list) and all(isinstance(path, str)
@@ -86,7 +96,7 @@ def main():
             selected_model = (collaboration.get('settings') or {}).get('model')
             effective_model = selected_model or params.get('model') or model
             return (effective_model in catalog_models or effective_model == model) and (params.get('model') in (None, effective_model) and selected_model in (None, effective_model)
-                    and params.get('modelProvider') in (None, 'openai')
+                    and params.get('modelProvider') in (None, provider)
                     and environments_safe(params.get('environments'))
                     and (params.get('runtimeWorkspaceRoots') is None or roots_safe(params['runtimeWorkspaceRoots']))
                     and params.get('approvalPolicy') in (None, 'on-request')
@@ -133,6 +143,11 @@ def main():
                 if request:
                     if method in ('config/value/write', 'config/batchWrite'):
                         edits = params.get('edits', [params])
+                        if catalog is not None and params.get('filePath') is None and edits and all(
+                                item.get('keyPath') == 'tui.animations' and type(item.get('value')) is bool
+                                and item.get('mergeStrategy') == 'replace' for item in edits):
+                            record('catalog_unrelated_write', disposition='native')
+                            return True
                         tool_keys = {'mcp_servers.node_repl', 'mcp_servers.cua_repl'}
                         environment_keys = {'shell_environment_policy.set.BROWSER_USE_AVAILABLE_BACKENDS',
                                             'shell_environment_policy.set.NODE_REPL_TRUSTED_CODE_PATHS'}
@@ -145,6 +160,8 @@ def main():
                             write((json.dumps({'id': message.get('id'), 'error': {'code': -32600,
                                 'message': 'Desktop tool registration is unavailable in this bounded test; shared CLI settings were not changed'}}) + '\n').encode())
                             return False
+                        if catalog is not None:
+                            record('catalog_other_write_refused', keys=[item.get('keyPath') if isinstance(item.get('keyPath'), str) and re.fullmatch('[a-zA-Z_][a-zA-Z0-9_.-]{0,100}', item['keyPath']) else 'other' for item in edits])
                         record('policy_refused', reason='shared_write_unsupported')
                         write((json.dumps({'id': message.get('id'), 'error': {'code': -32600,
                             'message': 'Shared configuration writes are not supported by this bounded desktop test'}}) + '\n').encode())
@@ -161,6 +178,7 @@ def main():
                         allowed = (method == 'turn/start' and thread.get('safe') is True
                                    and synthetic and not admitted and overrides_safe(params, thread['model'], thread_id))
                         if not allowed:
+                            if catalog is not None and not synthetic: catalog.background(params)
                             if synthetic: record('synthetic_guard', thread_verified=thread.get('safe') is True, sandbox_verified=params.get('sandboxPolicy') is None or sandbox_safe(params['sandboxPolicy'], thread_id), model_verified=overrides_safe({key: value for key, value in params.items() if key in ('model', 'collaborationMode')}, thread.get('model'), thread_id))
                             record('unrelated_turn_refused' if method == 'turn/start' and not synthetic else 'policy_refused',
                                    reason='synthetic_policy' if synthetic else 'unrelated_turn')
@@ -171,6 +189,9 @@ def main():
                             record('native_visualization_scope')
                         thread['selected_model'] = ((params.get('collaborationMode') or {}).get('settings') or {}).get('model') or params.get('model') or thread['model']
                         admitted.add(thread_id)
+                        if catalog is not None:
+                            effort = ((params.get('collaborationMode') or {}).get('settings') or {}).get('reasoning_effort') or params.get('effort')
+                            record('catalog_selection', model=thread['selected_model'], effort=effort if effort in ('low', 'medium', 'high') else 'other')
                     if method in ('initialize', 'config/read', 'model/list', 'thread/start', 'thread/resume', 'turn/start'):
                         if len(pending) >= 128: raise ValueError('pending_request_limit')
                         pending[str(message['id'])] = (method, params)
@@ -183,7 +204,9 @@ def main():
                     if operation == 'model/list':
                         for item in result.get('data', []):
                             model = item.get('model')
-                            if isinstance(model, str) and re.fullmatch(r'(?:gpt-[a-z0-9.-]+|o[0-9][a-z0-9.-]*|codex-[a-z0-9.-]+)', model): catalog_models.add(model)
+                            if valid_model(model): catalog_models.add(model)
+                        if catalog is not None:
+                            record('catalog_advertised', models=sorted(catalog_models), complete=result.get('nextCursor') is None)
                         if len(catalog_models) > 256: raise ValueError('model_catalog_limit')
                     if operation == 'initialize':
                         record('initialized', ok='error' not in message, main_connection=message.get('id') == '__codex_initialize__')
@@ -200,8 +223,12 @@ def main():
                         owned = ntpath.normcase(ntpath.normpath(arguments.get('cwd') or result.get('thread', {}).get('cwd') or '')) == workspace
                         if (not isinstance(thread_id, str) or not thread_id or len(threads) >= 128
                                 or not isinstance(result.get('model'), str)
-                                or not re.fullmatch(r'(?:gpt-[a-z0-9.-]+|o[0-9][a-z0-9.-]*|codex-[a-z0-9.-]+)', result['model'])
-                                or result.get('modelProvider') != 'openai'):
+                                or not valid_model(result['model'])
+                                or result.get('modelProvider') != provider):
+                            if catalog is not None:
+                                value = result.get('model')
+                                record('catalog_native_identity_refused', model=value if isinstance(value, str) and re.fullmatch(r'(?:gpt-[a-z0-9.-]+|tofa-catalog-[ab])', value) else 'other',
+                                       provider=result.get('modelProvider') if result.get('modelProvider') in ('openai', provider) else 'other')
                             record('invalid_identity')
                             return True
                         safe = (owned and roots_safe(result.get('runtimeWorkspaceRoots', []))
@@ -223,17 +250,18 @@ def main():
                                reviewer_verified=result.get('approvalsReviewer') == 'auto_review',
                                approval_verified=result.get('approvalPolicy') == 'on-request',
                                sandbox_verified=sandbox_safe(result.get('sandbox')),
+                               native_sandbox=(result.get('sandbox') or {}).get('type') if (result.get('sandbox') or {}).get('type') in ('workspaceWrite', 'readOnly', 'dangerFullAccess', 'externalSandbox') else 'other',
                                roots_verified=roots_safe(result.get('runtimeWorkspaceRoots', [])),
                                environment_verified=environments_safe(arguments.get('environments')),
-                               model=result['model'], provider='openai', reviewer='auto_review' if safe else 'unexpected')
+                               model=result['model'], provider=provider, reviewer='auto_review' if safe else 'unexpected')
                     if operation == 'turn/start' and 'error' not in message:
                         bind_turn(arguments.get('threadId'), result.get('turn', {}).get('id'))
                 if method == 'thread/settings/updated' and params.get('threadId') in threads:
                     thread_id, updated = params['threadId'], params.get('threadSettings', {})
                     thread = threads[thread_id]
                     model = updated.get('model')
-                    if (not isinstance(model, str) or not re.fullmatch(r'(?:gpt-[a-z0-9.-]+|o[0-9][a-z0-9.-]*|codex-[a-z0-9.-]+)', model)
-                            or updated.get('modelProvider') != 'openai'):
+                    if (not isinstance(model, str) or not valid_model(model)
+                            or updated.get('modelProvider') != provider):
                         record('invalid_identity')
                         return True
                     owned = ntpath.normcase(ntpath.normpath(updated.get('cwd') or '')) == workspace
@@ -253,7 +281,7 @@ def main():
                         record('policy_refused', reason='native_settings_changed')
                     thread.update(safe=safe, model=model)
                     record('thread_settings_updated', thread=thread['ordinal'], policy_verified=safe, owned_workspace=owned,
-                           model=model, provider='openai', reviewer='auto_review' if safe else 'unexpected')
+                           model=model, provider=provider, reviewer='auto_review' if safe else 'unexpected')
                 if method == 'model/rerouted' and params.get('threadId') in admitted:
                     record('invalid_identity')
                 if method == 'turn/started':
@@ -317,6 +345,9 @@ def main():
                           'approval_policy="on-request"', 'approvals_reviewer="auto_review"',
                           'projects={' + json.dumps(config['workspace']) + '={trust_level="trusted"}}'):
                 arguments.extend(['-c', value])
+        if catalog is not None and 'app-server' in arguments:
+            for value in config['catalog'].get('settings', []):
+                arguments.extend(['-c', value])
         record('start', pid=os.getpid(), parent_pid=os.getppid(), engine_sha256=config['sha256'],
                app_server='app-server' in arguments)
         child = subprocess.Popen([str(engine), *arguments], stdin=subprocess.PIPE,
@@ -329,7 +360,11 @@ def main():
                 while True:
                     line = sys.stdin.buffer.readline(1024 * 1024)
                     if not line: break
-                    with lock: allowed = observe(line, True)
+                    with lock:
+                        if catalog is not None:
+                            line = catalog.request(line)
+                            if line is None: continue
+                        allowed = observe(line, True)
                     if allowed:
                         input_pipe.write(line)
                         input_pipe.flush()
@@ -343,7 +378,9 @@ def main():
                 line = output_pipe.readline(1024 * 1024)
                 if not line: break
                 with lock: observe(line, False)
-                write(line)
+                if catalog is not None:
+                    with lock: line = catalog.response(line)
+                if line is not None: write(line)
             code = child.wait(timeout=5)
             with lock: record('exit', exit_code=code)
             return code

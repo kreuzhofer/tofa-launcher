@@ -1,0 +1,30 @@
+{
+  "python_full": {
+    "tests": 381,
+    "skipped": 80,
+    "result": "passed",
+    "skip_reasons": {
+      "set TOFA_TEST_DESKTOP_ENGINE on macOS": 16,
+      "set TOFA_TEST_DESKTOP_ENGINE": 3,
+      "set TOFA_TEST_DESKTOP_APP on macOS to run installed-app checks": 5,
+      "run through go test -run ^TestDesktopPicker$": 21,
+      "set TOFA_TEST_CODEX for installed-client fixture": 11,
+      "native Windows required": 17,
+      "requires native Windows Job Objects": 7
+    },
+    "note": "Suite discovered before the final HTTP regression was added; that regression passed in the subsequent 13-test catalog run."
+  },
+  "catalog_final": {
+    "tests": 13,
+    "result": "passed"
+  },
+  "go_race": "passed",
+  "go_vet": "passed",
+  "scoped_pyright_windows": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "diff_check": "passed",
+  "runner_state": "idle",
+  "native_catalog": "catalog_observation_failed"
+}

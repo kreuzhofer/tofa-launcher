@@ -63,6 +63,17 @@ fail and retain the clone. The executable snapshot contract never authorizes
 launch, adoption or cleanup. See the evidence report for exact measured identities,
 commands, failures and the remaining atomic ownership requirement.
 
+## Bounded catalog experiment
+
+Use `--suite desktop-catalog --test-auth native-session --timeout 1800` for
+[#86's synthetic catalog and settings experiment](windows-catalog-evidence-2026-10-07.md).
+It reuses native readiness and desktop smoke, then launches the real desktop
+against a two-model loopback provider in an owned synthetic engine home and
+Electron profile. Picker selection, actual request identity and concurrent CLI
+defaults are measured. Missing interactive evidence fails and retains the clone;
+a completed experiment keeps the production gate blocked. Tool-registration and
+background refusals remain restrictions, never product qualification.
+
 ## Bounded desktop smoke
 
 The `desktop-smoke` suite passed fresh-clone ARM64 acceptance for #82; see

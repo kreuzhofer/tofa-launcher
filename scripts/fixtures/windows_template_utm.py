@@ -221,6 +221,27 @@ elif args[:2] == ['file', 'pull'] and args[2].lower() == guest_uuid:
             if state['mode'] == 'desktop_no_effect': desktop['checks']['command_effect'] = False
             if state['mode'] == 'desktop_cleanup_failed': desktop['checks']['normal_quit'] = False
             if state['mode'] == 'desktop_secret': desktop['identity']['model'] = 'PRIVATE_KEY'
+            if state['mode'].startswith('catalog_'):
+                desktop['catalog'] = {
+                    'production_gate': 'blocked', 'stage': 'complete',
+                    'checks': {key: True for key in ('provider_closed', 'diagnostics_written', 'provider_scope_preserved', 'cli_before', 'cli_during', 'cli_after_selection', 'selected_request',
+                        'native_turn_completed', 'mixed_refused', 'mixed_atomic', 'unrelated_native', 'cli_after_writes',
+                        'replay_exited', 'normal_quit', 'cli_after_shutdown', 'cli_exited', 'ordinary_config_preserved', 'vendor_service_preserved', 'owned_apps_exited')},
+                    'picker': {'ok': True, 'stage': 'complete', 'choices': ['tofa-catalog-a', 'tofa-catalog-b']},
+                    'requests': [{'model': 'tofa-catalog-b', 'effort': 'high', 'path': '/responses'}],
+                    'identity': {'engine_sha256': 'a' * 64, 'app_sha256': 'c' * 64},
+                    'events': [
+                        {'event': 'catalog_advertised', 'models': ['tofa-catalog-a', 'tofa-catalog-b'], 'complete': True},
+                        {'event': 'catalog_default_write', 'method': 'config/batchWrite', 'keys': ['model'], 'values': ['tofa-catalog-b'], 'disposition': 'session_override'},
+                        {'event': 'catalog_selection', 'model': 'tofa-catalog-b', 'effort': 'high'},
+                        {'event': 'thread_settings_updated', 'model': 'tofa-catalog-b', 'provider': 'tofa-catalog', 'policy_verified': True},
+                        {'event': 'turn_completed', 'success': True}]}
+                if state['mode'] == 'catalog_no_protocol': desktop['catalog']['events'] = []
+                if state['mode'] == 'catalog_headless': desktop['catalog'].pop('picker')
+                if state['mode'] == 'catalog_changed_cli': desktop['catalog']['checks']['cli_during'] = False
+                if state['mode'] == 'catalog_wrong_request': desktop['catalog']['requests'][0]['model'] = 'tofa-catalog-a'
+                if state['mode'] == 'catalog_wrong_engine': desktop['catalog']['identity']['engine_sha256'] = 'b' * 64
+                if state['mode'] == 'catalog_private': desktop['catalog']['requests'][0]['model'] = 'PRIVATE_KEY'
             if state['mode'].startswith('ownership_'):
                 snapshot = {
                     'sid': 'S-1-5-21-1-2-3-1001', 'paths_safe': True, 'process_inventory_complete': True,

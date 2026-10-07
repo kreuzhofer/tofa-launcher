@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "run": "tofa-run-0d708501f1a7412686c63e838a58c26d",
+  "outcome": "failed",
+  "stages": [
+    {
+      "stage": "template_validation",
+      "outcome": "failed",
+      "reason": "retained_clone_limit",
+      "elapsed_seconds": 0.012
+    }
+  ],
+  "suite": "desktop-catalog",
+  "retained": false,
+  "cleanup": {
+    "outcome": "not_needed"
+  },
+  "capabilities": {
+    "native_sandbox": "unverified",
+    "desktop_guardian": "unverified"
+  },
+  "cleanup_action": "/Library/Developer/CommandLineTools/usr/bin/python3 /Users/daniel/src/github/kreuzhofer/nebius-tofa-cli/scripts/windows_test_runner.py cleanup --state-dir /Users/daniel/src/github/kreuzhofer/nebius-tofa-cli/.qualification/windows-clone-runs --run tofa-run-021aba73795846689600b844b99dbbd1 --utmctl /Applications/UTM.app/Contents/MacOS/utmctl",
+  "reason": "retained_clone_limit",
+  "failed_transport_operation": "not_started",
+  "transport_progress_observed": false,
+  "transport_steps": []
+}

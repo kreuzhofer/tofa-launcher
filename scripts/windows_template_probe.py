@@ -47,10 +47,11 @@ def workspace_owner(path):
 
 
 class NativeEngine:
-    def __init__(self, executable, workspace, additional_settings=()):
+    def __init__(self, executable, workspace, additional_settings=(), *, home=None, environment=None):
         env = {key: value for key, value in os.environ.items()
                if not key.upper().startswith(('CODEX_', 'OPENAI_', 'TOFA_')) and key.upper() != 'PSMODULEPATH'}
-        env['CODEX_HOME'] = str(Path.home() / '.codex')
+        env['CODEX_HOME'] = str(home if home is not None else Path.home() / '.codex')
+        if environment is not None: env.update(environment)
         args = [str(executable), 'app-server']
         # Settings apply only to this owned process; the native home stays intact.
         for setting in ('windows.sandbox="elevated"', 'sandbox_mode="workspace-write"',

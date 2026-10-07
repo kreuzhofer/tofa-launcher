@@ -433,7 +433,7 @@ def run_clone(options, directory, report):
         report['capabilities']['native_sandbox'] = 'verified'
         passed()
         desktop_cases = ('smoke', 'allow', 'deny') if options.suite == 'desktop-guardian' else (
-            ('smoke',) if options.suite in ('desktop-smoke', 'desktop-ownership') else ())
+            ('smoke',) if options.suite in ('desktop-smoke', 'desktop-ownership', 'desktop-catalog') else ())
         for case in desktop_cases:
             begin('desktop_smoke' if case == 'smoke' else 'guardian_' + case)
             print('Running desktop smoke...' if case == 'smoke' else 'Running live Guardian ' + case + ' case...', flush=True)
@@ -443,13 +443,21 @@ def run_clone(options, directory, report):
             desktop_preflight = transport.preflight({'run': desktop_run, 'user': options.test_user, 'operation': 'status'})
             validate_preflight(desktop_preflight)
             desktop_request = dict(request, run=desktop_run, workspace_run=report['run'], test_auth=options.test_auth,
-                                   candidate=None, ownership_experiment=options.suite == 'desktop-ownership')
+                                   candidate=None, ownership_experiment=options.suite == 'desktop-ownership',
+                                   catalog_experiment=options.suite == 'desktop-catalog')
             if case != 'smoke': desktop_request['guardian_case'] = case
             desktop_task, desktop = transport.measure(desktop_request, desktop=True)
             result = sanitized_desktop(desktop)
             if case == 'smoke': report['desktop'] = result
             else: report.setdefault('guardian', {})[case] = result
             validate_desktop(desktop_task, result, report['native'], guardian_case=None if case == 'smoke' else case)
+            if options.suite == 'desktop-catalog':
+                if 'catalog' not in result: raise Failure('catalog_evidence_missing')
+                from windows_catalog_result import validate as validate_catalog
+                validate_catalog(result['catalog'])
+                if any(result['catalog'].get('identity', {}).get(key) != result['identity'].get(key) for key in ('engine_sha256', 'app_sha256')):
+                    raise Failure('catalog_identity_mismatch')
+                report['capabilities']['desktop_catalog'] = 'experiment-complete'
             if options.suite == 'desktop-ownership':
                 if 'ownership' not in result: raise Failure('ownership_evidence_missing')
                 from windows_ownership_result import validate
@@ -512,7 +520,7 @@ def main():
     parser.add_argument('--version')
     parser.add_argument('--sha256')
     parser.add_argument('--candidate-commit')
-    parser.add_argument('--suite', choices=('native-smoke', 'desktop-smoke', 'desktop-guardian', 'desktop-ownership'), default='native-smoke')
+    parser.add_argument('--suite', choices=('native-smoke', 'desktop-smoke', 'desktop-guardian', 'desktop-ownership', 'desktop-catalog'), default='native-smoke')
     parser.add_argument('--test-auth', choices=('native-session',))
     parser.add_argument('--run', help='Exact owned run ID for explicit cleanup')
     options = parser.parse_args()

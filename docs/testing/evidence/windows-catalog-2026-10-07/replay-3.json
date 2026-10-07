@@ -1,0 +1,609 @@
+{
+  "owner_run": "tofa-run-d906f287fa754b7a993772ab44901baf",
+  "replay_run": "tofa-run-68d8a7b945314df380e141bded769757",
+  "task": {
+    "last_result": 0,
+    "state": "Ready",
+    "run": "tofa-run-68d8a7b945314df380e141bded769757",
+    "ok": true,
+    "reason": "completed",
+    "completed": true,
+    "phase": "completion",
+    "unregistered": true
+  },
+  "result": {
+    "run": "tofa-run-68d8a7b945314df380e141bded769757",
+    "phase": "desktop",
+    "ok": false,
+    "reason": "catalog_picker_failed",
+    "checks": {},
+    "catalog": {
+      "production_gate": "blocked",
+      "stage": "cleanup",
+      "checks": {
+        "cli_before": true,
+        "normal_quit": true,
+        "cli_after_shutdown": true,
+        "cli_exited": true,
+        "provider_closed": true,
+        "ordinary_config_preserved": true,
+        "vendor_service_preserved": true,
+        "owned_apps_exited": true,
+        "diagnostics_written": true
+      },
+      "requests": [],
+      "provider_refusals": 0,
+      "authorization_absent": true,
+      "identity": {
+        "app_sha256": "5474239dcfa9d1548d8bcd9219b8fd3474f1157f923555e9738f789dd4a81abe",
+        "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e"
+      },
+      "picker": {
+        "ok": false,
+        "choices": [
+          "tofa-catalog-a",
+          "tofa-catalog-b"
+        ],
+        "controls": [
+          {
+            "kind": "ControlType.Pane",
+            "name": "ChatGPT"
+          },
+          {
+            "kind": "ControlType.Document",
+            "name": "ChatGPT"
+          },
+          {
+            "kind": "ControlType.Hyperlink",
+            "name": "Skip to content"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Back"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Hide sidebar"
+          },
+          {
+            "kind": "ControlType.MenuBar",
+            "name": "Application menu"
+          },
+          {
+            "kind": "ControlType.MenuItem",
+            "name": "File"
+          },
+          {
+            "kind": "ControlType.MenuItem",
+            "name": "Edit"
+          },
+          {
+            "kind": "ControlType.MenuItem",
+            "name": "View"
+          },
+          {
+            "kind": "ControlType.MenuItem",
+            "name": "Help"
+          },
+          {
+            "kind": "ControlType.Group",
+            "name": "App navigation"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Home"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Scheduled"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Plugins"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Explore"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Code Review"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Open profile menu"
+          },
+          {
+            "kind": "ControlType.Group",
+            "name": "Home"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Switch mode, current mode: Codex"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "View activity"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Search"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "New chat"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Projects"
+          },
+          {
+            "kind": "ControlType.ListItem",
+            "name": "workspaceNo chats"
+          },
+          {
+            "kind": "ControlType.Group",
+            "name": "workspace"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "workspace"
+          },
+          {
+            "kind": "ControlType.Text",
+            "name": "No chats"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Recents"
+          },
+          {
+            "kind": "ControlType.ListItem",
+            "name": "No chats"
+          },
+          {
+            "kind": "ControlType.ToolBar",
+            "name": "Chat toolbar"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "New tab"
+          },
+          {
+            "kind": "ControlType.Text",
+            "name": "What should we work on in "
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "workspace?"
+          },
+          {
+            "kind": "ControlType.Text",
+            "name": "Finish Windows setup to continue"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Continue"
+          },
+          {
+            "kind": "ControlType.Group",
+            "name": "Composer utility bar"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Change project: workspace"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Don't work in a project"
+          },
+          {
+            "kind": "ControlType.Edit",
+            "name": "Do anything"
+          },
+          {
+            "kind": "ControlType.Text",
+            "name": "Reply with the exact text TOFA CATALOG OK. This is a synthetic test. Do not call tools."
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Add files and more"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Change permissions"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Select effort"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Send"
+          },
+          {
+            "kind": "ControlType.Group",
+            "name": "Notifications alt+T"
+          },
+          {
+            "kind": "ControlType.ListItem",
+            "name": "Couldn't update model settings. Check your config.toml.\n\nSynthetic desktop default write refused; no settings were changedOpen config.toml"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Open config.toml"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Close"
+          },
+          {
+            "kind": "ControlType.Menu",
+            "name": "Select effort"
+          },
+          {
+            "kind": "ControlType.MenuItem",
+            "name": "Select model"
+          },
+          {
+            "kind": "ControlType.MenuItem",
+            "name": "Power"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Minimize"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Maximize"
+          },
+          {
+            "kind": "ControlType.Button",
+            "name": "Close"
+          }
+        ],
+        "stage": "reasoning_button"
+      },
+      "last_work_stage": "picker",
+      "events": [
+        {
+          "event": "start",
+          "bridge_pid": 440,
+          "pid": 440,
+          "parent_pid": 7656,
+          "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+          "app_server": true
+        },
+        {
+          "event": "child",
+          "bridge_pid": 440,
+          "pid": 10124
+        },
+        {
+          "event": "initialized",
+          "bridge_pid": 440,
+          "ok": true,
+          "main_connection": true
+        },
+        {
+          "event": "catalog_other_write_refused",
+          "bridge_pid": 440,
+          "keys": [
+            "remote_control",
+            "features.remote_control"
+          ]
+        },
+        {
+          "event": "policy_refused",
+          "bridge_pid": 440,
+          "reason": "shared_write_unsupported"
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        },
+        {
+          "event": "catalog_other_write_refused",
+          "bridge_pid": 440,
+          "keys": [
+            "desktop.followUpQueueMode"
+          ]
+        },
+        {
+          "event": "policy_refused",
+          "bridge_pid": 440,
+          "reason": "shared_write_unsupported"
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        },
+        {
+          "event": "catalog_advertised",
+          "bridge_pid": 440,
+          "models": [
+            "tofa-catalog-a",
+            "tofa-catalog-b"
+          ],
+          "complete": true
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        },
+        {
+          "event": "tool_registration_refused",
+          "bridge_pid": 440
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        },
+        {
+          "event": "catalog_default_write",
+          "bridge_pid": 440,
+          "method": "config/batchWrite",
+          "keys": [
+            "model",
+            "model_reasoning_effort"
+          ],
+          "values": [
+            "tofa-catalog-b",
+            "low"
+          ],
+          "reload": true,
+          "versioned": false,
+          "disposition": "pending"
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        },
+        {
+          "event": "catalog_default_write",
+          "bridge_pid": 440,
+          "method": "config/batchWrite",
+          "keys": [
+            "model",
+            "model_reasoning_effort"
+          ],
+          "values": [
+            "tofa-catalog-b",
+            "low"
+          ],
+          "reload": true,
+          "versioned": false,
+          "disposition": "refused"
+        },
+        {
+          "event": "tool_registration_refused",
+          "bridge_pid": 440
+        },
+        {
+          "event": "catalog_native_identity_refused",
+          "bridge_pid": 440,
+          "model": "gpt-5.5",
+          "provider": "tofa-catalog"
+        },
+        {
+          "event": "invalid_identity",
+          "bridge_pid": 440
+        },
+        {
+          "event": "catalog_advertised",
+          "bridge_pid": 440,
+          "models": [
+            "tofa-catalog-a",
+            "tofa-catalog-b"
+          ],
+          "complete": true
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        },
+        {
+          "event": "catalog_other_write_refused",
+          "bridge_pid": 440,
+          "keys": [
+            "desktop.followUpQueueMode"
+          ]
+        },
+        {
+          "event": "policy_refused",
+          "bridge_pid": 440,
+          "reason": "shared_write_unsupported"
+        },
+        {
+          "event": "start",
+          "bridge_pid": 9440,
+          "pid": 9440,
+          "parent_pid": 7824,
+          "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+          "app_server": true
+        },
+        {
+          "event": "child",
+          "bridge_pid": 9440,
+          "pid": 9936
+        },
+        {
+          "event": "initialized",
+          "bridge_pid": 9440,
+          "ok": true,
+          "main_connection": false
+        },
+        {
+          "event": "settings",
+          "bridge_pid": 9440,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true
+        }
+      ]
+    },
+    "error_type": "ValueError"
+  },
+  "progress": {
+    "outcome": "collected",
+    "checkpoints": [
+      {
+        "stage": "user_started",
+        "elapsed_ms": 2
+      },
+      {
+        "stage": "package_discovered",
+        "elapsed_ms": 214
+      },
+      {
+        "stage": "engine_hashed",
+        "elapsed_ms": 10003
+      },
+      {
+        "stage": "engine_discovered",
+        "elapsed_ms": 18259
+      },
+      {
+        "stage": "native_probe_started",
+        "elapsed_ms": 18304
+      }
+    ]
+  }
+}

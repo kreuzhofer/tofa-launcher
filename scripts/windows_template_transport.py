@@ -144,7 +144,8 @@ class Transport:
             files['\\user.ps1'] = files['\\user.ps1'].replace(b"phase='native'", b"phase='desktop'")
             for name in ('windows_desktop_runtime.py', 'windows_desktop_bridge.py', 'windows_desktop_ui.ps1',
                          'windows_process.py', 'windows_process.cs', 'windows_guardian_result.py', 'windows_template_transport.py',
-                         'windows_ownership_experiment.py', 'windows_ownership_contract.py', 'windows_ownership_inspect.ps1'):
+                         'windows_ownership_experiment.py', 'windows_ownership_contract.py', 'windows_ownership_inspect.ps1',
+                         'windows_catalog_experiment.py', 'windows_catalog_protocol.py', 'windows_catalog_ui.ps1'):
                 files['\\' + name] = (here / name).read_bytes()
         if candidate is not None:
             files.update({'\\candidate.exe.gz': gzip.compress(candidate, mtime=0),

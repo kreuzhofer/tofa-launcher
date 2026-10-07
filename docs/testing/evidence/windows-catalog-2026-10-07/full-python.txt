@@ -1,0 +1,386 @@
+test_binary_mode_checksum_tool_produces_installer_compatible_manifest (build_test.BuildTest) ... ok
+test_build_replaces_stale_artifacts_with_six_versioned_binaries (build_test.BuildTest) ... ok
+test_bundle_contains_matching_scripts_and_complete_notices (build_test.BuildTest) ... ok
+test_failed_build_preserves_previous_distribution (build_test.BuildTest) ... ok
+test_pinned_bundle_installs_from_a_controlled_release_source (build_test.BuildTest) ... ok
+test_requires_one_explicit_version_before_touching_distribution (build_test.BuildTest) ... ok
+test_failed_relaunch_without_turn_result_is_recorded_without_raising (desktop_evaluation_test.CaseFailureTests) ... ok
+test_extended_deadline_reaches_observer_turn_and_process_wait (desktop_evaluation_test.CodingDeadlineTests) ... ok
+test_extended_observer_accepts_360_but_rejects_larger_deadlines (desktop_evaluation_test.CodingDeadlineTests) ... ok
+test_changed_metadata_blocks_and_preserves_five_candidate_matrix (desktop_evaluation_test.DesktopEvaluationTests) ... skipped 'set TOFA_TEST_DESKTOP_ENGINE on macOS'
+test_child_environment_excludes_unrelated_credentials (desktop_evaluation_test.DesktopEvaluationTests) ... skipped 'set TOFA_TEST_DESKTOP_ENGINE on macOS'
+test_command_to_report_checks_tools_resume_approvals_and_preservation (desktop_evaluation_test.DesktopEvaluationTests) ... skipped 'set TOFA_TEST_DESKTOP_ENGINE on macOS'
+test_failed_tool_result_stops_affected_sessions_but_retains_approvals (desktop_evaluation_test.DesktopEvaluationTests) ... skipped 'set TOFA_TEST_DESKTOP_ENGINE on macOS'
+test_guardian_inspection_continues_before_the_final_assessment (desktop_evaluation_test.DesktopEvaluationTests) ... skipped 'set TOFA_TEST_DESKTOP_ENGINE on macOS'
+test_invalid_review_counts_native_attempts_and_observes_nonexecution (desktop_evaluation_test.DesktopEvaluationTests) ... skipped 'set TOFA_TEST_DESKTOP_ENGINE on macOS'
+test_live_run_without_matching_qualification_is_blocked_before_inference (desktop_evaluation_test.DesktopEvaluationTests) ... skipped 'set TOFA_TEST_DESKTOP_ENGINE on macOS'
+test_local_stream_limit_is_retained_without_stopping_independent_lane (desktop_evaluation_test.DesktopEvaluationTests) ... skipped 'set TOFA_TEST_DESKTOP_ENGINE on macOS'
+test_missing_rates_and_usage_never_block_qualification (desktop_evaluation_test.DesktopEvaluationTests) ... skipped 'set TOFA_TEST_DESKTOP_ENGINE on macOS'
+test_native_cancellation_retains_incomplete_review_and_no_execution (desktop_evaluation_test.DesktopEvaluationTests) ... skipped 'set TOFA_TEST_DESKTOP_ENGINE on macOS'
+test_preflight_blocked_candidates_do_not_reach_inference (desktop_evaluation_test.DesktopEvaluationTests) ... skipped 'set TOFA_TEST_DESKTOP_ENGINE on macOS'
+test_provider_errors_retain_each_native_attempt (desktop_evaluation_test.DesktopEvaluationTests) ... skipped 'set TOFA_TEST_DESKTOP_ENGINE on macOS'
+test_public_command_refreshes_metadata_and_prices_before_inference (desktop_evaluation_test.DesktopEvaluationTests) ... skipped 'set TOFA_TEST_DESKTOP_ENGINE on macOS'
+test_remaining_exact_candidates_use_the_same_baseline (desktop_evaluation_test.DesktopEvaluationTests) ... skipped 'set TOFA_TEST_DESKTOP_ENGINE on macOS'
+test_restart_report_does_not_replay_or_double_count_attempts (desktop_evaluation_test.DesktopEvaluationTests) ... skipped 'set TOFA_TEST_DESKTOP_ENGINE on macOS'
+test_saved_keychain_login_is_readable_with_isolated_desktop_home (desktop_evaluation_test.DesktopEvaluationTests) ... skipped 'set TOFA_TEST_DESKTOP_ENGINE on macOS'
+test_launch_retires_only_its_verified_bridge_on_success_and_failure (desktop_evaluation_test.EvaluationBridgeCleanupTests) ... ok
+test_cleanup_failure_keeps_completed_and_unattempted_cases_distinct (desktop_evaluation_test.EvaluationCleanupReportTests) ... ok
+test_distinguishes_wrong_output_from_changed_input_without_raw_content (desktop_evaluation_test.FileDiagnosticsTests) ... ok
+test_missing_malformed_and_nonnumeric_outputs_are_explicit (desktop_evaluation_test.FileDiagnosticsTests) ... ok
+test_engine_history_preserves_explicit_provider_change (desktop_history_test.DesktopHistoryContract) ... skipped 'set TOFA_TEST_DESKTOP_ENGINE'
+test_ordinary_history_hydrates_without_live_inference (desktop_history_test.DesktopHistoryContract) ... skipped 'set TOFA_TEST_DESKTOP_ENGINE'
+test_tofa_history_resumes_when_provider_returns (desktop_history_test.DesktopHistoryContract) ... skipped 'set TOFA_TEST_DESKTOP_ENGINE'
+test_explicit_same_profile_launch_reuses_ordinary_owner (desktop_ownership_test.DesktopOwnershipTests) ... skipped 'set TOFA_TEST_DESKTOP_APP on macOS to run installed-app checks'
+test_graceful_quit_records_artifacts_and_allows_native_relaunch (desktop_ownership_test.DesktopOwnershipTests) ... skipped 'set TOFA_TEST_DESKTOP_APP on macOS to run installed-app checks'
+test_ordinary_launch_reuses_existing_ordinary_owner (desktop_ownership_test.DesktopOwnershipTests) ... skipped 'set TOFA_TEST_DESKTOP_APP on macOS to run installed-app checks'
+test_ordinary_launch_reuses_explicit_same_profile_owner (desktop_ownership_test.DesktopOwnershipTests) ... skipped 'set TOFA_TEST_DESKTOP_APP on macOS to run installed-app checks'
+test_simultaneous_launches_expose_ownership_evidence (desktop_ownership_test.DesktopOwnershipTests) ... skipped 'set TOFA_TEST_DESKTOP_APP on macOS to run installed-app checks'
+test_arrows_confirm_selected_main_at_desktop_boundary (desktop_picker_test.DesktopPickerTests) ... skipped 'run through go test -run ^TestDesktopPicker$'
+test_bare_launch_selects_desktop_before_supported_model (desktop_picker_test.DesktopPickerTests) ... skipped 'run through go test -run ^TestDesktopPicker$'
+test_cancel_restores_terminal_without_desktop_startup (desktop_picker_test.DesktopPickerTests) ... skipped 'run through go test -run ^TestDesktopPicker$'
+test_cancellation_and_output_failure_restore_terminal (desktop_picker_test.DesktopPickerTests) ... skipped 'run through go test -run ^TestDesktopPicker$'
+test_catalog_and_guardian_failures_do_not_prompt (desktop_picker_test.DesktopPickerTests) ... skipped 'run through go test -run ^TestDesktopPicker$'
+test_catalog_availability_cannot_inherit_cli_support (desktop_picker_test.DesktopPickerTests) ... skipped 'run through go test -run ^TestDesktopPicker$'
+test_disabled_metadata_cannot_be_confirmed (desktop_picker_test.DesktopPickerTests) ... skipped 'run through go test -run ^TestDesktopPicker$'
+test_experimental_choice_launches_without_additional_confirmation (desktop_picker_test.DesktopPickerTests) ... skipped 'run through go test -run ^TestDesktopPicker$'
+test_explicit_main_bypasses_picker_with_guardian_override (desktop_picker_test.DesktopPickerTests) ... skipped 'run through go test -run ^TestDesktopPicker$'
+test_failure_after_confirmation_restores_terminal (desktop_picker_test.DesktopPickerTests) ... skipped 'run through go test -run ^TestDesktopPicker$'
+test_first_explicit_desktop_launch_retains_roles_and_project (desktop_picker_test.DesktopPickerTests) ... skipped 'run through go test -run ^TestDesktopPicker$'
+test_installed_engine_selected_main_and_default_guardian_allow (desktop_picker_test.DesktopPickerTests) ... skipped 'run through go test -run ^TestDesktopPicker$'
+test_installed_engine_selected_main_and_override_guardian_deny (desktop_picker_test.DesktopPickerTests) ... skipped 'run through go test -run ^TestDesktopPicker$'
+test_installed_engine_supported_deepseek_default_guardian_deny (desktop_picker_test.DesktopPickerTests) ... skipped 'run through go test -run ^TestDesktopPicker$'
+test_installed_engine_supported_glm_default_guardian_allow (desktop_picker_test.DesktopPickerTests) ... skipped 'run through go test -run ^TestDesktopPicker$'
+test_installed_engine_supported_glm_default_guardian_deny (desktop_picker_test.DesktopPickerTests) ... skipped 'run through go test -run ^TestDesktopPicker$'
+test_noninteractive_omission_ignores_saved_preference (desktop_picker_test.DesktopPickerTests) ... skipped 'run through go test -run ^TestDesktopPicker$'
+test_production_support_does_not_promote_guardian_overrides (desktop_picker_test.DesktopPickerTests) ... skipped 'run through go test -run ^TestDesktopPicker$'
+test_production_support_labels_catalog_and_launches_supported_choices (desktop_picker_test.DesktopPickerTests) ... skipped 'run through go test -run ^TestDesktopPicker$'
+test_production_support_still_requires_current_availability (desktop_picker_test.DesktopPickerTests) ... skipped 'run through go test -run ^TestDesktopPicker$'
+test_supported_choices_require_desktop_route_and_pair_evidence (desktop_picker_test.DesktopPickerTests) ... skipped 'run through go test -run ^TestDesktopPicker$'
+test_actual_guardian_decisions_control_benign_execution (evaluation_client_test.InstalledEvaluationTests) ... skipped 'set TOFA_TEST_CODEX for installed-client fixture'
+test_all_candidates_complete_coding_and_guardian_lanes (evaluation_client_test.InstalledEvaluationTests) ... skipped 'set TOFA_TEST_CODEX for installed-client fixture'
+test_distinct_failed_guardian_retains_main_pass (evaluation_client_test.InstalledEvaluationTests) ... skipped 'set TOFA_TEST_CODEX for installed-client fixture'
+test_distinct_pair_command_to_report (evaluation_client_test.InstalledEvaluationTests) ... skipped 'set TOFA_TEST_CODEX for installed-client fixture'
+test_explicit_same_model_pair_command_to_report (evaluation_client_test.InstalledEvaluationTests) ... skipped 'set TOFA_TEST_CODEX for installed-client fixture'
+test_failed_guardian_preserves_passing_main_lane_and_native_retries (evaluation_client_test.InstalledEvaluationTests) ... skipped 'set TOFA_TEST_CODEX for installed-client fixture'
+test_failure_starting_continuation_retains_measured_first_turn (evaluation_client_test.InstalledEvaluationTests) ... skipped 'set TOFA_TEST_CODEX for installed-client fixture'
+test_five_campaign_pairs_use_the_explicit_guardian (evaluation_client_test.InstalledEvaluationTests) ... skipped 'set TOFA_TEST_CODEX for installed-client fixture'
+test_release_qualification_pair_uses_native_tools_and_approval_gates (evaluation_client_test.InstalledEvaluationTests) ... skipped 'set TOFA_TEST_CODEX for installed-client fixture'
+test_selected_candidate_command_to_report (evaluation_client_test.InstalledEvaluationTests) ... skipped 'set TOFA_TEST_CODEX for installed-client fixture'
+test_unreadable_normal_settings_retains_completed_measurements (evaluation_client_test.InstalledEvaluationTests) ... skipped 'set TOFA_TEST_CODEX for installed-client fixture'
+test_approval_proposal_executes_a_benign_marker_in_the_native_shell (evaluation_proxy_test.ProxyTests) ... ok
+test_budget_and_body_limits_stop_before_upstream (evaluation_proxy_test.ProxyTests) ... ok
+test_complete_oversized_event_is_rejected_before_json_parsing (evaluation_proxy_test.ProxyTests) ... ok
+test_explicit_native_reasoning_effort_is_recorded_without_substitution (evaluation_proxy_test.ProxyTests) ... ok
+test_guardian_decision_is_measured_separately_from_synthetic_task (evaluation_proxy_test.ProxyTests) ... ok
+test_guardian_only_routes_in_approval_cases_with_the_guardian_schema (evaluation_proxy_test.ProxyTests) ... ok
+test_multiline_sse_event_has_one_shared_size_limit (evaluation_proxy_test.ProxyTests) ... ok
+test_output_cap_cannot_make_upstream_input_exceed_body_limit (evaluation_proxy_test.ProxyTests) ... ok
+test_provider_cannot_complete_with_a_different_model_identity (evaluation_proxy_test.ProxyTests) ... ok
+test_selected_candidate_routes_guardian_and_synthetic_proposal (evaluation_proxy_test.ProxyTests) ... ok
+test_selected_pair_rejects_swapped_and_unexpected_roles_before_inference (evaluation_proxy_test.ProxyTests) ... ok
+test_trickling_stream_cannot_extend_the_total_request_deadline (evaluation_proxy_test.ProxyTests) ... ok
+test_unknown_models_server_context_and_nontext_inputs_are_refused (evaluation_proxy_test.ProxyTests) ... ok
+test_unlimited_observations_survive_restart_without_replacing_attempts (evaluation_proxy_test.ProxyTests) ... ok
+test_unrecognized_auxiliary_traffic_is_counted_and_sanitized (evaluation_proxy_test.ProxyTests) ... ok
+test_install_upgrade_uninstall_preserves_then_purges (install_test.InstallerTest) ... ok
+test_invalid_checksum_manifests_preserve_existing_installation (install_test.InstallerTest) ... ok
+test_cli_reports_blocked_purge_and_preserves_state_for_retry (lifecycle_test.LifecycleTest) ... ok
+test_cli_reports_failed_path_cleanup_and_allows_retry (lifecycle_test.LifecycleTest) ... ok
+test_corrupt_download_preserves_working_installation (lifecycle_test.LifecycleTest) ... ok
+test_install_repeat_uninstall_reinstall_and_purge (lifecycle_test.LifecycleTest) ... ok
+test_client_may_close_after_completed_response (live_compat_test.LiveCompatibilityTests) ... ok
+test_client_workspace_trust_is_predeclared_in_scratch_config (live_compat_test.LiveCompatibilityTests) ... ok
+test_completion_cannot_hide_an_earlier_stream_failure (live_compat_test.LiveCompatibilityTests) ... ok
+test_empty_deltas_do_not_prove_streaming (live_compat_test.LiveCompatibilityTests) ... ok
+test_file_diagnostics_distinguish_shape_and_preservation_failures (live_compat_test.LiveCompatibilityTests) ... ok
+test_loopback_listener_does_not_require_reverse_dns (live_compat_test.LiveCompatibilityTests) ... ok
+test_normal_auth_change_is_identified_without_exporting_its_content (live_compat_test.LiveCompatibilityTests) ... ok
+test_outer_timeout_retains_incomplete_request_diagnostics (live_compat_test.LiveCompatibilityTests) ... ok
+test_reasoning_and_answer_channels_are_counted_without_exporting_text (live_compat_test.LiveCompatibilityTests) ... ok
+test_rejects_completed_response_without_streaming (live_compat_test.LiveCompatibilityTests) ... ok
+test_rejects_failed_tool_despite_correct_files (live_compat_test.LiveCompatibilityTests) ... ok
+test_rejects_incorrect_files_despite_successful_tool (live_compat_test.LiveCompatibilityTests) ... ok
+test_rejects_metadata_warning (live_compat_test.LiveCompatibilityTests) ... ok
+test_rejects_new_session_instead_of_continuation (live_compat_test.LiveCompatibilityTests) ... ok
+test_selected_timeout_allows_headers_beyond_old_socket_limit (live_compat_test.LiveCompatibilityTests) ... ok
+test_socket_timeout_is_reported_without_exception_text (live_compat_test.LiveCompatibilityTests) ... ok
+test_stream_timing_uses_high_resolution_when_deadline_clock_is_coarse (live_compat_test.LiveCompatibilityTests) ... ok
+test_three_runs_require_tools_files_continuation_and_streaming (live_compat_test.LiveCompatibilityTests) ... ok
+test_timeout_records_failure_without_retry (live_compat_test.LiveCompatibilityTests) ... ok
+test_wrong_result_identifies_failed_field_without_exporting_values (live_compat_test.LiveCompatibilityTests) ... ok
+test_below_minimum_and_invalid_clients_are_blocked_before_inference (model_evaluation_test.EvaluationTests) ... ok
+test_candidate_usage_cost_and_missing_usage_are_separate_by_role (model_evaluation_test.EvaluationTests) ... ok
+test_completed_stream_with_prior_error_cannot_pass_protocol (model_evaluation_test.EvaluationTests) ... ok
+test_deadline_is_incomplete_not_a_coding_mistake (model_evaluation_test.EvaluationTests) ... ok
+test_declared_pass_without_observations_cannot_qualify_main_role (model_evaluation_test.EvaluationTests) ... ok
+test_extra_turns_cannot_inflate_the_protocol_score (model_evaluation_test.EvaluationTests) ... ok
+test_guardian_failure_gates_have_explicit_reasons (model_evaluation_test.EvaluationTests) ... ok
+test_guardian_retry_does_not_erase_unsuccessful_review (model_evaluation_test.EvaluationTests) ... ok
+test_guardian_role_requires_normal_settings_preserved (model_evaluation_test.EvaluationTests) ... ok
+test_guardian_selection_breaks_latency_tie_with_same_workload_cost (model_evaluation_test.EvaluationTests) ... ok
+test_guardian_selection_does_not_count_synthetic_usage_or_hide_retry_cost (model_evaluation_test.EvaluationTests) ... ok
+test_guardian_selection_keeps_cost_ties_and_missing_cost_unresolved (model_evaluation_test.EvaluationTests) ... ok
+test_guardian_selection_rechecks_gates_instead_of_trusting_pass_labels (model_evaluation_test.EvaluationTests) ... ok
+test_guardian_selection_rejects_missing_model_identities (model_evaluation_test.EvaluationTests) ... ok
+test_guardian_selection_rejects_missing_pairs_and_changed_normal_settings (model_evaluation_test.EvaluationTests) ... ok
+test_guardian_selection_reports_no_eligible_candidate (model_evaluation_test.EvaluationTests) ... ok
+test_guardian_selection_requires_completed_live_review_requests (model_evaluation_test.EvaluationTests) ... ok
+test_guardian_selection_uses_worst_case_not_mean_or_main_pass (model_evaluation_test.EvaluationTests) ... ok
+test_invalid_guardian_is_blocked_before_launcher_and_preserves_evidence (model_evaluation_test.EvaluationTests) ... ok
+test_invalid_measurement_fails_without_exporting_private_content (model_evaluation_test.EvaluationTests) ... ok
+test_launcher_disappearing_after_preflight_retains_both_lane_attempts (model_evaluation_test.EvaluationTests) ... ok
+test_local_budget_stop_is_distinct_from_provider_rejection (model_evaluation_test.EvaluationTests) ... ok
+test_minimum_and_newer_clients_reach_evaluation (model_evaluation_test.EvaluationTests) ... ok
+test_missing_guardian_metadata_blocks_before_catalog_or_inference (model_evaluation_test.EvaluationTests) ... ok
+test_pair_costs_and_missing_guardian_measurements_use_each_role_identity (model_evaluation_test.EvaluationTests) ... ok
+test_proxy_timeout_retains_its_cause (model_evaluation_test.EvaluationTests) ... ok
+test_quality_failure_does_not_hide_protocol_pass (model_evaluation_test.EvaluationTests) ... ok
+test_reasoning_channel_evidence_survives_scoring_without_text (model_evaluation_test.EvaluationTests) ... ok
+test_report_keeps_safe_file_diagnostics_and_preservation (model_evaluation_test.EvaluationTests) ... ok
+test_report_rejects_private_content_in_launcher_version (model_evaluation_test.EvaluationTests) ... ok
+test_report_retains_launcher_version (model_evaluation_test.EvaluationTests) ... ok
+test_synthetic_proposals_do_not_enter_paid_inference_totals (model_evaluation_test.EvaluationTests) ... ok
+test_too_many_repeats_are_rejected (model_evaluation_test.EvaluationTests) ... ok
+test_unknown_candidate_is_blocked_before_launcher_invocation (model_evaluation_test.EvaluationTests) ... ok
+test_unknown_model_never_inherits_kimi_prices (model_evaluation_test.EvaluationTests) ... ok
+test_unresolved_candidate_metadata_is_rejected_at_boundary (model_evaluation_test.EvaluationTests) ... ok
+test_usage_and_request_stage_remain_available_without_raw_fields (model_evaluation_test.EvaluationTests) ... ok
+test_existing_report_is_rejected_before_running_a_client (model_evaluation_test.QualificationPairInputTests) ... ok
+test_windows_evaluation_requires_native_codex_for_provenance (model_evaluation_test.QualificationPairInputTests) ... ok
+test_all_blocked_rows_explain_reasons_without_prompt (picker_test.PickerTests) ... ok
+test_app_picker_cancel_restores_terminal_before_catalog_discovery (picker_test.PickerTests) ... ok
+test_arrows_skip_blocked_rows_and_launch_selected_upstream (picker_test.PickerTests) ... ok
+test_bare_experimental_launch_selects_app_then_model (picker_test.PickerTests) ... ok
+test_cancel_restores_terminal_and_never_launches (picker_test.PickerTests) ... ok
+test_cancel_returns_to_original_shell_screen (picker_test.PickerTests) ... ok
+test_catalog_failure_never_launches (picker_test.PickerTests) ... ok
+test_detail_navigation_never_changes_selected_model (picker_test.PickerTests) ... ok
+test_direct_picker_uses_route_support_and_native_reviewer (picker_test.PickerTests) ... ok
+test_empty_catalog_does_not_open_picker (picker_test.PickerTests) ... ok
+test_experimental_confirmation_decline_and_cancel_never_launch (picker_test.PickerTests) ... ok
+test_experimental_models_visible_and_require_explicit_confirmation (picker_test.PickerTests) ... ok
+test_explicit_experimental_main_still_requires_flag (picker_test.PickerTests) ... ok
+test_explicit_main_bypasses_picker_and_saved_preference (picker_test.PickerTests) ... ok
+test_filter_finds_model_and_launches_without_catalog_noise (picker_test.PickerTests) ... ok
+test_first_explicit_launch_preserves_selections_and_client_args (picker_test.PickerTests) ... ok
+test_first_launch_authenticates_before_app_and_continues (picker_test.PickerTests) ... ok
+test_fresh_nonterminal_has_actionable_login_error (picker_test.PickerTests) ... ok
+test_fresh_nonterminal_without_model_has_login_guidance (picker_test.PickerTests) ... ok
+test_indicator_moves_in_presented_list (picker_test.PickerTests) ... ok
+test_invalid_explicit_id_never_prompts_or_launches (picker_test.PickerTests) ... ok
+test_invalid_launch_arguments_never_collect_credentials (picker_test.PickerTests) ... ok
+test_launch_command_and_up_arrow (picker_test.PickerTests) ... ok
+test_logout_then_launch_onboards (picker_test.PickerTests) ... ok
+test_missing_guardian_does_not_prompt_or_substitute (picker_test.PickerTests) ... ok
+test_noninteractive_omitted_main_ignores_saved_preference (picker_test.PickerTests) ... ok
+test_onboarding_cancel_and_eof_do_not_write_or_launch (picker_test.PickerTests) ... ok
+test_orphaned_credentials_require_recovery_before_input (picker_test.PickerTests) ... ok
+test_output_error_restores_terminal_without_launch (picker_test.PickerTests) ... ok
+test_page_navigation_and_empty_search_are_recoverable (picker_test.PickerTests) ... ok
+test_qualified_production_pairs_follow_native_unix_scope (picker_test.PickerTests) ... ok
+test_remote_rejection_keeps_saved_login_but_stops_setup (picker_test.PickerTests) ... ok
+test_resize_reflows_without_key_input_or_selection_loss (picker_test.PickerTests) ... ok
+test_signal_restores_terminal (picker_test.PickerTests) ... ok
+test_support_from_another_platform_requires_experimental_consent (picker_test.PickerTests) ... ok
+test_supported_bare_picker_ignores_saved_model (picker_test.PickerTests) ... ok
+test_supported_choices_follow_guardian_override (picker_test.PickerTests) ... ok
+test_unavailable_view_explains_offscreen_models_without_launch (picker_test.PickerTests) ... ok
+test_unreadable_or_missing_saved_credentials_never_onboard (picker_test.PickerTests) ... ok
+test_vault_failures_never_fall_back_or_claim_success (picker_test.PickerTests) ... ok
+test_agent_rejects_existing_state_root_before_mutation (qualify_macos_test.QualificationTests) ... ok
+test_agent_runs_disposable_lifecycle_without_fabricated_confirmations (qualify_macos_test.QualificationTests) ... ok
+test_changed_normal_codex_auth_fails_preservation (qualify_macos_test.QualificationTests) ... ok
+test_complete_lifecycle_uses_pinned_download_and_saved_login (qualify_macos_test.QualificationTests) ... ok
+test_corrupt_script_is_rejected_before_install_or_login (qualify_macos_test.QualificationTests) ... ok
+test_declined_fresh_terminal_never_claims_live_success (qualify_macos_test.QualificationTests) ... ok
+test_declined_purge_retains_saved_credentials (qualify_macos_test.QualificationTests) ... ok
+test_declined_recovery_keeps_existing_state_and_records_incomplete (qualify_macos_test.QualificationTests) ... ok
+test_download_failure_still_saves_sanitized_reports (qualify_macos_test.QualificationTests) ... ok
+test_failed_synthetic_vault_purge_keeps_recovery_and_fails (qualify_macos_test.QualificationTests) ... ok
+test_host_downloaded_assets_are_checked_before_login (qualify_macos_test.QualificationTests) ... ok
+test_interrupted_live_run_stops_child_and_saves_incomplete_report (qualify_macos_test.QualificationTests) ... ok
+test_invalid_startup_file_reports_preflight_failure_without_mutation (qualify_macos_test.QualificationTests) ... ok
+test_live_timeout_stops_child_and_reports_failure (qualify_macos_test.QualificationTests) ... ok
+test_missing_report_parent_is_rejected_without_account_changes (qualify_macos_test.QualificationTests) ... ok
+test_selected_pair_is_recorded_and_used_for_both_live_stages (qualify_macos_test.QualificationTests) ... ok
+test_symlinked_codex_auth_target_changes_fail_preservation (qualify_macos_test.QualificationTests) ... ok
+test_synthetic_loopback_qualification_does_not_depend_on_dns (qualify_macos_test.QualificationTests) ... ok
+test_synthetic_vault_lifecycle_checks_presence_without_reading_secret (qualify_macos_test.QualificationTests) ... ok
+test_uninstall_losing_login_stops_before_reinstall (qualify_macos_test.QualificationTests) ... ok
+test_unwritable_report_directory_rejected_before_install (qualify_macos_test.QualificationTests) ... ok
+test_wrong_installed_version_fails_before_login (qualify_macos_test.QualificationTests) ... ok
+test_actual_candidate_cli_helper_is_awaited_through_native_supervisor (qualify_windows_test.WindowsQualificationTests) ... skipped 'native Windows required'
+test_changed_ordinary_auth_fails_preservation (qualify_windows_test.WindowsQualificationTests) ... skipped 'native Windows required'
+test_command_output_limit_stops_a_noisy_process_tree (qualify_windows_test.WindowsQualificationTests) ... skipped 'native Windows required'
+test_corrupt_matching_installer_fails_before_login (qualify_windows_test.WindowsQualificationTests) ... skipped 'native Windows required'
+test_custom_installation_preserves_default_install_neighbor (qualify_windows_test.WindowsQualificationTests) ... skipped 'native Windows required'
+test_declined_recovery_and_purge_are_incomplete (qualify_windows_test.WindowsQualificationTests) ... skipped 'native Windows required'
+test_download_failure_retains_sanitized_report (qualify_windows_test.WindowsQualificationTests) ... skipped 'native Windows required'
+test_download_install_live_reinstall_reuse_and_purge (qualify_windows_test.WindowsQualificationTests) ... skipped 'native Windows required'
+test_helper_deadline_stops_descendants_and_cannot_pass (qualify_windows_test.WindowsQualificationTests) ... skipped 'native Windows required'
+test_helper_failure_or_cancel_never_reports_cleanup_success (qualify_windows_test.WindowsQualificationTests) ... skipped 'native Windows required'
+test_helper_nonzero_exit_fails_even_after_all_cleanup_side_effects (qualify_windows_test.WindowsQualificationTests) ... skipped 'native Windows required'
+test_interruption_stops_live_tree_and_saves_incomplete_report (qualify_windows_test.WindowsQualificationTests) ... skipped 'native Windows required'
+test_lost_synthetic_vault_credential_cannot_pass_saved_login_reuse (qualify_windows_test.WindowsQualificationTests) ... skipped 'native Windows required'
+test_npm_cmd_is_resolved_without_shell_argument_parsing (qualify_windows_test.WindowsQualificationTests) ... skipped 'native Windows required'
+test_preserve_uninstall_losing_login_cannot_reinstall (qualify_windows_test.WindowsQualificationTests) ... skipped 'native Windows required'
+test_synthetic_vault_reuse_and_purge (qualify_windows_test.WindowsQualificationTests) ... skipped 'native Windows required'
+test_windows_powershell_reconstructs_its_own_module_path (qualify_windows_test.WindowsQualificationTests) ... skipped 'native Windows required'
+test_existing_release_draft_or_api_failure_is_never_mutated (release_test.ReleaseTest) ... ok
+test_failed_upload_or_download_never_makes_a_public_release (release_test.ReleaseTest) ... ok
+test_incomplete_or_corrupt_bundle_cannot_create_a_release (release_test.ReleaseTest) ... ok
+test_only_tag_push_with_every_required_job_success_can_publish (release_test.ReleaseTest) ... ok
+test_publishes_verified_downloads_as_a_prerelease_without_rebuilding (release_test.ReleaseTest) ... ok
+test_version_uses_explicit_prerelease_tags_and_rejects_invalid_tags (release_test.ReleaseTest) ... ok
+test_cancel_restores_echo (terminal_test.TerminalTests) ... ok
+test_login_masks_key_and_logout_retains_preferences (terminal_test.TerminalTests) ... ok
+test_cli_uses_real_launcher_injected_provider_with_isolated_client_home (trace_codex_test.TraceTests) ... ok
+test_forwards_stream_unchanged_and_only_records_safe_metadata (trace_codex_test.TraceTests) ... ok
+test_header_deadline_records_stage_without_private_exception_text (trace_codex_test.TraceTests) ... ok
+test_nested_reviewer_tools_and_http_error_are_sanitized_without_mutation (trace_codex_test.TraceTests) ... ok
+test_refuses_nonlocal_or_ambiguous_adapter_targets (trace_codex_test.TraceTests) ... ok
+test_stream_flushes_before_backend_finishes_and_sse_error_is_classified (trace_codex_test.TraceTests) ... ok
+test_explicit_synthetic_selection_reaches_engine_and_outside_catalog_fails (windows_catalog_test.CatalogBridgeTests) ... ok
+test_malformed_write_parameters_receive_explicit_refusal (windows_catalog_test.CatalogBridgeTests) ... ok
+test_mixed_default_write_is_refused_atomically (windows_catalog_test.CatalogBridgeTests) ... ok
+test_model_default_write_is_session_only_and_cli_defaults_survive (windows_catalog_test.CatalogBridgeTests) ... ok
+test_native_errors_and_missing_layers_cannot_qualify_an_override (windows_catalog_test.CatalogBridgeTests) ... ok
+test_native_layer_matches_file_identity_and_rejects_a_different_file (windows_catalog_test.CatalogBridgeTests) ... ok
+test_stale_version_and_profile_writes_fail_without_changing_cli_defaults (windows_catalog_test.CatalogBridgeTests) ... ok
+test_stale_version_has_no_successful_override_evidence (windows_catalog_test.CatalogBridgeTests) ... ok
+test_unrelated_write_remains_native (windows_catalog_test.CatalogBridgeTests) ... ok
+test_completed_synthetic_experiment_keeps_production_blocked (windows_catalog_test.CatalogRunnerTests) ... ok
+test_headless_or_missing_catalog_evidence_cannot_qualify_desktop (windows_catalog_test.CatalogRunnerTests) ... ok
+test_incomplete_or_mismatched_native_evidence_retains_the_clone (windows_catalog_test.CatalogRunnerTests) ... ok
+test_actual_bridge_forwards_the_authorized_workspace_turn (windows_desktop_test.DesktopTests) ... ok
+test_actual_bridge_refuses_full_access_before_native_execution (windows_desktop_test.DesktopTests) ... ok
+test_bridge_refuses_policy_and_identity_overrides_before_execution (windows_desktop_test.DesktopTests) ... ok
+test_builtin_local_environment_is_limited_to_the_owned_workspace (windows_desktop_test.DesktopTests) ... ok
+test_completed_ownership_experiment_keeps_the_production_gate_blocked (windows_desktop_test.DesktopTests) ... ok
+test_completion_from_another_turn_cannot_qualify_the_desktop_command (windows_desktop_test.DesktopTests) ... ok
+test_control_failure_retains_only_bounded_diagnostic_fields (windows_desktop_test.DesktopTests) ... ok
+test_desktop_composer_trailing_newline_preserves_the_exact_synthetic_task (windows_desktop_test.DesktopTests) ... ok
+test_desktop_pass_requires_automated_permission_control_confirmation (windows_desktop_test.DesktopTests) ... ok
+test_desktop_pass_requires_real_bridge_command_and_clean_shutdown (windows_desktop_test.DesktopTests) ... ok
+test_desktop_policy_identity_effect_and_cleanup_failures_cannot_pass (windows_desktop_test.DesktopTests) ... ok
+test_desktop_requires_explicit_test_authentication_choice (windows_desktop_test.DesktopTests) ... ok
+test_desktop_selected_catalog_model_requires_native_effective_identity (windows_desktop_test.DesktopTests) ... ok
+test_desktop_tool_environment_batch_preserves_shared_cli_settings (windows_desktop_test.DesktopTests) ... ok
+test_desktop_tool_registration_does_not_write_shared_cli_settings (windows_desktop_test.DesktopTests) ... ok
+test_failed_desktop_diagnostics_cannot_pass_even_after_clean_quit (windows_desktop_test.DesktopTests) ... ok
+test_failed_native_readiness_prevents_desktop_trials (windows_desktop_test.DesktopTests) ... ok
+test_incomplete_ownership_checks_cannot_be_reported_as_a_completed_experiment (windows_desktop_test.DesktopTests) ... ok
+test_interrupted_desktop_collects_its_own_run_diagnostics_before_shutdown (windows_desktop_test.DesktopTests) ... ok
+test_invalid_control_diagnostics_fail_without_exposing_external_content (windows_desktop_test.DesktopTests) ... ok
+test_malformed_ownership_snapshot_retains_clone_with_a_sanitized_error (windows_desktop_test.DesktopTests) ... ok
+test_missing_desktop_authentication_is_a_setup_failure_before_trials (windows_desktop_test.DesktopTests) ... ok
+test_native_canonical_sandbox_keeps_the_cwd_implicit (windows_desktop_test.DesktopTests) ... ok
+test_native_guardian_reviewer_alias_preserves_verified_automatic_review (windows_desktop_test.DesktopTests) ... ok
+test_native_model_reroute_cannot_qualify_the_original_model_identity (windows_desktop_test.DesktopTests) ... ok
+test_native_thread_visualization_root_stays_scoped_to_the_verified_thread (windows_desktop_test.DesktopTests) ... ok
+test_ownership_experiment_requires_evidence_and_never_promotes_support (windows_desktop_test.DesktopTests) ... ok
+test_ownership_metadata_rejects_private_or_malformed_external_fields (windows_desktop_test.DesktopTests) ... ok
+test_unknown_write_after_successful_command_cannot_pass_final_policy_audit (windows_desktop_test.DesktopTests) ... ok
+test_unmeasured_pipe_acl_cannot_complete_the_ownership_experiment (windows_desktop_test.DesktopTests) ... ok
+test_unrelated_background_turn_is_blocked_without_invalidating_the_authorized_task (windows_desktop_test.DesktopTests) ... ok
+test_unrelated_desktop_instance_is_refused_without_adoption_or_termination (windows_desktop_test.DesktopTests) ... ok
+test_unsupported_permission_write_is_refused_before_shared_settings_change (windows_desktop_test.DesktopTests) ... ok
+test_visualization_scope_rejects_unrelated_shared_redirected_and_wrong_owner_directories (windows_desktop_test.DesktopTests) ... ok
+test_bridge_observes_native_review_lifecycle_without_answering_it (windows_guardian_test.GuardianTests) ... ok
+test_denial_requires_native_decision_and_declined_execution_of_the_same_item (windows_guardian_test.GuardianTests) ... ok
+test_destructive_denial_candidate_requires_verified_absent_target_drive (windows_guardian_test.GuardianTests) ... ok
+test_guardian_requires_the_verified_native_shell_identity (windows_guardian_test.GuardianTests) ... ok
+test_live_review_suite_requires_both_decisions_and_clean_clone_deletion (windows_guardian_test.GuardianTests) ... ok
+test_marker_mention_does_not_authorize_an_additional_command (windows_guardian_test.GuardianTests) ... ok
+test_missing_review_cannot_turn_a_marker_effect_into_guardian_approval (windows_guardian_test.GuardianTests) ... ok
+test_native_declined_item_with_successful_exit_cannot_prove_denial (windows_guardian_test.GuardianTests) ... ok
+test_native_shell_wrapper_preserves_the_exact_synthetic_script (windows_guardian_test.GuardianTests) ... ok
+test_engine_integrity_architecture_and_ambiguity_fail_closed (windows_ownership_test.OwnershipContractTests) ... ok
+test_incomplete_update_is_refused (windows_ownership_test.OwnershipContractTests) ... ok
+test_matching_engine_does_not_grant_ownership_from_a_snapshot (windows_ownership_test.OwnershipContractTests) ... ok
+test_multiple_registrations_are_not_resolved_by_highest_version (windows_ownership_test.OwnershipContractTests) ... ok
+test_ordinary_instance_is_refused_even_with_different_path_casing (windows_ownership_test.OwnershipContractTests) ... ok
+test_reparse_or_incomplete_process_inventory_never_grants_ownership (windows_ownership_test.OwnershipContractTests) ... ok
+test_standalone_cli_is_not_a_matching_relocated_engine (windows_ownership_test.OwnershipContractTests) ... ok
+test_architecture_rejects_unknown_hosts_and_api_failures (windows_process_test.CodexResolutionTests) ... ok
+test_architecture_uses_host_machine_even_when_environment_reports_amd64 (windows_process_test.CodexResolutionTests) ... ok
+test_resolves_native_executable_and_npm_wrapper_without_a_shell (windows_process_test.CodexResolutionTests) ... ok
+test_live_supervision_allows_entrypoint_to_recover_from_tool_failure (windows_process_test.WindowsProcessTests) ... skipped 'requires native Windows Job Objects'
+test_native_codex_shim_preserves_observed_arguments (windows_process_test.WindowsProcessTests) ... skipped 'requires native Windows Job Objects'
+test_preserves_arguments_environment_and_exit_status (windows_process_test.WindowsProcessTests) ... skipped 'requires native Windows Job Objects'
+test_spawn_failure_has_fixed_diagnostic (windows_process_test.WindowsProcessTests) ... skipped 'requires native Windows Job Objects'
+test_strict_cleanup_checks_helper_exit_after_its_work_completes (windows_process_test.WindowsProcessTests) ... skipped 'requires native Windows Job Objects'
+test_timeout_cancellation_kills_descendants (windows_process_test.WindowsProcessTests) ... skipped 'requires native Windows Job Objects'
+test_waits_for_async_descendants_after_command_exit (windows_process_test.WindowsProcessTests) ... skipped 'requires native Windows Job Objects'
+test_abandoned_lease_recovers_even_when_recorded_pid_is_alive (windows_run_test.RunTests) ... ok
+test_boot_and_session_readiness_are_awaited (windows_run_test.RunTests) ... ok
+test_candidate_integrity_is_checked_before_creating_a_clone (windows_run_test.RunTests) ... ok
+test_candidate_transfer_preserves_integrity_with_compressed_staging (windows_run_test.RunTests) ... ok
+test_cleanup_failure_is_nonpassing_and_keeps_the_smoke_evidence (windows_run_test.RunTests) ... ok
+test_cleanup_refuses_wrong_targets_and_symlinked_ownership (windows_run_test.RunTests) ... ok
+test_concurrent_run_is_refused_and_interruption_retains_the_owned_clone (windows_run_test.RunTests) ... ok
+test_crash_before_initial_report_can_be_recovered_without_vm_actions (windows_run_test.RunTests) ... ok
+test_crashed_runner_is_recovered_as_a_retained_failure (windows_run_test.RunTests) ... ok
+test_diagnostic_inventory_failure_does_not_skip_owned_shutdown (windows_run_test.RunTests) ... ok
+test_existing_lock_refuses_mutations_but_status_explains_it (windows_run_test.RunTests) ... ok
+test_explicit_cleanup_is_idempotent_and_preserves_failure_history (windows_run_test.RunTests) ... ok
+test_failed_clone_is_stopped_retained_and_listed_until_explicit_cleanup (windows_run_test.RunTests) ... ok
+test_failed_completion_report_includes_sanitized_task_diagnostics (windows_run_test.RunTests) ... ok
+test_failed_recovery_is_durable_and_retryable (windows_run_test.RunTests) ... ok
+test_fresh_clone_collects_native_results_then_deletes_only_owned_clone (windows_run_test.RunTests) ... ok
+test_guest_package_failure_reports_the_specific_sanitized_prerequisite (windows_run_test.RunTests) ... ok
+test_guest_session_wait_has_a_deadline_and_retains_clone (windows_run_test.RunTests) ... ok
+test_incomplete_task_records_guest_checkpoints_and_host_timings (windows_run_test.RunTests) ... ok
+test_inflight_transport_holds_lease_after_runner_is_killed (windows_run_test.RunTests) ... ok
+test_invalid_guest_checkpoints_fail_without_leaking_content (windows_run_test.RunTests) ... ok
+test_known_progress_is_recorded_and_newer_compatible_client_is_accepted (windows_run_test.RunTests) ... ok
+test_misleading_completion_never_passes_and_retains_evidence (windows_run_test.RunTests) ... ok
+test_missing_inventory_cannot_prove_successful_deletion (windows_run_test.RunTests) ... ok
+test_native_task_is_not_started_without_its_full_completion_budget (windows_run_test.RunTests) ... ok
+test_normal_shutdown_refusal_forces_only_owned_clone_and_retains_disk (windows_run_test.RunTests) ... ok
+test_ownership_saved_before_report_update_is_recoverable (windows_run_test.RunTests) ... ok
+test_package_registration_can_settle_within_bounded_boot_readiness (windows_run_test.RunTests) ... ok
+test_readiness_poll_waits_for_a_fresh_result_instead_of_a_stale_file (windows_run_test.RunTests) ... ok
+test_recovered_failures_count_toward_retention_limit (windows_run_test.RunTests) ... ok
+test_recovery_bounds_hanging_shutdown_and_records_force (windows_run_test.RunTests) ... ok
+test_recovery_collects_trial_checkpoints_without_turning_abandoned_run_into_pass (windows_run_test.RunTests) ... ok
+test_recovery_recognizes_deletion_completed_before_host_crash (windows_run_test.RunTests) ... ok
+test_replaced_lease_never_authorizes_recovery (windows_run_test.RunTests) ... ok
+test_running_source_is_rejected_without_mutation (windows_run_test.RunTests) ... ok
+test_slow_engine_discovery_has_a_bounded_complete_task_budget (windows_run_test.RunTests) ... ok
+test_transport_failure_collects_checkpoints_before_retaining_clone (windows_run_test.RunTests) ... ok
+test_two_retained_failures_refuse_another_clone_with_concrete_cleanup (windows_run_test.RunTests) ... ok
+test_unverified_clone_return_cannot_boot_or_delete_an_unrelated_vm (windows_run_test.RunTests) ... ok
+test_utm_without_clone_stdout_requires_a_unique_new_inventory_identity (windows_run_test.RunTests) ... ok
+test_vm_commands_preserve_utms_case_sensitive_uuid_identity (windows_run_test.RunTests) ... ok
+test_ambiguous_template_fails_without_guest_changes (windows_template_test.TemplateTests) ... ok
+test_bad_native_evidence_never_passes (windows_template_test.TemplateTests) ... ok
+test_completion_fields_cannot_leak_guest_content (windows_template_test.TemplateTests) ... ok
+test_delayed_guest_result_is_awaited (windows_template_test.TemplateTests) ... ok
+test_delayed_task_directory_is_awaited (windows_template_test.TemplateTests) ... ok
+test_executable_harness_is_staged_in_a_protected_directory (windows_template_test.TemplateTests) ... ok
+test_existing_report_is_preserved_before_any_guest_changes (windows_template_test.TemplateTests) ... ok
+test_explicit_native_setup_prepares_sandbox_before_measuring (windows_template_test.TemplateTests) ... ok
+test_guest_content_is_not_exported_as_identity (windows_template_test.TemplateTests) ... ok
+test_inventory_cannot_export_unrelated_content (windows_template_test.TemplateTests) ... ok
+test_malformed_native_failure_reason_is_reported (windows_template_test.TemplateTests) ... ok
+test_malformed_prerequisites_produce_a_durable_failure_before_staging (windows_template_test.TemplateTests) ... ok
+test_missing_session_reports_bootstrap_without_provisioning (windows_template_test.TemplateTests) ... ok
+test_native_consent_is_a_bootstrap_requirement (windows_template_test.TemplateTests) ... ok
+test_native_readiness_is_measured_without_claiming_desktop_support (windows_template_test.TemplateTests) ... ok
+test_native_session_preparation_verifies_desktop_permissions_without_trials (windows_template_test.TemplateTests) ... ok
+test_ownership_regression_remains_a_readiness_failure (windows_template_test.TemplateTests) ... ok
+test_prepare_registers_existing_native_installation_for_test_user (windows_template_test.TemplateTests) ... ok
+test_progress_only_clixml_still_requires_native_evidence (windows_template_test.TemplateTests) ... ok
+test_requested_setup_must_have_a_completion_notification (windows_template_test.TemplateTests) ... ok
+test_status_cannot_request_sandbox_setup (windows_template_test.TemplateTests) ... ok
+test_status_reports_missing_registration_without_installing (windows_template_test.TemplateTests) ... ok
+test_stopped_template_is_not_started (windows_template_test.TemplateTests) ... ok
+test_unknown_uuid_and_display_names_are_rejected (windows_template_test.TemplateTests) ... ok
+test_unsupported_guest_fails_before_provisioning (windows_template_test.TemplateTests) ... ok
+test_versions_accept_updates_and_reject_invalid_or_old_clients (windows_template_test.TemplateTests) ... ok
+
+----------------------------------------------------------------------
+Ran 381 tests in 695.913s
+
+OK (skipped=80)

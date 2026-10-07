@@ -1,0 +1,19 @@
+{
+  "template": {
+    "uuid": "EF96CF12-D901-455F-81FF-4C5001E15F80",
+    "state": "stopped"
+  },
+  "everyday": {
+    "uuid": "545C23DD-356D-434A-B2AE-48277320BF34",
+    "state": "started"
+  },
+  "preexisting_retained": {
+    "uuid": "DA6F9285-78EA-41E1-A284-C072A113471E",
+    "state": "stopped"
+  },
+  "unrelated": {
+    "uuid": "9071AD4D-C2CE-4510-9790-79DF20230CB9",
+    "state": "stopped"
+  },
+  "task_owned_clones_remaining": 0
+}

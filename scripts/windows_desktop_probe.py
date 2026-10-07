@@ -59,12 +59,15 @@ def main():
             report.update(ok=True, reason='desktop_readiness_passed')
         else:
             desktop_smoke(root, request, identity, workspace, report, checkpoint)
+            if request.get('catalog_experiment'):
+                from windows_catalog_experiment import experiment as catalog_experiment
+                catalog_experiment(root, request, identity, workspace, report)
             if request.get('ownership_experiment'):
                 from windows_ownership_experiment import experiment
                 experiment(root, request, workspace, report)
             report.update(ok=True, reason='desktop_smoke_passed')
     except ValueError as error:
-        allowed = {'desktop_authentication_required', 'desktop_workspace_invalid', 'desktop_control_unsupported',
+        allowed = {'catalog_discovery_failed', 'catalog_picker_failed', 'catalog_protocol_failed', 'catalog_observation_failed', 'desktop_authentication_required', 'desktop_workspace_invalid', 'desktop_control_unsupported',
                    'desktop_policy_mismatch', 'desktop_startup_failed', 'desktop_command_failed', 'desktop_cleanup_failed',
                    'engine_identity_mismatch', 'native_client_busy', 'guardian_review_missing',
                    'ownership_discovery_failed', 'ownership_startup_failed', 'ownership_observation_failed', 'guardian_target_unavailable', 'guardian_decision_mismatch', 'guardian_enforcement_failed', 'guardian_review_mismatch'}

@@ -1,0 +1,678 @@
+{
+  "schema": 1,
+  "run": "tofa-run-97a37a27ddb54cd8b7f4ebef2ce23f03",
+  "outcome": "failed",
+  "stages": [
+    {
+      "stage": "template_validation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.202
+    },
+    {
+      "stage": "candidate_validation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.012
+    },
+    {
+      "stage": "clone_creation",
+      "outcome": "passed",
+      "elapsed_seconds": 1.255
+    },
+    {
+      "stage": "boot",
+      "outcome": "passed",
+      "elapsed_seconds": 20.0
+    },
+    {
+      "stage": "guest_session",
+      "outcome": "passed",
+      "elapsed_seconds": 12.844
+    },
+    {
+      "stage": "native_smoke",
+      "outcome": "passed",
+      "elapsed_seconds": 43.809
+    },
+    {
+      "stage": "desktop_smoke",
+      "outcome": "failed",
+      "reason": "catalog_picker_failed",
+      "elapsed_seconds": 111.63
+    }
+  ],
+  "suite": "desktop-catalog",
+  "retained": true,
+  "cleanup": {
+    "outcome": "retained",
+    "shutdown": "stopped"
+  },
+  "capabilities": {
+    "native_sandbox": "verified",
+    "desktop_guardian": "unverified"
+  },
+  "template": {
+    "uuid": "EF96CF12-D901-455F-81FF-4C5001E15F80",
+    "state": "stopped"
+  },
+  "requested_candidate": {
+    "version": "v0.1.0-rc.14",
+    "sha256": "1b0a2e7aa7aafc515391e221a16bee5124cf5b09aedf89af779796fae15bdd77",
+    "commit": "14134d43df4cca00bcdf10e49b3dc5ef3122f8d7"
+  },
+  "ownership_unresolved": false,
+  "clone_identity_source": "unique_inventory_delta",
+  "clone": {
+    "uuid": "8AC8CAE1-F213-4BD0-8514-EB85B44E3761",
+    "name": "tofa-run-97a37a27ddb54cd8b7f4ebef2ce23f03"
+  },
+  "diagnostics": {
+    "guest_staging": "C:\\Users\\Public\\tofa-run-97a37a27ddb54cd8b7f4ebef2ce23f03",
+    "guest_workspace": "%USERPROFILE%\\tofa-run-97a37a27ddb54cd8b7f4ebef2ce23f03"
+  },
+  "os": {
+    "name": "Windows 11",
+    "architecture": "ARM64",
+    "version": "10.0.26200"
+  },
+  "native": {
+    "identity": {
+      "client_version": "26.930.7945.0",
+      "engine_version": "0.160.1",
+      "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+      "package_engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+      "package": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+      "architecture": "Arm64",
+      "python_version": "3.13.15",
+      "sid": "S-1-5-21-1299817968-325600504-2357610402-1005",
+      "session": 1
+    },
+    "checks": {
+      "limited_user": true,
+      "harness_read_only": true,
+      "workspace_owned_by_user": true,
+      "workspace_acl_manageable": true,
+      "ordinary_write": true,
+      "workspace_write_read": true,
+      "outside_permission_denied": true,
+      "outside_marker_exists": false,
+      "full_access_disabled": true,
+      "engine_exited": true,
+      "markers_removed": true
+    },
+    "execution": {
+      "workspace_exit_code": 0,
+      "outside_exit_code": 1,
+      "outside_denial_signal": "GetContentWriterUnauthorizedAccessError"
+    }
+  },
+  "candidate": {
+    "version": "v0.1.0-rc.14",
+    "sha256": "1b0a2e7aa7aafc515391e221a16bee5124cf5b09aedf89af779796fae15bdd77",
+    "commit": "14134d43df4cca00bcdf10e49b3dc5ef3122f8d7",
+    "architecture": "ARM64",
+    "version_verified": true
+  },
+  "completion": {
+    "completed": true,
+    "unregistered": true,
+    "last_result": 1,
+    "state": "Ready"
+  },
+  "desktop_run": "tofa-run-b606c473d12c4eaeba697f329358477a",
+  "desktop": {
+    "ok": false,
+    "reason": "catalog_picker_failed",
+    "checks": {
+      "authenticated": true,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true,
+      "readiness_engine_exited": true,
+      "bridge_policy_preserved": true,
+      "bridge_initialized": true,
+      "desktop_started": true,
+      "desktop_permissions_configured": true,
+      "command_effect": true,
+      "normal_quit": true,
+      "owned_children_exited": true,
+      "cli_defaults_unchanged": true,
+      "vendor_service_preserved": true,
+      "diagnostics_written": true
+    },
+    "route": "native-desktop-bridge",
+    "restrictions": {
+      "tool_registration_writes_refused": 1,
+      "unrelated_turns_refused": 1,
+      "native_visualization_roots": 1
+    },
+    "identity": {
+      "model": "gpt-5.6-sol",
+      "provider": "openai",
+      "reviewer": "auto_review",
+      "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+      "app_sha256": "5474239dcfa9d1548d8bcd9219b8fd3474f1157f923555e9738f789dd4a81abe",
+      "bridge_sha256": "3cf763ad10fe232386464677b31e525ee5621d2b8cebf44211f7b26cf8f1879f",
+      "package": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+      "app_pid": 1276,
+      "bridge_pid": 8160,
+      "engine_pid": 1720
+    },
+    "execution": {
+      "admitted": {
+        "bridge_pid": 8160,
+        "thread": 2,
+        "turn": 1
+      },
+      "command": {
+        "bridge_pid": 8160,
+        "thread": 2,
+        "turn": 1
+      },
+      "completed": {
+        "bridge_pid": 8160,
+        "thread": 2,
+        "turn": 1
+      }
+    },
+    "catalog": {
+      "production_gate": "blocked",
+      "stage": "cleanup",
+      "checks": {
+        "cli_before": true,
+        "normal_quit": true,
+        "cli_exited": true,
+        "ordinary_config_preserved": true,
+        "vendor_service_preserved": true,
+        "owned_apps_exited": true
+      },
+      "requests": [],
+      "picker": {
+        "ok": false,
+        "stage": "model_choice",
+        "choices": []
+      },
+      "identity": {
+        "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+        "app_sha256": "5474239dcfa9d1548d8bcd9219b8fd3474f1157f923555e9738f789dd4a81abe"
+      }
+    }
+  },
+  "reason": "catalog_picker_failed",
+  "failed_transport_operation": "file_pull",
+  "recovery_diagnostics": {
+    "outcome": "collected",
+    "files": {
+      "progress": {
+        "outcome": "collected",
+        "checkpoints": [
+          {
+            "stage": "user_started",
+            "elapsed_ms": 3
+          },
+          {
+            "stage": "package_discovered",
+            "elapsed_ms": 321
+          },
+          {
+            "stage": "engine_hashed",
+            "elapsed_ms": 8026
+          },
+          {
+            "stage": "engine_discovered",
+            "elapsed_ms": 15271
+          },
+          {
+            "stage": "native_probe_started",
+            "elapsed_ms": 15294
+          },
+          {
+            "stage": "candidate_verification",
+            "elapsed_ms": 16347
+          },
+          {
+            "stage": "workspace_preparation",
+            "elapsed_ms": 17127
+          },
+          {
+            "stage": "engine_initialization",
+            "elapsed_ms": 17479
+          },
+          {
+            "stage": "sandbox_configuration",
+            "elapsed_ms": 18525
+          },
+          {
+            "stage": "workspace_execution",
+            "elapsed_ms": 18551
+          },
+          {
+            "stage": "outside_execution",
+            "elapsed_ms": 19690
+          }
+        ]
+      },
+      "native": {
+        "identity": {
+          "client_version": "26.930.7945.0",
+          "engine_version": "0.160.1",
+          "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+          "package_engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+          "package": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+          "architecture": "Arm64",
+          "python_version": "3.13.15",
+          "sid": "S-1-5-21-1299817968-325600504-2357610402-1005",
+          "session": 1
+        },
+        "checks": {
+          "limited_user": true,
+          "harness_read_only": true,
+          "workspace_owned_by_user": true,
+          "workspace_acl_manageable": true,
+          "ordinary_write": true,
+          "workspace_write_read": true,
+          "outside_permission_denied": true,
+          "outside_marker_exists": false,
+          "full_access_disabled": true,
+          "engine_exited": true,
+          "markers_removed": true
+        },
+        "execution": {
+          "workspace_exit_code": 0,
+          "outside_exit_code": 1,
+          "outside_denial_signal": "GetContentWriterUnauthorizedAccessError"
+        }
+      },
+      "desktop_progress": {
+        "outcome": "collected",
+        "checkpoints": [
+          {
+            "stage": "user_started",
+            "elapsed_ms": 2
+          },
+          {
+            "stage": "package_discovered",
+            "elapsed_ms": 188
+          },
+          {
+            "stage": "engine_hashed",
+            "elapsed_ms": 564
+          },
+          {
+            "stage": "engine_discovered",
+            "elapsed_ms": 843
+          },
+          {
+            "stage": "native_probe_started",
+            "elapsed_ms": 851
+          },
+          {
+            "stage": "desktop_authentication",
+            "elapsed_ms": 851
+          },
+          {
+            "stage": "desktop_preparation",
+            "elapsed_ms": 1798
+          },
+          {
+            "stage": "desktop_startup",
+            "elapsed_ms": 4517
+          },
+          {
+            "stage": "desktop_permissions",
+            "elapsed_ms": 13144
+          },
+          {
+            "stage": "desktop_command",
+            "elapsed_ms": 29673
+          },
+          {
+            "stage": "desktop_quit",
+            "elapsed_ms": 48638
+          },
+          {
+            "stage": "desktop_cleanup",
+            "elapsed_ms": 51985
+          }
+        ]
+      },
+      "desktop": {
+        "ok": false,
+        "reason": "catalog_picker_failed",
+        "checks": {
+          "authenticated": true,
+          "workspace_trusted": true,
+          "automatic_review": true,
+          "full_access_disabled": true,
+          "readiness_engine_exited": true,
+          "bridge_policy_preserved": true,
+          "bridge_initialized": true,
+          "desktop_started": true,
+          "desktop_permissions_configured": true,
+          "command_effect": true,
+          "normal_quit": true,
+          "owned_children_exited": true,
+          "cli_defaults_unchanged": true,
+          "vendor_service_preserved": true,
+          "diagnostics_written": true
+        },
+        "route": "native-desktop-bridge",
+        "restrictions": {
+          "tool_registration_writes_refused": 1,
+          "unrelated_turns_refused": 1,
+          "native_visualization_roots": 1
+        },
+        "identity": {
+          "model": "gpt-5.6-sol",
+          "provider": "openai",
+          "reviewer": "auto_review",
+          "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+          "app_sha256": "5474239dcfa9d1548d8bcd9219b8fd3474f1157f923555e9738f789dd4a81abe",
+          "bridge_sha256": "3cf763ad10fe232386464677b31e525ee5621d2b8cebf44211f7b26cf8f1879f",
+          "package": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+          "app_pid": 1276,
+          "bridge_pid": 8160,
+          "engine_pid": 1720
+        },
+        "execution": {
+          "admitted": {
+            "bridge_pid": 8160,
+            "thread": 2,
+            "turn": 1
+          },
+          "command": {
+            "bridge_pid": 8160,
+            "thread": 2,
+            "turn": 1
+          },
+          "completed": {
+            "bridge_pid": 8160,
+            "thread": 2,
+            "turn": 1
+          }
+        },
+        "catalog": {
+          "production_gate": "blocked",
+          "stage": "cleanup",
+          "checks": {
+            "cli_before": true,
+            "normal_quit": true,
+            "cli_exited": true,
+            "ordinary_config_preserved": true,
+            "vendor_service_preserved": true,
+            "owned_apps_exited": true
+          },
+          "requests": [],
+          "picker": {
+            "ok": false,
+            "stage": "model_choice",
+            "choices": []
+          },
+          "identity": {
+            "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+            "app_sha256": "5474239dcfa9d1548d8bcd9219b8fd3474f1157f923555e9738f789dd4a81abe"
+          }
+        }
+      }
+    }
+  },
+  "transport_progress_observed": false,
+  "transport_steps": [
+    {
+      "step": "protected_staging",
+      "started_after_seconds": 21.471,
+      "outcome": "passed",
+      "elapsed_seconds": 7.037
+    },
+    {
+      "step": "guest_preflight",
+      "started_after_seconds": 28.507,
+      "outcome": "passed",
+      "elapsed_seconds": 5.806
+    },
+    {
+      "step": "stage_request",
+      "started_after_seconds": 35.017,
+      "outcome": "passed",
+      "elapsed_seconds": 0.096
+    },
+    {
+      "step": "stage_probe",
+      "started_after_seconds": 35.114,
+      "outcome": "passed",
+      "elapsed_seconds": 0.117
+    },
+    {
+      "step": "stage_user",
+      "started_after_seconds": 35.231,
+      "outcome": "passed",
+      "elapsed_seconds": 0.108
+    },
+    {
+      "step": "stage_candidate",
+      "started_after_seconds": 35.339,
+      "outcome": "passed",
+      "elapsed_seconds": 13.134
+    },
+    {
+      "step": "stage_windows_candidate",
+      "started_after_seconds": 48.473,
+      "outcome": "passed",
+      "elapsed_seconds": 0.107
+    },
+    {
+      "step": "prepare_task",
+      "started_after_seconds": 48.58,
+      "outcome": "passed",
+      "elapsed_seconds": 3.897
+    },
+    {
+      "step": "native_task",
+      "started_after_seconds": 52.477,
+      "outcome": "passed",
+      "elapsed_seconds": 0.195
+    },
+    {
+      "step": "collect_task",
+      "started_after_seconds": 52.672,
+      "outcome": "passed",
+      "elapsed_seconds": 25.194
+    },
+    {
+      "step": "collect_native",
+      "started_after_seconds": 77.866,
+      "outcome": "passed",
+      "elapsed_seconds": 0.122
+    },
+    {
+      "step": "protected_staging",
+      "started_after_seconds": 78.124,
+      "outcome": "passed",
+      "elapsed_seconds": 2.065
+    },
+    {
+      "step": "guest_preflight",
+      "started_after_seconds": 80.189,
+      "outcome": "passed",
+      "elapsed_seconds": 3.517
+    },
+    {
+      "step": "stage_request",
+      "started_after_seconds": 83.707,
+      "outcome": "passed",
+      "elapsed_seconds": 0.142
+    },
+    {
+      "step": "stage_probe",
+      "started_after_seconds": 83.849,
+      "outcome": "passed",
+      "elapsed_seconds": 0.154
+    },
+    {
+      "step": "stage_user",
+      "started_after_seconds": 84.003,
+      "outcome": "passed",
+      "elapsed_seconds": 0.121
+    },
+    {
+      "step": "stage_windows_template_probe",
+      "started_after_seconds": 84.125,
+      "outcome": "passed",
+      "elapsed_seconds": 0.148
+    },
+    {
+      "step": "stage_windows_desktop_runtime",
+      "started_after_seconds": 84.272,
+      "outcome": "passed",
+      "elapsed_seconds": 0.172
+    },
+    {
+      "step": "stage_windows_desktop_bridge",
+      "started_after_seconds": 84.445,
+      "outcome": "passed",
+      "elapsed_seconds": 0.169
+    },
+    {
+      "step": "stage_windows_desktop_ui",
+      "started_after_seconds": 84.614,
+      "outcome": "passed",
+      "elapsed_seconds": 0.134
+    },
+    {
+      "step": "stage_windows_process",
+      "started_after_seconds": 84.748,
+      "outcome": "passed",
+      "elapsed_seconds": 0.11
+    },
+    {
+      "step": "stage_windows_process",
+      "started_after_seconds": 84.857,
+      "outcome": "passed",
+      "elapsed_seconds": 0.142
+    },
+    {
+      "step": "stage_windows_guardian_result",
+      "started_after_seconds": 84.999,
+      "outcome": "passed",
+      "elapsed_seconds": 0.132
+    },
+    {
+      "step": "stage_windows_template_transport",
+      "started_after_seconds": 85.131,
+      "outcome": "passed",
+      "elapsed_seconds": 0.225
+    },
+    {
+      "step": "stage_windows_ownership_experiment",
+      "started_after_seconds": 85.356,
+      "outcome": "passed",
+      "elapsed_seconds": 0.144
+    },
+    {
+      "step": "stage_windows_ownership_contract",
+      "started_after_seconds": 85.499,
+      "outcome": "passed",
+      "elapsed_seconds": 0.115
+    },
+    {
+      "step": "stage_windows_ownership_inspect",
+      "started_after_seconds": 85.614,
+      "outcome": "passed",
+      "elapsed_seconds": 0.125
+    },
+    {
+      "step": "stage_windows_catalog_experiment",
+      "started_after_seconds": 85.739,
+      "outcome": "passed",
+      "elapsed_seconds": 0.141
+    },
+    {
+      "step": "stage_windows_catalog_protocol",
+      "started_after_seconds": 85.881,
+      "outcome": "passed",
+      "elapsed_seconds": 0.117
+    },
+    {
+      "step": "stage_windows_catalog_ui",
+      "started_after_seconds": 85.997,
+      "outcome": "passed",
+      "elapsed_seconds": 0.118
+    },
+    {
+      "step": "prepare_task",
+      "started_after_seconds": 86.115,
+      "outcome": "passed",
+      "elapsed_seconds": 2.335
+    },
+    {
+      "step": "desktop_task",
+      "started_after_seconds": 88.45,
+      "outcome": "passed",
+      "elapsed_seconds": 0.176
+    },
+    {
+      "step": "collect_task",
+      "started_after_seconds": 88.626,
+      "outcome": "passed",
+      "elapsed_seconds": 100.733
+    },
+    {
+      "step": "collect_desktop",
+      "started_after_seconds": 189.359,
+      "outcome": "passed",
+      "elapsed_seconds": 0.184
+    }
+  ],
+  "guest_progress": {
+    "outcome": "collected",
+    "checkpoints": [
+      {
+        "stage": "user_started",
+        "elapsed_ms": 2
+      },
+      {
+        "stage": "package_discovered",
+        "elapsed_ms": 188
+      },
+      {
+        "stage": "engine_hashed",
+        "elapsed_ms": 564
+      },
+      {
+        "stage": "engine_discovered",
+        "elapsed_ms": 843
+      },
+      {
+        "stage": "native_probe_started",
+        "elapsed_ms": 851
+      },
+      {
+        "stage": "desktop_authentication",
+        "elapsed_ms": 851
+      },
+      {
+        "stage": "desktop_preparation",
+        "elapsed_ms": 1798
+      },
+      {
+        "stage": "desktop_startup",
+        "elapsed_ms": 4517
+      },
+      {
+        "stage": "desktop_permissions",
+        "elapsed_ms": 13144
+      },
+      {
+        "stage": "desktop_command",
+        "elapsed_ms": 29673
+      },
+      {
+        "stage": "desktop_quit",
+        "elapsed_ms": 48638
+      },
+      {
+        "stage": "desktop_cleanup",
+        "elapsed_ms": 51985
+      }
+    ]
+  }
+}

@@ -8,7 +8,7 @@ READINESS = ('authenticated', 'workspace_trusted', 'automatic_review', 'full_acc
 CHECKS = (*READINESS,
           'bridge_policy_preserved', 'bridge_initialized', 'desktop_started', 'desktop_permissions_configured', 'command_effect', 'normal_quit',
           'owned_children_exited', 'cli_defaults_unchanged', 'vendor_service_preserved', 'diagnostics_written')
-REASONS = {'desktop_authentication_required', 'desktop_workspace_invalid', 'desktop_control_unsupported',
+REASONS = {'catalog_discovery_failed', 'catalog_picker_failed', 'catalog_protocol_failed', 'catalog_observation_failed', 'desktop_authentication_required', 'desktop_workspace_invalid', 'desktop_control_unsupported',
            'native_client_busy', 'engine_identity_mismatch', 'wrong_user_session', 'desktop_readiness_failed',
            'desktop_policy_mismatch', 'desktop_startup_failed', 'desktop_command_failed',
            'desktop_cleanup_failed', 'desktop_smoke_passed', 'desktop_readiness_passed', 'guardian_review_missing',
@@ -74,6 +74,9 @@ def sanitized_desktop(value):
                 or any(detail.get(key) not in choices for key, choices in fields.items())):
             raise Failure('malformed_desktop_result')
         result['control_failure'] = {key: detail[key] for key in fields}
+    if 'catalog' in value:
+        from windows_catalog_result import sanitize as sanitize_catalog
+        result['catalog'] = sanitize_catalog(value['catalog'])
     if 'ownership' in value:
         from windows_ownership_result import sanitize
         result['ownership'] = sanitize(value['ownership'])

@@ -1,0 +1,18 @@
+test_explicit_synthetic_selection_reaches_engine_and_outside_catalog_fails (__main__.CatalogBridgeTests) ... ok
+test_malformed_write_parameters_receive_explicit_refusal (__main__.CatalogBridgeTests) ... ok
+test_mixed_default_write_is_refused_atomically (__main__.CatalogBridgeTests) ... ok
+test_model_default_write_is_session_only_and_cli_defaults_survive (__main__.CatalogBridgeTests) ... ok
+test_native_errors_and_missing_layers_cannot_qualify_an_override (__main__.CatalogBridgeTests) ... ok
+test_native_layer_matches_file_identity_and_rejects_a_different_file (__main__.CatalogBridgeTests) ... ok
+test_stale_version_and_profile_writes_fail_without_changing_cli_defaults (__main__.CatalogBridgeTests) ... ok
+test_stale_version_has_no_successful_override_evidence (__main__.CatalogBridgeTests) ... ok
+test_unrelated_write_remains_native (__main__.CatalogBridgeTests) ... ok
+test_malformed_http_bodies_are_counted_and_refused (__main__.CatalogProviderTests) ... ok
+test_completed_synthetic_experiment_keeps_production_blocked (__main__.CatalogRunnerTests) ... ok
+test_headless_or_missing_catalog_evidence_cannot_qualify_desktop (__main__.CatalogRunnerTests) ... ok
+test_incomplete_or_mismatched_native_evidence_retains_the_clone (__main__.CatalogRunnerTests) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 25.940s
+
+OK

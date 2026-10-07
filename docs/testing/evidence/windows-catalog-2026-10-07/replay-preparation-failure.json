@@ -1,0 +1,6 @@
+{
+  "owner_run": "tofa-run-d906f287fa754b7a993772ab44901baf",
+  "stage": "host replay request construction",
+  "reason": "incorrect preflight SID lookup; no guest catalog task submitted",
+  "shutdown": "stopped"
+}
