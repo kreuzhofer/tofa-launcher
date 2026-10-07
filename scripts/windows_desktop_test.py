@@ -8,6 +8,50 @@ import windows_run_test as fixture
 
 @unittest.skipIf(os.name == 'nt', 'Mac operator CLI requires Unix executable fixtures')
 class DesktopTests(fixture.WindowsRunFixture):
+    def test_malformed_ownership_snapshot_retains_clone_with_a_sanitized_error(self):
+        for field in ('pipe', 'service', 'packages', 'engines', 'incumbents'):
+            with self.subTest(field=field):
+                self.change(mode='ownership_shape', ownership_field=field)
+                result, report, _ = self.invoke('--suite', 'desktop-ownership', '--test-auth', 'native-session')
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(report['reason'], 'malformed_ownership_result')
+                self.assertTrue(report['retained'])
+                self.assertEqual(self.invoke('--run', report['run'], command='cleanup')[0].returncode, 0)
+
+    def test_unmeasured_pipe_acl_cannot_complete_the_ownership_experiment(self):
+        self.change(mode='ownership_acl_unmeasured')
+        result, report, _ = self.invoke('--suite', 'desktop-ownership', '--test-auth', 'native-session')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(report['reason'], 'ownership_observation_failed')
+
+    def test_ownership_metadata_rejects_private_or_malformed_external_fields(self):
+        self.change(mode='ownership_private')
+        result, report, _ = self.invoke('--suite', 'desktop-ownership', '--test-auth', 'native-session')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(report['reason'], 'malformed_ownership_result')
+
+    def test_incomplete_ownership_checks_cannot_be_reported_as_a_completed_experiment(self):
+        self.change(mode='ownership_incomplete')
+        result, report, _ = self.invoke('--suite', 'desktop-ownership', '--test-auth', 'native-session')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(report['reason'], 'ownership_observation_failed')
+        self.assertTrue(report['retained'])
+
+    def test_completed_ownership_experiment_keeps_the_production_gate_blocked(self):
+        self.change(mode='ownership_blocked')
+        result, report, _ = self.invoke('--suite', 'desktop-ownership', '--test-auth', 'native-session')
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(report['capabilities']['desktop_ownership'], 'blocked')
+        self.assertEqual(report['desktop']['ownership']['production_gate'], 'blocked')
+        self.assertFalse(report['retained'])
+
+    def test_ownership_experiment_requires_evidence_and_never_promotes_support(self):
+        result, report, _ = self.invoke('--suite', 'desktop-ownership', '--test-auth', 'native-session')
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(report.get('reason'), 'ownership_evidence_missing')
+        self.assertTrue(report['retained'])
+        self.assertNotEqual(report['capabilities'].get('desktop_ownership'), 'verified')
+
     def test_control_failure_retains_only_bounded_diagnostic_fields(self):
         self.change(mode='desktop_control_details')
         result, report, _ = self.invoke('--suite', 'desktop-smoke', '--test-auth', 'native-session')

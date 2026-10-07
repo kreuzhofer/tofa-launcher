@@ -1,0 +1,12 @@
+{
+  "scripts/windows_ownership_contract.py": "e702bf0e3ecc3b0a3181615db696622dc2c060bbefe897e04e9da12711f8dcc5",
+  "scripts/windows_ownership_experiment.py": "4010ace0638b7d1ecd81d5d16b0276e5c696a9c65f4db725a375d8a3812f5571",
+  "scripts/windows_ownership_inspect.ps1": "7f0ffd00c1476f9086a79bc625d0b52fb321de058941a87bffebefca6e5dda40",
+  "scripts/windows_ownership_result.py": "d2b31f269f55eac7fd10fd8e194b97507cbd7d5ba10873ba7070fb40e4fdb7f1",
+  "scripts/windows_clone_runner.py": "a0edd25c02050962f986f52d3e2ef0f4da2d5df13fc8d8045eb046c8c2d76e80",
+  "scripts/windows_desktop_bridge.py": "b30e58b97624b6f2c72d9183dbfc929300dddecbb168abf0d6e78c904d708c6a",
+  "scripts/windows_desktop_probe.py": "0eee6c9a34d5bdd68fca5b40101cb56f492c2950cd2319d08ba4e53b6eebe44c",
+  "scripts/windows_desktop_result.py": "488f9ffb4e670fb19b99cdacf2d39a0fded2900a534f9dcece45c550da6caaa2",
+  "scripts/windows_desktop_runtime.py": "5730a25f8307b3a91ef816e74d1785cbd78c23e0586a58da429fb41ef52f6a7e",
+  "scripts/windows_template_transport.py": "816eafaf51350c24e99410ff83e95e23a6d44782f2352d36834af9543fa9274b"
+}

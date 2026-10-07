@@ -1,0 +1,94 @@
+{
+  "base": "1d40521219ce49d8387b678fcbfee2a62d2c1ae2",
+  "go_race": {
+    "command": "go test -race ./...",
+    "outcome": "passed",
+    "initial_sandbox_attempt": "loopback bind prohibited"
+  },
+  "go_vet": {
+    "command": "go vet ./...",
+    "outcome": "passed"
+  },
+  "python_discovery": {
+    "command": "python3.12 -m unittest discover -s scripts -p '*_test.py' -v",
+    "tests": 368,
+    "passed": 282,
+    "skipped": 80,
+    "entrypoint_errors": 6,
+    "failed_assertions": 0,
+    "details": "Four lifecycle cases require DIST/VERSION; two terminal cases require a binary path. All six passed through documented entrypoints below."
+  },
+  "lifecycle": {
+    "command": "python3.12 scripts/lifecycle_test.py .qualification/rc14/assets v0.1.0-rc.14 -v",
+    "tests": 4,
+    "outcome": "passed"
+  },
+  "terminal": {
+    "command": "python3.12 scripts/terminal_test.py /private/tmp/tofa85-terminal -v",
+    "tests": 2,
+    "outcome": "passed",
+    "binary": "Built from current ./cmd/tofa with go build"
+  },
+  "desktop_targeted": {
+    "command": "python3 scripts/windows_desktop_test.py -v",
+    "tests": 33,
+    "outcome": "passed"
+  },
+  "review_regression": {
+    "command": "python3 scripts/windows_desktop_test.py DesktopTests.test_malformed_ownership_snapshot_retains_clone_with_a_sanitized_error -v",
+    "tests": 1,
+    "subcases": [
+      "pipe",
+      "service",
+      "packages",
+      "engines",
+      "incumbents"
+    ],
+    "outcome": "passed"
+  },
+  "executable_contract": {
+    "command": "python3 scripts/windows_ownership_test.py -v",
+    "tests": 7,
+    "outcome": "passed"
+  },
+  "scoped_pyright": {
+    "outcome": "passed",
+    "errors": 0,
+    "files": [
+      "windows_ownership_contract.py",
+      "windows_ownership_experiment.py",
+      "windows_ownership_result.py",
+      "windows_desktop_bridge.py",
+      "windows_desktop_probe.py",
+      "windows_desktop_result.py",
+      "windows_template_transport.py"
+    ]
+  },
+  "broader_pyright": {
+    "files": [
+      "windows_clone_runner.py",
+      "windows_desktop_runtime.py"
+    ],
+    "errors": 17,
+    "baseline_errors": 17,
+    "categories": [
+      "reportOptionalSubscript",
+      "reportPossiblyUnboundVariable"
+    ],
+    "outcome": "pre_existing_errors_reproduced_at_base"
+  },
+  "native": {
+    "attempts": 3,
+    "failed": 1,
+    "completed": 2,
+    "final": "attempt-3-final.json",
+    "production_ownership": "blocked",
+    "all_trial_clones_deleted": true
+  },
+  "review": {
+    "standards_remaining": 0,
+    "standards_resolved": 2,
+    "spec_remaining": 0,
+    "spec_resolved": 1
+  }
+}

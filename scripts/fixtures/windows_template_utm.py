@@ -221,6 +221,28 @@ elif args[:2] == ['file', 'pull'] and args[2].lower() == guest_uuid:
             if state['mode'] == 'desktop_no_effect': desktop['checks']['command_effect'] = False
             if state['mode'] == 'desktop_cleanup_failed': desktop['checks']['normal_quit'] = False
             if state['mode'] == 'desktop_secret': desktop['identity']['model'] = 'PRIVATE_KEY'
+            if state['mode'].startswith('ownership_'):
+                snapshot = {
+                    'sid': 'S-1-5-21-1-2-3-1001', 'paths_safe': True, 'process_inventory_complete': True,
+                    'packages': [], 'engines': [], 'incumbents': [], 'profiles': [], 'standalone': [],
+                    'pipe': {'name': 'codex-ipc', 'open_error': 0, 'server_pid': 101, 'security_error': 0, 'sddl': 'O:S-1-5-21-1-2-3-1001D:(A;;FA;;;SY)'},
+                    'service': {'pid': 44, 'state': 'Running'},
+                }
+                desktop['ownership'] = {
+                    'production_gate': 'blocked', 'blocker': 'atomic_profile_ipc_ownership_unproven',
+                    'checks': {key: True for key in ('argv_environment_stdio_exit', 'reparse_refused', 'case_equivalent',
+                        'competing_guards_refused', 'ordinary_refused', 'incumbent_preserved', 'same_profile_singleton',
+                        'separate_profile_measured', 'ordinary_still_alive', 'separate_owned_exit', 'ordinary_normal_quit',
+                        'vendor_service_preserved', 'owned_apps_exited')},
+                    **{phase: snapshot for phase in ('before', 'ordinary', 'separate', 'after')},
+                    'bridge_initializations': [{'main': True, 'ok': True}, {'main': False, 'ok': True}],
+                }
+            if state['mode'] == 'ownership_acl_unmeasured': desktop['ownership']['ordinary']['pipe']['security_error'] = 87
+            if state['mode'] == 'ownership_shape':
+                field = state.get('ownership_field', 'pipe')
+                desktop['ownership']['ordinary'][field] = [None] if field in ('packages', 'engines', 'incumbents') else None
+            if state['mode'] == 'ownership_private': desktop['ownership']['ordinary']['profiles'] = ['PRIVATE_KEY']
+            if state['mode'] == 'ownership_incomplete': desktop['ownership']['checks'].pop('ordinary_refused')
             print(json.dumps(desktop))
             sys.exit(0)
         report = {'run': request['run'], 'phase': 'native', 'ok': True,

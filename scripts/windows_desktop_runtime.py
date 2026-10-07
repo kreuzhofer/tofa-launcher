@@ -125,7 +125,7 @@ def desktop_smoke(root, request, identity, workspace, report, checkpoint):
                                         'workspace': str(workspace), 'evidence_dir': str(owned),
                                         'visualization_root': str(Path.home() / '.codex' / 'visualizations'), 'sid': request['sid'],
                                         'prompt': prompt, 'marker_name': marker.name, 'expected_command': command,
-                                        'shell_path': shell_path}), encoding='utf-8')
+                                        'shell_path': shell_path, 'record_ownership': request.get('ownership_experiment', False)}), encoding='utf-8')
     link = 'codex://threads/new?' + urlencode({'path': str(workspace), 'prompt': prompt})
     env = dict(os.environ, CODEX_CLI_PATH=str(bridge), TOFA_LIVE_PYTHON=request['python'],
                TOFA_LIVE_HARNESS=str(root / 'windows_desktop_bridge.py'), TOFA_DESKTOP_PROBE_CONFIG=str(configuration))

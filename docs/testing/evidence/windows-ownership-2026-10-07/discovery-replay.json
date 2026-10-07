@@ -1,0 +1,18 @@
+[
+  {
+    "phase": "before",
+    "exit": 42,
+    "result": {
+      "may_launch": false,
+      "reason": "ownership_unproven"
+    }
+  },
+  {
+    "phase": "ordinary",
+    "exit": 41,
+    "result": {
+      "may_launch": false,
+      "reason": "native_client_busy"
+    }
+  }
+]

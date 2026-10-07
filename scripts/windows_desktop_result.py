@@ -13,7 +13,7 @@ REASONS = {'desktop_authentication_required', 'desktop_workspace_invalid', 'desk
            'desktop_policy_mismatch', 'desktop_startup_failed', 'desktop_command_failed',
            'desktop_cleanup_failed', 'desktop_smoke_passed', 'desktop_readiness_passed', 'guardian_review_missing',
            'guardian_review_denied', 'guardian_review_timed_out', 'guardian_review_aborted',
-           'guardian_target_unavailable', 'guardian_decision_mismatch', 'guardian_enforcement_failed', 'guardian_review_mismatch'}
+           'ownership_discovery_failed', 'ownership_startup_failed', 'ownership_observation_failed', 'guardian_target_unavailable', 'guardian_decision_mismatch', 'guardian_enforcement_failed', 'guardian_review_mismatch'}
 
 
 def sanitized_desktop(value):
@@ -74,6 +74,9 @@ def sanitized_desktop(value):
                 or any(detail.get(key) not in choices for key, choices in fields.items())):
             raise Failure('malformed_desktop_result')
         result['control_failure'] = {key: detail[key] for key in fields}
+    if 'ownership' in value:
+        from windows_ownership_result import sanitize
+        result['ownership'] = sanitize(value['ownership'])
     if 'guardian' in value: result['guardian'] = sanitized_guardian(value['guardian'])
     return result
 

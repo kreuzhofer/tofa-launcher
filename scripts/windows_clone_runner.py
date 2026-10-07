@@ -433,7 +433,7 @@ def run_clone(options, directory, report):
         report['capabilities']['native_sandbox'] = 'verified'
         passed()
         desktop_cases = ('smoke', 'allow', 'deny') if options.suite == 'desktop-guardian' else (
-            ('smoke',) if options.suite == 'desktop-smoke' else ())
+            ('smoke',) if options.suite in ('desktop-smoke', 'desktop-ownership') else ())
         for case in desktop_cases:
             begin('desktop_smoke' if case == 'smoke' else 'guardian_' + case)
             print('Running desktop smoke...' if case == 'smoke' else 'Running live Guardian ' + case + ' case...', flush=True)
@@ -443,13 +443,18 @@ def run_clone(options, directory, report):
             desktop_preflight = transport.preflight({'run': desktop_run, 'user': options.test_user, 'operation': 'status'})
             validate_preflight(desktop_preflight)
             desktop_request = dict(request, run=desktop_run, workspace_run=report['run'], test_auth=options.test_auth,
-                                   candidate=None)
+                                   candidate=None, ownership_experiment=options.suite == 'desktop-ownership')
             if case != 'smoke': desktop_request['guardian_case'] = case
             desktop_task, desktop = transport.measure(desktop_request, desktop=True)
             result = sanitized_desktop(desktop)
             if case == 'smoke': report['desktop'] = result
             else: report.setdefault('guardian', {})[case] = result
             validate_desktop(desktop_task, result, report['native'], guardian_case=None if case == 'smoke' else case)
+            if options.suite == 'desktop-ownership':
+                if 'ownership' not in result: raise Failure('ownership_evidence_missing')
+                from windows_ownership_result import validate
+                validate(result['ownership'])
+                report['capabilities']['desktop_ownership'] = 'blocked'
             if case != 'smoke': validate_guardian(result, case)
             if case == 'smoke': report['capabilities']['desktop_smoke'] = 'verified'
             if case == 'deny': report['capabilities']['desktop_guardian'] = 'verified'
@@ -507,7 +512,7 @@ def main():
     parser.add_argument('--version')
     parser.add_argument('--sha256')
     parser.add_argument('--candidate-commit')
-    parser.add_argument('--suite', choices=('native-smoke', 'desktop-smoke', 'desktop-guardian'), default='native-smoke')
+    parser.add_argument('--suite', choices=('native-smoke', 'desktop-smoke', 'desktop-guardian', 'desktop-ownership'), default='native-smoke')
     parser.add_argument('--test-auth', choices=('native-session',))
     parser.add_argument('--run', help='Exact owned run ID for explicit cleanup')
     options = parser.parse_args()

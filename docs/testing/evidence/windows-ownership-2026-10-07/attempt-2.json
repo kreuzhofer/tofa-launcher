@@ -1,0 +1,635 @@
+{
+  "schema": 1,
+  "run": "tofa-run-06331420e8a0487cbb202f652b26784f",
+  "outcome": "passed",
+  "stages": [
+    {
+      "stage": "template_validation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.22
+    },
+    {
+      "stage": "candidate_validation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.012
+    },
+    {
+      "stage": "clone_creation",
+      "outcome": "passed",
+      "elapsed_seconds": 0.722
+    },
+    {
+      "stage": "boot",
+      "outcome": "passed",
+      "elapsed_seconds": 19.782
+    },
+    {
+      "stage": "guest_session",
+      "outcome": "passed",
+      "elapsed_seconds": 13.199
+    },
+    {
+      "stage": "native_smoke",
+      "outcome": "passed",
+      "elapsed_seconds": 43.527
+    },
+    {
+      "stage": "desktop_smoke",
+      "outcome": "passed",
+      "elapsed_seconds": 113.257
+    },
+    {
+      "stage": "cleanup",
+      "outcome": "passed",
+      "elapsed_seconds": 5.853
+    }
+  ],
+  "suite": "desktop-ownership",
+  "retained": false,
+  "cleanup": {
+    "outcome": "deleted"
+  },
+  "capabilities": {
+    "native_sandbox": "verified",
+    "desktop_guardian": "unverified",
+    "desktop_ownership": "blocked",
+    "desktop_smoke": "verified"
+  },
+  "template": {
+    "uuid": "EF96CF12-D901-455F-81FF-4C5001E15F80",
+    "state": "stopped"
+  },
+  "requested_candidate": {
+    "version": "v0.1.0-rc.14",
+    "sha256": "1b0a2e7aa7aafc515391e221a16bee5124cf5b09aedf89af779796fae15bdd77",
+    "commit": "14134d43df4cca00bcdf10e49b3dc5ef3122f8d7"
+  },
+  "ownership_unresolved": false,
+  "clone_identity_source": "unique_inventory_delta",
+  "clone": {
+    "uuid": "9D294A58-F99B-489A-81A8-11889D8F706E",
+    "name": "tofa-run-06331420e8a0487cbb202f652b26784f"
+  },
+  "diagnostics": {
+    "guest_staging": "C:\\Users\\Public\\tofa-run-06331420e8a0487cbb202f652b26784f",
+    "guest_workspace": "%USERPROFILE%\\tofa-run-06331420e8a0487cbb202f652b26784f"
+  },
+  "os": {
+    "name": "Windows 11",
+    "architecture": "ARM64",
+    "version": "10.0.26200"
+  },
+  "native": {
+    "identity": {
+      "client_version": "26.930.7945.0",
+      "engine_version": "0.160.1",
+      "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+      "package_engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+      "package": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+      "architecture": "Arm64",
+      "python_version": "3.13.15",
+      "sid": "S-1-5-21-1299817968-325600504-2357610402-1005",
+      "session": 1
+    },
+    "checks": {
+      "limited_user": true,
+      "harness_read_only": true,
+      "workspace_owned_by_user": true,
+      "workspace_acl_manageable": true,
+      "ordinary_write": true,
+      "workspace_write_read": true,
+      "outside_permission_denied": true,
+      "outside_marker_exists": false,
+      "full_access_disabled": true,
+      "engine_exited": true,
+      "markers_removed": true
+    },
+    "execution": {
+      "workspace_exit_code": 0,
+      "outside_exit_code": 1,
+      "outside_denial_signal": "GetContentWriterUnauthorizedAccessError"
+    }
+  },
+  "candidate": {
+    "version": "v0.1.0-rc.14",
+    "sha256": "1b0a2e7aa7aafc515391e221a16bee5124cf5b09aedf89af779796fae15bdd77",
+    "commit": "14134d43df4cca00bcdf10e49b3dc5ef3122f8d7",
+    "architecture": "ARM64",
+    "version_verified": true
+  },
+  "completion": {
+    "completed": true,
+    "unregistered": true,
+    "last_result": 0,
+    "state": "Ready"
+  },
+  "desktop_run": "tofa-run-47f0796f25fc4f91af9f2497c5816c47",
+  "desktop": {
+    "ok": true,
+    "reason": "desktop_smoke_passed",
+    "checks": {
+      "authenticated": true,
+      "workspace_trusted": true,
+      "automatic_review": true,
+      "full_access_disabled": true,
+      "readiness_engine_exited": true,
+      "bridge_policy_preserved": true,
+      "bridge_initialized": true,
+      "desktop_started": true,
+      "desktop_permissions_configured": true,
+      "command_effect": true,
+      "normal_quit": true,
+      "owned_children_exited": true,
+      "cli_defaults_unchanged": true,
+      "vendor_service_preserved": true,
+      "diagnostics_written": true
+    },
+    "route": "native-desktop-bridge",
+    "restrictions": {
+      "tool_registration_writes_refused": 2,
+      "unrelated_turns_refused": 1,
+      "native_visualization_roots": 1
+    },
+    "identity": {
+      "model": "gpt-5.6-sol",
+      "provider": "openai",
+      "reviewer": "auto_review",
+      "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+      "app_sha256": "5474239dcfa9d1548d8bcd9219b8fd3474f1157f923555e9738f789dd4a81abe",
+      "bridge_sha256": "8e905d7bc26115338b87ebc5cb79ba573b056c5feac5139e8c4ff856e8fea9a8",
+      "package": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+      "app_pid": 8168,
+      "bridge_pid": 6948,
+      "engine_pid": 8784
+    },
+    "execution": {
+      "admitted": {
+        "bridge_pid": 6948,
+        "thread": 2,
+        "turn": 1
+      },
+      "command": {
+        "bridge_pid": 6948,
+        "thread": 2,
+        "turn": 1
+      },
+      "completed": {
+        "bridge_pid": 6948,
+        "thread": 2,
+        "turn": 1
+      }
+    },
+    "ownership": {
+      "production_gate": "blocked",
+      "blocker": "atomic_profile_ipc_ownership_unproven",
+      "stage": "complete",
+      "checks": {
+        "argv_environment_stdio_exit": true,
+        "reparse_refused": true,
+        "case_equivalent": true,
+        "competing_guards_refused": true,
+        "ordinary_refused": true,
+        "incumbent_preserved": true,
+        "same_profile_singleton": true,
+        "separate_profile_measured": true,
+        "ordinary_still_alive": true,
+        "separate_owned_exit": true,
+        "ordinary_normal_quit": true,
+        "vendor_service_preserved": true,
+        "owned_apps_exited": true
+      },
+      "before": {
+        "sid": "S-1-5-21-1299817968-325600504-2357610402-1005",
+        "paths_safe": true,
+        "process_inventory_complete": true,
+        "packages": [
+          {
+            "name": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+            "root": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+            "app": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+            "status": "Ok",
+            "architecture": "Arm64",
+            "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e"
+          }
+        ],
+        "engines": [
+          {
+            "path": "C:\\Users\\tofa-test\\AppData\\Local\\OpenAI\\Codex\\bin\\2c64dcfa86419e1c\\codex.exe",
+            "sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+            "architecture": "ARM64"
+          }
+        ],
+        "incumbents": [],
+        "profiles": [],
+        "standalone": [
+          "C:\\Users\\tofa-test\\AppData\\Local\\Programs\\OpenAI\\Codex\\bin\\codex.exe"
+        ],
+        "service": {
+          "pid": 4192,
+          "state": "Running"
+        },
+        "pipe": {
+          "name": "codex-ipc",
+          "open_error": 2,
+          "server_pid": 0,
+          "security_error": 0,
+          "sddl": null
+        }
+      },
+      "ordinary": {
+        "sid": "S-1-5-21-1299817968-325600504-2357610402-1005",
+        "paths_safe": true,
+        "process_inventory_complete": true,
+        "packages": [
+          {
+            "name": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+            "root": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+            "app": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+            "status": "Ok",
+            "architecture": "Arm64",
+            "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e"
+          }
+        ],
+        "engines": [
+          {
+            "path": "C:\\Users\\tofa-test\\AppData\\Local\\OpenAI\\Codex\\bin\\2c64dcfa86419e1c\\codex.exe",
+            "sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+            "architecture": "ARM64"
+          }
+        ],
+        "incumbents": [
+          {
+            "pid": 10952,
+            "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+            "created": "639269696694671600"
+          }
+        ],
+        "profiles": [
+          "C:\\Users\\tofa-test\\AppData\\Roaming\\Codex\\web\\Codex"
+        ],
+        "standalone": [
+          "C:\\Users\\tofa-test\\AppData\\Local\\Programs\\OpenAI\\Codex\\bin\\codex.exe"
+        ],
+        "service": {
+          "pid": 4192,
+          "state": "Running"
+        },
+        "pipe": {
+          "name": "codex-ipc",
+          "open_error": 0,
+          "server_pid": 10952,
+          "security_error": 0,
+          "sddl": "O:S-1-5-21-1299817968-325600504-2357610402-1005D:(A;;FA;;;SY)(A;;FA;;;BA)(A;;FA;;;S-1-5-21-1299817968-325600504-2357610402-1005)(A;;FR;;;WD)(A;;FR;;;AN)"
+        }
+      },
+      "separate": {
+        "sid": "S-1-5-21-1299817968-325600504-2357610402-1005",
+        "paths_safe": true,
+        "process_inventory_complete": true,
+        "packages": [
+          {
+            "name": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+            "root": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+            "app": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+            "status": "Ok",
+            "architecture": "Arm64",
+            "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e"
+          }
+        ],
+        "engines": [
+          {
+            "path": "C:\\Users\\tofa-test\\AppData\\Local\\OpenAI\\Codex\\bin\\2c64dcfa86419e1c\\codex.exe",
+            "sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+            "architecture": "ARM64"
+          }
+        ],
+        "incumbents": [
+          {
+            "pid": 10952,
+            "path": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+            "created": "639269696694671600"
+          }
+        ],
+        "profiles": [
+          "C:\\Users\\tofa-test\\AppData\\Roaming\\Codex\\web\\Codex"
+        ],
+        "standalone": [
+          "C:\\Users\\tofa-test\\AppData\\Local\\Programs\\OpenAI\\Codex\\bin\\codex.exe"
+        ],
+        "service": {
+          "pid": 4192,
+          "state": "Running"
+        },
+        "pipe": {
+          "name": "codex-ipc",
+          "open_error": 0,
+          "server_pid": 10952,
+          "security_error": 0,
+          "sddl": "O:S-1-5-21-1299817968-325600504-2357610402-1005D:(A;;FA;;;SY)(A;;FA;;;BA)(A;;FA;;;S-1-5-21-1299817968-325600504-2357610402-1005)(A;;FR;;;WD)(A;;FR;;;AN)"
+        }
+      },
+      "after": {
+        "sid": "S-1-5-21-1299817968-325600504-2357610402-1005",
+        "paths_safe": true,
+        "process_inventory_complete": true,
+        "packages": [
+          {
+            "name": "OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+            "root": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0",
+            "app": "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0\\app\\ChatGPT.exe",
+            "status": "Ok",
+            "architecture": "Arm64",
+            "engine_sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e"
+          }
+        ],
+        "engines": [
+          {
+            "path": "C:\\Users\\tofa-test\\AppData\\Local\\OpenAI\\Codex\\bin\\2c64dcfa86419e1c\\codex.exe",
+            "sha256": "ce29231882a4b6c2cb5381f3ee311d29735fd63f45c432e2e704e12b0d31e78e",
+            "architecture": "ARM64"
+          }
+        ],
+        "incumbents": [],
+        "profiles": [],
+        "standalone": [
+          "C:\\Users\\tofa-test\\AppData\\Local\\Programs\\OpenAI\\Codex\\bin\\codex.exe"
+        ],
+        "service": {
+          "pid": 4192,
+          "state": "Running"
+        },
+        "pipe": {
+          "name": "codex-ipc",
+          "open_error": 2,
+          "server_pid": 0,
+          "security_error": 0,
+          "sddl": null
+        }
+      },
+      "synthetic_histories": [
+        {
+          "path": "C:\\Users\\tofa-test\\.codex\\sessions\\2026\\10\\07\\rollout-2026-10-07T04-33-53-01a11624-3115-78b1-8b16-4b6e66dcc0e6.jsonl",
+          "exists": false
+        },
+        {
+          "path": "C:\\Users\\tofa-test\\.codex\\sessions\\2026\\10\\07\\rollout-2026-10-07T04-33-55-01a11624-3c2e-7900-9e5b-1c05634f63a5.jsonl",
+          "exists": true
+        }
+      ],
+      "separate_profile_result": "exited_without_window",
+      "same_profile_exit": 0,
+      "bridge_initializations": [
+        {
+          "main": false,
+          "ok": true
+        },
+        {
+          "main": true,
+          "ok": true
+        }
+      ]
+    }
+  },
+  "transport_progress_observed": false,
+  "transport_steps": [
+    {
+      "step": "protected_staging",
+      "started_after_seconds": 20.737,
+      "outcome": "passed",
+      "elapsed_seconds": 8.331
+    },
+    {
+      "step": "guest_preflight",
+      "started_after_seconds": 29.068,
+      "outcome": "passed",
+      "elapsed_seconds": 4.866
+    },
+    {
+      "step": "stage_request",
+      "started_after_seconds": 34.646,
+      "outcome": "passed",
+      "elapsed_seconds": 0.105
+    },
+    {
+      "step": "stage_probe",
+      "started_after_seconds": 34.751,
+      "outcome": "passed",
+      "elapsed_seconds": 0.125
+    },
+    {
+      "step": "stage_user",
+      "started_after_seconds": 34.876,
+      "outcome": "passed",
+      "elapsed_seconds": 0.1
+    },
+    {
+      "step": "stage_candidate",
+      "started_after_seconds": 34.976,
+      "outcome": "passed",
+      "elapsed_seconds": 13.359
+    },
+    {
+      "step": "stage_windows_candidate",
+      "started_after_seconds": 48.335,
+      "outcome": "passed",
+      "elapsed_seconds": 0.138
+    },
+    {
+      "step": "prepare_task",
+      "started_after_seconds": 48.473,
+      "outcome": "passed",
+      "elapsed_seconds": 3.917
+    },
+    {
+      "step": "native_task",
+      "started_after_seconds": 52.39,
+      "outcome": "passed",
+      "elapsed_seconds": 0.303
+    },
+    {
+      "step": "collect_task",
+      "started_after_seconds": 52.695,
+      "outcome": "passed",
+      "elapsed_seconds": 24.391
+    },
+    {
+      "step": "collect_native",
+      "started_after_seconds": 77.086,
+      "outcome": "passed",
+      "elapsed_seconds": 0.181
+    },
+    {
+      "step": "protected_staging",
+      "started_after_seconds": 77.464,
+      "outcome": "passed",
+      "elapsed_seconds": 2.089
+    },
+    {
+      "step": "guest_preflight",
+      "started_after_seconds": 79.554,
+      "outcome": "passed",
+      "elapsed_seconds": 3.065
+    },
+    {
+      "step": "stage_request",
+      "started_after_seconds": 82.62,
+      "outcome": "passed",
+      "elapsed_seconds": 0.159
+    },
+    {
+      "step": "stage_probe",
+      "started_after_seconds": 82.779,
+      "outcome": "passed",
+      "elapsed_seconds": 0.169
+    },
+    {
+      "step": "stage_user",
+      "started_after_seconds": 82.948,
+      "outcome": "passed",
+      "elapsed_seconds": 0.188
+    },
+    {
+      "step": "stage_windows_template_probe",
+      "started_after_seconds": 83.136,
+      "outcome": "passed",
+      "elapsed_seconds": 0.168
+    },
+    {
+      "step": "stage_windows_desktop_runtime",
+      "started_after_seconds": 83.304,
+      "outcome": "passed",
+      "elapsed_seconds": 0.212
+    },
+    {
+      "step": "stage_windows_desktop_bridge",
+      "started_after_seconds": 83.516,
+      "outcome": "passed",
+      "elapsed_seconds": 0.254
+    },
+    {
+      "step": "stage_windows_desktop_ui",
+      "started_after_seconds": 83.77,
+      "outcome": "passed",
+      "elapsed_seconds": 0.177
+    },
+    {
+      "step": "stage_windows_process",
+      "started_after_seconds": 83.946,
+      "outcome": "passed",
+      "elapsed_seconds": 0.151
+    },
+    {
+      "step": "stage_windows_process",
+      "started_after_seconds": 84.098,
+      "outcome": "passed",
+      "elapsed_seconds": 0.157
+    },
+    {
+      "step": "stage_windows_guardian_result",
+      "started_after_seconds": 84.254,
+      "outcome": "passed",
+      "elapsed_seconds": 0.149
+    },
+    {
+      "step": "stage_windows_template_transport",
+      "started_after_seconds": 84.403,
+      "outcome": "passed",
+      "elapsed_seconds": 0.148
+    },
+    {
+      "step": "stage_windows_ownership_experiment",
+      "started_after_seconds": 84.551,
+      "outcome": "passed",
+      "elapsed_seconds": 0.152
+    },
+    {
+      "step": "stage_windows_ownership_contract",
+      "started_after_seconds": 84.703,
+      "outcome": "passed",
+      "elapsed_seconds": 0.146
+    },
+    {
+      "step": "stage_windows_ownership_inspect",
+      "started_after_seconds": 84.849,
+      "outcome": "passed",
+      "elapsed_seconds": 0.154
+    },
+    {
+      "step": "prepare_task",
+      "started_after_seconds": 85.004,
+      "outcome": "passed",
+      "elapsed_seconds": 2.403
+    },
+    {
+      "step": "desktop_task",
+      "started_after_seconds": 87.407,
+      "outcome": "passed",
+      "elapsed_seconds": 0.206
+    },
+    {
+      "step": "collect_task",
+      "started_after_seconds": 87.612,
+      "outcome": "passed",
+      "elapsed_seconds": 102.797
+    },
+    {
+      "step": "collect_desktop",
+      "started_after_seconds": 190.409,
+      "outcome": "passed",
+      "elapsed_seconds": 0.166
+    }
+  ],
+  "guest_progress": {
+    "outcome": "collected",
+    "checkpoints": [
+      {
+        "stage": "user_started",
+        "elapsed_ms": 1
+      },
+      {
+        "stage": "package_discovered",
+        "elapsed_ms": 161
+      },
+      {
+        "stage": "engine_hashed",
+        "elapsed_ms": 519
+      },
+      {
+        "stage": "engine_discovered",
+        "elapsed_ms": 790
+      },
+      {
+        "stage": "native_probe_started",
+        "elapsed_ms": 797
+      },
+      {
+        "stage": "desktop_authentication",
+        "elapsed_ms": 797
+      },
+      {
+        "stage": "desktop_preparation",
+        "elapsed_ms": 1676
+      },
+      {
+        "stage": "desktop_startup",
+        "elapsed_ms": 4147
+      },
+      {
+        "stage": "desktop_permissions",
+        "elapsed_ms": 12278
+      },
+      {
+        "stage": "desktop_command",
+        "elapsed_ms": 22204
+      },
+      {
+        "stage": "desktop_quit",
+        "elapsed_ms": 44495
+      },
+      {
+        "stage": "desktop_cleanup",
+        "elapsed_ms": 49220
+      }
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "preserved": [
+    {
+      "uuid": "ef96cf12-d901-455f-81ff-4c5001e15f80",
+      "state": "stopped",
+      "expected": "stopped"
+    },
+    {
+      "uuid": "545c23dd-356d-434a-b2ae-48277320bf34",
+      "state": "started",
+      "expected": "started"
+    },
+    {
+      "uuid": "da6f9285-78ea-41e1-a284-c072a113471e",
+      "state": "stopped",
+      "expected": "stopped"
+    }
+  ],
+  "trial_clones_absent": true
+}

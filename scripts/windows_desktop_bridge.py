@@ -208,6 +208,10 @@ def main():
                                 and environments_safe(arguments.get('environments'))
                                 and result.get('approvalsReviewer') == 'auto_review'
                                 and result.get('approvalPolicy') == 'on-request' and sandbox_safe(result.get('sandbox')))
+                        if config.get('record_ownership') and owned and operation == 'thread/start':
+                            history = result.get('thread', {}).get('path')
+                            if isinstance(history, str) and ntpath.commonpath([ntpath.normcase(history), ntpath.normcase(str(Path.home() / '.codex/sessions'))]) == ntpath.normcase(str(Path.home() / '.codex/sessions')):
+                                record('synthetic_history', path=history)
                         ordinal = threads.get(thread_id, {}).get('ordinal', len(threads) + 1)
                         threads[thread_id] = {'ordinal': ordinal, 'safe': safe, 'model': result['model'],
                                               'environment_verified': environments_safe(arguments.get('environments')) and roots_safe(result.get('runtimeWorkspaceRoots', [])),

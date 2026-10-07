@@ -48,6 +48,21 @@ specific prerequisite failure are retained in the report. An app update may
 require another one-time desktop launch in the template to initialize its new
 engine cache; the runner never substitutes an older or standalone engine.
 
+## Bounded ownership experiment
+
+Use `--suite desktop-ownership --test-auth native-session --timeout 1800` for
+[#85's discovery/profile/IPC experiment](windows-ownership-evidence-2026-10-07.md).
+It reuses native readiness and desktop bridge smoke, then measures ordinary
+instance refusal, singleton/profile collision, pipe owner/ACL metadata and
+normal owned cleanup in the disposable clone. It uses only synthetic histories
+and the already authorized dedicated native account.
+
+A completed experiment records `desktop_ownership: blocked`; this is an explicit
+production gate, not Windows Token Factory qualification. Incomplete observations
+fail and retain the clone. The executable snapshot contract never authorizes
+launch, adoption or cleanup. See the evidence report for exact measured identities,
+commands, failures and the remaining atomic ownership requirement.
+
 ## Bounded desktop smoke
 
 The `desktop-smoke` suite passed fresh-clone ARM64 acceptance for #82; see
