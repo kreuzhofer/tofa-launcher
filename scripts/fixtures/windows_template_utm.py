@@ -161,6 +161,18 @@ elif args[:2] == ['file', 'pull'] and args[2].lower() == guest_uuid:
                 'checks': {key: True for key in ('authenticated', 'workspace_trusted', 'automatic_review', 'readiness_engine_exited',
                     'full_access_disabled', 'bridge_policy_preserved', 'bridge_initialized', 'desktop_started', 'desktop_permissions_configured', 'command_effect', 'normal_quit',
                     'owned_children_exited', 'cli_defaults_unchanged', 'vendor_service_preserved', 'diagnostics_written')}}
+            if state['mode'].startswith('atomic_'):
+                desktop['atomic_ownership'] = {
+                    'production_gate': 'blocked', 'stage': 'complete',
+                    'identity': {'package': desktop['identity']['package'], 'app_sha256': 'c'*64,
+                                 'engine_sha256': 'a'*64, 'asar_sha256': 'b'*64},
+                    'sources': [], 'checks': {'owned_apps_exited': True, 'cli_defaults_unchanged': True,
+                                              'vendor_service_preserved': True},
+                    'trials': [{'case': 'pipe_precreated', 'connected': True, 'client_pid': 101,
+                                'bytes_available': 84, 'admitted': False}],
+                    'blockers': ['unverified_native_pipe_connection', 'cross_user_session_unavailable']}
+                if state['mode'] == 'atomic_incomplete': desktop['atomic_ownership']['stage'] = 'pipe'
+                if state['mode'] == 'atomic_preservation_failed': desktop['atomic_ownership']['checks']['cli_defaults_unchanged'] = False
             if 'policy_preserved' in state.get('bridge_trial', {}): desktop['checks']['bridge_policy_preserved'] = state['bridge_trial']['policy_preserved']
             desktop['restrictions'] = {'native_visualization_roots': state.get('bridge_trial', {}).get('visualization_roots', 0), 'tool_registration_writes_refused': int(state.get('bridge_trial', {}).get('settings_rejected', False)),
                                        'unrelated_turns_refused': int(state.get('bridge_trial', {}).get('background_blocked', False))}

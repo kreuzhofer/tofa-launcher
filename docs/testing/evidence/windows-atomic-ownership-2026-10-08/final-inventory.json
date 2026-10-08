@@ -1,0 +1,43 @@
+{
+  "vms": [
+    {
+      "uuid": "545C23DD-356D-434A-B2AE-48277320BF34",
+      "state": "stopped",
+      "name": "Sabre Windows 11 ARM64"
+    },
+    {
+      "uuid": "EF96CF12-D901-455F-81FF-4C5001E15F80",
+      "state": "stopped",
+      "name": "tofa77 Windows ARM64 bridge prototype"
+    },
+    {
+      "uuid": "DA6F9285-78EA-41E1-A284-C072A113471E",
+      "state": "stopped",
+      "name": "tofa-run-021aba73795846689600b844b99dbbd1"
+    },
+    {
+      "uuid": "9071AD4D-C2CE-4510-9790-79DF20230CB9",
+      "state": "stopped",
+      "name": "Ubuntu Desktop ARM64 Testbed"
+    }
+  ],
+  "owned_experiment_clones_absent": true,
+  "cleanup": [
+    {
+      "run": "tofa-run-bb2c14b01e7e43ba80c882a5666fb386",
+      "record": {
+        "run": "tofa-run-bb2c14b01e7e43ba80c882a5666fb386",
+        "outcome": "deleted",
+        "already_absent": false
+      }
+    },
+    {
+      "run": "tofa-run-4bfff2134bcc4eabbd0575fd6916d152",
+      "record": {
+        "run": "tofa-run-4bfff2134bcc4eabbd0575fd6916d152",
+        "outcome": "deleted",
+        "already_absent": false
+      }
+    }
+  ]
+}

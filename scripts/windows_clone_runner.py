@@ -309,6 +309,7 @@ def run_clone(options, directory, report):
         nonlocal stage
         stage = name
         seconds = 1500 if name == 'desktop_smoke' and options.guided_catalog else STAGE_SECONDS[name]
+        if name == 'desktop_smoke' and options.suite == 'desktop-atomic-ownership': seconds = 900
         transport.deadline = min(work_deadline, time.monotonic() + seconds)
     stage_started = time.monotonic()
     def passed():
@@ -434,10 +435,11 @@ def run_clone(options, directory, report):
         report['capabilities']['native_sandbox'] = 'verified'
         passed()
         desktop_cases = ('smoke', 'allow', 'deny') if options.suite == 'desktop-guardian' else (
-            ('smoke',) if options.suite in ('desktop-smoke', 'desktop-ownership', 'desktop-catalog') else ())
+            ('smoke',) if options.suite in ('desktop-smoke', 'desktop-ownership', 'desktop-catalog', 'desktop-atomic-ownership') else ())
         for case in desktop_cases:
             begin('desktop_smoke' if case == 'smoke' else 'guardian_' + case)
-            print('Running desktop smoke...' if case == 'smoke' else 'Running live Guardian ' + case + ' case...', flush=True)
+            print('Running atomic ownership prototype...' if options.suite == 'desktop-atomic-ownership' else
+                  ('Running desktop smoke...' if case == 'smoke' else 'Running live Guardian ' + case + ' case...'), flush=True)
             desktop_run = 'tofa-run-' + uuid.uuid4().hex
             report['desktop_run'] = desktop_run
             save(directory / 'report.json', report)
@@ -446,11 +448,25 @@ def run_clone(options, directory, report):
             desktop_request = dict(request, run=desktop_run, workspace_run=report['run'], test_auth=options.test_auth,
                                    candidate=None, ownership_experiment=options.suite == 'desktop-ownership',
                                    catalog_experiment=options.suite == 'desktop-catalog')
+            if options.suite == 'desktop-atomic-ownership':
+                desktop_request['atomic_ownership_experiment'] = True
             if options.guided_catalog:
                 desktop_request['guided_catalog'] = True
                 print('Guided review: open UTM clone ' + report['run'] + '. Follow its Windows review console; allow up to 15 minutes for the human steps.', flush=True)
             if case != 'smoke': desktop_request['guardian_case'] = case
             desktop_task, desktop = transport.measure(desktop_request, desktop=True)
+            if options.suite == 'desktop-atomic-ownership':
+                if 'atomic_ownership' not in desktop: raise Failure('atomic_ownership_evidence_missing')
+                from windows_atomic_ownership_result import sanitize as sanitize_atomic
+                report['atomic_ownership'] = sanitize_atomic(desktop['atomic_ownership'])
+                report['capabilities']['desktop_ownership'] = 'blocked'
+                atomic = report['atomic_ownership']
+                if (atomic.get('stage') != 'complete' or any(atomic['checks'].get(key) is not True
+                        for key in ('owned_apps_exited', 'cli_defaults_unchanged', 'vendor_service_preserved'))):
+                    raise Failure('atomic_ownership_observation_failed')
+                # This throwaway experiment retains even negative findings for
+                # review. It cannot qualify a launch or dispose of the evidence.
+                raise Failure('atomic_ownership_blocked')
             result = sanitized_desktop(desktop)
             if case == 'smoke': report['desktop'] = result
             else: report.setdefault('guardian', {})[case] = result
@@ -524,7 +540,7 @@ def main():
     parser.add_argument('--version')
     parser.add_argument('--sha256')
     parser.add_argument('--candidate-commit')
-    parser.add_argument('--suite', choices=('native-smoke', 'desktop-smoke', 'desktop-guardian', 'desktop-ownership', 'desktop-catalog'), default='native-smoke')
+    parser.add_argument('--suite', choices=('native-smoke', 'desktop-smoke', 'desktop-guardian', 'desktop-ownership', 'desktop-catalog', 'desktop-atomic-ownership'), default='native-smoke')
     parser.add_argument('--test-auth', choices=('native-session',))
     parser.add_argument('--guided-catalog', action='store_true', help='guide a human through desktop-catalog setup and selection in the owned clone')
     parser.add_argument('--run', help='Exact owned run ID for explicit cleanup')

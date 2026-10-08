@@ -1,0 +1,5 @@
+{
+  "guest_probe_sha256": "e49528be9a9813ee248d96fb85af4a754e9c62127966452790318dcedb0fc6e9",
+  "guest_task_budget_seconds": 240,
+  "result": "guest_task_incomplete"
+}

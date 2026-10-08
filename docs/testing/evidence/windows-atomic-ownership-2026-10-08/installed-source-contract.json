@@ -1,0 +1,75 @@
+{
+  "bootstrap-C8gUBg5L.js": {
+    "sha256": "1f726d0e3103d81501551546d3b6e70f1fc10646f9326e00fe68605f144c5f4f",
+    "signals": [
+      {
+        "token": "requestSingleInstanceLock",
+        "character_offset": 2179495
+      },
+      {
+        "token": "requestSingleInstanceLock",
+        "character_offset": 2179565
+      },
+      {
+        "token": "requestSingleInstanceLock",
+        "character_offset": 2205045
+      },
+      {
+        "token": "EADDRINUSE",
+        "character_offset": 1719844
+      },
+      {
+        "token": "scheduleReconnect",
+        "character_offset": 1418686
+      },
+      {
+        "token": "scheduleReconnect",
+        "character_offset": 1432551
+      },
+      {
+        "token": "scheduleReconnect",
+        "character_offset": 1432571
+      },
+      {
+        "token": "scheduleReconnect",
+        "character_offset": 1436561
+      },
+      {
+        "token": "CODEX_ELECTRON_USER_DATA_PATH",
+        "character_offset": 2175003
+      },
+      {
+        "token": "CODEX_ELECTRON_USER_DATA_PATH",
+        "character_offset": 2204991
+      }
+    ]
+  },
+  "application-network-startup-BEAX-hka.js": {
+    "sha256": "634382c7af55d0ff57eb028aa4dd904130215c44fb559ea90a4f4035a5419f6e",
+    "signals": [
+      {
+        "token": "codex-ipc",
+        "character_offset": 273506
+      },
+      {
+        "token": "codex-ipc",
+        "character_offset": 273844
+      }
+    ]
+  },
+  "package_metadata": {
+    "name": "openai-codex-electron",
+    "version": "26.930.61225",
+    "engines": null,
+    "electron_dependency": "42.3.0"
+  },
+  "ipc_client": {
+    "source": "bootstrap-C8gUBg5L.js",
+    "sha256": "1f726d0e3103d81501551546d3b6e70f1fc10646f9326e00fe68605f144c5f4f",
+    "character_offset": 1720415,
+    "connect_offset": 1722505,
+    "close_reconnect_offset": 1723481,
+    "reconnect_mechanism": "close handler schedules this.connect using setTimeout",
+    "authentication_observation": "initialize sends clientType; no launcher nonce or peer identity validation in inspected connection path"
+  }
+}

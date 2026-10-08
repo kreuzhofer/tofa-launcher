@@ -63,6 +63,15 @@ fail and retain the clone. The executable snapshot contract never authorizes
 launch, adoption or cleanup. See the evidence report for exact measured identities,
 commands, failures and the remaining atomic ownership requirement.
 
+## Throwaway atomic ownership experiment
+
+On the `prototype/windows-atomic-ownership-102` branch, `--suite
+desktop-atomic-ownership --test-auth native-session --timeout 1800` runs the
+throwaway [atomic ownership experiment](windows-atomic-ownership-evidence-2026-10-08.md).
+It always refuses production admission and retains its owned clone for evidence
+review, including a completed negative finding. This suite does not qualify
+desktop or Guardian support.
+
 ## Bounded catalog experiment
 
 Use `--suite desktop-catalog --test-auth native-session --timeout 1800` for

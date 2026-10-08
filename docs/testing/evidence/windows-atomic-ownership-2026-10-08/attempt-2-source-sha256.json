@@ -1,0 +1,10 @@
+{
+  "windows_atomic_ownership_prototype.py": "c5795d96a890eff2715119bc2c34924dd4b6b827b9e0f6c869b3d70b23353fb2",
+  "windows_atomic_ownership_result.py": "ed110397f33d796dffbd651b8a70f41dfd01f2bd978292aa35dd07f0c6b33705",
+  "windows_clone_runner.py": "7092fe4fdfba9326a8d864e1659dafdece230332dcee9b8e86b736f460a07d7f",
+  "windows_template_transport.py": "5548205ad7c2feec32fe158edc7f94aed0e7faf3720e6859be59eb471be4f181",
+  "windows_desktop_bridge.py": "89abf2ba5222ff9eacb1c1530a9fd922987fa89f311b5feada6bf170326f3ca1",
+  "windows_ownership_inspect.ps1": "7f0ffd00c1476f9086a79bc625d0b52fb321de058941a87bffebefca6e5dda40",
+  "windows_process.py": "2cfd5d132feecdb23beefc2ca6285ddc0673cff70432d7d7159272edc8d5b8dd",
+  "windows_process.cs": "2d82a8a187bb1461c12ef4ec7aea23f143eda67581ea7c625ce592677980de2c"
+}

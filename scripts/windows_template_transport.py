@@ -134,7 +134,7 @@ class Transport:
 
     def measure_task(self, request, candidate=None, desktop=False):
         guided = desktop and request.get('guided_catalog') is True
-        task_seconds = 1200 if guided else TASK_EXECUTION_SECONDS
+        task_seconds = 1200 if guided else (600 if request.get('atomic_ownership_experiment') else TASK_EXECUTION_SECONDS)
         root = 'C:\\Users\\Public\\' + request['run']
         here = Path(__file__).parent
         files = {'\\request.json': json.dumps(request).encode(),
@@ -142,6 +142,8 @@ class Transport:
                  '\\user.ps1': (here / 'windows_template_user.ps1').read_text().replace('__ROOT__', root).encode('utf-8')}
         if desktop:
             files['\\probe.py'] = (here / 'windows_desktop_probe.py').read_bytes()
+            if request.get('atomic_ownership_experiment'):
+                files['\\probe.py'] = (here / 'windows_atomic_ownership_prototype.py').read_bytes()
             files['\\windows_template_probe.py'] = (here / 'windows_template_probe.py').read_bytes()
             files['\\user.ps1'] = files['\\user.ps1'].replace(b"phase='native'", b"phase='desktop'")
             for name in ('windows_desktop_runtime.py', 'windows_desktop_bridge.py', 'windows_desktop_ui.ps1',

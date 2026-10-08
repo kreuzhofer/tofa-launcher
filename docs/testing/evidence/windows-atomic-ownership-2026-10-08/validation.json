@@ -1,0 +1,42 @@
+{
+  "python_tests": {
+    "windows_atomic_ownership_test.py": {
+      "passed": 5
+    },
+    "windows_desktop_test.py": {
+      "passed": 34
+    },
+    "windows_run_test.py": {
+      "passed": 41
+    },
+    "windows_template_test.py": {
+      "passed": 26
+    },
+    "windows_catalog_test.py": {
+      "passed": 18
+    }
+  },
+  "syntax": "passed using ast.parse (default py_compile cache is sandbox-protected)",
+  "whitespace": "git diff --check passed",
+  "standards_review": {
+    "resolved": 3,
+    "remaining": 0
+  },
+  "spec_review": {
+    "failure_retention_resolved": true,
+    "negative_outcome_defects_remaining": 0,
+    "positive_qualification": "not established"
+  },
+  "native": {
+    "attempt_1": "guest_task_incomplete at 240-second budget",
+    "attempt_2": "complete negative finding; atomic_ownership_blocked; preservation checks passed",
+    "normal_ui_quit": "not established; owned supervisors terminated app trees",
+    "cross_user_sessions": "untested",
+    "provider_request_counts": "unmeasured",
+    "runtime_source_mapping": "declared Electron version only"
+  },
+  "auxiliary_source_collection": {
+    "full_archive_transfer": "30-second timeout; bounded guest excerpts used",
+    "ipc_excerpt_initial_attempts": "60- and 30-second timeouts because reader assumed a scheduleReconnect method after IpcClient; corrected to inspect direct close-handler timer"
+  }
+}
