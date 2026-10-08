@@ -1,0 +1,19 @@
+{
+  "fixed_point": "c5a69e0cbdcb8597656515295a6300d3cdaaed47",
+  "initial_reviewed_commit": "3623355d3647e66ea3bbcd5c8da943bd0c661abb",
+  "axes": {
+    "standards": {
+      "remaining_findings": 0,
+      "resolved": [
+        "Corrected report stage count from 12 to the 11 passed stages in evidence."
+      ]
+    },
+    "spec": {
+      "remaining_findings": 0,
+      "resolved": [
+        "Verified the corrected stage count; scoped #104 requirements satisfied."
+      ]
+    }
+  },
+  "correction_scope": "Documentation count only; runtime and recorded measurements unchanged."
+}
