@@ -169,6 +169,53 @@ The standalone source fingerprint command is:
 python3 scripts/windows_atomic_ownership_prototype.py --inspect-asar /path/to/app.asar
 ```
 
+## Follow-up design decisions
+
+On 2026-10-08, the maintainer confirmed that the next launcher release proceeds
+independently of Windows desktop integration. Windows desktop remains disabled
+until a safe route is demonstrated and the existing qualification gates are met;
+#87 remains blocked. This release-priority decision does not change the accepted
+ordinary-profile/history requirements or establish an alternative launch route.
+
+The maintainer's preferred Windows development workflow uses one persistent
+Windows environment. Resetting or reinstalling it is not the default for each
+development iteration. The Windows developer runs locally inside Windows and
+owns native implementation, debugging and qualification. Use isolated test state
+only when a specific installation, recovery or destructive lifecycle test needs
+it; preserve the normal development environment. A clean installation test needs
+a verified initial state, not a routine OS reinstall.
+
+This operating decision supersedes the routine clone-per-run workflow in #78
+and the corresponding environment assumptions in #77/#102. Those tickets and
+their historical evidence retain their product, identity, preservation and
+qualification requirements. Existing disposable-runner infrastructure remains
+available for tests that actually need it.
+
+macOS and Windows development share one launcher version. Platform work and
+release coordination use tickets, with the macOS side coordinating the final
+release. The existing CI pipeline remains suitable for building the shared
+artifacts; coordination does not require every artifact to be built on macOS.
+Each platform owner records qualification of the exact release candidate in
+their ticket, and the macOS coordinator records the combined release-readiness
+decision. Shared-code changes require checks on both platforms; platform-specific
+work stays with its owner. Publishing an experimental candidate and declaring
+product qualification remain separate steps under the existing release workflow.
+
+The maintainer authorized removal of disposable Windows test clones and chose
+to keep both `Sabre Windows 11 ARM64` and `tofa77 Windows ARM64 bridge prototype`
+for now. The remaining retained `tofa-run-021aba73795846689600b844b99dbbd1` clone
+was removed through the public runner cleanup command; its local reports remain.
+
+Confirmed follow-up work is tracked in:
+
+- [#103: Persistent Windows-local development and baseline](https://github.com/kreuzhofer/tofa-launcher/issues/103).
+- [#104: Shared candidate preparation and macOS qualification](https://github.com/kreuzhofer/tofa-launcher/issues/104).
+- [#105: Windows qualification of that candidate](https://github.com/kreuzhofer/tofa-launcher/issues/105), blocked by #103 and #104.
+- [#106: Combined release-readiness decision](https://github.com/kreuzhofer/tofa-launcher/issues/106), blocked by #104 and #105.
+
+The first two tickets can start independently. No new candidate version or
+stable-release promotion was selected by this operating-model decision.
+
 ## Required upstream contract — draft, not sent
 
 Can the Windows desktop expose a supported acquisition and lifetime contract for
