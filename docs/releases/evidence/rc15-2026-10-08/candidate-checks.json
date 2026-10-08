@@ -1,0 +1,14 @@
+[
+  {
+    "name": "candidate-lifecycle",
+    "exit_code": 0,
+    "seconds": 4.132,
+    "test_count": 4
+  },
+  {
+    "name": "candidate-terminal",
+    "exit_code": 0,
+    "seconds": 0.6,
+    "test_count": 2
+  }
+]

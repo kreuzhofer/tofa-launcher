@@ -1,0 +1,20 @@
+{
+  "source_commit": "28557a88ab46f00da4a936f644f7423658d9f70f",
+  "tag": "v0.1.0-rc.15",
+  "host": {
+    "os": "macOS",
+    "version": "26.7",
+    "architecture": "arm64"
+  },
+  "client": {
+    "version": "codex-cli 0.160.1",
+    "sha256": "09fa44fdc37a5fc70dc1ace31235f90468a2e193d0e85f7552eab068ea2582be"
+  },
+  "toolchain": "go version go1.27.1 darwin/arm64",
+  "runner_hashes": {
+    "qualify_macos.py": "e53017ceba861371e9e163c5bc9f030038680381e890ea2c8bd32b9af0d91876",
+    "qualification_pair.py": "6e5de700dba7858b8f916d76152dba21b49ce88172fa5f9fb053db9606807a5f",
+    "live_compat.py": "66e03046115af949ea7c974f88a62b1d7b3e15013b22341a6fe44e9d5ceeca7c",
+    "live_macos.py": "70c119ce8510844e9d9c3960f94df45158b529b836d8529080f42510fb8ca9a2"
+  }
+}

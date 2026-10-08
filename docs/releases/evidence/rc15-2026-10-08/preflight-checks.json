@@ -1,0 +1,48 @@
+[
+  {
+    "name": "vet",
+    "command": [
+      "go",
+      "vet",
+      "./..."
+    ],
+    "exit_code": 0,
+    "seconds": 1.03
+  },
+  {
+    "name": "release",
+    "command": [
+      "python3",
+      "scripts/release_test.py",
+      "-v"
+    ],
+    "exit_code": 0,
+    "seconds": 3.226,
+    "test_count": 6
+  },
+  {
+    "name": "selection",
+    "command": [
+      "go",
+      "test",
+      "./internal/tofa",
+      "-run",
+      "Test.*(Selection|Supported|Verification|Experimental)",
+      "-count=1"
+    ],
+    "exit_code": 0,
+    "seconds": 8.994
+  },
+  {
+    "name": "installed-client",
+    "command": [
+      "python3",
+      "scripts/evaluation_client_test.py",
+      "InstalledEvaluationTests.test_release_qualification_pair_uses_native_tools_and_approval_gates",
+      "-v"
+    ],
+    "exit_code": 0,
+    "seconds": 7.723,
+    "test_count": 1
+  }
+]

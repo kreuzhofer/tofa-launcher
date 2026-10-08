@@ -1,0 +1,13 @@
+{
+  "runner_commit": "28557a88ab46f00da4a936f644f7423658d9f70f",
+  "limits": {
+    "total_requests": 24,
+    "output_tokens_per_request": 4096,
+    "coding_turn_seconds": 180,
+    "guardian_turn_seconds": 120
+  },
+  "runner_exit": 0,
+  "original_config_unchanged": true,
+  "original_key_unchanged": true,
+  "disposable_config_removed": true
+}

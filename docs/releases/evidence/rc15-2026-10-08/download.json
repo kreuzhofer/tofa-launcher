@@ -1,0 +1,30 @@
+{
+  "tag": "v0.1.0-rc.15",
+  "source_commit": "28557a88ab46f00da4a936f644f7423658d9f70f",
+  "release_url": "https://github.com/kreuzhofer/tofa-launcher/releases/tag/v0.1.0-rc.15",
+  "release_id": 406993979,
+  "prerelease": true,
+  "published_at": "2026-10-08T15:38:15Z",
+  "ci_run": 37799706567,
+  "all_published_assets_match_checked_ci_bundle": true,
+  "manifest_sha256": "daf9f997eb0c6c50424aed4482da3d3251116be3d782077c7dd0a8319f241da2",
+  "verified_assets": {
+    "LICENSE": "796a0cd7abc80802b9d2692b7b5a606f14babdd4fed054903af045b56d7997f6",
+    "LICENSE-CODEX.txt": "d17f227e4df5da1600391338865ce0f3055211760a36688f816941d58232d8dc",
+    "LICENSE-GO.txt": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+    "NOTICE-CODEX.txt": "9d71575ecfd9a843fc1677b0efb08053c6ba9fd686a0de1a6f5382fd3c220915",
+    "PATENTS-GO.txt": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc",
+    "README.md": "9af52a1224c31cfa7b135948aa57a79090e4146281f67c8d5c6cbeb0f1a578bd",
+    "THIRD_PARTY_NOTICES.txt": "dad7f088af26b7c74156dbf9c46d51a8da22eec4f1a4048e75a357058fbee468",
+    "install.ps1": "950b62b3266ef2d1dc4dc395f21c5e2140b14b5eaa48a7a0b9ca689a2ea81c9b",
+    "install.sh": "1a288a20700dfbb7e57272e94730ae1f08ee73641eb3b5854d95ed7f481fc724",
+    "tofa_v0.1.0-rc.15_darwin_amd64": "6716bfdbf350de9b29037299244b37bc116192f4aacb6d95133fb4a5a29e667f",
+    "tofa_v0.1.0-rc.15_darwin_arm64": "e77aabb93284ae08fae443dce6b3a100cc5d39f1a256af531e499b45f9ed09d4",
+    "tofa_v0.1.0-rc.15_linux_amd64": "6e80b8bd6c79ee64b9d7335fe7146a05e82f0e38d7a6c61dce47f0c2f7914caa",
+    "tofa_v0.1.0-rc.15_linux_arm64": "ea673ef50880da223d9e7bf044bcfe6e514f52dcab07ebe40b9e56439a47af5e",
+    "tofa_v0.1.0-rc.15_windows_amd64.exe": "1e93eceac7ee04b6a383ff698d614705b2e05b23269e9d62942d57acd6f495d8",
+    "tofa_v0.1.0-rc.15_windows_arm64.exe": "71b7226561aedbdefcb3091945b564893bdb73904646d886630ea14bd743c335",
+    "uninstall.ps1": "0b0a63484262720ecd8f38e748c9fac9913c8cf2d39ac945729e9c66c846a82b",
+    "uninstall.sh": "692fd1469d5d03d9fb1bbefbb829cb0b4c3bb2437be67feb87d2ec4745d00089"
+  }
+}

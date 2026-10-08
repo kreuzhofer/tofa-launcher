@@ -1,0 +1,63 @@
+[
+  {
+    "asset": "tofa_v0.1.0-rc.15_darwin_amd64",
+    "go_version": "go1.27.1",
+    "module_version": "v0.1.0-rc.15",
+    "os": "darwin",
+    "architecture": "amd64",
+    "source_commit": "28557a88ab46f00da4a936f644f7423658d9f70f",
+    "source_modified": false,
+    "file_type": "Mach-O 64-bit executable x86_64"
+  },
+  {
+    "asset": "tofa_v0.1.0-rc.15_darwin_arm64",
+    "go_version": "go1.27.1",
+    "module_version": "v0.1.0-rc.15",
+    "os": "darwin",
+    "architecture": "arm64",
+    "source_commit": "28557a88ab46f00da4a936f644f7423658d9f70f",
+    "source_modified": false,
+    "file_type": "Mach-O 64-bit executable arm64",
+    "native_version_output": "tofa v0.1.0-rc.15"
+  },
+  {
+    "asset": "tofa_v0.1.0-rc.15_linux_amd64",
+    "go_version": "go1.27.1",
+    "module_version": "v0.1.0-rc.15",
+    "os": "linux",
+    "architecture": "amd64",
+    "source_commit": "28557a88ab46f00da4a936f644f7423658d9f70f",
+    "source_modified": false,
+    "file_type": "ELF 64-bit LSB executable, x86-64, version 1 (SYSV), statically linked, Go BuildID=8vV6Ne9G4y0gmqhULgC9/6An_-fJ6qKDTJ-1v7AsD/ZQ37tJW2YqldDDMnd0pJ/nYgjGWeHh1O4TAMdcdOR, BuildID[sha1]=ebcea20f15687a91de9d9a29da5f9247fd0fc601, with debug_info, not stripped"
+  },
+  {
+    "asset": "tofa_v0.1.0-rc.15_linux_arm64",
+    "go_version": "go1.27.1",
+    "module_version": "v0.1.0-rc.15",
+    "os": "linux",
+    "architecture": "arm64",
+    "source_commit": "28557a88ab46f00da4a936f644f7423658d9f70f",
+    "source_modified": false,
+    "file_type": "ELF 64-bit LSB executable, ARM aarch64, version 1 (SYSV), statically linked, Go BuildID=Hoy2weyE59G0F2QCVOIQ/2d_wpFZ0eyFV1mvXnyea/D7r8QvlQ1Vh3v-Qkpb7D/8kRcyyjTNSgSzxKYjzQp, BuildID[sha1]=ce895a783a8e8c36233e70bf985d3eb2325a9e83, with debug_info, not stripped"
+  },
+  {
+    "asset": "tofa_v0.1.0-rc.15_windows_amd64.exe",
+    "go_version": "go1.27.1",
+    "module_version": "v0.1.0-rc.15",
+    "os": "windows",
+    "architecture": "amd64",
+    "source_commit": "28557a88ab46f00da4a936f644f7423658d9f70f",
+    "source_modified": false,
+    "file_type": "PE32+ executable (console) x86-64, for MS Windows"
+  },
+  {
+    "asset": "tofa_v0.1.0-rc.15_windows_arm64.exe",
+    "go_version": "go1.27.1",
+    "module_version": "v0.1.0-rc.15",
+    "os": "windows",
+    "architecture": "arm64",
+    "source_commit": "28557a88ab46f00da4a936f644f7423658d9f70f",
+    "source_modified": false,
+    "file_type": "PE32+ executable (console) Aarch64, for MS Windows"
+  }
+]

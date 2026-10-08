@@ -1,0 +1,17 @@
+[
+  {
+    "operation": "candidate_offline_checks",
+    "outcome": "incomplete",
+    "reason": "artifact_download_still_running_manifest_absent",
+    "lifecycle_started": false,
+    "inference_requests": 0,
+    "resolution": "wait_for_download_completion_before_retry"
+  },
+  {
+    "operation": "binary_metadata_audit",
+    "outcome": "incomplete",
+    "reason": "audit_assumed_ldflags_were_present_in_go_version_metadata",
+    "inference_requests": 0,
+    "resolution": "verify_actual_module_version_source_revision_and_native_version_output"
+  }
+]

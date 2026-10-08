@@ -1,0 +1,206 @@
+[
+  {
+    "name": "go-race",
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "./..."
+    ],
+    "exit_code": 0,
+    "seconds": 289.214,
+    "skipped_count": 0
+  },
+  {
+    "name": "build",
+    "command": [
+      "python3",
+      "scripts/build_test.py",
+      "-v"
+    ],
+    "exit_code": 0,
+    "seconds": 12.781,
+    "test_count": 6,
+    "skipped_count": 0
+  },
+  {
+    "name": "install",
+    "command": [
+      "python3",
+      "scripts/install_test.py",
+      "-v"
+    ],
+    "exit_code": 0,
+    "seconds": 0.691,
+    "test_count": 2,
+    "skipped_count": 0
+  },
+  {
+    "name": "picker",
+    "command": [
+      "python3",
+      "scripts/picker_test.py",
+      "-v"
+    ],
+    "exit_code": 0,
+    "seconds": 34.795,
+    "test_count": 40,
+    "skipped_count": 0
+  },
+  {
+    "name": "live_compat",
+    "command": [
+      "python3",
+      "scripts/live_compat_test.py",
+      "-v"
+    ],
+    "exit_code": 0,
+    "seconds": 86.968,
+    "test_count": 20,
+    "skipped_count": 0
+  },
+  {
+    "name": "trace_codex",
+    "command": [
+      "python3",
+      "scripts/trace_codex_test.py",
+      "-v"
+    ],
+    "exit_code": 0,
+    "seconds": 6.681,
+    "test_count": 6,
+    "skipped_count": 0
+  },
+  {
+    "name": "model_evaluation",
+    "command": [
+      "python3",
+      "scripts/model_evaluation_test.py",
+      "-v"
+    ],
+    "exit_code": 0,
+    "seconds": 13.933,
+    "test_count": 39,
+    "skipped_count": 0
+  },
+  {
+    "name": "evaluation_proxy",
+    "command": [
+      "python3",
+      "scripts/evaluation_proxy_test.py",
+      "-v"
+    ],
+    "exit_code": 0,
+    "seconds": 15.523,
+    "test_count": 15,
+    "skipped_count": 0
+  },
+  {
+    "name": "desktop_evaluation",
+    "command": [
+      "python3",
+      "scripts/desktop_evaluation_test.py",
+      "-v"
+    ],
+    "exit_code": 0,
+    "seconds": 2.884,
+    "test_count": 23,
+    "skipped_count": 16
+  },
+  {
+    "name": "qualify_macos",
+    "command": [
+      "python3",
+      "scripts/qualify_macos_test.py",
+      "-v"
+    ],
+    "exit_code": 0,
+    "seconds": 81.497,
+    "test_count": 22,
+    "skipped_count": 0
+  },
+  {
+    "name": "windows_template",
+    "command": [
+      "python3",
+      "scripts/windows_template_test.py",
+      "-v"
+    ],
+    "exit_code": 0,
+    "seconds": 25.007,
+    "test_count": 26,
+    "skipped_count": 0
+  },
+  {
+    "name": "windows_run",
+    "command": [
+      "python3",
+      "scripts/windows_run_test.py",
+      "-v"
+    ],
+    "exit_code": 0,
+    "seconds": 89.334,
+    "test_count": 41,
+    "skipped_count": 0
+  },
+  {
+    "name": "windows_desktop",
+    "command": [
+      "python3",
+      "scripts/windows_desktop_test.py",
+      "-v"
+    ],
+    "exit_code": 0,
+    "seconds": 142.53,
+    "test_count": 34,
+    "skipped_count": 0
+  },
+  {
+    "name": "windows_catalog",
+    "command": [
+      "python3",
+      "scripts/windows_catalog_test.py",
+      "-v"
+    ],
+    "exit_code": 0,
+    "seconds": 35.007,
+    "test_count": 18,
+    "skipped_count": 0
+  },
+  {
+    "name": "windows_guardian",
+    "command": [
+      "python3",
+      "scripts/windows_guardian_test.py",
+      "-v"
+    ],
+    "exit_code": 0,
+    "seconds": 73.174,
+    "test_count": 9,
+    "skipped_count": 0
+  },
+  {
+    "name": "windows_ownership",
+    "command": [
+      "python3",
+      "scripts/windows_ownership_test.py",
+      "-v"
+    ],
+    "exit_code": 0,
+    "seconds": 0.398,
+    "test_count": 7,
+    "skipped_count": 0
+  },
+  {
+    "name": "desktop_picker",
+    "command": [
+      "python3",
+      "scripts/desktop_picker_test.py",
+      "-v"
+    ],
+    "exit_code": 0,
+    "seconds": 0.072,
+    "test_count": 21,
+    "skipped_count": 21
+  }
+]

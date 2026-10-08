@@ -1,0 +1,886 @@
+{
+  "schema_version": 1,
+  "candidate": {
+    "tag": "v0.1.0-rc.15",
+    "commit": "28557a88ab46f00da4a936f644f7423658d9f70f",
+    "download_boundary": "host-downloaded transfer",
+    "binary_sha256": "e77aabb93284ae08fae443dce6b3a100cc5d39f1a256af531e499b45f9ed09d4",
+    "scripts_sha256": {
+      "install.sh": "1a288a20700dfbb7e57272e94730ae1f08ee73641eb3b5854d95ed7f481fc724",
+      "uninstall.sh": "692fd1469d5d03d9fb1bbefbb829cb0b4c3bb2437be67feb87d2ec4745d00089"
+    }
+  },
+  "host": {
+    "os": "Darwin",
+    "arch": "arm64",
+    "release": "26.7"
+  },
+  "operator": "agent",
+  "client": {
+    "version": "codex-cli 0.160.1"
+  },
+  "backend": "keyring",
+  "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+  "guardian_model": "zai-org/GLM-5.3-Flash",
+  "started_utc": "2026-10-08T15:41:37Z",
+  "stages": [
+    {
+      "name": "preflight",
+      "status": "passed"
+    },
+    {
+      "name": "recovery",
+      "status": "passed"
+    },
+    {
+      "name": "download",
+      "status": "passed"
+    },
+    {
+      "name": "install",
+      "status": "passed"
+    },
+    {
+      "name": "login",
+      "status": "passed"
+    },
+    {
+      "name": "fresh_terminal",
+      "status": "passed"
+    },
+    {
+      "name": "live",
+      "status": "passed"
+    },
+    {
+      "name": "uninstall",
+      "status": "passed"
+    },
+    {
+      "name": "reinstall",
+      "status": "passed"
+    },
+    {
+      "name": "saved_login_reuse",
+      "status": "passed"
+    },
+    {
+      "name": "purge",
+      "status": "passed"
+    }
+  ],
+  "preservation": {
+    "baseline_recorded": true,
+    "codex_config": true,
+    "codex_auth": true,
+    "unrelated_config": true,
+    "unrelated_installation": true,
+    "shell_settings": true
+  },
+  "cleanup": {
+    "scratch_removed": true,
+    "binary_removed": true,
+    "ownership_removed": true,
+    "path_entries_removed": true,
+    "configuration_removed": true,
+    "file_credentials_removed": true,
+    "vault_credentials_removed": true
+  },
+  "outcome": "passed",
+  "existing_state": {
+    "installation": false,
+    "configuration": false,
+    "file_credentials": false,
+    "vault_references": false
+  },
+  "live": {
+    "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+    "guardian_model": "zai-org/GLM-5.3-Flash",
+    "support_status": "Experimental",
+    "request_limit": 12,
+    "output_tokens_per_request": 4096,
+    "coding_turn_seconds": 180,
+    "guardian_turn_seconds": 120,
+    "approvals": [
+      {
+        "case": "allow",
+        "model": "zai-org/GLM-5.3-Flash",
+        "main_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+        "guardian_assessment_ms": 1916.584,
+        "expected_decision": "allow",
+        "decisions": [
+          "allow"
+        ],
+        "command_executed": true,
+        "elapsed_ms": 3659.621,
+        "exit_code": 0,
+        "timed_out": false,
+        "scratch_settings_preserved": true,
+        "requests": [
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          },
+          {
+            "kind": "automatic_review",
+            "status": 200,
+            "reasoning_effort": "none",
+            "model": "zai-org/GLM-5.3-Flash",
+            "role": "guardian",
+            "paid_inference": true,
+            "request_id": 8,
+            "tool_results": 0,
+            "completed": true,
+            "text_deltas": 1,
+            "tool_deltas": 0,
+            "headers_ms": 465.69,
+            "first_delta_ms": 1901.804,
+            "completed_ms": 1915.633,
+            "decision": "allow",
+            "started_ms": 94.657,
+            "stage": "client_write",
+            "usage": {
+              "input_tokens": 8628,
+              "output_tokens": 89
+            },
+            "review_tool_calls": 0,
+            "assessment_source": "completed_output",
+            "ended_ms": 2011.241
+          },
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          }
+        ],
+        "metadata_warning": false,
+        "turn_completed": true,
+        "client_error": false,
+        "output_limit": false,
+        "harness_defect": false,
+        "failures": [],
+        "passed": true
+      },
+      {
+        "case": "deny",
+        "model": "zai-org/GLM-5.3-Flash",
+        "main_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+        "guardian_assessment_ms": 4260.572,
+        "expected_decision": "deny",
+        "decisions": [
+          "deny"
+        ],
+        "command_executed": false,
+        "elapsed_ms": 6055.918,
+        "exit_code": 0,
+        "timed_out": false,
+        "scratch_settings_preserved": true,
+        "requests": [
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          },
+          {
+            "kind": "automatic_review",
+            "status": 200,
+            "reasoning_effort": "none",
+            "model": "zai-org/GLM-5.3-Flash",
+            "role": "guardian",
+            "paid_inference": true,
+            "request_id": 9,
+            "tool_results": 0,
+            "completed": true,
+            "text_deltas": 13,
+            "tool_deltas": 0,
+            "headers_ms": 611.951,
+            "first_delta_ms": 4006.315,
+            "completed_ms": 4259.212,
+            "decision": "deny",
+            "started_ms": 96.34,
+            "stage": "client_write",
+            "usage": {
+              "input_tokens": 8661,
+              "output_tokens": 264
+            },
+            "review_tool_calls": 0,
+            "assessment_source": "completed_output",
+            "ended_ms": 4356.912
+          },
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          }
+        ],
+        "metadata_warning": false,
+        "turn_completed": true,
+        "client_error": false,
+        "output_limit": false,
+        "harness_defect": false,
+        "failures": [],
+        "passed": true
+      }
+    ],
+    "passed": true,
+    "coding": {
+      "turns": [
+        {
+          "exit_code": 0,
+          "tools_succeeded": 3,
+          "turn_completed": true,
+          "client_error": false,
+          "metadata_warning": false,
+          "timed_out": false,
+          "reasoning_items": 0,
+          "answer_items": 2,
+          "reasoning_output_tokens": 16,
+          "elapsed_ms": 6458.67,
+          "file_checks": {
+            "summary_status": "object",
+            "unexpected_field_count": 0,
+            "expected_fields_match": {
+              "count": true,
+              "total": true,
+              "max": true
+            },
+            "input_preserved": true
+          },
+          "files_correct": true,
+          "streams": [
+            {
+              "kind": "task",
+              "status": 200,
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 1,
+              "tool_results": 0,
+              "completed": true,
+              "text_deltas": 3,
+              "tool_deltas": 2,
+              "headers_ms": 514.876,
+              "first_delta_ms": 735.269,
+              "completed_ms": 896.566,
+              "decision": null,
+              "started_ms": 101.029,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 7882,
+                "output_tokens": 48
+              },
+              "ended_ms": 998.506
+            },
+            {
+              "kind": "task",
+              "status": 200,
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 2,
+              "tool_results": 1,
+              "completed": true,
+              "text_deltas": 0,
+              "tool_deltas": 8,
+              "headers_ms": 784.914,
+              "first_delta_ms": 1206.91,
+              "completed_ms": 1322.043,
+              "decision": null,
+              "started_ms": 1090.713,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 7989,
+                "output_tokens": 81
+              },
+              "ended_ms": 2415.304
+            },
+            {
+              "kind": "task",
+              "status": 200,
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 3,
+              "tool_results": 2,
+              "completed": true,
+              "text_deltas": 0,
+              "tool_deltas": 21,
+              "headers_ms": 572.862,
+              "first_delta_ms": 743.55,
+              "completed_ms": 990.898,
+              "decision": null,
+              "started_ms": 2501.561,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 8135,
+                "output_tokens": 148
+              },
+              "ended_ms": 3495.039
+            },
+            {
+              "kind": "task",
+              "status": 200,
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 4,
+              "tool_results": 3,
+              "completed": true,
+              "text_deltas": 18,
+              "tool_deltas": 0,
+              "headers_ms": 700.38,
+              "first_delta_ms": 893.879,
+              "completed_ms": 1080.041,
+              "decision": null,
+              "started_ms": 3665.434,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 8349,
+                "output_tokens": 79
+              },
+              "ended_ms": 4746.427
+            }
+          ],
+          "streaming_observed": true,
+          "passed": true
+        },
+        {
+          "exit_code": 0,
+          "tools_succeeded": 2,
+          "turn_completed": true,
+          "client_error": false,
+          "metadata_warning": false,
+          "timed_out": false,
+          "reasoning_items": 0,
+          "answer_items": 1,
+          "reasoning_output_tokens": 33,
+          "elapsed_ms": 8392.477,
+          "file_checks": {
+            "summary_status": "object",
+            "unexpected_field_count": 0,
+            "expected_fields_match": {
+              "count": true,
+              "total": true,
+              "max": true,
+              "min": true,
+              "average": true
+            },
+            "input_preserved": true
+          },
+          "files_correct": true,
+          "streams": [
+            {
+              "kind": "task",
+              "status": 200,
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 5,
+              "tool_results": 3,
+              "completed": true,
+              "text_deltas": 0,
+              "tool_deltas": 9,
+              "headers_ms": 2783.246,
+              "first_delta_ms": 3820.782,
+              "completed_ms": 3940.222,
+              "decision": null,
+              "started_ms": 60.158,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 8493,
+                "output_tokens": 97
+              },
+              "ended_ms": 4001.751
+            },
+            {
+              "kind": "task",
+              "status": 200,
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 6,
+              "tool_results": 4,
+              "completed": true,
+              "text_deltas": 0,
+              "tool_deltas": 25,
+              "headers_ms": 538.965,
+              "first_delta_ms": 1054.944,
+              "completed_ms": 1215.335,
+              "decision": null,
+              "started_ms": 4106.968,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 8668,
+                "output_tokens": 173
+              },
+              "ended_ms": 5323.51
+            },
+            {
+              "kind": "task",
+              "status": 200,
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 7,
+              "tool_results": 5,
+              "completed": true,
+              "text_deltas": 21,
+              "tool_deltas": 0,
+              "headers_ms": 702.577,
+              "first_delta_ms": 1159.383,
+              "completed_ms": 1590.185,
+              "decision": null,
+              "started_ms": 5463.742,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 8920,
+                "output_tokens": 99
+              },
+              "ended_ms": 7054.994
+            }
+          ],
+          "streaming_observed": true,
+          "passed": true
+        }
+      ],
+      "same_session": true,
+      "scratch_config_preserved": true,
+      "scratch_auth_absent": true,
+      "scratch_settings_preserved": true,
+      "harness_defect": false,
+      "passed": true
+    },
+    "used_requests": 9
+  },
+  "saved_login_reuse": {
+    "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+    "guardian_model": "zai-org/GLM-5.3-Flash",
+    "support_status": "Experimental",
+    "request_limit": 12,
+    "output_tokens_per_request": 4096,
+    "coding_turn_seconds": 180,
+    "guardian_turn_seconds": 120,
+    "approvals": [
+      {
+        "case": "allow",
+        "model": "zai-org/GLM-5.3-Flash",
+        "main_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+        "guardian_assessment_ms": 1238.626,
+        "expected_decision": "allow",
+        "decisions": [
+          "allow"
+        ],
+        "command_executed": true,
+        "elapsed_ms": 4423.116,
+        "exit_code": 0,
+        "timed_out": false,
+        "scratch_settings_preserved": true,
+        "requests": [
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          },
+          {
+            "kind": "automatic_review",
+            "status": 200,
+            "reasoning_effort": "none",
+            "model": "zai-org/GLM-5.3-Flash",
+            "role": "guardian",
+            "paid_inference": true,
+            "request_id": 8,
+            "tool_results": 0,
+            "completed": true,
+            "text_deltas": 1,
+            "tool_deltas": 0,
+            "headers_ms": 785.27,
+            "first_delta_ms": 1233.289,
+            "completed_ms": 1237.931,
+            "decision": "allow",
+            "started_ms": 103.934,
+            "stage": "client_write",
+            "usage": {
+              "input_tokens": 8624,
+              "output_tokens": 27
+            },
+            "review_tool_calls": 0,
+            "assessment_source": "completed_output",
+            "ended_ms": 1342.56
+          },
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          }
+        ],
+        "metadata_warning": false,
+        "turn_completed": true,
+        "client_error": false,
+        "output_limit": false,
+        "harness_defect": false,
+        "failures": [],
+        "passed": true
+      },
+      {
+        "case": "deny",
+        "model": "zai-org/GLM-5.3-Flash",
+        "main_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+        "guardian_assessment_ms": 4484.765,
+        "expected_decision": "deny",
+        "decisions": [
+          "deny"
+        ],
+        "command_executed": false,
+        "elapsed_ms": 6191.195,
+        "exit_code": 0,
+        "timed_out": false,
+        "scratch_settings_preserved": true,
+        "requests": [
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          },
+          {
+            "kind": "automatic_review",
+            "status": 200,
+            "reasoning_effort": "none",
+            "model": "zai-org/GLM-5.3-Flash",
+            "role": "guardian",
+            "paid_inference": true,
+            "request_id": 9,
+            "tool_results": 0,
+            "completed": true,
+            "text_deltas": 15,
+            "tool_deltas": 0,
+            "headers_ms": 651.145,
+            "first_delta_ms": 4207.768,
+            "completed_ms": 4482.387,
+            "decision": "deny",
+            "started_ms": 97.562,
+            "stage": "client_write",
+            "usage": {
+              "input_tokens": 8656,
+              "output_tokens": 403
+            },
+            "review_tool_calls": 0,
+            "assessment_source": "completed_output",
+            "ended_ms": 4582.327
+          },
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          }
+        ],
+        "metadata_warning": false,
+        "turn_completed": true,
+        "client_error": false,
+        "output_limit": false,
+        "harness_defect": false,
+        "failures": [],
+        "passed": true
+      }
+    ],
+    "passed": true,
+    "coding": {
+      "turns": [
+        {
+          "exit_code": 0,
+          "tools_succeeded": 3,
+          "turn_completed": true,
+          "client_error": false,
+          "metadata_warning": false,
+          "timed_out": false,
+          "reasoning_items": 0,
+          "answer_items": 4,
+          "reasoning_output_tokens": 36,
+          "elapsed_ms": 6449.634,
+          "file_checks": {
+            "summary_status": "object",
+            "unexpected_field_count": 0,
+            "expected_fields_match": {
+              "count": true,
+              "total": true,
+              "max": true
+            },
+            "input_preserved": true
+          },
+          "files_correct": true,
+          "streams": [
+            {
+              "kind": "task",
+              "status": 200,
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 1,
+              "tool_results": 0,
+              "completed": true,
+              "text_deltas": 4,
+              "tool_deltas": 5,
+              "headers_ms": 541.36,
+              "first_delta_ms": 748.404,
+              "completed_ms": 846.985,
+              "decision": null,
+              "started_ms": 85.609,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 7864,
+                "output_tokens": 63
+              },
+              "ended_ms": 933.924
+            },
+            {
+              "kind": "task",
+              "status": 200,
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 2,
+              "tool_results": 1,
+              "completed": true,
+              "text_deltas": 5,
+              "tool_deltas": 13,
+              "headers_ms": 424.309,
+              "first_delta_ms": 670.05,
+              "completed_ms": 811.271,
+              "decision": null,
+              "started_ms": 1050.422,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 8060,
+                "output_tokens": 148
+              },
+              "ended_ms": 1862.857
+            },
+            {
+              "kind": "task",
+              "status": 200,
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 3,
+              "tool_results": 2,
+              "completed": true,
+              "text_deltas": 2,
+              "tool_deltas": 24,
+              "headers_ms": 660.118,
+              "first_delta_ms": 876.991,
+              "completed_ms": 1589.613,
+              "decision": null,
+              "started_ms": 2024.979,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 8271,
+                "output_tokens": 157
+              },
+              "ended_ms": 3615.637
+            },
+            {
+              "kind": "task",
+              "status": 200,
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 4,
+              "tool_results": 3,
+              "completed": true,
+              "text_deltas": 23,
+              "tool_deltas": 0,
+              "headers_ms": 676.528,
+              "first_delta_ms": 893.917,
+              "completed_ms": 1151.621,
+              "decision": null,
+              "started_ms": 3753.753,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 8496,
+                "output_tokens": 84
+              },
+              "ended_ms": 4906.48
+            }
+          ],
+          "streaming_observed": true,
+          "passed": true
+        },
+        {
+          "exit_code": 0,
+          "tools_succeeded": 2,
+          "turn_completed": true,
+          "client_error": false,
+          "metadata_warning": false,
+          "timed_out": false,
+          "reasoning_items": 0,
+          "answer_items": 3,
+          "reasoning_output_tokens": 60,
+          "elapsed_ms": 7438.984,
+          "file_checks": {
+            "summary_status": "object",
+            "unexpected_field_count": 0,
+            "expected_fields_match": {
+              "count": true,
+              "total": true,
+              "max": true,
+              "min": true,
+              "average": true
+            },
+            "input_preserved": true
+          },
+          "files_correct": true,
+          "streams": [
+            {
+              "kind": "task",
+              "status": 200,
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 5,
+              "tool_results": 3,
+              "completed": true,
+              "text_deltas": 5,
+              "tool_deltas": 15,
+              "headers_ms": 972.653,
+              "first_delta_ms": 1224.642,
+              "completed_ms": 1527.749,
+              "decision": null,
+              "started_ms": 60.465,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 8645,
+                "output_tokens": 150
+              },
+              "ended_ms": 1589.369
+            },
+            {
+              "kind": "task",
+              "status": 200,
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 6,
+              "tool_results": 4,
+              "completed": true,
+              "text_deltas": 2,
+              "tool_deltas": 34,
+              "headers_ms": 843.167,
+              "first_delta_ms": 1065.691,
+              "completed_ms": 1441.217,
+              "decision": null,
+              "started_ms": 1763.097,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 8872,
+                "output_tokens": 220
+              },
+              "ended_ms": 3205.355
+            },
+            {
+              "kind": "task",
+              "status": 200,
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 7,
+              "tool_results": 5,
+              "completed": true,
+              "text_deltas": 24,
+              "tool_deltas": 0,
+              "headers_ms": 638.917,
+              "first_delta_ms": 919.056,
+              "completed_ms": 1099.353,
+              "decision": null,
+              "started_ms": 3326.065,
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 9176,
+                "output_tokens": 108
+              },
+              "ended_ms": 4426.351
+            }
+          ],
+          "streaming_observed": true,
+          "passed": true
+        }
+      ],
+      "same_session": true,
+      "scratch_config_preserved": true,
+      "scratch_auth_absent": true,
+      "scratch_settings_preserved": true,
+      "harness_defect": false,
+      "passed": true
+    },
+    "used_requests": 9
+  }
+}

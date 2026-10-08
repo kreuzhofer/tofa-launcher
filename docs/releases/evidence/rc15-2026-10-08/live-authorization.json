@@ -1,0 +1,8 @@
+{
+  "scope": "rc15 isolated macOS lifecycle",
+  "saved_login_reuse": "explicitly_allowed_by_maintainer",
+  "temporary_login_cleanup": true,
+  "ordinary_login_must_be_preserved": true,
+  "request_limit": 24,
+  "permission_is_not_a_test_result": true
+}

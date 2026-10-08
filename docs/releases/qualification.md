@@ -1,6 +1,19 @@
 # Local prerelease qualification
 
-## Agent-operated rc14 qualification (2026-10-01)
+## Shared candidate coordination
+
+The next shared candidate is tracked in
+[#104](https://github.com/kreuzhofer/tofa-launcher/issues/104) and the
+[rc15 report](v0.1.0-rc.15.md). Use its pinned version, source, assets and current
+platform verdicts. Windows-local qualification is #105; the Mac coordinator's
+combined readiness decision is #106. A published candidate is not automatically
+qualified on either platform.
+
+Routine Windows development uses a persistent Windows 11 ARM64 UTM environment.
+Use new owned test state for lifecycle checks that need it; the disposable-VM
+options below do not authorize treating the retained environment as disposable.
+
+## Agent-operated rc14 procedure (historical, 2026-10-01)
 
 Required targets are macOS ARM64 and Windows 11 ARM64 in UTM. Existing hosted
 Windows CI remains supplementary by maintainer authorization. The agent operates
@@ -8,7 +21,7 @@ the lifecycle; only credentials and unavoidable OS/account consent require the
 maintainer. Historical manual commands below remain available, but are not the
 current #23 execution plan.
 
-The current candidate is `v0.1.0-rc.14`, commit
+The historical candidate was `v0.1.0-rc.14`, commit
 `14134d43df4cca00bcdf10e49b3dc5ef3122f8d7`. Download its assets without modifying
 previous candidates. With `gh release download`, also save the exact release API
 response as `release.json` and commit API response as `commit.json`. Transfer that
@@ -56,11 +69,12 @@ Native Windows fixture suites can be explicitly authorized in the owned VM with
 `TOFA_TEST_DISPOSABLE_VM=1` for `qualify_windows_test.py`. These retain restoration
 and synthetic-state checks; do not misrepresent the VM as GitHub Actions.
 
-Current result: macOS full live lifecycle passed; Windows published onboarding
-and synthetic lifecycle passed. The Windows installed-client fixture is blocked
-by native sandbox access to the private scratch workspace. No live Windows
-inference is claimed. Sandbox account/policy setup requires separate OS consent;
-do not disable the sandbox to manufacture a pass. See the dated rc14 report.
+Final rc14 result: both required platforms passed the full CLI lifecycle on
+2026-10-02, including Windows live inference using its already initialized native
+sandbox. See the [final rc14 acceptance report](../evaluation/rc14-cli-2026-10-02.md)
+for the original failures, corrections, exact evidence and preservation checks.
+Those results qualify rc14 only. New sandbox account/policy setup still requires
+OS consent; do not disable the sandbox to manufacture a pass.
 
 
 These runners qualify the **Codex CLI** release lifecycle. They do not qualify the
