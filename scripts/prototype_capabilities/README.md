@@ -30,6 +30,30 @@ It is not the reusable evaluator or a production prompt change.
   exits two. The earlier result remains inconclusive. Corpus v2 uses `python3`;
   validating the probe's own outcome remains a reusable-evaluator requirement.
 
+## Desktop UI calibration result
+
+The maintainer completed the three-model file-handoff checklist. Kimi produced
+clickable links and both files opened in the side panel. DeepSeek returned only
+backticked absolute paths; GLM returned only backticked relative paths. Both missed
+clickable document delivery. All six fixture copies still match their original
+checksums. This is one manual observation per model, not a reliability claim or
+part of the bounded 24-run baseline.
+
+Read-only inspection of those synthetic sessions confirms the same 20,751-character
+base instructions in all three, including the inline-code file-path guidance.
+Kimi's successful output used ordinary Markdown links with absolute local paths,
+not `:codex-file-citation` directives. This is a concrete renderer-supported format
+for the next delivery experiment; it does not imply a missing artifact tool.
+The evidence files `desktop-handoff-ui-calibration.json` and
+`desktop-handoff-recorded-inputs.json` keep user-observed previews, file integrity,
+recorded instruction hashes and response syntax distinct.
+
+The [Ollama research](../../docs/research/ollama-model-prompts-2026-10-09.md)
+finds native Desktop prompt reuse and enabled skill/plugin/app instruction flags,
+plus protocol adaptations. Exact hosted-model prompt processing remains unknown.
+Compare full effective Desktop inputs before changing flags; do not import
+model-training templates or assume Ollama has a special artifact-delivery prompt.
+
 The JSON filenames identify individual attempts. Earlier calibration `id` fields
 are not all unique; do not merge results by those IDs. The reusable evaluator
 must allocate unique run IDs and separate cell IDs from attempts.
@@ -79,7 +103,7 @@ deck cases through it or classify its rejections as model failures. Native
 Guardian enforcement remains enabled; a Guardian interaction unsupported by
 this observer is an infrastructure limitation.
 
-Desktop preview checks remain operator-owned. The accompanying checklist is
+Desktop preview checks remain operator-owned. The completed checklist is
 manual UI calibration with a three-minute stop rule, not the bounded baseline:
 the Desktop request/time supervision seam has not been implemented. Do not
 infer preview success from link syntax or replace the refused UI control path.

@@ -1,0 +1,99 @@
+{
+  "source": "read-only recorded session inspection for the three synthetic fixture workspaces",
+  "limitations": "Recorded base text and assistant syntax only; not a full outgoing-request/tool/skill inventory. Model context entries can precede a model change before the task. No raw text, paths, IDs or credentials exported.",
+  "sessions": [
+    {
+      "workspace_model": "deepseek",
+      "base_instructions_sha256": "ac8ae107a0d72fe3476b430afb161ea4e67da2e446d778aefc44828160559807",
+      "base_instruction_characters": 20751,
+      "inline_file_path_guidance": true,
+      "native_citation_guidance": false,
+      "model_context_sequence": [
+        "deepseek-ai/DeepSeek-V4.1-Flash"
+      ],
+      "function_calls_observed": 1,
+      "assistant_message_shapes": [
+        {
+          "model_context": "deepseek-ai/DeepSeek-V4.1-Flash",
+          "mentions_both_fixtures": false,
+          "native_citation_count": 0,
+          "markdown_links": [],
+          "backticked_fixture_paths": 0
+        },
+        {
+          "model_context": "deepseek-ai/DeepSeek-V4.1-Flash",
+          "mentions_both_fixtures": true,
+          "native_citation_count": 0,
+          "markdown_links": [],
+          "backticked_fixture_paths": 2
+        }
+      ]
+    },
+    {
+      "workspace_model": "glm",
+      "base_instructions_sha256": "ac8ae107a0d72fe3476b430afb161ea4e67da2e446d778aefc44828160559807",
+      "base_instruction_characters": 20751,
+      "inline_file_path_guidance": true,
+      "native_citation_guidance": false,
+      "model_context_sequence": [
+        "zai-org/GLM-5.3"
+      ],
+      "function_calls_observed": 1,
+      "assistant_message_shapes": [
+        {
+          "model_context": "zai-org/GLM-5.3",
+          "mentions_both_fixtures": false,
+          "native_citation_count": 0,
+          "markdown_links": [],
+          "backticked_fixture_paths": 0
+        },
+        {
+          "model_context": "zai-org/GLM-5.3",
+          "mentions_both_fixtures": true,
+          "native_citation_count": 0,
+          "markdown_links": [],
+          "backticked_fixture_paths": 2
+        }
+      ]
+    },
+    {
+      "workspace_model": "kimi",
+      "base_instructions_sha256": "ac8ae107a0d72fe3476b430afb161ea4e67da2e446d778aefc44828160559807",
+      "base_instruction_characters": 20751,
+      "inline_file_path_guidance": true,
+      "native_citation_guidance": false,
+      "model_context_sequence": [
+        "zai-org/GLM-5.3",
+        "moonshotai/Kimi-K3"
+      ],
+      "function_calls_observed": 1,
+      "assistant_message_shapes": [
+        {
+          "model_context": "moonshotai/Kimi-K3",
+          "mentions_both_fixtures": true,
+          "native_citation_count": 0,
+          "markdown_links": [],
+          "backticked_fixture_paths": 0
+        },
+        {
+          "model_context": "moonshotai/Kimi-K3",
+          "mentions_both_fixtures": true,
+          "native_citation_count": 0,
+          "markdown_links": [
+            {
+              "extension": ".pptx",
+              "absolute_local_path": true,
+              "file_url": false
+            },
+            {
+              "extension": ".pdf",
+              "absolute_local_path": true,
+              "file_url": false
+            }
+          ],
+          "backticked_fixture_paths": 0
+        }
+      ]
+    }
+  ]
+}

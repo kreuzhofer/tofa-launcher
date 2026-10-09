@@ -9,8 +9,10 @@ CLI model-support qualification is narrower; it does not replace its promotion g
 Prototype update: [the throwaway runner and verdict](../../scripts/prototype_capabilities/README.md)
 record ten passing synthetic tests and six live CLI calibrations (14 requests).
 The scoped catalog instruction change reaches actual requests, but the tested
-GLM runs show no file-citation improvement. Desktop preview remains unverified;
-the 24-run baseline remains not run. Synthetic fixtures for 05 and 07 now exist
+GLM runs show no file-citation improvement. The subsequent manual Desktop check
+confirmed Kimi's Markdown links opened both previews, while GLM and DeepSeek
+returned non-clickable paths; all fixtures remained unchanged. These are single
+calibration observations, and the 24-run baseline remains not run. Synthetic fixtures for 05 and 07 now exist
 in that prototype. Its separately versioned v2 corpus uses `python3` in case 07;
 the original proposed corpus below and earlier attempts remain preserved.
 

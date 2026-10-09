@@ -1,0 +1,111 @@
+{
+  "date": "2026-10-09",
+  "operator_report": "Kimi alone produced clickable document links that opened side-panel previews. DeepSeek supplied absolute paths; GLM supplied relative paths.",
+  "model_name_normalization": "Operator wrote GKM; interpreted as GLM from the three-model checklist.",
+  "fixture_manifest_sha256": "a994ea5bc481029128327c2ebf5e6c84bcadcd6ecf6c75dc754f512fcd166bf2",
+  "runs": [
+    {
+      "run_id": "desktop-glm-05-ui-calibration-1",
+      "model": "zai-org/GLM-5.3",
+      "client": "desktop",
+      "case": "05",
+      "variant": "published_rc17_baseline",
+      "phase": "manual_ui_calibration",
+      "baseline_eligible": false,
+      "attempt": 1,
+      "evidence_source": "maintainer_report_and_local_fixture_hashes",
+      "artifact_integrity": {
+        "status": "passed",
+        "files_unchanged": {
+          "sample-deck.pptx": true,
+          "sample-deck.pdf": true
+        }
+      },
+      "delivery_reference": {
+        "status": "failed",
+        "observed_form": "relative_paths_only"
+      },
+      "delivery_ui": {
+        "status": "failed",
+        "reason": "no_clickable_document_reference",
+        "pptx_preview_opened": null,
+        "pdf_preview_opened": null
+      },
+      "renderer_assessment": "not_exercised",
+      "request_count": null,
+      "elapsed_seconds": null,
+      "limit_enforcement": "manual_stop_rule_only; no prototype request counter",
+      "skill_use": "not_assessed",
+      "generation_quality": "not_applicable_existing_fixture"
+    },
+    {
+      "run_id": "desktop-kimi-05-ui-calibration-1",
+      "model": "moonshotai/Kimi-K3",
+      "client": "desktop",
+      "case": "05",
+      "variant": "published_rc17_baseline",
+      "phase": "manual_ui_calibration",
+      "baseline_eligible": false,
+      "attempt": 1,
+      "evidence_source": "maintainer_report_and_local_fixture_hashes",
+      "artifact_integrity": {
+        "status": "passed",
+        "files_unchanged": {
+          "sample-deck.pptx": true,
+          "sample-deck.pdf": true
+        }
+      },
+      "delivery_reference": {
+        "status": "passed",
+        "observed_form": "clickable_documents"
+      },
+      "delivery_ui": {
+        "status": "passed",
+        "reason": "both_expected_previews_opened",
+        "pptx_preview_opened": true,
+        "pdf_preview_opened": true
+      },
+      "renderer_assessment": "preview_verified",
+      "request_count": null,
+      "elapsed_seconds": null,
+      "limit_enforcement": "manual_stop_rule_only; no prototype request counter",
+      "skill_use": "not_assessed",
+      "generation_quality": "not_applicable_existing_fixture"
+    },
+    {
+      "run_id": "desktop-deepseek-05-ui-calibration-1",
+      "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "client": "desktop",
+      "case": "05",
+      "variant": "published_rc17_baseline",
+      "phase": "manual_ui_calibration",
+      "baseline_eligible": false,
+      "attempt": 1,
+      "evidence_source": "maintainer_report_and_local_fixture_hashes",
+      "artifact_integrity": {
+        "status": "passed",
+        "files_unchanged": {
+          "sample-deck.pptx": true,
+          "sample-deck.pdf": true
+        }
+      },
+      "delivery_reference": {
+        "status": "failed",
+        "observed_form": "absolute_paths_only"
+      },
+      "delivery_ui": {
+        "status": "failed",
+        "reason": "no_clickable_document_reference",
+        "pptx_preview_opened": null,
+        "pdf_preview_opened": null
+      },
+      "renderer_assessment": "not_exercised",
+      "request_count": null,
+      "elapsed_seconds": null,
+      "limit_enforcement": "manual_stop_rule_only; no prototype request counter",
+      "skill_use": "not_assessed",
+      "generation_quality": "not_applicable_existing_fixture"
+    }
+  ],
+  "scope": "One observation per model; no reliability, model promotion, or model-quality ranking claim."
+}
