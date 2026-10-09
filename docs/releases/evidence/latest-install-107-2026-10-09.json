@@ -1,0 +1,940 @@
+{
+  "date": "2026-10-09",
+  "issue": 107,
+  "candidate": {
+    "version": "v0.1.0-rc.16",
+    "source": "3485d49388aa4cbd71d39f9fa2c0b466cb59d291",
+    "ci_run": 37903230270,
+    "prerelease": true,
+    "draft": false,
+    "checked_bundle_matches_downloads": true,
+    "checksummed_asset_count": 17,
+    "sha256": {
+      "NOTICE-CODEX.txt": "9d71575ecfd9a843fc1677b0efb08053c6ba9fd686a0de1a6f5382fd3c220915",
+      "uninstall.ps1": "0b0a63484262720ecd8f38e748c9fac9913c8cf2d39ac945729e9c66c846a82b",
+      "LICENSE-GO.txt": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad",
+      "tofa_v0.1.0-rc.16_darwin_amd64": "fcd0b2180be29ee477e89617c1e346cd91c40c714023c18c984d3884fbc6ec5a",
+      "LICENSE": "796a0cd7abc80802b9d2692b7b5a606f14babdd4fed054903af045b56d7997f6",
+      "uninstall.sh": "692fd1469d5d03d9fb1bbefbb829cb0b4c3bb2437be67feb87d2ec4745d00089",
+      "install.sh": "c7557fb2073a8c6ccdb8ab2cd4991b9199d56140d5257496f891579ef9edf8a8",
+      "tofa_v0.1.0-rc.16_linux_amd64": "afb12b6a0cb24f31b0611b145614a8176565d06c9db9442b9442d562c5296140",
+      "PATENTS-GO.txt": "96f408bfae65bf137fc2525d3ecb030271c50c1e90799f87abf8846d8dd505cc",
+      "README.md": "1d89721344ec7414a3f22fb105337bafd924814758856e89e0e80eb6f956b0c9",
+      "install.ps1": "8e4fab93ea7635277f4383589bee1a8a8c8dfd54d4d7f6e6f6d7873b39db6bd7",
+      "tofa_v0.1.0-rc.16_windows_amd64.exe": "66ded18e3da719c39db540cdbaefcb5134e187b1db28acb196c964fce9530947",
+      "tofa_v0.1.0-rc.16_darwin_arm64": "ca2a5d301c2172ed8bf0885a5c88788d119696542b597bf82b74a8a5db3aaba3",
+      "THIRD_PARTY_NOTICES.txt": "dad7f088af26b7c74156dbf9c46d51a8da22eec4f1a4048e75a357058fbee468",
+      "LICENSE-CODEX.txt": "d17f227e4df5da1600391338865ce0f3055211760a36688f816941d58232d8dc",
+      "tofa_v0.1.0-rc.16_windows_arm64.exe": "8a49f71e5a8782f6cb044ede0a9399da249a5c309382bc74378770bc9632c82c",
+      "SHA256SUMS": "e13bc1f234deba6a6376349f3ad39f5f545682c7d786645837eb75bdaec9aa81",
+      "tofa_v0.1.0-rc.16_linux_arm64": "ae2f0c01cfbe0ec65fa39d68b77e903afb4cfeddb1f349323309b994e4357a86"
+    }
+  },
+  "host": {
+    "os": "macOS 26.7",
+    "build": "25G229",
+    "architecture": "arm64",
+    "go": "go1.27.1"
+  },
+  "local_go": [
+    {
+      "name": "vet",
+      "exit_code": 0,
+      "seconds": 0.476
+    },
+    {
+      "name": "race",
+      "exit_code": 0,
+      "seconds": 281.725
+    }
+  ],
+  "actual_candidate_checks": [
+    {
+      "name": "lifecycle",
+      "exit_code": 0
+    },
+    {
+      "name": "terminal",
+      "exit_code": 0
+    }
+  ],
+  "controlled_latest_actual_binary": {
+    "result": "pass",
+    "actual_binary_version": "tofa v0.1.0-rc.16",
+    "binary_sha256": "ca2a5d301c2172ed8bf0885a5c88788d119696542b597bf82b74a8a5db3aaba3",
+    "requests": [
+      "https://github.com/kreuzhofer/tofa-launcher/releases/latest",
+      "https://github.com/kreuzhofer/tofa-launcher/releases/download/v0.1.0/tofa_v0.1.0_darwin_arm64",
+      "https://github.com/kreuzhofer/tofa-launcher/releases/download/v0.1.0/SHA256SUMS"
+    ],
+    "settings_preserved": true,
+    "limitation": "Synthetic stable redirect and asset transport with exact rc16 bytes; no public stable release exists."
+  },
+  "public_no_stable": {
+    "result": "pass",
+    "exit_code": 1,
+    "stderr": "tofa: invalid latest stable release URL",
+    "installation_and_settings_preserved": true,
+    "scope": "Actual public latest-release resolution with no stable release; isolated synthetic installation, no credentials"
+  },
+  "ci": {
+    "conclusion": "success",
+    "event": "push",
+    "headSha": "3485d49388aa4cbd71d39f9fa2c0b466cb59d291",
+    "jobs": [
+      {
+        "completedAt": "2026-10-09T08:11:27Z",
+        "conclusion": "success",
+        "databaseId": 113730439503,
+        "name": "artifacts",
+        "startedAt": "2026-10-09T08:09:29Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-09T08:09:33Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-09T08:09:32Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:09:34Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@v4",
+            "number": 2,
+            "startedAt": "2026-10-09T08:09:33Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:09:49Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-go@v5",
+            "number": 3,
+            "startedAt": "2026-10-09T08:09:34Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:09:49Z",
+            "conclusion": "success",
+            "name": "Validate explicit tag version",
+            "number": 4,
+            "startedAt": "2026-10-09T08:09:49Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:09:52Z",
+            "conclusion": "success",
+            "name": "Offline publication and workflow checks",
+            "number": 5,
+            "startedAt": "2026-10-09T08:09:49Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:11:10Z",
+            "conclusion": "success",
+            "name": "Build the candidate once",
+            "number": 6,
+            "startedAt": "2026-10-09T08:09:52Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:11:20Z",
+            "conclusion": "success",
+            "name": "Verify complete versioned distributions",
+            "number": 7,
+            "startedAt": "2026-10-09T08:11:10Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:11:23Z",
+            "conclusion": "success",
+            "name": "Run actions/upload-artifact@v4",
+            "number": 8,
+            "startedAt": "2026-10-09T08:11:20Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:11:23Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-go@v5",
+            "number": 15,
+            "startedAt": "2026-10-09T08:11:23Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:11:24Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v4",
+            "number": 16,
+            "startedAt": "2026-10-09T08:11:23Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:11:24Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 17,
+            "startedAt": "2026-10-09T08:11:24Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/kreuzhofer/tofa-launcher/actions/runs/37903230270/job/113730439503"
+      },
+      {
+        "completedAt": "2026-10-09T08:27:12Z",
+        "conclusion": "success",
+        "databaseId": 113731120807,
+        "name": "native (macos-latest)",
+        "startedAt": "2026-10-09T08:11:37Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-09T08:11:41Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-09T08:11:38Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:11:44Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@v4",
+            "number": 2,
+            "startedAt": "2026-10-09T08:11:41Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:12:07Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-go@v5",
+            "number": 3,
+            "startedAt": "2026-10-09T08:11:44Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:12:08Z",
+            "conclusion": "success",
+            "name": "Configure qualified desktop login shell",
+            "number": 4,
+            "startedAt": "2026-10-09T08:12:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:12:08Z",
+            "conclusion": "skipped",
+            "name": "Install shell used by disposable qualification",
+            "number": 5,
+            "startedAt": "2026-10-09T08:12:08Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:16:46Z",
+            "conclusion": "success",
+            "name": "Run go test -race ./...",
+            "number": 6,
+            "startedAt": "2026-10-09T08:12:08Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:16:50Z",
+            "conclusion": "success",
+            "name": "Run go vet ./...",
+            "number": 7,
+            "startedAt": "2026-10-09T08:16:46Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:16:51Z",
+            "conclusion": "success",
+            "name": "Run python3 scripts/install_test.py",
+            "number": 8,
+            "startedAt": "2026-10-09T08:16:50Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:16:53Z",
+            "conclusion": "success",
+            "name": "Latest stable installer checks",
+            "number": 9,
+            "startedAt": "2026-10-09T08:16:51Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:16:54Z",
+            "conclusion": "success",
+            "name": "Run actions/download-artifact@v4",
+            "number": 10,
+            "startedAt": "2026-10-09T08:16:53Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:16:57Z",
+            "conclusion": "success",
+            "name": "Native candidate installation lifecycle",
+            "number": 11,
+            "startedAt": "2026-10-09T08:16:54Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:16:57Z",
+            "conclusion": "success",
+            "name": "Terminal checks with the candidate",
+            "number": 12,
+            "startedAt": "2026-10-09T08:16:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:18:02Z",
+            "conclusion": "success",
+            "name": "Compiled launcher model picker terminal checks",
+            "number": 13,
+            "startedAt": "2026-10-09T08:16:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:19:37Z",
+            "conclusion": "success",
+            "name": "Offline live-harness qualification checks",
+            "number": 14,
+            "startedAt": "2026-10-09T08:18:02Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:20:17Z",
+            "conclusion": "success",
+            "name": "Offline Codex trace checks",
+            "number": 15,
+            "startedAt": "2026-10-09T08:19:37Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:21:15Z",
+            "conclusion": "success",
+            "name": "Offline model evaluation",
+            "number": 16,
+            "startedAt": "2026-10-09T08:20:17Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:22:14Z",
+            "conclusion": "success",
+            "name": "Offline macOS qualification lifecycle",
+            "number": 17,
+            "startedAt": "2026-10-09T08:21:15Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:27:07Z",
+            "conclusion": "success",
+            "name": "Windows template CLI with controlled UTM fixtures",
+            "number": 18,
+            "startedAt": "2026-10-09T08:22:14Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:27:07Z",
+            "conclusion": "skipped",
+            "name": "Parse PowerShell installers",
+            "number": 19,
+            "startedAt": "2026-10-09T08:27:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:27:07Z",
+            "conclusion": "skipped",
+            "name": "Offline Windows installer lifecycle",
+            "number": 20,
+            "startedAt": "2026-10-09T08:27:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:27:07Z",
+            "conclusion": "skipped",
+            "name": "Latest stable Windows installer checks",
+            "number": 21,
+            "startedAt": "2026-10-09T08:27:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:27:07Z",
+            "conclusion": "skipped",
+            "name": "Native Windows candidate installation lifecycle",
+            "number": 22,
+            "startedAt": "2026-10-09T08:27:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:27:07Z",
+            "conclusion": "skipped",
+            "name": "Windows process ownership and discovery",
+            "number": 23,
+            "startedAt": "2026-10-09T08:27:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:27:07Z",
+            "conclusion": "skipped",
+            "name": "Offline Windows qualification lifecycle",
+            "number": 24,
+            "startedAt": "2026-10-09T08:27:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:27:08Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-go@v5",
+            "number": 47,
+            "startedAt": "2026-10-09T08:27:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:27:08Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v4",
+            "number": 48,
+            "startedAt": "2026-10-09T08:27:08Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:27:10Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 49,
+            "startedAt": "2026-10-09T08:27:08Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/kreuzhofer/tofa-launcher/actions/runs/37903230270/job/113731120807"
+      },
+      {
+        "completedAt": "2026-10-09T08:19:52Z",
+        "conclusion": "success",
+        "databaseId": 113731120836,
+        "name": "native (ubuntu-latest)",
+        "startedAt": "2026-10-09T08:11:30Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-09T08:11:32Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-09T08:11:31Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:11:32Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@v4",
+            "number": 2,
+            "startedAt": "2026-10-09T08:11:32Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:11:44Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-go@v5",
+            "number": 3,
+            "startedAt": "2026-10-09T08:11:32Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:11:44Z",
+            "conclusion": "skipped",
+            "name": "Configure qualified desktop login shell",
+            "number": 4,
+            "startedAt": "2026-10-09T08:11:44Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:11:54Z",
+            "conclusion": "success",
+            "name": "Install shell used by disposable qualification",
+            "number": 5,
+            "startedAt": "2026-10-09T08:11:44Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:12:31Z",
+            "conclusion": "success",
+            "name": "Run go test -race ./...",
+            "number": 6,
+            "startedAt": "2026-10-09T08:11:54Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:12:47Z",
+            "conclusion": "success",
+            "name": "Run go vet ./...",
+            "number": 7,
+            "startedAt": "2026-10-09T08:12:31Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:12:47Z",
+            "conclusion": "success",
+            "name": "Run python3 scripts/install_test.py",
+            "number": 8,
+            "startedAt": "2026-10-09T08:12:47Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:12:48Z",
+            "conclusion": "success",
+            "name": "Latest stable installer checks",
+            "number": 9,
+            "startedAt": "2026-10-09T08:12:47Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:12:49Z",
+            "conclusion": "success",
+            "name": "Run actions/download-artifact@v4",
+            "number": 10,
+            "startedAt": "2026-10-09T08:12:48Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:12:50Z",
+            "conclusion": "success",
+            "name": "Native candidate installation lifecycle",
+            "number": 11,
+            "startedAt": "2026-10-09T08:12:49Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:12:50Z",
+            "conclusion": "success",
+            "name": "Terminal checks with the candidate",
+            "number": 12,
+            "startedAt": "2026-10-09T08:12:50Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:13:14Z",
+            "conclusion": "success",
+            "name": "Compiled launcher model picker terminal checks",
+            "number": 13,
+            "startedAt": "2026-10-09T08:12:50Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:14:06Z",
+            "conclusion": "success",
+            "name": "Offline live-harness qualification checks",
+            "number": 14,
+            "startedAt": "2026-10-09T08:13:14Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:14:11Z",
+            "conclusion": "success",
+            "name": "Offline Codex trace checks",
+            "number": 15,
+            "startedAt": "2026-10-09T08:14:06Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:14:32Z",
+            "conclusion": "success",
+            "name": "Offline model evaluation",
+            "number": 16,
+            "startedAt": "2026-10-09T08:14:11Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:15:12Z",
+            "conclusion": "success",
+            "name": "Offline macOS qualification lifecycle",
+            "number": 17,
+            "startedAt": "2026-10-09T08:14:32Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:19:50Z",
+            "conclusion": "success",
+            "name": "Windows template CLI with controlled UTM fixtures",
+            "number": 18,
+            "startedAt": "2026-10-09T08:15:12Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:19:50Z",
+            "conclusion": "skipped",
+            "name": "Parse PowerShell installers",
+            "number": 19,
+            "startedAt": "2026-10-09T08:19:50Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:19:50Z",
+            "conclusion": "skipped",
+            "name": "Offline Windows installer lifecycle",
+            "number": 20,
+            "startedAt": "2026-10-09T08:19:50Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:19:50Z",
+            "conclusion": "skipped",
+            "name": "Latest stable Windows installer checks",
+            "number": 21,
+            "startedAt": "2026-10-09T08:19:50Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:19:50Z",
+            "conclusion": "skipped",
+            "name": "Native Windows candidate installation lifecycle",
+            "number": 22,
+            "startedAt": "2026-10-09T08:19:50Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:19:50Z",
+            "conclusion": "skipped",
+            "name": "Windows process ownership and discovery",
+            "number": 23,
+            "startedAt": "2026-10-09T08:19:50Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:19:50Z",
+            "conclusion": "skipped",
+            "name": "Offline Windows qualification lifecycle",
+            "number": 24,
+            "startedAt": "2026-10-09T08:19:50Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:19:50Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-go@v5",
+            "number": 47,
+            "startedAt": "2026-10-09T08:19:50Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:19:50Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v4",
+            "number": 48,
+            "startedAt": "2026-10-09T08:19:50Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:19:50Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 49,
+            "startedAt": "2026-10-09T08:19:50Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/kreuzhofer/tofa-launcher/actions/runs/37903230270/job/113731120836"
+      },
+      {
+        "completedAt": "2026-10-09T08:15:28Z",
+        "conclusion": "success",
+        "databaseId": 113731120848,
+        "name": "native (windows-latest)",
+        "startedAt": "2026-10-09T08:11:30Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-09T08:11:33Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-09T08:11:32Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:11:44Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@v4",
+            "number": 2,
+            "startedAt": "2026-10-09T08:11:33Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:12:16Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-go@v5",
+            "number": 3,
+            "startedAt": "2026-10-09T08:11:44Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:12:16Z",
+            "conclusion": "skipped",
+            "name": "Configure qualified desktop login shell",
+            "number": 4,
+            "startedAt": "2026-10-09T08:12:16Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:12:16Z",
+            "conclusion": "skipped",
+            "name": "Install shell used by disposable qualification",
+            "number": 5,
+            "startedAt": "2026-10-09T08:12:16Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:12:34Z",
+            "conclusion": "success",
+            "name": "Run go test -race ./...",
+            "number": 6,
+            "startedAt": "2026-10-09T08:12:16Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:12:57Z",
+            "conclusion": "success",
+            "name": "Run go vet ./...",
+            "number": 7,
+            "startedAt": "2026-10-09T08:12:34Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:12:57Z",
+            "conclusion": "skipped",
+            "name": "Run python3 scripts/install_test.py",
+            "number": 8,
+            "startedAt": "2026-10-09T08:12:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:12:57Z",
+            "conclusion": "skipped",
+            "name": "Latest stable installer checks",
+            "number": 9,
+            "startedAt": "2026-10-09T08:12:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:13:01Z",
+            "conclusion": "success",
+            "name": "Run actions/download-artifact@v4",
+            "number": 10,
+            "startedAt": "2026-10-09T08:12:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:13:01Z",
+            "conclusion": "skipped",
+            "name": "Native candidate installation lifecycle",
+            "number": 11,
+            "startedAt": "2026-10-09T08:13:01Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:13:01Z",
+            "conclusion": "skipped",
+            "name": "Terminal checks with the candidate",
+            "number": 12,
+            "startedAt": "2026-10-09T08:13:01Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:13:01Z",
+            "conclusion": "skipped",
+            "name": "Compiled launcher model picker terminal checks",
+            "number": 13,
+            "startedAt": "2026-10-09T08:13:01Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:13:01Z",
+            "conclusion": "skipped",
+            "name": "Offline live-harness qualification checks",
+            "number": 14,
+            "startedAt": "2026-10-09T08:13:01Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:13:01Z",
+            "conclusion": "skipped",
+            "name": "Offline Codex trace checks",
+            "number": 15,
+            "startedAt": "2026-10-09T08:13:01Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:13:01Z",
+            "conclusion": "skipped",
+            "name": "Offline model evaluation",
+            "number": 16,
+            "startedAt": "2026-10-09T08:13:01Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:13:01Z",
+            "conclusion": "skipped",
+            "name": "Offline macOS qualification lifecycle",
+            "number": 17,
+            "startedAt": "2026-10-09T08:13:01Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:13:01Z",
+            "conclusion": "skipped",
+            "name": "Windows template CLI with controlled UTM fixtures",
+            "number": 18,
+            "startedAt": "2026-10-09T08:13:01Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:13:01Z",
+            "conclusion": "success",
+            "name": "Parse PowerShell installers",
+            "number": 19,
+            "startedAt": "2026-10-09T08:13:01Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:13:07Z",
+            "conclusion": "success",
+            "name": "Offline Windows installer lifecycle",
+            "number": 20,
+            "startedAt": "2026-10-09T08:13:01Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:13:09Z",
+            "conclusion": "success",
+            "name": "Latest stable Windows installer checks",
+            "number": 21,
+            "startedAt": "2026-10-09T08:13:07Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:13:22Z",
+            "conclusion": "success",
+            "name": "Native Windows candidate installation lifecycle",
+            "number": 22,
+            "startedAt": "2026-10-09T08:13:09Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:13:27Z",
+            "conclusion": "success",
+            "name": "Windows process ownership and discovery",
+            "number": 23,
+            "startedAt": "2026-10-09T08:13:22Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:15:23Z",
+            "conclusion": "success",
+            "name": "Offline Windows qualification lifecycle",
+            "number": 24,
+            "startedAt": "2026-10-09T08:13:27Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:15:23Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-go@v5",
+            "number": 47,
+            "startedAt": "2026-10-09T08:15:23Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:15:25Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v4",
+            "number": 48,
+            "startedAt": "2026-10-09T08:15:23Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:15:25Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 49,
+            "startedAt": "2026-10-09T08:15:25Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/kreuzhofer/tofa-launcher/actions/runs/37903230270/job/113731120848"
+      },
+      {
+        "completedAt": "2026-10-09T08:27:34Z",
+        "conclusion": "success",
+        "databaseId": 113736336757,
+        "name": "publish",
+        "startedAt": "2026-10-09T08:27:16Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-09T08:27:18Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-09T08:27:17Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:27:19Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@v4",
+            "number": 2,
+            "startedAt": "2026-10-09T08:27:18Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:27:22Z",
+            "conclusion": "success",
+            "name": "Run actions/download-artifact@v4",
+            "number": 3,
+            "startedAt": "2026-10-09T08:27:19Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:27:32Z",
+            "conclusion": "success",
+            "name": "Publish verified candidate bytes",
+            "number": 4,
+            "startedAt": "2026-10-09T08:27:22Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:27:32Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v4",
+            "number": 8,
+            "startedAt": "2026-10-09T08:27:32Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T08:27:32Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 9,
+            "startedAt": "2026-10-09T08:27:32Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/kreuzhofer/tofa-launcher/actions/runs/37903230270/job/113736336757"
+      }
+    ],
+    "status": "completed",
+    "url": "https://github.com/kreuzhofer/tofa-launcher/actions/runs/37903230270"
+  },
+  "reviews": {
+    "standards": "pass",
+    "spec": "pass after adding isolated settings-preservation assertions"
+  },
+  "remaining": [
+    "Native Windows ARM64 qualification: #105",
+    "Combined readiness: #106",
+    "First approved stable release: real public Latest installer smoke tests"
+  ],
+  "live_inference_performed": false,
+  "saved_credentials_reused": false,
+  "windows_vm_operated": false
+}
