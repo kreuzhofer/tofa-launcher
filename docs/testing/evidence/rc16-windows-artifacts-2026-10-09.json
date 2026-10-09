@@ -1,0 +1,19 @@
+{
+  "release": "v0.1.0-rc.16",
+  "source_and_runner": "3485d49388aa4cbd71d39f9fa2c0b466cb59d291",
+  "prerelease": true,
+  "draft": false,
+  "sha256": {
+    "tofa_v0.1.0-rc.16_windows_arm64.exe": "8a49f71e5a8782f6cb044ede0a9399da249a5c309382bc74378770bc9632c82c",
+    "install.ps1": "8e4fab93ea7635277f4383589bee1a8a8c8dfd54d4d7f6e6f6d7873b39db6bd7",
+    "uninstall.ps1": "0b0a63484262720ecd8f38e748c9fac9913c8cf2d39ac945729e9c66c846a82b",
+    "SHA256SUMS": "e13bc1f234deba6a6376349f3ad39f5f545682c7d786645837eb75bdaec9aa81"
+  },
+  "manifest_matches": true,
+  "published_launcher_pe_machine": "0xaa64",
+  "selected_codex_version": "0.160.1",
+  "selected_codex_pe_machine": "0xaa64",
+  "os": "Windows 11 Pro 10.0.26200 ARM64",
+  "desktop_refusal_exit_code": 1,
+  "published_launcher_version": "tofa v0.1.0-rc.16"
+}

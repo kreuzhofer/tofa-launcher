@@ -80,13 +80,19 @@ Restarting the verified JavaScript helpers temporarily restored sandboxed shell
 execution, but restarting JavaScript tooling reproduced the failure. It is not
 a durable fix or evidence that the sandbox needs broader permissions.
 
-The retained VM now uses an explicit **managed-daemon pin to Codex 0.160.1**.
+The earlier recovery used an explicit **managed-daemon pin to Codex 0.160.1**.
 That vendor package passed the same probe with the JavaScript helpers active;
 0.162.0 failed. The supported updater restarted the daemon, preserved sessions,
 and the resumed native agent passed sandboxed reads, edits, boundary-denial
 checks, the full Go suite, vet, and build after JavaScript helper startup. See
 [#108](https://github.com/kreuzhofer/tofa-launcher/issues/108) and the
 [recovery evidence](windows-codex-sandbox-recovery-2026-10-09.md).
+
+Later #105 preflight found the managed daemon back at 0.162.0 and the same
+sandbox failure recurring; the cause of pin replacement is unknown. Check the
+actual version before relying on that recovery. The retained standalone 0.160.1
+still passes the native loopback prerequisite. See the
+[recurrence](windows-codex-sandbox-recovery-2026-10-09.md#recurrence-during-105).
 
 The standalone CLI remains 0.162.0. From an ordinary native PowerShell window,
 `codex app-server daemon version` should show managed/running daemon 0.160.1.

@@ -158,6 +158,21 @@ suite.
 
 Total findings: Standards 0; Spec 0.
 
+## Recurrence during #105
+
+Later on 2026-10-09, the #105 preflight found the managed/running daemon back at
+0.162.0 and the `auto-update-version` marker present again. Ordinary agent shell
+setup reproduced `helper_unknown_error`; the dated sandbox log again identified
+sharing violation 32 on the active `cua_node/.../bin/node_repl.exe`. The cause
+of the pin replacement has not been established. The earlier measured recovery
+and fresh-session passes remain historical evidence, not the current daemon state.
+
+The retained explicit standalone 0.160.1 client still passed the pinned rc16
+loopback qualification prerequisite, including native tools, Guardian allow/deny,
+config/auth preservation and cleanup of its three owned sessions. The daemon was
+not repinned by #105. See the [rc16 Windows report](../releases/v0.1.0-rc.16-windows.md)
+for the separate, incomplete release qualification and remaining login requirement.
+
 ## Sources
 
 - Local versioned `codex help sandbox`, `codex update --help`, and
