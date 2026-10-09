@@ -1,0 +1,30 @@
+{
+  "at": "2026-10-09T12:54:10.252727+00:00",
+  "route": "direct provider; same saved project/login as rc17",
+  "requests": [
+    {
+      "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "http_status": 200,
+      "seconds": 0.817,
+      "exact_model_not_found": false,
+      "request_id": "06d926e4b526db3582cbb1854a4f7216",
+      "completed": true
+    }
+  ],
+  "catalog": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": true
+  },
+  "available_deepseek_ids": [
+    "deepseek-ai/DeepSeek-V4-Flash-0731",
+    "deepseek-ai/DeepSeek-V4-Pro",
+    "deepseek-ai/DeepSeek-V4-Pro-0813",
+    "deepseek-ai/DeepSeek-V4.1-Flash"
+  ],
+  "public_deepseek_ids": [
+    "deepseek-ai/DeepSeek-V4-Flash-0731",
+    "deepseek-ai/DeepSeek-V4-Pro",
+    "deepseek-ai/DeepSeek-V4-Pro-0813",
+    "deepseek-ai/DeepSeek-V4.1-Flash"
+  ],
+  "passed": true
+}
