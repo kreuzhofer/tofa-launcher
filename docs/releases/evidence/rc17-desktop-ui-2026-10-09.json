@@ -9,15 +9,14 @@
   "guardian": "zai-org/GLM-5.3-Flash",
   "naming_model": "nvidia/Nemotron-3_5-Lightning",
   "observation_method": "operator-confirmed UI; unmodified published launcher; no diagnostic observer",
-  "status": "in_progress_after_transient_provider_recovery",
+  "status": "generated_titles_confirmed_persistence_deferred",
   "prior_candidate_closed_normally": true,
   "prior_launcher_exit": 0,
   "checks": [
     {
       "main": "zai-org/GLM-5.3",
       "operator_report": "worked fine",
-      "generated_title_exact": null,
-      "scope": "operator reported success; exact title and persistence not yet recorded"
+      "scope": "conversation and generated sidebar title confirmed by maintainer; persistence not yet checked"
     },
     {
       "main": "deepseek-ai/DeepSeek-V4.1-Flash",
@@ -31,8 +30,23 @@
       "operator_report": "it works now",
       "same_client_retry": true,
       "launcher_restarted": false,
-      "generated_title_exact": null,
-      "scope": "successful conversation retry; exact title and persistence still pending"
+      "scope": "conversation and generated sidebar title confirmed by maintainer; persistence not yet checked"
     }
-  ]
+  ],
+  "persistence_status": "deferred while the client is still working; do not interrupt",
+  "generated_titles": [
+    {
+      "model": "zai-org/GLM-5.3",
+      "operator_confirmed": true,
+      "title_characters": 35,
+      "title_content_exported": false
+    },
+    {
+      "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "operator_confirmed": true,
+      "title_characters": 33,
+      "title_content_exported": false
+    }
+  ],
+  "title_observation": "Maintainer supplied exact sidebar titles from their own chats; contents retained only in local qualification state, not exported."
 }
