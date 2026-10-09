@@ -1,0 +1,49 @@
+{
+  "app_version": "26.930.51102",
+  "app_build": "13100",
+  "bundle_id": "com.openai.codex",
+  "engine_version": "0.160.0",
+  "engine_sha256": "6b582e8813ce7e8ed4c52814ee5cf230dba647bf2292df747a4003f2657ef201",
+  "asar_sha256": "a159b8f5b78ed1ba89fc70d5c8448d822a46c4fc2a4a9f18ec348f3cc2f6b8c9",
+  "members": [
+    {
+      "path": ".vite/build/bootstrap-CXJAEjVI.js",
+      "sha256": "cc62d7cbd85833ea829a9b9dd3d0faba8a4c1652f49393de467456149ba5ec9a",
+      "markers": [
+        "thread_title",
+        "allowProviderModelFallback"
+      ]
+    },
+    {
+      "path": ".vite/build/main-C7cfj__D.js",
+      "sha256": "d8d4f45e673efc81a9e3db98fa0fa57908094bf2fd13f73f6b149cf2a3104c2e",
+      "markers": [
+        "ThreadMetadataGenerationService",
+        "async generateTitle"
+      ]
+    },
+    {
+      "path": ".vite/build/worker.js",
+      "sha256": "46b153e94466da15a8245dba0aecea0cc775b0b1688fe3b4cc9dd74d7805d7ad",
+      "markers": [
+        "thread_title"
+      ]
+    },
+    {
+      "path": "webview/assets/app-initial-f9b16fbf8fc7.js",
+      "sha256": "22f3ea455585cfc0508e3d3627eac161c80c849c0aace3d76d09fdebaa0aeca3",
+      "markers": [
+        "thread_title"
+      ]
+    },
+    {
+      "path": "webview/assets/app-shared-9d148924be0b.js",
+      "sha256": "eb2500c5398279d4fbf5c71d7ce982d54631660907761740199f6c22591d71ab",
+      "markers": [
+        "expectedProvisionalTitle",
+        "function VKr(",
+        "function zKr("
+      ]
+    }
+  ]
+}
