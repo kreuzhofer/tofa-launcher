@@ -58,6 +58,15 @@ func prepareDesktopCatalog(ctx context.Context, bundle desktopBundle, home, elec
 		if err != nil {
 			return "", err
 		}
+		// THROWAWAY #117 experiment; confined to the three pilot Desktop mains.
+		// Keep a selected Guardian's descriptor unchanged even if it is a pilot main.
+		if identity != guardian && (identity == "zai-org/GLM-5.3" || identity == "moonshotai/Kimi-K3" || identity == "deepseek-ai/DeepSeek-V4.1-Flash") {
+			prompt, err := prototypeDesktopMarkdownPrompt(codexPrompt)
+			if err != nil {
+				return "", err
+			}
+			entry["model_messages"] = map[string]any{"instructions_template": prompt}
+		}
 		status, err := selectionStatus("codex-desktop", "adapted", identity, guardian, true)
 		if err != nil {
 			return "", err
@@ -76,6 +85,28 @@ func prepareDesktopCatalog(ctx context.Context, bundle desktopBundle, home, elec
 		return "", err
 	}
 	return catalog, nil
+}
+
+// This is an experimental candidate only, not adopted production guidance.
+func prototypeDesktopMarkdownPrompt(original string) (string, error) {
+	before, section, found := strings.Cut(original, "**File References**")
+	if !found {
+		return "", errors.New("prototype file-reference section is missing")
+	}
+	_, after, found := strings.Cut(section, "**Structure**")
+	if !found {
+		return "", errors.New("prototype file-reference boundary is missing")
+	}
+	const replacement = `**File References**
+For local document delivery, use a normal Markdown link: [document name](/absolute/path/to/document.ext).
+Use the exact verified absolute path and put each deliverable in its own link.
+This document-delivery rule takes precedence over the generic monospace rule above: do not wrap the link or its label in backticks, and do not return a bare path in place of the link.
+If a path contains spaces, put angle brackets around the link target. Do not use file:// or vscode:// URLs.
+Preserve existing files when asked; do not regenerate or upload them to make links. Do not claim that a preview opened unless the user confirms it.
+For source-code references, use inline code with a relevant start line when known; do not provide a line range.
+
+**Structure**`
+	return before + replacement + after, nil
 }
 
 // debug models does not propagate remote refresh errors to its exit status (or

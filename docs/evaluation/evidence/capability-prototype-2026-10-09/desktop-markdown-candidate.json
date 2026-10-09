@@ -1,0 +1,38 @@
+{
+  "variant": "desktop-markdown-links-v1",
+  "launcher_version": "tofa v0.1.0-rc.17+prototype.markdown-links-v1",
+  "binary_sha256": "6492ab77032da632b10c57252356a536f7882b03ad1188f50f4306ed76146ed3",
+  "app_version": "26.930.51102",
+  "app_build": "13100",
+  "pilot_models": [
+    "zai-org/GLM-5.3",
+    "deepseek-ai/DeepSeek-V4.1-Flash",
+    "moonshotai/Kimi-K3"
+  ],
+  "guardian": "zai-org/GLM-5.3-Flash",
+  "changed_scope": "file-reference section for the three pilot Desktop mains only; selected Guardian excluded",
+  "other_instruction_text_preserved": true,
+  "catalog_flags_unchanged": true,
+  "cli_prompt_unchanged": true,
+  "installed_rc17_replaced": false,
+  "phase": "manual_ui_calibration",
+  "baseline_eligible": false,
+  "manual_time_limit_seconds": 180,
+  "request_cap_enforced": false,
+  "native_app_launched": false,
+  "validation": {
+    "test_groups_passed": [
+      "prototype Desktop catalog, native catalog preservation, history and concurrent config",
+      "CLI metadata, Desktop main/Guardian scope, title routing and tool-free naming"
+    ],
+    "synthetic_only": true
+  },
+  "fixture_manifest_sha256": "a994ea5bc481029128327c2ebf5e6c84bcadcd6ecf6c75dc754f512fcd166bf2",
+  "source_base_commit": "ef8242d886aa81ea9c1cd0e2d6c4de04d8e7ccad",
+  "source_sha256": {
+    "internal/tofa/desktop_catalog_darwin.go": "fc4892ad326c5d3f8c0f405ab905ba319ac8c9b024a715783deeca6c4fa5eabc",
+    "internal/tofa/desktop_darwin_test.go": "2da19eed7e4850af81a69c23b880a27d60f090408dca080105429a2d283ff5c0",
+    "internal/tofa/assets/codex-prompt.md": "ac8ae107a0d72fe3476b430afb161ea4e67da2e446d778aefc44828160559807"
+  },
+  "go_version": "go version go1.27.1 darwin/arm64"
+}

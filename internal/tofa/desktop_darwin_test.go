@@ -1498,6 +1498,64 @@ func TestDesktopStartupAndRoutingFailures(t *testing.T) {
 	}
 }
 
+func TestPrototypeDesktopMarkdownDeliveryInstructions(t *testing.T) {
+	bundle, capture := desktopFixture(t, "normal")
+	app, _ := adapterFixture(t, nil, nil)
+	if err := app.Run([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}); err != nil {
+		t.Fatal(err)
+	}
+	raw, err := os.ReadFile(capture)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var child struct {
+		Catalog struct{ Models []map[string]any }
+	}
+	if err := json.Unmarshal(raw, &child); err != nil {
+		t.Fatal(err)
+	}
+	original, err := os.ReadFile("assets/codex-prompt.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	before, after, ok := strings.Cut(string(original), "**File References**")
+	if !ok {
+		t.Fatal("missing original file-reference section")
+	}
+	_, after, ok = strings.Cut(after, "**Structure**")
+	if !ok {
+		t.Fatal("missing following section")
+	}
+	want := map[string]bool{"zai-org/GLM-5.3": false, "moonshotai/Kimi-K3": false, "deepseek-ai/DeepSeek-V4.1-Flash": false}
+	for _, entry := range child.Catalog.Models {
+		identity, _ := entry["slug"].(string)
+		messages, present := entry["model_messages"].(map[string]any)
+		if !present {
+			continue // Native descriptor preservation has its own launch test.
+		}
+		prompt, _ := messages["instructions_template"].(string)
+		if _, selected := want[identity]; selected {
+			want[identity] = true
+			if !strings.Contains(prompt, "[document name](/absolute/path/to/document.ext)") || !strings.Contains(prompt, "takes precedence over the generic monospace rule") || strings.Contains(prompt, "Use inline code to make file paths clickable") {
+				t.Errorf("%s did not receive explicit Markdown delivery guidance", identity)
+			}
+			if !strings.HasPrefix(prompt, before+"**File References**") || !strings.HasSuffix(prompt, "**Structure**"+after) {
+				t.Errorf("%s changed instructions outside file references", identity)
+			}
+			if entry["auto_review_model_override"] != "zai-org/GLM-5.3-Flash" {
+				t.Error("Guardian route changed")
+			}
+		} else if prompt != string(original) {
+			t.Errorf("non-pilot model %s instructions changed", identity)
+		}
+	}
+	for identity, found := range want {
+		if !found {
+			t.Errorf("missing pilot model %s", identity)
+		}
+	}
+}
+
 func TestDesktopPreservesFreshNativeCatalog(t *testing.T) {
 	bundle, capture := desktopFixture(t, "normal")
 	app, _ := adapterFixture(t, nil, nil)

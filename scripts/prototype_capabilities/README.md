@@ -5,6 +5,22 @@ creation, delivery, workflow compliance and visible Desktop behavior, and whethe
 a scoped file-reference instruction change reaches a real client request.
 It is not the reusable evaluator or a production prompt change.
 
+**Experimental source build:** this branch now includes a Desktop-only
+`desktop-markdown-links-v1` candidate in `desktop_catalog_darwin.go`. Building
+this branch changes the file-reference section for GLM 5.3, Kimi K3 and DeepSeek
+V4.1 Flash, except any model selected as Guardian. The shared CLI prompt, native
+descriptors, other catalog flags and independent naming policy are unchanged.
+The guidance explicitly gives document Markdown links precedence over the generic
+monospace instruction. Keep this binary distinct from published rc17; do not
+merge or publish it as release guidance before the agreed comparison gates pass.
+
+The new public-launch fixture test failed for all three mains before the change
+and passed afterward. Existing native catalog, history, concurrent config, CLI
+metadata, Guardian and naming tests also passed. These synthetic checks establish
+candidate scope, not live model compliance or preview success. A fresh three-model
+manual UI calibration is prepared; its result is pending and has no enforced
+request counter.
+
 ## Result so far
 
 - Ten synthetic command-boundary tests pass. They exercise replay, stopping an
