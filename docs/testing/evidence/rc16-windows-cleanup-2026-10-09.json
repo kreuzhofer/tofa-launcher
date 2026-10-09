@@ -1,0 +1,23 @@
+{
+  "kind": "post-failure cleanup, not lifecycle acceptance",
+  "candidate": "v0.1.0-rc.16",
+  "method": "published candidate uninstall --purge; pinned native process supervisor",
+  "attempts": [
+    "command_failed; binary, configuration and credential references remained; native helper diagnostics not retained",
+    "process-only PowerShell Bypass, matching the interactive lifecycle controller; no account policy change"
+  ],
+  "checks": {
+    "helper_completed": true,
+    "binary_removed": true,
+    "ownership_removed": true,
+    "path_entry_removed": true,
+    "configuration_removed": true,
+    "file_credentials_removed": true,
+    "owned_vault_credentials_removed": true,
+    "native_config_auth_preserved": true,
+    "unrelated_user_path_preserved": true,
+    "machine_path_preserved": true,
+    "cleanup_scratch_removed": true
+  },
+  "passed": true
+}

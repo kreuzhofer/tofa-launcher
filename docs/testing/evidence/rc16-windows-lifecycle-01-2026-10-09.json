@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "candidate": {
+    "tag": "v0.1.0-rc.16",
+    "commit": "3485d49388aa4cbd71d39f9fa2c0b466cb59d291",
+    "download_boundary": "host-downloaded transfer",
+    "binary_sha256": "8a49f71e5a8782f6cb044ede0a9399da249a5c309382bc74378770bc9632c82c",
+    "scripts_sha256": {
+      "install.ps1": "8e4fab93ea7635277f4383589bee1a8a8c8dfd54d4d7f6e6f6d7873b39db6bd7",
+      "uninstall.ps1": "0b0a63484262720ecd8f38e748c9fac9913c8cf2d39ac945729e9c66c846a82b"
+    }
+  },
+  "host": {
+    "os": "Windows",
+    "arch": "ARM64",
+    "release": "10.0.26200"
+  },
+  "operator": "agent",
+  "client": {
+    "version": "codex-cli 0.160.1"
+  },
+  "backend": "keyring",
+  "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+  "guardian_model": "zai-org/GLM-5.3-Flash",
+  "started_utc": "2026-10-09T09:05:20Z",
+  "stages": [
+    {
+      "name": "preflight",
+      "status": "passed"
+    },
+    {
+      "name": "recovery",
+      "status": "passed"
+    },
+    {
+      "name": "download",
+      "status": "passed"
+    },
+    {
+      "name": "install",
+      "status": "passed"
+    },
+    {
+      "name": "login",
+      "status": "passed"
+    },
+    {
+      "name": "fresh_terminal",
+      "status": "passed"
+    },
+    {
+      "name": "live",
+      "status": "failed"
+    },
+    {
+      "name": "uninstall",
+      "status": "pending"
+    },
+    {
+      "name": "reinstall",
+      "status": "pending"
+    },
+    {
+      "name": "saved_login_reuse",
+      "status": "pending"
+    },
+    {
+      "name": "purge",
+      "status": "pending"
+    }
+  ],
+  "preservation": {
+    "baseline_recorded": true,
+    "codex_config": true,
+    "codex_auth": true,
+    "unrelated_config": true,
+    "unrelated_installation": true,
+    "user_path": true,
+    "machine_path": true
+  },
+  "cleanup": {
+    "scratch_removed": true,
+    "binary_removed": false,
+    "ownership_removed": false,
+    "path_entries_removed": false,
+    "configuration_removed": false,
+    "file_credentials_removed": true,
+    "vault_credentials_removed": false,
+    "helpers_completed": true
+  },
+  "outcome": "failed",
+  "existing_state": {
+    "installation": false,
+    "configuration": false,
+    "file_credentials": false,
+    "vault_references": false
+  },
+  "live": {
+    "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+    "guardian_model": "zai-org/GLM-5.3-Flash",
+    "support_status": "Experimental",
+    "request_limit": 12,
+    "output_tokens_per_request": 4096,
+    "coding_turn_seconds": 180,
+    "guardian_turn_seconds": 120,
+    "approvals": [],
+    "passed": false,
+    "coding": {
+      "turns": [
+        {
+          "exit_code": 1,
+          "tools_succeeded": 0,
+          "turn_completed": false,
+          "client_error": true,
+          "metadata_warning": false,
+          "timed_out": false,
+          "reasoning_items": 0,
+          "answer_items": 0,
+          "reasoning_output_tokens": null,
+          "elapsed_ms": 4101.608,
+          "file_checks": {
+            "summary_status": "missing",
+            "unexpected_field_count": null,
+            "expected_fields_match": {
+              "count": false,
+              "total": false,
+              "max": false
+            },
+            "input_preserved": true
+          },
+          "files_correct": false,
+          "streams": [
+            {
+              "kind": "task",
+              "status": 200,
+              "reasoning_effort": "high",
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 1,
+              "tool_results": 0,
+              "completed": false,
+              "text_deltas": 0,
+              "tool_deltas": 0,
+              "headers_ms": 1460.911,
+              "first_delta_ms": null,
+              "completed_ms": null,
+              "decision": null,
+              "started_ms": 1171.968,
+              "stage": "stream_read",
+              "failure": "event_body_limit",
+              "ended_ms": 2836.039
+            }
+          ],
+          "streaming_observed": false,
+          "passed": false
+        }
+      ],
+      "same_session": false,
+      "scratch_config_preserved": true,
+      "scratch_auth_absent": true,
+      "scratch_settings_preserved": true,
+      "harness_defect": false,
+      "passed": false
+    },
+    "native_sandbox_home_reused": true,
+    "native_config_auth_preserved": true,
+    "owned_native_sessions_removed": true,
+    "owned_native_session_count": 1,
+    "used_requests": 1
+  },
+  "reason": "live_assertions_failed"
+}

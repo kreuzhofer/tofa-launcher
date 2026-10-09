@@ -171,7 +171,8 @@ The retained explicit standalone 0.160.1 client still passed the pinned rc16
 loopback qualification prerequisite, including native tools, Guardian allow/deny,
 config/auth preservation and cleanup of its three owned sessions. The daemon was
 not repinned by #105. See the [rc16 Windows report](../releases/v0.1.0-rc.16-windows.md)
-for the separate, incomplete release qualification and remaining login requirement.
+for the separate failed live qualification (`event_body_limit`) and completed
+post-failure cleanup. The maintainer supplied the test login locally.
 
 ## Sources
 
