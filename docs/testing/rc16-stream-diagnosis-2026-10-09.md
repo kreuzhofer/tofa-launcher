@@ -109,4 +109,4 @@ The prepared diagnostic caps the budget at one, uses the actual rc16 artifact,
 and includes scoped credential purge and preservation checks. Reviewers did not
 execute inference or repeat the tests.
 
-Findings: Standards 0; Spec 1 known outstanding diagnosis/acceptance requirement.
+Review findings: Standards 0; Spec 0. Issue-level diagnosis and acceptance remain incomplete.
