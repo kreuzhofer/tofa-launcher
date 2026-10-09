@@ -71,7 +71,8 @@ The two existing oversized-event HTTP tests were first extended to require
 diagnostics and failed with `KeyError: stream_diagnostics`. After implementation,
 all **17 observer tests passed**, including fixed-label redaction, privacy,
 limits, deadlines and cancellation. The explicitly selected native Codex 0.160.1
-loopback coding/Guardian fixture passed in 27.7 seconds, with native config/auth
+loopback coding/Guardian [fixture](evidence/issue110-native-loopback-2026-10-09.json)
+passed in 27.7 seconds, with native config/auth
 preserved and its three owned sessions removed. Full `go test ./...`, `go vet
 ./...` and Python syntax checks also passed. These are offline/synthetic checks.
 
@@ -88,3 +89,24 @@ one-request diagnostic. The previous test login was correctly purged. No new
 login or live request has started at the time of this report. A diagnostic
 result will not qualify the release; any resulting fix needs regression tests
 and renewed affected qualification before #105 can pass.
+
+## Review
+
+Independent reviews compared `e368efa` with diagnostic commit `a990819`.
+
+### Standards
+
+No blocking findings, ADR conflicts or actionable code-smell concerns. The
+diagnostic additions preserve limits and export only fixed categories/counters;
+HTTP tests cover size enforcement and redaction. The ignored one-request
+controller was also inspected for isolated login and owned cleanup boundaries.
+
+### Spec
+
+No blocking implementation mismatch. #110 remains partial: the original live
+cause is unconfirmed, and no fix or renewed actual-candidate lifecycle is claimed.
+The prepared diagnostic caps the budget at one, uses the actual rc16 artifact,
+and includes scoped credential purge and preservation checks. Reviewers did not
+execute inference or repeat the tests.
+
+Findings: Standards 0; Spec 1 known outstanding diagnosis/acceptance requirement.
