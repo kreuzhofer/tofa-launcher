@@ -1,9 +1,11 @@
 # rc16 stream failure diagnosis (#110)
 
-The cause of the original rc16 Windows live failure remains **unconfirmed**.
-An offline probe demonstrates a separate observer framing defect that produces
-the same `event_body_limit` category, and bounded diagnostics are now tested
-for distinguishing the causes. No new paid inference has run in this diagnosis.
+The authorized one-request diagnostic **reproduced an oversized initial event**
+declared as `response.created`. Its data line crossed the observer's 256 KiB
+event bound before JSON parsing. CR-only framing did not occur in this attempt.
+The contents and final size of that event remain unknown; request metadata being
+echoed is a hypothesis, not a measured fact. One upstream inference request ran
+in this diagnosis, without retry, and its isolated login was removed.
 [#110](https://github.com/kreuzhofer/tofa-launcher/issues/110) and Windows
 qualification #105 remain open; the original failed evidence is unchanged.
 
@@ -65,7 +67,7 @@ The checks distinguish these hypotheses without asserting one is established:
 4. An unexpected response format: header categories and framing counters differ
    from SSE expectations.
 
-## Validation and next step
+## Validation before the live diagnostic
 
 The two existing oversized-event HTTP tests were first extended to require
 diagnostics and failed with `KeyError: stream_diagnostics`. After implementation,
@@ -76,23 +78,81 @@ passed in 27.7 seconds, with native config/auth
 preserved and its three owned sessions removed. Full `go test ./...`, `go vet
 ./...` and Python syntax checks also passed. These are offline/synthetic checks.
 
-A separate interactive diagnostic is prepared locally with the unchanged
+A separate interactive diagnostic used the unchanged
 published rc16 executable, explicit Codex 0.160.1, and this instrumented observer.
-It permits **one** upstream inference request, 4096 output tokens, a 180-second
+It permitted **one** upstream inference request, 4096 output tokens, a 180-second
 coding deadline, the unchanged 1 MiB request/256 KiB event/8 MiB response bounds,
-and no Guardian campaign or automatic paid retry. It uses a new isolated local
-login and purges only that login afterward. Its report records the observer's
+and no Guardian campaign or automatic paid retry. It used a new isolated local
+login and purged only that login afterward. Its report records the observer's
 SHA-256, so it cannot be mistaken for the original pinned qualification runner.
 
-The maintainer has been asked to enter credentials locally again for that
-one-request diagnostic. The previous test login was correctly purged. No new
-login or live request has started at the time of this report. A diagnostic
-result will not qualify the release; any resulting fix needs regression tests
-and renewed affected qualification before #105 can pass.
+## Authorized live diagnostic result
+
+The maintainer authorized the diagnostic and entered credentials locally.
+The [unaltered sanitized report](evidence/issue110-diagnostic-01-2026-10-09.json)
+records one upstream inference request and the same `event_body_limit` failure.
+The coding turn ended after 4.72 seconds without executing a tool or producing
+the expected output file. No Guardian check, continuation campaign, retry or
+model substitution ran.
+
+| Measurement | Result |
+| --- | ---: |
+| Forwarded request bytes | 390,852 |
+| Received response bytes before stopping | 265,679 |
+| Content type | `text/event-stream` |
+| Content encoding header | Empty |
+| CR bytes | 0 |
+| LF bytes / processed lines | 1 / 1 |
+| Blank lines / parsed JSON lines | 0 / 0 |
+| Initial event type hint | `response.created` |
+| Processed event bytes | 24 |
+| Pending data-line bytes at stop | 265,655 |
+| Event limit | 262,144 |
+
+These counters locate the reproduced failure: the initial event declaration
+was read, but its following data line exceeded the bound before completing.
+They rule out CR-only framing and accumulation of multiple completed JSON lines
+for this attempt. The declared type is a bounded hint from the stream prefix,
+not a parsed oversized JSON object. The complete event size and contents were
+not captured, so neither echoed request fields nor any particular provider
+payload field is established as the source of the size. The original rc16
+report remains unchanged and lacks these counters; the diagnostic reproduces
+its symptom but cannot retroactively prove identical contents.
+
+The observer SHA-256 was
+`9d963a03963388458e601c0245fe0370ddca1b4891b66556a8b938dcab219c6e`,
+matching the reviewed source at `a0c6857`. Limits and product bytes were unchanged.
+The report's `passed: false` is the failed coding result, not a cleanup failure.
+All five cleanup checks passed: isolated config/file credentials/vault credential
+removed, ordinary user and machine PATH preserved. Native config/auth preservation,
+removal of the one owned native session, and scratch removal also passed.
+Usage and cost are unknown because no completed usage was returned. Across the
+original qualification and this diagnostic, two upstream requests have run.
+
+## Next step
+
+The new HTTP-seam test
+`ProxyTests.test_large_created_event_reproduces_the_diagnostic_pending_line_failure`
+reproduces the measured signature offline in about one second: a 24-byte
+`event: response.created` header followed by one large data line, LF framing,
+no parsed JSON or blank line, and rejection at the unchanged event limit. It
+uses synthetic contents and does not assert those contents match the live event.
+After adding this reproduction, the full observer suite passed: **18 tests in
+69.7 seconds**. No production code or resource limit changed in this follow-up.
+
+Next, decide how the observer should handle such an
+event while retaining explicit finite resource bounds and privacy; do not change
+the limit merely to produce a passing qualification. The separate CR-only parser
+defect remains real but is not the cause demonstrated by this diagnostic.
+
+No fix or release acceptance is claimed. Any resulting change needs tests and
+renewed affected qualification before #105 can pass. Another paid attempt is a
+separate step; this diagnostic's one-request authorization has been consumed.
 
 ## Review
 
-Independent reviews compared `e368efa` with diagnostic commit `a990819`.
+The pre-diagnostic independent reviews compared `e368efa` with diagnostic commit
+`a990819`; they did not review or execute the later live attempt.
 
 ### Standards
 

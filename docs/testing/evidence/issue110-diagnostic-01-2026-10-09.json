@@ -1,0 +1,99 @@
+{
+  "kind": "single-request diagnostic, not release acceptance",
+  "candidate": "v0.1.0-rc.16",
+  "client": "codex-cli 0.160.1",
+  "request_limit": 1,
+  "output_tokens_per_request": 4096,
+  "coding_deadline_seconds": 180,
+  "event_limit_bytes": 262144,
+  "request_limit_bytes": 1048576,
+  "observer_sha256": "9d963a03963388458e601c0245fe0370ddca1b4891b66556a8b938dcab219c6e",
+  "passed": false,
+  "login_completed": true,
+  "coding": {
+    "turns": [
+      {
+        "exit_code": 1,
+        "tools_succeeded": 0,
+        "turn_completed": false,
+        "client_error": true,
+        "metadata_warning": false,
+        "timed_out": false,
+        "reasoning_items": 0,
+        "answer_items": 0,
+        "reasoning_output_tokens": null,
+        "elapsed_ms": 4720.008,
+        "file_checks": {
+          "summary_status": "missing",
+          "unexpected_field_count": null,
+          "expected_fields_match": {
+            "count": false,
+            "total": false,
+            "max": false
+          },
+          "input_preserved": true
+        },
+        "files_correct": false,
+        "streams": [
+          {
+            "kind": "task",
+            "status": 200,
+            "reasoning_effort": "high",
+            "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+            "role": "main",
+            "paid_inference": true,
+            "request_id": 1,
+            "tool_results": 0,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "headers_ms": 1464.007,
+            "first_delta_ms": null,
+            "completed_ms": null,
+            "decision": null,
+            "started_ms": 1375.656,
+            "stream_diagnostics": {
+              "request_bytes": 390852,
+              "response_bytes": 265679,
+              "content_type": "text/event-stream",
+              "content_encoding": "",
+              "cr_bytes": 0,
+              "lf_bytes": 1,
+              "lines": 1,
+              "blank_lines": 0,
+              "parsed_json_lines": 0,
+              "first_event_type_hint": "response.created",
+              "last_event_type": null,
+              "event_bytes_at_stop": 24,
+              "pending_line_bytes_at_stop": 265655
+            },
+            "stage": "stream_read",
+            "failure": "event_body_limit",
+            "ended_ms": 3079.118
+          }
+        ],
+        "streaming_observed": false,
+        "passed": false
+      }
+    ],
+    "same_session": false,
+    "scratch_config_preserved": true,
+    "scratch_auth_absent": true,
+    "scratch_settings_preserved": true,
+    "harness_defect": false,
+    "passed": false
+  },
+  "used_requests": 1,
+  "native_sandbox_home_reused": true,
+  "native_config_auth_preserved": true,
+  "owned_native_sessions_removed": true,
+  "owned_native_session_count": 1,
+  "cleanup": {
+    "configuration_removed": true,
+    "file_credentials_removed": true,
+    "owned_vault_credentials_removed": true,
+    "user_path_preserved": true,
+    "machine_path_preserved": true
+  },
+  "scratch_removed": true
+}

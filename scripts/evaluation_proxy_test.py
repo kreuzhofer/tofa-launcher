@@ -395,5 +395,50 @@ class ProxyTests(unittest.TestCase):
     def test_multiline_sse_event_has_one_shared_size_limit(self):
         self.test_complete_oversized_event_is_rejected_before_json_parsing(multiline=True)
 
+    def test_large_created_event_reproduces_the_diagnostic_pending_line_failure(self):
+        # Reproduce the measured framing/category, without claiming the unknown
+        # live event contained this synthetic field or had this complete size.
+        header = b'event: response.created\n'
+        payload = b'data: ' + json.dumps({'type': 'response.created',
+            'response': {'fixture': 'PRIVATE_CONTENT' + 'x' * 390000}}).encode() + b'\n\n'
+        class Upstream(http.server.BaseHTTPRequestHandler):
+            def log_message(self, *unused): pass
+            def do_POST(self):
+                self.rfile.read(int(self.headers['Content-Length']))
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/event-stream')
+                self.end_headers()
+                try:
+                    self.wfile.write(header + payload)
+                except (BrokenPipeError, ConnectionResetError): pass
+        server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), Upstream)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        try:
+            with tempfile.TemporaryDirectory() as directory:
+                report = Path(directory) / 'report.json'
+                with EvaluationProxy('http://127.0.0.1:' + str(server.server_port), 'fixture-token',
+                                     report, None, 'coding', 5) as proxy:
+                    request = urllib.request.Request(proxy.url + '/responses',
+                        data=b'{"model":"moonshotai/Kimi-K3","stream":true,"input":[]}',
+                        headers={'Authorization': 'Bearer fixture-token'})
+                    with urllib.request.build_opener(urllib.request.ProxyHandler({})).open(request) as response:
+                        response.read()
+                observed = json.loads(report.read_text())[0]
+                self.assertEqual(observed['failure'], 'event_body_limit')
+                self.assertFalse(observed['completed'])
+                diagnostics = observed['stream_diagnostics']
+                self.assertEqual(diagnostics['first_event_type_hint'], 'response.created')
+                self.assertEqual(diagnostics['event_bytes_at_stop'], len(header))
+                self.assertGreater(diagnostics['pending_line_bytes_at_stop'], 256 * 1024 - len(header))
+                self.assertLess(diagnostics['response_bytes'], len(header + payload))
+                self.assertEqual(diagnostics['cr_bytes'], 0)
+                self.assertEqual(diagnostics['lf_bytes'], 1)
+                self.assertEqual(diagnostics['blank_lines'], 0)
+                self.assertEqual(diagnostics['parsed_json_lines'], 0)
+                self.assertNotIn('PRIVATE_CONTENT', report.read_text())
+                self.assertNotIn('fixture-token', report.read_text())
+        finally:
+            server.shutdown(); server.server_close()
+
 
 if __name__ == '__main__': unittest.main()
