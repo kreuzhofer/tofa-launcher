@@ -451,6 +451,23 @@ class EvaluationTests(unittest.TestCase):
 
 
 class QualificationPairInputTests(unittest.TestCase):
+    def test_explicit_unlimited_sample_reports_request_count_without_a_cap(self):
+        import qualification_pair
+        from types import SimpleNamespace
+        def coding(options, root):
+            budget = Path(os.environ['TOFA_EVAL_BUDGET'])
+            data = json.loads(budget.read_text())
+            self.assertIsNone(data['maximum'])
+            data['used'] = 3; budget.write_text(json.dumps(data))
+            return {'passed': False}
+        with tempfile.TemporaryDirectory() as directory, \
+                patch('qualification_pair.live.run_one', side_effect=coding), \
+                patch('windows_sandbox_state.NativeState'):
+            report = qualification_pair.run(SimpleNamespace(model='deepseek-ai/DeepSeek-V4.1-Flash',
+                guardian_model='zai-org/GLM-5.3-Flash', no_request_limit=True), Path(directory))
+        self.assertIsNone(report['request_limit'])
+        self.assertEqual(report['used_requests'], 3)
+
     def test_windows_evaluation_requires_native_codex_for_provenance(self):
         import model_evaluation
         with tempfile.TemporaryDirectory() as directory:

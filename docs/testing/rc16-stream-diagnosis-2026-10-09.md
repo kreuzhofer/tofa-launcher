@@ -1,5 +1,16 @@
 # rc16 stream failure diagnosis (#110)
 
+**Latest result:** the bounded envelope fix passes live streaming. It exposed a
+second defect: Codex 0.160.1 replays reasoning items without the ID required by
+Token Factory. A narrow adapter repair now passes the local-build two-turn coding
+and Guardian allow/deny sample. This changes product bytes: rc16 remains failed,
+and a new shared candidate needs Mac and Windows qualification. See the
+[follow-up evidence](#retained-login-follow-up-and-local-fix) below.
+
+The following sections retain the earlier diagnostic history and its original
+authorization limits. The maintainer subsequently authorized continued work,
+removed the usage cap, and instructed us to retain and reuse the Windows login.
+
 The authorized one-request diagnostic **reproduced an oversized initial event**
 declared as `response.created`. Its data line crossed the observer's 256 KiB
 event bound before JSON parsing. CR-only framing did not occur in this attempt.
@@ -24,7 +35,7 @@ paid inference. Run from the repository root:
 python docs/testing/evidence/issue110-stream-probe.py
 ```
 
-This is a deliberately red diagnostic probe, not a passing regression test.
+At revision `9538008`, this is a deliberately red diagnostic probe, not a passing regression test.
 It exits 1 because two separately bounded CR-only events are rejected. Repeated
 runs produced the same result in under four seconds. The
 [recorded matrix](evidence/issue110-framing-2026-10-09.json) shows:
@@ -170,3 +181,92 @@ and includes scoped credential purge and preservation checks. Reviewers did not
 execute inference or repeat the tests.
 
 Review findings: Standards 0; Spec 0. Issue-level diagnosis and acceptance remain incomplete.
+
+## Retained-login follow-up and local fix
+
+The maintainer entered a login once into the normal Windows profile and requested
+reuse without purging it. Each follow-up verified that the saved vault credential,
+ordinary tofa files and native Codex config/auth remained unchanged. No credential
+values, project identifiers, conversation text or tool arguments are in the reports.
+The sample explicitly uses `--no-request-limit`; the default remains 12 for callers
+that do not opt in. Request counts are still recorded. The 4096-token output bound,
+1 MiB request bound, 8 MiB response bound and finite deadlines remain operational
+limits, not a user usage budget.
+
+The observer now distinguishes ordinary events (256 KiB) from the fixed set of
+response-envelope events (at most 1 MiB + 256 KiB). Oversized envelopes must parse
+as the hinted event type, preserve the selected model, and contain at most 256 KiB
+of serialized output. The ordinary delta/tool-event bound and total response bound
+still apply. This follows the distinction between an event delta and an envelope
+carrying a response object in the [Responses streaming contract](https://developers.openai.com/api/reference/resources/responses/streaming-events).
+No claim is made about the unknown original payload's exact contents. The unrelated
+CR-only parser limitation is unchanged.
+
+Four attempts used the unchanged published rc16 ARM64 executable and Codex 0.160.1,
+with the modified observer. Their reports record runner hashes and baseline
+`9538008`; they are not runs of the original pinned qualifier.
+
+| Retained report | Upstream requests | Measured result |
+| --- | ---: | --- |
+| [01](evidence/issue110-retained-01-2026-10-09.json) | 2 | Initial response completed with three large envelopes; continuation HTTP 422 initially mislabeled by the observer's event bound |
+| [02](evidence/issue110-retained-02-2026-10-09.json) | 2 | Same failure; bounded JSON-error diagnostics correctly report HTTP 422 |
+| [03](evidence/issue110-retained-03-2026-10-09.json) | 2 | Input-shape metadata identifies a reasoning item without an ID |
+| [04](evidence/issue110-retained-04-2026-10-09.json) | 3 | Continuation without reasoning accepted; next continuation rejected at `ResponseReasoningItem.id` for input item 6 |
+
+All four install/repeat-install/fresh-terminal checks passed. All failed live samples
+stopped before Guardian and reinstall acceptance; failure cleanup removed only the
+owned test installation and PATH entry, preserving the login. All recorded cleanup
+and native-state preservation checks passed. No failed report was overwritten.
+
+The provider's [public OpenAPI schema](https://api.tokenfactory.nebius.com/openapi.json)
+requires `id`, `summary` and `type` on `ResponseReasoningItem`. Attempt 04 records
+`summary` as an array, `type` as reasoning, and the provider's exact fixed-category
+missing-ID error. These observations distinguish the defect from assistant-message
+normalization and tool-call formatting. The regression
+`TestAdaptedLaunchRepairsMissingReasoningID` reproduced HTTP 422 through the real
+adapter before the fix. The adapter now supplies a deterministic ID only when a
+reasoning item has an array summary and no supplied ID. Retries retain the same ID;
+repeated items have distinct IDs. Supplied IDs (including null), reasoning content,
+encrypted fields and unrelated history stay intact.
+
+The [local diagnostic build](evidence/issue110-local-fix-01-2026-10-09.json), SHA-256
+`1d323d7c0bfb01741e66a8e2731bb94e730c2d172830d88ffffd22715f3beb1b`,
+passed both coding turns in one native session (four and two successful tools),
+then Guardian allow executed the marker and Guardian deny prevented execution.
+All 12 upstream responses completed. Native config/auth were preserved, all three
+owned sessions were removed, and the saved Windows login remained intact. This is
+live local-fix evidence, **not published-candidate or installation acceptance**.
+
+Validation: the new missing-ID test failed before repair and passed afterward;
+`go test ./...` and `go vet ./...` passed. The full affected Python suite passed
+**70 tests in 86.7 seconds, with three optional tests skipped**. The selected native
+loopback fixture had also passed after the envelope repair, before the later
+diagnostic metadata additions. Actual native live checks above cover the final
+adapter repair. Source hashes in each report identify exactly what it measured.
+
+The Mac coordinator can take the reviewed commit, publish a new immutable shared
+candidate, and collect renewed affected Mac and Windows evidence. #105/#106/#110
+remain open until the required candidate acceptance is complete. Stable release,
+model promotion (#75), Windows desktop ownership, and the separate managed-daemon
+sandbox recurrence (#108) are not established by these results.
+
+## Follow-up review
+
+Independent reviews covered the final uncommitted task diff against `9538008`
+and all five follow-up evidence files. They did not rerun tests or paid inference.
+
+### Standards
+
+Zero hard violations and zero actionable code-smell findings. The reasoning-ID
+repair preserves supplied IDs and unrelated fields; diagnostics remain bounded
+and redact values. No ADR conflict was found. Credential reuse follows the
+maintainer's explicit instruction.
+
+### Spec
+
+Zero implementation or evidence-identity findings. The remaining acceptance gate
+is explicit: publish a new shared candidate and qualify the exact artifacts on
+both platforms. The successful local diagnostic cannot close #105/#106/#110.
+
+Review findings: Standards 0; Spec 0 implementation findings, with candidate
+acceptance still incomplete.

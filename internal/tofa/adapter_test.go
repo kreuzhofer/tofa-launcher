@@ -195,6 +195,56 @@ func TestAdapterPreservesExistingAndUnrelatedFields(t *testing.T) {
 	runAdapted(t, app)
 }
 
+func TestAdaptedLaunchRepairsMissingReasoningID(t *testing.T) {
+	// Native Codex 0.160.1 omits the ID on replay. Token Factory rejects
+	// this item with ResponseReasoningItem.id: Field required (HTTP 422).
+	item := `{"type":"reasoning","summary":[],"content":[{"type":"reasoning_text","text":"fixture reasoning"}],"encrypted_content":"opaque","future":9007199254740993}`
+	body := `{"model":"fixture-model","input":[` + item + `,` + item + `,{"type":"reasoning","id":"rs_existing","summary":[]},{"type":"reasoning","id":null,"summary":[]}]}`
+	var originalIDs []string
+	app, _ := adapterFixture(t, func(writer http.ResponseWriter, request *http.Request) {
+		var payload struct {
+			Input []map[string]json.RawMessage `json:"input"`
+		}
+		if err := json.NewDecoder(request.Body).Decode(&payload); err != nil {
+			t.Fatal(err)
+		}
+		ids := []string{string(payload.Input[0]["id"]), string(payload.Input[1]["id"])}
+		if ids[0] == "" || ids[1] == "" || ids[0] == ids[1] {
+			writer.WriteHeader(http.StatusUnprocessableEntity)
+			return
+		}
+		if originalIDs == nil {
+			originalIDs = ids
+		} else if ids[0] != originalIDs[0] || ids[1] != originalIDs[1] {
+			t.Error("reasoning IDs changed on retry or continuation")
+		}
+		for _, index := range []int{0, 1} {
+			var expected map[string]json.RawMessage
+			json.Unmarshal([]byte(item), &expected)
+			delete(payload.Input[index], "id")
+			got, _ := json.Marshal(payload.Input[index])
+			want, _ := json.Marshal(expected)
+			if string(got) != string(want) {
+				t.Error("reasoning content changed")
+			}
+		}
+		if string(payload.Input[2]["id"]) != `"rs_existing"` || string(payload.Input[3]["id"]) != "null" {
+			t.Error("supplied reasoning ID changed")
+		}
+		writer.WriteHeader(http.StatusOK)
+	}, func(endpoint, token string) error {
+		for _, input := range []string{body, body, strings.TrimSuffix(body, `]}`) + `,{"type":"message","role":"user","content":"next"}]}`} {
+			response := adapterRequest(t, endpoint, token, input)
+			if response.StatusCode != http.StatusOK {
+				t.Errorf("reasoning continuation returned HTTP %d", response.StatusCode)
+			}
+			response.Body.Close()
+		}
+		return nil
+	})
+	runAdapted(t, app)
+}
+
 func TestAdaptedHistoryIDsSurviveRetriesAndAdditionalTurns(t *testing.T) {
 	message := `{"type":"message","role":"assistant","content":[{"type":"output_text","text":"same reply"}]}`
 	body := `{"model":"fixture-model","input":[` + message + `,` + message + `]}`

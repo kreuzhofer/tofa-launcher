@@ -411,7 +411,22 @@ func normalizeHistory(body []byte) ([]byte, error) {
 	changed := false
 	for index, raw := range items {
 		var item map[string]json.RawMessage
-		if json.Unmarshal(raw, &item) != nil || string(item["type"]) != `"message"` || string(item["role"]) != `"assistant"` {
+		if json.Unmarshal(raw, &item) != nil {
+			continue
+		}
+		if string(item["type"]) == `"reasoning"` {
+			// Native Codex omits reasoning IDs on replay, but Token Factory
+			// requires them. Repair only complete reasoning-history shapes;
+			// preserve supplied IDs and all reasoning fields verbatim.
+			var summary []json.RawMessage
+			if _, exists := item["id"]; !exists && json.Unmarshal(item["summary"], &summary) == nil && summary != nil {
+				item["id"] = historyItemID(item, index, "rs_tofa_")
+				items[index], _ = json.Marshal(item)
+				changed = true
+			}
+			continue
+		}
+		if string(item["type"]) != `"message"` || string(item["role"]) != `"assistant"` {
 			continue
 		}
 		var content []json.RawMessage
@@ -441,9 +456,7 @@ func normalizeHistory(body []byte) ([]byte, error) {
 			// Some desktop history messages omit the ID required by Token
 			// Factory. Keep repairs stable on retries and distinguish repeated
 			// identical messages by their position; never replace supplied IDs.
-			canonical, _ := json.Marshal(item)
-			digest := sha256.Sum256(append([]byte(strconv.Itoa(index)+":"), canonical...))
-			item["id"], _ = json.Marshal("msg_tofa_" + hex.EncodeToString(digest[:24]))
+			item["id"] = historyItemID(item, index, "msg_tofa_")
 			itemChanged = true
 		}
 		if itemChanged {
@@ -456,6 +469,13 @@ func normalizeHistory(body []byte) ([]byte, error) {
 	}
 	payload["input"], _ = json.Marshal(items)
 	return json.Marshal(payload)
+}
+
+func historyItemID(item map[string]json.RawMessage, index int, prefix string) json.RawMessage {
+	canonical, _ := json.Marshal(item)
+	digest := sha256.Sum256(append([]byte(strconv.Itoa(index)+":"), canonical...))
+	id, _ := json.Marshal(prefix + hex.EncodeToString(digest[:24]))
+	return id
 }
 
 // Codex 0.155.1 guardian-reviewer/src/assessment.rs. This non-strict schema
