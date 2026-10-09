@@ -311,7 +311,7 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 	fmt.Fprintln(a.Out, "Route: per-launch Responses request adapter (assistant-history repair).")
 	if selectedModel != "" {
 		fmt.Fprintf(a.Out, "Naming: %s (automatic desktop titles; independent of main and Guardian; no fallback).\n", desktopNamingModel)
-		fmt.Fprintln(a.Out, "Automatic title routing: recognized gpt-5.6-luna/gpt-6-luna thread_title requests use the naming model; tools and title schema are retained. Other auxiliary requests remain unsupported.")
+		fmt.Fprintln(a.Out, "Automatic title routing: recognized gpt-5.6-luna/gpt-6-luna thread_title requests use the naming model; tool-free; provider-default reasoning; native title schema retained. Native reasoning inclusion and cache hints are omitted. Other auxiliary requests remain unsupported.")
 	}
 	go func() {
 		err := adapter.server.Serve(listener)

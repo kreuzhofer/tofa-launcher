@@ -491,8 +491,11 @@ the remaining Electron UI qualification.
 
 The development naming route recognizes the captured `gpt-5.6-luna` and
 `gpt-6-luna` title requests by both source markers, exact title schema and tool
-inventory. It sends those requests to `nvidia/Nemotron-3_5-Lightning`, retaining
-all tool definitions and the structured-output schema. Main, Guardian, native
+inventory. It sends those requests to `nvidia/Nemotron-3_5-Lightning` as tool-free
+naming, retaining the prompt and structured-output schema. Live qualification found
+that Lightning rejects namespace tools, `include`, `reasoning` and `prompt_cache_key`.
+The naming route omits those fields and uses provider-default reasoning; the
+launcher announces this policy. Main, Guardian, native
 catalog descriptors and CLI title routing remain unchanged. There is no naming
 picker, configurable fallback, or automatic substitution.
 
@@ -504,8 +507,7 @@ successes. The desktop still validates and persists titles under its existing
 rules, including manual-title protection. Client cancellation propagates upstream;
 this work does not increase the desktop's naming deadline.
 
-The [#111 implementation and qualification record](https://github.com/kreuzhofer/tofa-launcher/issues/111) is pending live
-provider and actual Mac UI acceptance. rc16 retains the older Kimi-only route.
+The [#111 implementation and qualification record](https://github.com/kreuzhofer/tofa-launcher/issues/111) has passed live provider/bundled-engine checks and is pending actual Mac UI acceptance. rc16 retains the older Kimi-only route.
 The [#52 report](research/desktop-shared-title-generation.md) records historical
 Kimi generation and persistence; it is not evidence of Lightning behavior.
 

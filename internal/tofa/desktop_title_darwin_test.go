@@ -51,13 +51,15 @@ func TestDesktopPreservesRoutedTitleContractAndFailures(t *testing.T) {
 					}
 					original["model"] = "nvidia/Nemotron-3_5-Lightning"
 					input := original["input"].([]any)
-					original["tools"] = input[0].(map[string]any)["tools"]
+					delete(original, "reasoning")
+					delete(original, "include")
+					delete(original, "prompt_cache_key")
 					original["input"] = input[1:]
 					app, _ := adapterFixture(t, func(w http.ResponseWriter, r *http.Request) {
 						raw, err := io.ReadAll(r.Body)
 						got := jsonValue(t, raw).(map[string]any)
 						if err != nil || !reflect.DeepEqual(got, original) {
-							t.Error("title adaptation changed tool definitions, input, metadata, reasoning or other settings")
+							t.Error("title adaptation changed prompt, schema, metadata or unrelated settings")
 						}
 						w.WriteHeader(tc.status)
 						io.WriteString(w, tc.response)
@@ -258,7 +260,7 @@ func TestDesktopBundledEngineRoutesAutomaticTitleToLightning(t *testing.T) {
 						return
 					}
 				}
-				if body["model"] != "nvidia/Nemotron-3_5-Lightning" || body["tools"] == nil || body["instructions"] != nil || body["text"].(map[string]any)["format"] == nil {
+				if body["model"] != "nvidia/Nemotron-3_5-Lightning" || body["tools"] != nil || body["instructions"] != nil || body["text"].(map[string]any)["format"] == nil {
 					t.Errorf("current title contract changed: model=%v tools=%v", body["model"], body["tools"])
 				}
 				emitFixtureResponse(w, fixtureMessage(title))

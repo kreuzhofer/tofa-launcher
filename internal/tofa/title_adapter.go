@@ -62,10 +62,13 @@ func routeDesktopTitle(body []byte) ([]byte, bool, error) {
 			return nil, false, unsupported
 		}
 	}
-	// Token Factory rejects additional_tools input items. Relocate the captured
-	// definitions intact and retain the native structured-output contract. The
-	// Kimi-specific constrained-decoding workaround does not apply to Lightning.
-	payload["tools"] = additional.Tools
+	// Lightning's Responses endpoint rejects namespace tools, include, reasoning
+	// and prompt_cache_key (live engine replay, #111). Naming is explicitly
+	// tool-free and uses provider-default reasoning. Retain the native prompt
+	// and output schema; the desktop still validates and persists the result.
+	delete(payload, "include")
+	delete(payload, "reasoning")
+	delete(payload, "prompt_cache_key")
 	payload["input"], _ = json.Marshal(input[1:])
 	payload["model"], _ = json.Marshal(desktopNamingModel)
 	result, err := json.Marshal(payload)

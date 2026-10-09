@@ -1,6 +1,6 @@
 # Independent desktop naming: implementation evidence for #111
 
-Status: offline implementation verified; live provider and Mac UI acceptance pending.
+Status: live provider/engine naming passed; actual Mac UI acceptance pending.
 This is development work for [#111](https://github.com/kreuzhofer/tofa-launcher/issues/111),
 not functionality shipped in rc16. Historical Kimi qualification does not qualify
 Lightning or GLM chat naming.
@@ -12,7 +12,10 @@ Recognized desktop title requests route to exactly
 project availability fails naming explicitly while main conversation requests
 remain usable. There is no model fallback or naming picker. The desktop retains
 its native title schema, validation, deadline, persistence and manual-title guard.
-The launcher relocates the captured tool definitions without altering them.
+Live testing found that Lightning rejects the captured namespace tools and native
+`include`, `reasoning`, and `prompt_cache_key` fields. The naming route now omits
+these fields, retains the prompt and native schema, and announces tool-free naming
+with provider-default reasoning. Main and Guardian tools remain unchanged.
 
 The dedicated [metadata snapshot](../../internal/tofa/assets/desktop-naming.json)
 records the exact entry from the unauthenticated Token Factory
@@ -20,7 +23,7 @@ records the exact entry from the unauthenticated Token Factory
 including source hash and retrieval date. Its `responses_api` and
 `function_calling` flags justify testing this candidate; they do not prove that
 the provider accepts the actual namespace tools together with structured output.
-Authenticated project availability has not been checked in this campaign.
+The authenticated project catalog was checked and contains the exact Lightning ID.
 
 ## Current installed contract
 
@@ -50,7 +53,7 @@ Native catalog descriptors are preserved; naming is routed at the request bounda
 
 - Red: a GLM 5.3 launch rejected a captured naming request with HTTP 400 and no
   provider call. Green: all five existing main selections route that request to
-  Lightning, preserving schema and tool definitions.
+  Lightning, preserving the native schema.
 - Red: missing Lightning availability initially still reached the provider.
   Green: it now returns an explicit naming error with no fallback; an ordinary
   GLM request still succeeds.
@@ -68,19 +71,40 @@ Native catalog descriptors are preserved; naming is routed at the request bounda
   obsolete picker expectation for the former unsupported-naming notice. That
   assertion was updated; final full-suite outcome is recorded in the issue/PR.
 
+## Live provider and engine results
+
+The unmodified branch received provider HTTP 400 before generation. Isolated
+probes removed one demonstrated incompatibility at a time: `include`, then
+`reasoning`, then `prompt_cache_key`; the next error was `Unsupported Responses
+tool type namespace`. Removing the captured tools while retaining the schema
+produced a valid title. This justified the explicit tool-free naming policy.
+No production fallback, automatic retry, schema removal or change to main/Guardian
+requests was introduced.
+
+The public-launcher regression first failed with HTTP 400 for `include`, then
+passed after the scoped adaptation. Targeted offline regressions and installed-engine
+replay passed in 39.826 seconds. With the current app's complete naming prompt,
+both native contracts then generated **Explain Python integer addition** using
+Lightning. End-to-end fixture times were 13.506 seconds for `gpt-5.6-luna` and
+8.603 seconds for `gpt-6-luna`, including setup, under the native 30-second limit.
+[Sanitized live results and usage](evidence/independent-desktop-naming-2026-10-09-live.json)
+record the model identities, title, descriptions and response IDs. Those requests
+used synthetic prompts and isolated engine profiles. They establish provider/engine
+compatibility, not actual UI acceptance. The observer buffered each provider response
+before feeding it to the engine; streaming UI behavior is not established by this check.
+
 ## Remaining live acceptance
 
-AGENTS.md requires asking before authenticated testing. Existing evaluation
-fixtures use synthetic credentials; they do not authorize reuse of the saved
-Token Factory login. Prepare a temporary candidate from this branch, then with
-explicit authorization:
+The maintainer explicitly authorized saved-login reuse on 2026-10-09 and removed
+the proposed request limit. The login is reused in memory without modifications.
+Remaining UI work requires the operator: Computer Use refuses control of
+`com.openai.codex`. A temporary observed candidate will support these checks:
 
 1. Reuse the saved login only in memory and check exact project availability.
-   Apply a shared maximum of 12 paid requests and record sanitized model routing,
-   durations, output validation and usage. Do not log tokens or private prompts.
+   Record sanitized model routing, durations, output validation and usage. Do not log tokens or private prompts.
 2. First check the captured Lightning title request against the real provider,
-   including its existing tools and structured output. Stop on incompatibility;
-   do not introduce an unobserved fallback or remove the schema speculatively.
+   Keep the structured-output schema and the now-evidenced tool-free adaptation.
+   Do not introduce a model fallback.
 3. Coordinate a normal desktop quit/relaunch with the operator. Never bypass
    native profile ownership or terminate their unrelated running session.
 4. Start a fresh synthetic GLM conversation. Observe a useful generated title

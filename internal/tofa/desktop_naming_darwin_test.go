@@ -2,6 +2,7 @@ package tofa_test
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -175,5 +176,40 @@ func TestDesktopUnavailableNamingDoesNotFallBackOrBlockMain(t *testing.T) {
 	}
 	if !strings.Contains(output.String(), "naming model nvidia/Nemotron-3_5-Lightning is unavailable") {
 		t.Fatal("naming unavailability was not visible")
+	}
+}
+
+// Lightning rejects these native fields and namespace tools before generation.
+// Keep that observed provider boundary in the public-launcher regression.
+func TestDesktopLightningUsesToolFreeStructuredNaming(t *testing.T) {
+	bundle, capture := desktopFixture(t, "ignore")
+	app, output := adapterFixture(t, func(w http.ResponseWriter, r *http.Request) {
+		raw, _ := io.ReadAll(r.Body)
+		p := jsonValue(t, raw).(map[string]any)
+		for _, field := range []string{"include", "reasoning", "prompt_cache_key", "tools"} {
+			if _, found := p[field]; found {
+				http.Error(w, "Lightning rejects native naming field: "+field, 400)
+				return
+			}
+		}
+		if p["text"].(map[string]any)["format"] == nil {
+			t.Error("native title schema removed")
+		}
+		io.WriteString(w, `{"title":"Python addition","description":"How integers are added"}`)
+	}, nil)
+	child, stop := liveDesktopFixture(t, app, bundle, capture, "--model", "zai-org/GLM-5.3")
+	p := nativeTitleFixture(t)
+	p["include"] = []string{"reasoning.encrypted_content"}
+	p["prompt_cache_key"] = "synthetic-title-cache"
+	raw, _ := json.Marshal(p)
+	response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], child.Env["TOFA_API_KEY"], string(raw))
+	data, _ := io.ReadAll(response.Body)
+	response.Body.Close()
+	stop()
+	if response.StatusCode != 200 {
+		t.Fatalf("Lightning title failed: status=%d body=%s", response.StatusCode, data)
+	}
+	if !strings.Contains(output.String(), "tool-free; provider-default reasoning; native title schema retained") {
+		t.Fatal("naming adaptation not announced")
 	}
 }
