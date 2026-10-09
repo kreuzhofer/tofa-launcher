@@ -1,0 +1,179 @@
+{
+  "source_commit": "d492de9",
+  "app_version": "26.930.51102",
+  "app_build": "13100",
+  "engine_version": "0.160.0",
+  "observer_binary_sha256": "732764d8bf1ff5e233a58ff148557087e6d5d8f763b638816790545bedc3f0d5",
+  "actual_ui": true,
+  "operator_confirmed_titles": [
+    "Explain Python integer addition",
+    "Explain cache timeout"
+  ],
+  "initial_provisional_title_observed": true,
+  "persistence": "Operator confirmed both generated titles after normal quit and production candidate relaunch",
+  "manual_title": "Operator renamed Python chat to Manual naming check 111, sent a follow-up and confirmed title remained unchanged",
+  "requests": [
+    {
+      "at": "2026-10-09T10:15:44.960662Z",
+      "completed_ms": 5600,
+      "completion_event": "response.completed",
+      "has_cache_hint": true,
+      "has_include": true,
+      "has_reasoning": false,
+      "has_tools": true,
+      "headers_ms": 1409,
+      "http_status": 200,
+      "model": "zai-org/GLM-5.3",
+      "request_bytes": 423236,
+      "response_bytes": 163355,
+      "response_id": "resp_a87b253fb33f4d1cb896925594d201d2",
+      "response_model": "zai-org/GLM-5.3",
+      "source": "user",
+      "trigger": "composer",
+      "upstream_request_id": "48b9c793d98727d50ba993f20c067f29",
+      "usage": {
+        "input_tokens": 7385,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 6528
+        },
+        "output_tokens": 1018,
+        "output_tokens_details": {
+          "reasoning_tokens": 704
+        },
+        "total_tokens": 8403
+      }
+    },
+    {
+      "at": "2026-10-09T10:15:44.768796Z",
+      "completed_ms": 28245,
+      "completion_event": "response.completed",
+      "description": "Python int addition why result is int",
+      "generated_title": "Explain Python integer addition",
+      "has_cache_hint": false,
+      "has_include": false,
+      "has_reasoning": false,
+      "has_schema": true,
+      "has_tools": false,
+      "headers_ms": 223,
+      "http_status": 200,
+      "model": "nvidia/Nemotron-3_5-Lightning",
+      "request_bytes": 32189,
+      "response_bytes": 857121,
+      "response_id": "resp_748484d9",
+      "response_model": "nvidia/Nemotron-3_5-Lightning",
+      "source": "thread_title",
+      "trigger": "thread_title",
+      "upstream_request_id": "814af568fb6758558893bd8363608034",
+      "usage": {
+        "input_tokens": 6137,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cached_tokens_per_turn": [
+            0
+          ],
+          "input_tokens_per_turn": [
+            6137
+          ]
+        },
+        "output_tokens": 7201,
+        "output_tokens_details": {
+          "output_tokens_per_turn": [
+            7201
+          ],
+          "reasoning_tokens": 7177,
+          "tool_output_tokens": 0,
+          "tool_output_tokens_per_turn": [
+            0
+          ]
+        },
+        "total_tokens": 13338
+      }
+    },
+    {
+      "at": "2026-10-09T10:17:29.652492Z",
+      "completed_ms": 5374,
+      "completion_event": "response.completed",
+      "has_cache_hint": true,
+      "has_include": true,
+      "has_reasoning": true,
+      "has_tools": true,
+      "headers_ms": 1515,
+      "http_status": 200,
+      "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "request_bytes": 420566,
+      "response_bytes": 1232197,
+      "response_id": "resp_b98c9d6efa2aa966",
+      "response_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "source": "user",
+      "trigger": "composer",
+      "upstream_request_id": "eca9041adb219e7c34f05e9ee22dd02d",
+      "usage": {
+        "input_tokens": 98550,
+        "input_tokens_details": {
+          "cache_write_tokens": 98336,
+          "cached_tokens": 0,
+          "cached_tokens_per_turn": [],
+          "input_tokens_per_turn": []
+        },
+        "output_tokens": 273,
+        "output_tokens_details": {
+          "output_tokens_per_turn": [],
+          "reasoning_tokens": 0,
+          "tool_output_tokens": 0,
+          "tool_output_tokens_per_turn": []
+        },
+        "total_tokens": 98823
+      }
+    },
+    {
+      "at": "2026-10-09T10:17:29.544616Z",
+      "completed_ms": 6258,
+      "completion_event": "response.completed",
+      "description": "cache entry timeout expiration",
+      "generated_title": "Explain cache timeout",
+      "has_cache_hint": false,
+      "has_include": false,
+      "has_reasoning": false,
+      "has_schema": true,
+      "has_tools": false,
+      "headers_ms": 495,
+      "http_status": 200,
+      "model": "nvidia/Nemotron-3_5-Lightning",
+      "request_bytes": 32152,
+      "response_bytes": 192925,
+      "response_id": "resp_696a0d72",
+      "response_model": "nvidia/Nemotron-3_5-Lightning",
+      "source": "thread_title",
+      "trigger": "thread_title",
+      "upstream_request_id": "db953cb2bbf7356e5c73148e0d36a8b8",
+      "usage": {
+        "input_tokens": 6129,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cached_tokens_per_turn": [
+            0
+          ],
+          "input_tokens_per_turn": [
+            6129
+          ]
+        },
+        "output_tokens": 1569,
+        "output_tokens_details": {
+          "output_tokens_per_turn": [
+            1569
+          ],
+          "reasoning_tokens": 1549,
+          "tool_output_tokens": 0,
+          "tool_output_tokens_per_turn": [
+            0
+          ]
+        },
+        "total_tokens": 7698
+      }
+    }
+  ],
+  "production_candidate_version": "dev-111-d492de9",
+  "production_candidate_sha256": "f88f0d61d09b9e5b81f0730aebfe9ad71162dc02e14aab51cae1425d5b075f2c",
+  "observed_launch_exit_code": 0
+}

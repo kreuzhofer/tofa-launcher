@@ -318,7 +318,7 @@ keeps its own selected main across relaunches. The configured Guardian applies
 to every Token Factory main. Automatic titles use the fixed naming model
 `nvidia/Nemotron-3_5-Lightning`, independently of main and Guardian. Naming is
 tool-free with provider-default reasoning and the native title schema. Current
-implementation and live UI qualification are tracked in #111; this is not part
+implementation passed the pinned GLM/DeepSeek Mac UI checks in #111; this is not part
 of the published rc16 preview. An unavailable naming model produces an explicit
 error without substituting another model or blocking main conversations. See
 [tested versions, lifecycle, and limitations](docs/codex-desktop.md).

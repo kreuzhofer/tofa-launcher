@@ -1,6 +1,7 @@
 # Independent desktop naming: implementation evidence for #111
 
-Status: live provider/engine naming passed; actual Mac UI acceptance pending.
+Status: live provider/engine naming and operator-confirmed Mac UI acceptance passed.
+Release qualification and publication are separate from this development check.
 This is development work for [#111](https://github.com/kreuzhofer/tofa-launcher/issues/111),
 not functionality shipped in rc16. Historical Kimi qualification does not qualify
 Lightning or GLM chat naming.
@@ -93,26 +94,50 @@ used synthetic prompts and isolated engine profiles. They establish provider/eng
 compatibility, not actual UI acceptance. The observer buffered each provider response
 before feeding it to the engine; streaming UI behavior is not established by this check.
 
-## Remaining live acceptance
+## Actual Mac UI acceptance
 
-The maintainer explicitly authorized saved-login reuse on 2026-10-09 and removed
-the proposed request limit. The login is reused in memory without modifications.
-Remaining UI work requires the operator: Computer Use refuses control of
-`com.openai.codex`. A temporary observed candidate will support these checks:
+The maintainer explicitly authorized saved-login reuse on 2026-10-09 with no
+request-count restriction. The login was reused in memory without modification.
+Computer Use refused control of `com.openai.codex`; the maintainer operated the UI
+and reported the observations directly. A temporary diagnostic launcher called
+the production `App` with a streaming HTTP observer that recorded only routing,
+usage and generated synthetic titles, not credentials or ordinary answer text.
+The same pinned app and engine used the ordinary profile; no application patch,
+ownership bypass or forced termination was used.
 
-1. Reuse the saved login only in memory and check exact project availability.
-   Record sanitized model routing, durations, output validation and usage. Do not log tokens or private prompts.
-2. First check the captured Lightning title request against the real provider,
-   Keep the structured-output schema and the now-evidenced tool-free adaptation.
-   Do not introduce a model fallback.
-3. Coordinate a normal desktop quit/relaunch with the operator. Never bypass
-   native profile ownership or terminate their unrelated running session.
-4. Start a fresh synthetic GLM conversation. Observe a useful generated title
-   distinct from the first message in the sidebar; confirm persistence after
-   relaunch. Repeat with a different main and check main/Guardian routing.
-5. Rename a synthetic conversation manually and verify the generated title cannot
-   overwrite it. Preserve existing history/settings and leave the normal login
-   unchanged. Record actual app/engine/launcher versions and sanitized evidence.
+1. With GLM 5.3 main and GLM 5.3 Flash Guardian, the synthetic integer-addition
+   conversation completed its main request in 5.600 seconds. Lightning generated
+   **Explain Python integer addition** in 28.245 seconds. The operator initially
+   reported the provisional first-message title, then confirmed the generated
+   title appeared. Only the latter observation is counted as success.
+2. A new conversation selected DeepSeek V4.1 Flash in the desktop picker while
+   the launch default remained GLM. Main used DeepSeek and completed in 5.374
+   seconds; naming still used Lightning and generated **Explain cache timeout**
+   in 6.258 seconds. The operator confirmed that exact title.
+3. The operator quit normally; the observed launcher exited with status 0. The
+   production candidate `dev-111-d492de9` relaunched the ordinary profile without
+   the diagnostic observer. The operator confirmed both generated titles persisted.
+4. The operator renamed the Python chat to **Manual naming check 111**, sent a
+   follow-up, and confirmed the manual title remained unchanged.
 
-Keep #111 open until these checks pass. A new release candidate and affected Mac
-qualification are required before shipping. Windows desktop is outside this scope.
+[Sanitized UI evidence](evidence/independent-desktop-naming-2026-10-09-ui.json)
+records routing, provider request/response IDs, reported usage, binary identities
+and operator confirmations. The main/Guardian security and tool-routing checks
+remain covered by the unchanged public-boundary regression suite; no new live
+Guardian tool action was needed for these no-tools synthetic prompts.
+
+The corrected implementation passed targeted regressions (39.826 seconds),
+`go test -race ./...` (internal/tofa 303.405 seconds; scripts 2.212 seconds),
+`go vet ./...`, and independent Standards and Spec follow-up reviews. CI results
+are linked from PR #112.
+
+Limitations: the first observed title took nearly the full native 30-second
+budget. These two UI successes do not establish a latency/reliability guarantee;
+the provisional title remains visible until generation completes, and timeout or
+provider failure can leave it in place. No deadline increase, response truncation,
+retry or alternate-model fallback was introduced. Native non-title auxiliary
+operations remain unsupported; the production relaunch/manual-rename sequence
+also logged an unsupported-model rejection, whose exact auxiliary source was not
+captured. App-backed title lookup remains unqualified. rc16 is unchanged; shipping
+requires a new release candidate and affected release qualification. Windows
+desktop remains outside this scope.

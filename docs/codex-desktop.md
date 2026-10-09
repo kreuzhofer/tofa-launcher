@@ -61,13 +61,15 @@ image capability. Offline routing tests do not qualify live model behavior.
 The development naming policy uses one fixed model,
 `nvidia/Nemotron-3_5-Lightning`, for recognized automatic title requests,
 independently of launch main, conversation main and Guardian. Changing a main
-does not change the naming model. This implementation is being qualified in
-[#111](https://github.com/kreuzhofer/tofa-launcher/issues/111); it is not included
-in rc16 and has not yet established live Lightning title quality or UI persistence.
+does not change the naming model. [#111 qualification](research/independent-desktop-naming-2026-10-09.md)
+observed generated titles with GLM and DeepSeek, persistence across relaunch and
+manual-title preservation on the pinned Mac app. Naming took 6.3–28.2 seconds;
+the provisional first-message title can remain visible while generation completes.
+This development implementation is not included in rc16.
 The [five-model comparison](evaluation/desktop-comparison-2026-09-29.md) records
 main/Guardian outcomes, naming limits, timings, shared costs and promotion provenance.
-Support covers the pinned headless bundled-engine baseline, not Electron UI or
-release qualification. See the [offline selection evidence](evaluation/desktop-selection-2026-09-28.md).
+Main/Guardian support labels cover the pinned headless bundled-engine baseline,
+not comprehensive Electron UI or release qualification. See the [offline selection evidence](evaluation/desktop-selection-2026-09-28.md).
 
 ### Switching launch modes and recovering a conversation
 
@@ -507,7 +509,11 @@ successes. The desktop still validates and persists titles under its existing
 rules, including manual-title protection. Client cancellation propagates upstream;
 this work does not increase the desktop's naming deadline.
 
-The [#111 implementation and qualification record](https://github.com/kreuzhofer/tofa-launcher/issues/111) has passed live provider/bundled-engine checks and is pending actual Mac UI acceptance. rc16 retains the older Kimi-only route.
+The [#111 qualification record](research/independent-desktop-naming-2026-10-09.md)
+records passing live provider/engine and operator-confirmed Mac UI checks, including
+persistence and manual-title preservation. The 28.2-second GLM naming result was
+close to the unchanged native 30-second deadline; broader reliability is unqualified.
+rc16 retains the older Kimi-only route.
 The [#52 report](research/desktop-shared-title-generation.md) records historical
 Kimi generation and persistence; it is not evidence of Lightning behavior.
 
