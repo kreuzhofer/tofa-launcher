@@ -17,9 +17,12 @@ merge or publish it as release guidance before the agreed comparison gates pass.
 The new public-launch fixture test failed for all three mains before the change
 and passed afterward. Existing native catalog, history, concurrent config, CLI
 metadata, Guardian and naming tests also passed. These synthetic checks establish
-candidate scope, not live model compliance or preview success. A fresh three-model
-manual UI calibration is prepared; its result is pending and has no enforced
-request counter.
+candidate scope. The subsequent manual UI calibration succeeded for all three
+models: the maintainer confirmed clickable cards and both previews, all six files
+remained unchanged, and recorded sessions contain the updated guidance and valid
+absolute-path Markdown links. The operator reused the baseline fixture workspaces
+in separate recorded candidate sessions. There was no enforced request counter.
+This positive one-shot result is not repeated qualification or production readiness.
 
 ## Result so far
 
@@ -47,6 +50,18 @@ request counter.
   validating the probe's own outcome remains a reusable-evaluator requirement.
 
 ## Desktop UI calibration result
+
+| Main model | Published rc17 calibration | Markdown candidate calibration |
+| --- | --- | --- |
+| GLM 5.3 | Relative paths only; no clickable documents | Both document previews opened |
+| DeepSeek V4.1 Flash | Absolute paths only; no clickable documents | Both document previews opened |
+| Kimi K3 | Both document previews opened | Both document previews opened |
+
+Each cell is one operator observation. Candidate evidence is in
+`desktop-markdown-ui-calibration.json`; the earlier results remain preserved.
+This supports investigating shared client-correct delivery guidance. It does not
+establish reliability, solve presentation generation/language/repetition behavior,
+or replace the outstanding bounded campaign and adoption checks.
 
 The maintainer completed the three-model file-handoff checklist. Kimi produced
 clickable links and both files opened in the side panel. DeepSeek returned only

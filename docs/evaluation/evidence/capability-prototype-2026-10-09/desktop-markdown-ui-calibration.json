@@ -1,0 +1,203 @@
+{
+  "date": "2026-10-09",
+  "source_commit": "768f261",
+  "binary_sha256": "6492ab77032da632b10c57252356a536f7882b03ad1188f50f4306ed76146ed3",
+  "operator_report": "All three models presented clickable cards and previews opened as expected.",
+  "runs": [
+    {
+      "run_id": "desktop-deepseek-05-markdown-calibration-1",
+      "workspace_model": "deepseek",
+      "variant": "desktop-markdown-links-v1",
+      "case": "05",
+      "client": "desktop",
+      "phase": "manual_ui_calibration",
+      "baseline_eligible": false,
+      "attempt": 1,
+      "model_context_sequence": [
+        "deepseek-ai/DeepSeek-V4.1-Flash"
+      ],
+      "workspace_origin": "original baseline fixture workspace reused; separate recorded candidate session",
+      "artifact_integrity": {
+        "status": "passed",
+        "files_unchanged": {
+          "sample-deck.pptx": true,
+          "sample-deck.pdf": true
+        }
+      },
+      "recorded_input": {
+        "base_instruction_sha256": "ac7610fbf205a056fc34c0d0c86013c2fdaa2f2e759adfcb06099dbb253591d8",
+        "base_instruction_characters": 20865,
+        "markdown_guidance_present": true,
+        "precedence_rule_present": true,
+        "old_inline_guidance_present": false
+      },
+      "recorded_output_shapes": [
+        {
+          "model_context": "deepseek-ai/DeepSeek-V4.1-Flash",
+          "document_links": []
+        },
+        {
+          "model_context": "deepseek-ai/DeepSeek-V4.1-Flash",
+          "document_links": [
+            {
+              "extension": ".pptx",
+              "absolute_path": true,
+              "file_exists": true
+            },
+            {
+              "extension": ".pdf",
+              "absolute_path": true,
+              "file_exists": true
+            }
+          ]
+        }
+      ],
+      "function_calls_observed": 1,
+      "delivery_reference": {
+        "status": "passed",
+        "source": "operator report and recorded Markdown link syntax"
+      },
+      "delivery_ui": {
+        "status": "passed",
+        "source": "maintainer report",
+        "pptx_preview_opened": true,
+        "pdf_preview_opened": true
+      },
+      "request_count": null,
+      "elapsed_seconds": null,
+      "limit_enforcement": "manual stop rule only; no prototype request counter"
+    },
+    {
+      "run_id": "desktop-glm-05-markdown-calibration-1",
+      "workspace_model": "glm",
+      "variant": "desktop-markdown-links-v1",
+      "case": "05",
+      "client": "desktop",
+      "phase": "manual_ui_calibration",
+      "baseline_eligible": false,
+      "attempt": 1,
+      "model_context_sequence": [
+        "zai-org/GLM-5.3"
+      ],
+      "workspace_origin": "original baseline fixture workspace reused; separate recorded candidate session",
+      "artifact_integrity": {
+        "status": "passed",
+        "files_unchanged": {
+          "sample-deck.pptx": true,
+          "sample-deck.pdf": true
+        }
+      },
+      "recorded_input": {
+        "base_instruction_sha256": "ac7610fbf205a056fc34c0d0c86013c2fdaa2f2e759adfcb06099dbb253591d8",
+        "base_instruction_characters": 20865,
+        "markdown_guidance_present": true,
+        "precedence_rule_present": true,
+        "old_inline_guidance_present": false
+      },
+      "recorded_output_shapes": [
+        {
+          "model_context": "zai-org/GLM-5.3",
+          "document_links": []
+        },
+        {
+          "model_context": "zai-org/GLM-5.3",
+          "document_links": [
+            {
+              "extension": ".pptx",
+              "absolute_path": true,
+              "file_exists": true
+            },
+            {
+              "extension": ".pdf",
+              "absolute_path": true,
+              "file_exists": true
+            }
+          ]
+        }
+      ],
+      "function_calls_observed": 1,
+      "delivery_reference": {
+        "status": "passed",
+        "source": "operator report and recorded Markdown link syntax"
+      },
+      "delivery_ui": {
+        "status": "passed",
+        "source": "maintainer report",
+        "pptx_preview_opened": true,
+        "pdf_preview_opened": true
+      },
+      "request_count": null,
+      "elapsed_seconds": null,
+      "limit_enforcement": "manual stop rule only; no prototype request counter"
+    },
+    {
+      "run_id": "desktop-kimi-05-markdown-calibration-1",
+      "workspace_model": "kimi",
+      "variant": "desktop-markdown-links-v1",
+      "case": "05",
+      "client": "desktop",
+      "phase": "manual_ui_calibration",
+      "baseline_eligible": false,
+      "attempt": 1,
+      "model_context_sequence": [
+        "zai-org/GLM-5.3"
+      ],
+      "workspace_origin": "original baseline fixture workspace reused; separate recorded candidate session",
+      "artifact_integrity": {
+        "status": "passed",
+        "files_unchanged": {
+          "sample-deck.pptx": true,
+          "sample-deck.pdf": true
+        }
+      },
+      "recorded_input": {
+        "base_instruction_sha256": "ac7610fbf205a056fc34c0d0c86013c2fdaa2f2e759adfcb06099dbb253591d8",
+        "base_instruction_characters": 20865,
+        "markdown_guidance_present": true,
+        "precedence_rule_present": true,
+        "old_inline_guidance_present": false
+      },
+      "recorded_output_shapes": [
+        {
+          "model_context": "zai-org/GLM-5.3",
+          "document_links": []
+        },
+        {
+          "model_context": "zai-org/GLM-5.3",
+          "document_links": [
+            {
+              "extension": ".pptx",
+              "absolute_path": true,
+              "file_exists": true
+            },
+            {
+              "extension": ".pdf",
+              "absolute_path": true,
+              "file_exists": true
+            }
+          ]
+        }
+      ],
+      "function_calls_observed": 1,
+      "delivery_reference": {
+        "status": "passed",
+        "source": "operator report and recorded Markdown link syntax"
+      },
+      "delivery_ui": {
+        "status": "passed",
+        "source": "maintainer report",
+        "pptx_preview_opened": true,
+        "pdf_preview_opened": true
+      },
+      "request_count": null,
+      "elapsed_seconds": null,
+      "limit_enforcement": "manual stop rule only; no prototype request counter"
+    }
+  ],
+  "interpretation": "Positive one-shot calibration: GLM and DeepSeek improved vs earlier UI observations; Kimi stayed successful. Does not establish repeated reliability or production readiness.",
+  "limitations": [
+    "Recorded base instructions and output syntax are not a full outgoing request/tool/skill inventory.",
+    "The operator reused baseline fixture workspaces in separate candidate session recordings; this is not the strict fresh-workspace campaign.",
+    "Time/request enforcement and repeated/held-out/live regression gates remain outstanding."
+  ]
+}
