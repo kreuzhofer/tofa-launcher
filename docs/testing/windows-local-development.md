@@ -89,10 +89,11 @@ checks, the full Go suite, vet, and build after JavaScript helper startup. See
 [recovery evidence](windows-codex-sandbox-recovery-2026-10-09.md).
 
 Later #105 preflight found the managed daemon back at 0.162.0 and the same
-sandbox failure recurring; the cause of pin replacement is unknown. Check the
-actual version before relying on that recovery. The retained standalone 0.160.1
-still passes the native loopback prerequisite. See the
-[recurrence](windows-codex-sandbox-recovery-2026-10-09.md#recurrence-during-105).
+sandbox failure recurring. Follow-up logs identify a `manual` update selecting
+0.162.0 at 08:49 UTC, before the later scheduled updates; the initiator is unknown.
+The supported 0.160.1 pin was restored at 10:47 UTC and helper-active sandbox
+checks passed again. Check the actual version before relying on recovery. See
+the [recurrence resolution](windows-codex-sandbox-recovery-2026-10-09.md#recurrence-resolution).
 
 The standalone CLI remains 0.162.0. From an ordinary native PowerShell window,
 `codex app-server daemon version` should show managed/running daemon 0.160.1.
@@ -116,7 +117,11 @@ if ($LASTEXITCODE -ne 0) { throw 'Codex daemon pin failed' }
 
 This is a supported package pin, not a patched 0.162.0 binary. Do not silently
 remove it: `codex app-server daemon update` returns the daemon to production
-updates and may interrupt work. Test a future candidate with its JavaScript
+updates and may interrupt work. Avoid plain daemon-update actions while relying
+on this pin. If it changes, inspect `daemon-updater.stderr.log` and its `.previous`
+file under `%USERPROFILE%/.codex/app-server-daemon` for the `package_selected`
+trigger before concluding that a scheduled update replaced it. Do not export
+whole logs or change their contents. Test a future candidate with its JavaScript
 helper active before switching, then repeat the read/edit/test and boundary
 checks in a fresh native session. Confirm saved sessions remain available and
 existing authentication still works. The standalone `codex update` command did

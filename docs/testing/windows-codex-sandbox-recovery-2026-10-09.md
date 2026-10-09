@@ -9,6 +9,13 @@ daemon to the retained vendor-distributed Codex 0.160.1 package. JavaScript help
 startup followed by sandboxed read/edit/test commands passed after the daemon
 restart. The 0.162.0 defect was not patched; the pin is the measured local remedy.
 
+**Latest follow-up:** a logged manual update replaced the first pin at
+08:49 UTC. The supported pin was restored at 10:47 UTC, with configuration,
+authentication and all 39 existing session files preserved. Helper-active
+sandbox checks and the native test baseline pass again. See
+[the recurrence resolution](#recurrence-resolution) for evidence and remaining
+limits; the update initiator is unknown.
+
 ## Reproduction and version comparison
 
 The active native agent and standalone CLI used Codex 0.162.0. With
@@ -183,3 +190,93 @@ post-failure cleanup. The maintainer supplied the test login locally.
 - [Official troubleshooting guidance](https://learn.chatgpt.com/docs/reference/troubleshooting)
   distinguishes CLI and desktop versions and recommends preserving policy
   boundaries when diagnosing execution failures.
+
+## Recurrence resolution
+
+The follow-up started from `e20568555b91fb34e04ad1e8030a1dbf5e3b9050` on
+`fix/windows-runtime-recovery-108`. Ordinary `Write-Output` failed before
+PowerShell started with `helper_unknown_error: setup refresh had errors`.
+The current dated sandbox log again identified sharing violation 32 while
+validating the active JavaScript runtime's read/execute access. With the same
+helpers active, standalone 0.160.1 passed and standalone 0.162.0 failed.
+
+The retained daemon-updater logs now establish what replaced the earlier pin.
+The [sanitized event sequence](evidence/issue108-update-triggers-2026-10-09.json)
+records:
+
+| UTC time, 2026-10-09 | Event |
+| --- | --- |
+| 08:49:28.262 | `package_selected`, release 0.162.0, trigger `manual` |
+| 08:49:28.463 | Restart requested; local log identifies the previously pinned daemon as the shutdown target |
+| 08:54:53.910 | 0.162.0 selected by a scheduled update |
+| 09:54:55.713 | 0.162.0 selected by a scheduled update |
+
+This resolves the earlier uncertainty about the update trigger. The first
+replacement was marked manual, not scheduled. The log does not identify its
+initiator; it could have come from a person or another client requesting an
+update. Do not attribute it to a particular actor or claim the pin expired.
+The installed CLI's supported updater explicitly says that `update --from-cli`
+pins its package and plain `app-server daemon update` returns to production updates.
+
+A new hidden, independent PowerShell controller ran the retained official
+0.160.1 package's `app-server daemon update --from-cli --yes`. Its
+[recovery report](evidence/issue108-recovery-02-2026-10-09.json) records completion
+at 10:47:30 UTC: managed/running daemon 0.160.1, automatic-update marker absent,
+all 39 existing session files still present, and byte-for-byte preservation of
+the checked native Codex and tofa configuration/authentication files (including
+absence where applicable). Only comparison booleans are exported. Saved Token
+Factory credentials remain available for reuse. No credential copying, purge,
+sandbox weakening, manual ACL changes, Defender exclusions, or UAC prompt occurred.
+
+The independent controller's sandbox read/edit/boundary probe and targeted tests
+passed. It successfully queued continuation using `--approve-for-me` without
+the incompatible additional `--sandbox` flag. Native daemon recovery restored
+this conversation automatically. The one-shot controller exited; it is not a
+watchdog that repeatedly forces the version.
+
+After recovery, `cua.getState()` succeeded and JavaScript helpers were active.
+The normal agent shell, without execution escalation, passed:
+
+| Check | Result |
+| --- | --- |
+| Workspace marker read, create, edit, read-back | Passed |
+| Sentinel writes outside workspace and inside `.git` | Both denied with `UnauthorizedAccessException` |
+| Targeted Windows Go tests | Passed, 0.170 seconds |
+| Full non-race Go suite | Passed; `internal/tofa` 3.417 seconds, `scripts` 0.192 seconds |
+| `go vet ./...` and native ARM64 build | Both exit 0 |
+| Windows process tests | 10 passed in 5.089 seconds |
+
+An independent reviewer then repeated the probe in a fresh native agent session
+through an ordinary, non-escalated shell. Two `node_repl` processes were active
+immediately before the check and remained untouched. Workspace marker
+read/create/edit/read-back passed; both outside-workspace and `.git` sentinel
+writes were denied. Targeted Windows Go tests passed in 0.272 seconds; the full
+probe exited 0 in 1.329 seconds. This is fresh-session evidence for the restored
+pin, in addition to the resumed-conversation checks above.
+
+Ordinary-account daemon management still reports managed/running 0.160.1 and
+standalone CLI 0.162.0, with the auto-update marker absent. Desktop remains
+26.930.7945.0. Doctor reports configured authentication, restricted filesystem
+and network policy, healthy databases and zero failed checks, but an overall
+degraded result with warnings about Defender, Dev Drive, optional MCP settings
+and rollout/state-database inventory. Those warnings were not repaired or used
+to justify broader permissions. The session-file preservation check above is
+not a claim that every pre-existing database inventory warning is resolved.
+
+The local development loop is recovered within the explicit package pin.
+Standalone 0.162.0 remains affected and no upstream fix is claimed. This work
+does not qualify a launcher release, change model support, or enable Windows
+desktop launching. No Token Factory inference was needed. Go race tests remain
+unsupported on Windows ARM64. The unrelated `skills-lock.json` hash is unchanged.
+
+### Follow-up review
+
+Independent Standards and Spec reviews covered the task diff against `e205685`
+and both sanitized evidence files. Standards reported zero hard violations and
+zero heuristic findings, and performed the fresh-session check above. Spec
+reported zero substantive findings but required the fresh-session result to be
+recorded before completion; that measured result has now been added. Neither
+review repeated the runtime update or paid inference.
+
+Review findings: Standards 0; Spec 0 substantive findings, with the requested
+fresh-session verification completed and recorded.
