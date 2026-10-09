@@ -49,6 +49,11 @@ An available model verified with a particular target client to handle streaming,
 tool calls, and continued conversation. Support applies to the tested combination.
 _Avoid_: Available model as a synonym for supported model
 
+**Capability evaluation**:
+An assessment of how a main model performs a defined user workflow in a particular
+target client and environment. Its results describe task-specific strengths and
+gaps separately from the verified compatibility represented by a Supported model.
+
 **Experimental selection**:
 Use of an available model in a target-client role whose compatibility has not
 yet been verified. Experimental status is shown explicitly. The desktop enables

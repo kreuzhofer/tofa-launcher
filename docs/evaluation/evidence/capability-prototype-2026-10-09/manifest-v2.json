@@ -1,0 +1,421 @@
+{
+  "prototype": true,
+  "corpus_version": "prototype-v2-python3",
+  "prompts": {
+    "03": "Build me a 5-slide pitch deck for an app that texts you one genuine compliment every morning. Make the design go hard. No corporate stock-photo energy.",
+    "05": "The finished deck is in fixtures/sample-deck.pptx and its PDF copy is in fixtures/sample-deck.pdf. Give me both files so I can open them. Do not edit, regenerate, or upload them.",
+    "07": "Run python3 probe.py and diagnose the failure. Do not install anything or use the network. Make at most three diagnostic tool calls, then explain the blocker and one concrete next step. Do not repeat an unchanged command.",
+    "04": "Use the installed presentation skill; read its instructions before creating the deck. Build me a 5-slide pitch deck for an app that texts you one genuine compliment every morning. Make the design go hard. No corporate stock-photo energy."
+  },
+  "runs": [
+    {
+      "id": "cli-glm-05-baseline-1",
+      "model": "zai-org/GLM-5.3",
+      "client": "cli",
+      "platform": "macos-arm64",
+      "case": "05",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 180,
+        "repeated_actions": 5,
+        "requests": 12,
+        "output_tokens_per_request": 4096
+      }
+    },
+    {
+      "id": "cli-kimi-05-baseline-1",
+      "model": "moonshotai/Kimi-K3",
+      "client": "cli",
+      "platform": "macos-arm64",
+      "case": "05",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 180,
+        "repeated_actions": 5,
+        "requests": 12,
+        "output_tokens_per_request": 4096
+      }
+    },
+    {
+      "id": "cli-deepseek-05-baseline-1",
+      "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "client": "cli",
+      "platform": "macos-arm64",
+      "case": "05",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 180,
+        "repeated_actions": 5,
+        "requests": 12,
+        "output_tokens_per_request": 4096
+      }
+    },
+    {
+      "id": "desktop-glm-05-baseline-1",
+      "model": "zai-org/GLM-5.3",
+      "client": "desktop",
+      "platform": "macos-arm64",
+      "case": "05",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 180,
+        "repeated_actions": 5,
+        "requests": 12,
+        "output_tokens_per_request": 4096
+      }
+    },
+    {
+      "id": "desktop-kimi-05-baseline-1",
+      "model": "moonshotai/Kimi-K3",
+      "client": "desktop",
+      "platform": "macos-arm64",
+      "case": "05",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 180,
+        "repeated_actions": 5,
+        "requests": 12,
+        "output_tokens_per_request": 4096
+      }
+    },
+    {
+      "id": "desktop-deepseek-05-baseline-1",
+      "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "client": "desktop",
+      "platform": "macos-arm64",
+      "case": "05",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 180,
+        "repeated_actions": 5,
+        "requests": 12,
+        "output_tokens_per_request": 4096
+      }
+    },
+    {
+      "id": "cli-glm-07-baseline-1",
+      "model": "zai-org/GLM-5.3",
+      "client": "cli",
+      "platform": "macos-arm64",
+      "case": "07",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 180,
+        "repeated_actions": 5,
+        "requests": 12,
+        "output_tokens_per_request": 4096
+      }
+    },
+    {
+      "id": "cli-kimi-07-baseline-1",
+      "model": "moonshotai/Kimi-K3",
+      "client": "cli",
+      "platform": "macos-arm64",
+      "case": "07",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 180,
+        "repeated_actions": 5,
+        "requests": 12,
+        "output_tokens_per_request": 4096
+      }
+    },
+    {
+      "id": "cli-deepseek-07-baseline-1",
+      "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "client": "cli",
+      "platform": "macos-arm64",
+      "case": "07",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 180,
+        "repeated_actions": 5,
+        "requests": 12,
+        "output_tokens_per_request": 4096
+      }
+    },
+    {
+      "id": "desktop-glm-07-baseline-1",
+      "model": "zai-org/GLM-5.3",
+      "client": "desktop",
+      "platform": "macos-arm64",
+      "case": "07",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 180,
+        "repeated_actions": 5,
+        "requests": 12,
+        "output_tokens_per_request": 4096
+      }
+    },
+    {
+      "id": "desktop-kimi-07-baseline-1",
+      "model": "moonshotai/Kimi-K3",
+      "client": "desktop",
+      "platform": "macos-arm64",
+      "case": "07",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 180,
+        "repeated_actions": 5,
+        "requests": 12,
+        "output_tokens_per_request": 4096
+      }
+    },
+    {
+      "id": "desktop-deepseek-07-baseline-1",
+      "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "client": "desktop",
+      "platform": "macos-arm64",
+      "case": "07",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 180,
+        "repeated_actions": 5,
+        "requests": 12,
+        "output_tokens_per_request": 4096
+      }
+    },
+    {
+      "id": "cli-glm-03-baseline-1",
+      "model": "zai-org/GLM-5.3",
+      "client": "cli",
+      "platform": "macos-arm64",
+      "case": "03",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 900,
+        "repeated_actions": 5,
+        "requests": 80,
+        "output_tokens_per_request": 8192
+      }
+    },
+    {
+      "id": "cli-kimi-03-baseline-1",
+      "model": "moonshotai/Kimi-K3",
+      "client": "cli",
+      "platform": "macos-arm64",
+      "case": "03",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 900,
+        "repeated_actions": 5,
+        "requests": 80,
+        "output_tokens_per_request": 8192
+      }
+    },
+    {
+      "id": "cli-deepseek-03-baseline-1",
+      "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "client": "cli",
+      "platform": "macos-arm64",
+      "case": "03",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 900,
+        "repeated_actions": 5,
+        "requests": 80,
+        "output_tokens_per_request": 8192
+      }
+    },
+    {
+      "id": "desktop-glm-03-baseline-1",
+      "model": "zai-org/GLM-5.3",
+      "client": "desktop",
+      "platform": "macos-arm64",
+      "case": "03",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 900,
+        "repeated_actions": 5,
+        "requests": 80,
+        "output_tokens_per_request": 8192
+      }
+    },
+    {
+      "id": "desktop-kimi-03-baseline-1",
+      "model": "moonshotai/Kimi-K3",
+      "client": "desktop",
+      "platform": "macos-arm64",
+      "case": "03",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 900,
+        "repeated_actions": 5,
+        "requests": 80,
+        "output_tokens_per_request": 8192
+      }
+    },
+    {
+      "id": "desktop-deepseek-03-baseline-1",
+      "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "client": "desktop",
+      "platform": "macos-arm64",
+      "case": "03",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 900,
+        "repeated_actions": 5,
+        "requests": 80,
+        "output_tokens_per_request": 8192
+      }
+    },
+    {
+      "id": "cli-glm-04-baseline-1",
+      "model": "zai-org/GLM-5.3",
+      "client": "cli",
+      "platform": "macos-arm64",
+      "case": "04",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 900,
+        "repeated_actions": 5,
+        "requests": 80,
+        "output_tokens_per_request": 8192
+      }
+    },
+    {
+      "id": "cli-kimi-04-baseline-1",
+      "model": "moonshotai/Kimi-K3",
+      "client": "cli",
+      "platform": "macos-arm64",
+      "case": "04",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 900,
+        "repeated_actions": 5,
+        "requests": 80,
+        "output_tokens_per_request": 8192
+      }
+    },
+    {
+      "id": "cli-deepseek-04-baseline-1",
+      "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "client": "cli",
+      "platform": "macos-arm64",
+      "case": "04",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 900,
+        "repeated_actions": 5,
+        "requests": 80,
+        "output_tokens_per_request": 8192
+      }
+    },
+    {
+      "id": "desktop-glm-04-baseline-1",
+      "model": "zai-org/GLM-5.3",
+      "client": "desktop",
+      "platform": "macos-arm64",
+      "case": "04",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 900,
+        "repeated_actions": 5,
+        "requests": 80,
+        "output_tokens_per_request": 8192
+      }
+    },
+    {
+      "id": "desktop-kimi-04-baseline-1",
+      "model": "moonshotai/Kimi-K3",
+      "client": "desktop",
+      "platform": "macos-arm64",
+      "case": "04",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 900,
+        "repeated_actions": 5,
+        "requests": 80,
+        "output_tokens_per_request": 8192
+      }
+    },
+    {
+      "id": "desktop-deepseek-04-baseline-1",
+      "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "client": "desktop",
+      "platform": "macos-arm64",
+      "case": "04",
+      "variant": "baseline",
+      "status": "not_run",
+      "attempt": 1,
+      "guardian": "zai-org/GLM-5.3-Flash",
+      "limits": {
+        "seconds": 900,
+        "repeated_actions": 5,
+        "requests": 80,
+        "output_tokens_per_request": 8192
+      }
+    }
+  ],
+  "limits_status": "declared; live enforcement must pass synthetic tests first"
+}

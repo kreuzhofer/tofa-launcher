@@ -1,0 +1,10 @@
+{
+  "slides": 1,
+  "pdf_pages": 1,
+  "identity": "TOFA-PILOT-05",
+  "sha256": {
+    "sample-deck.pdf": "e6bc39cc3f08781460116bc28f9522c4b0ffdc9feb2102c1bfc908dd513f47b8",
+    "sample-deck.pptx": "5893e7a4d4bcdb815cb896351d3db2cf992983cc9c5f83d362e7b9ef9527fcaa",
+    "probe.py": "1818a164426d638806a41bf23a72939a0fede78f3e887789fbf1c561484eed6a"
+  }
+}

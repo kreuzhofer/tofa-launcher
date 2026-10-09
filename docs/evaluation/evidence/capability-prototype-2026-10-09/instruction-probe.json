@@ -1,0 +1,26 @@
+{
+  "inference_requests": 0,
+  "client": "Codex CLI 0.162.0",
+  "config_unchanged": true,
+  "renders": [
+    {
+      "variant": "baseline",
+      "input_items": 5,
+      "marker_present": false,
+      "marker_roles": [],
+      "presentation_skill_present": true,
+      "prompt_input_sha256": "9df7434e6d46fa176f5f887eef9265a5ddd797dfaadcc8502806393467601332"
+    },
+    {
+      "variant": "additive-marker",
+      "input_items": 5,
+      "marker_present": true,
+      "marker_roles": [
+        "developer"
+      ],
+      "presentation_skill_present": true,
+      "prompt_input_sha256": "094d8dd413ec46c51a8b51604cb98dda8f1dbda6162703b3c62030e70c80cfb5"
+    }
+  ],
+  "limitation": "prompt-input render only; no desktop renderer or live-model efficacy claim"
+}

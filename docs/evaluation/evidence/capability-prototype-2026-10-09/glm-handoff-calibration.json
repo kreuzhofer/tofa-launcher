@@ -1,0 +1,60 @@
+{
+  "id": "cli-glm-05-calibration-1",
+  "model": "zai-org/GLM-5.3",
+  "client": "cli",
+  "platform": "macos-arm64",
+  "case": "05",
+  "variant": "baseline",
+  "status": "inconclusive",
+  "attempt": 1,
+  "guardian": "zai-org/GLM-5.3-Flash",
+  "limits": {
+    "seconds": 180,
+    "repeated_actions": 5,
+    "requests": 12,
+    "output_tokens_per_request": 4096
+  },
+  "stop_reason": null,
+  "turn_completed": true,
+  "commands_completed": 1,
+  "client_error": false,
+  "exit_code": 0,
+  "elapsed_ms": 33234,
+  "settings_unchanged": true,
+  "fixtures_unchanged": true,
+  "requests_used": 2,
+  "observer_failures": [],
+  "skill_read_observed": false,
+  "artifact_reference_syntax": {
+    "native_citations": 0,
+    "markdown_links": 0,
+    "both_fixture_names_present": true
+  },
+  "probe_exit_2_observed": false,
+  "reason": "criterion_review_required",
+  "phase": "preflight_calibration",
+  "baseline_eligible": false,
+  "run_directory_retained_locally": true,
+  "request_summary": [
+    {
+      "status": 200,
+      "role": "main",
+      "completed": true,
+      "usage": {
+        "input_tokens": 11126,
+        "output_tokens": 190
+      },
+      "failure": null
+    },
+    {
+      "status": 200,
+      "role": "main",
+      "completed": true,
+      "usage": {
+        "input_tokens": 11416,
+        "output_tokens": 58
+      },
+      "failure": null
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "purpose": "Prototype calibration only; not the 24-run baseline or model promotion",
+  "platform": {
+    "system": "Darwin",
+    "release": "25.6.0",
+    "machine": "arm64",
+    "macos": "26.7"
+  },
+  "launcher_version": "tofa v0.1.0-rc.17",
+  "launcher_sha256": "5bc9e61ba0cbf41148b84171ffa1d23205a2d430d6b1aee2fe11fab4b182317f",
+  "cli_version": "codex-cli 0.162.0",
+  "synthetic_tests": {
+    "passed": 10,
+    "command": "python3 -m unittest discover -s scripts/prototype_capabilities -p 'test_*.py'"
+  },
+  "actual_request_audit": "client request forwarded to the launcher adapter; captures system/developer text hashes and fixed markers only",
+  "production_prompt_changed": false,
+  "live_attempts": [
+    {
+      "evidence": "glm-handoff-calibration.json",
+      "requests": 2,
+      "variant": "baseline",
+      "case": "05",
+      "completed": true,
+      "baseline_eligible": false,
+      "actual_instruction_audit_valid": false
+    },
+    {
+      "evidence": "deepseek-recovery-calibration.json",
+      "requests": 4,
+      "variant": "baseline",
+      "case": "07",
+      "completed": true,
+      "baseline_eligible": false,
+      "actual_instruction_audit_valid": false
+    },
+    {
+      "evidence": "glm-handoff-baseline-probe-v2.json",
+      "requests": 2,
+      "variant": "baseline",
+      "case": "05",
+      "completed": true,
+      "baseline_eligible": false,
+      "actual_instruction_audit_valid": false
+    },
+    {
+      "evidence": "glm-handoff-citations-probe-v2.json",
+      "requests": 2,
+      "variant": "file-citations-v1",
+      "case": "05",
+      "completed": true,
+      "baseline_eligible": false,
+      "actual_instruction_audit_valid": false
+    },
+    {
+      "evidence": "glm-handoff-baseline-audited-v2.json",
+      "requests": 2,
+      "variant": "baseline",
+      "case": "05",
+      "completed": true,
+      "baseline_eligible": false,
+      "actual_instruction_audit_valid": true
+    },
+    {
+      "evidence": "glm-handoff-citations-audited-v2.json",
+      "requests": 2,
+      "variant": "file-citations-v1",
+      "case": "05",
+      "completed": true,
+      "baseline_eligible": false,
+      "actual_instruction_audit_valid": true
+    }
+  ],
+  "requests_total": 14
+}

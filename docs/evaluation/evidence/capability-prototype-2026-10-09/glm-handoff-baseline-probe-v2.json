@@ -1,0 +1,84 @@
+{
+  "id": "cli-glm-05-baseline-probe",
+  "model": "zai-org/GLM-5.3",
+  "client": "cli",
+  "platform": "macos-arm64",
+  "case": "05",
+  "variant": "baseline",
+  "status": "inconclusive",
+  "attempt": 1,
+  "guardian": "zai-org/GLM-5.3-Flash",
+  "limits": {
+    "seconds": 180,
+    "repeated_actions": 5,
+    "requests": 12,
+    "output_tokens_per_request": 4096
+  },
+  "stop_reason": null,
+  "turn_completed": true,
+  "commands_completed": 1,
+  "client_error": false,
+  "exit_code": 0,
+  "elapsed_ms": 8674,
+  "settings_unchanged": true,
+  "corpus_version": "prototype-v2-python3",
+  "source_sha256": {
+    "pilot.py": "130f69c29dea77384f300c52c22f61ea95983f97b92d52e1d2995eccfba2e3e0",
+    "small_run.py": "f50e5eb498a227f2863c35da68919b8088932d307ea9ca1b938bfa33cfe5869a"
+  },
+  "fixture_manifest_sha256": "a994ea5bc481029128327c2ebf5e6c84bcadcd6ecf6c75dc754f512fcd166bf2",
+  "prompt_sha256": "b3b5c2f0d3f51b4506d88fa90f79ac887b4a5bff971c1bc76de5411890ea08d4",
+  "fixtures_unchanged": true,
+  "requests_used": 2,
+  "observer_failures": [],
+  "skill_read_observed": false,
+  "artifact_reference_syntax": {
+    "native_citations": 0,
+    "markdown_links": 0,
+    "citation_paths_verified": false,
+    "both_fixture_names_present": true
+  },
+  "probe_exit_2_observed": false,
+  "reason": "criterion_review_required",
+  "phase": "preflight_calibration",
+  "baseline_eligible": false,
+  "run_directory_retained_locally": true,
+  "guidance_target": "native_cli_baseline",
+  "renderer_tested": false,
+  "request_audit": [
+    {
+      "model": "zai-org/GLM-5.3",
+      "instructions_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "file_citation_guidance_present": false,
+      "tools_count": 29
+    },
+    {
+      "model": "zai-org/GLM-5.3",
+      "instructions_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "file_citation_guidance_present": false,
+      "tools_count": 29
+    }
+  ],
+  "request_summary": [
+    {
+      "status": 200,
+      "role": "main",
+      "completed": true,
+      "usage": {
+        "input_tokens": 11126,
+        "output_tokens": 109
+      },
+      "failure": null
+    },
+    {
+      "status": 200,
+      "role": "main",
+      "completed": true,
+      "usage": {
+        "input_tokens": 11369,
+        "output_tokens": 45
+      },
+      "failure": null
+    }
+  ]
+}
