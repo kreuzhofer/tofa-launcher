@@ -13,12 +13,39 @@ import urllib.error
 import urllib.request
 
 from evaluation_proxy import EvaluationProxy, BODY_LIMIT, initial_event_hint
+import evaluation_proxy
 
 
 ASSESSMENT = {'required': ['outcome'], 'properties': {'outcome': {'type': 'string', 'enum': ['allow', 'deny']}}}
 
 
 class ProxyTests(unittest.TestCase):
+    def test_reasoning_validation_is_visible_after_union_branch_noise(self):
+        details = [{'type': 'literal_error', 'loc': ['PRIVATE_CONTENT']}] * 20
+        details += [{'type': 'missing', 'loc': ['body', 'input', 'PRIVATE_CONTENT',
+                     3, 'ResponseReasoningItem', 'id'], 'input': 'PRIVATE_CONTENT'}]
+        result = evaluation_proxy.validation_summary(json.dumps({'detail': details}))
+        self.assertEqual(result['reasoning_errors'], [{'type': 'missing',
+            'loc': ['body', 'input', 'other', 3, 'ResponseReasoningItem', 'id']}])
+        self.assertNotIn('PRIVATE_CONTENT', json.dumps(result))
+
+    def test_history_shape_is_bounded_and_never_exports_values(self):
+        items = [{'role': 'assistant', 'content': [{'type': 'output_text',
+                  'text': 'PRIVATE_CONTENT'}]},
+                 {'type': 'function_call', 'name': 'PRIVATE_CONTENT',
+                  'arguments': 'PRIVATE_CONTENT', 'id': None},
+                 {'type': ['PRIVATE_CONTENT'], 'content': 'PRIVATE_CONTENT'}]
+        result = evaluation_proxy.history_shape(items * 20)
+        self.assertEqual(result['count'], 60)
+        self.assertEqual(len(result['items']), 32)
+        self.assertEqual(result['items'][0]['type'], 'missing')
+        self.assertEqual(result['items'][0]['role'], 'assistant')
+        self.assertEqual(result['items'][0]['content'][0],
+                         {'type': 'output_text', 'annotations': 'missing'})
+        self.assertEqual(result['items'][1]['id'], 'null')
+        self.assertEqual(result['items'][1]['name'], 'other')
+        self.assertNotIn('PRIVATE_CONTENT', json.dumps(result))
+
     def test_event_type_hints_are_fixed_labels_not_captured_payloads(self):
         for prefix, expected in (
             (b'event: response.created\r\ndata: {"private":"SECRET"}', 'response.created'),
@@ -395,12 +422,13 @@ class ProxyTests(unittest.TestCase):
     def test_multiline_sse_event_has_one_shared_size_limit(self):
         self.test_complete_oversized_event_is_rejected_before_json_parsing(multiline=True)
 
-    def test_large_created_event_reproduces_the_diagnostic_pending_line_failure(self):
+    def test_large_created_event_preserves_the_stream_and_reaches_completion(self):
         # Reproduce the measured framing/category, without claiming the unknown
         # live event contained this synthetic field or had this complete size.
         header = b'event: response.created\n'
         payload = b'data: ' + json.dumps({'type': 'response.created',
             'response': {'fixture': 'PRIVATE_CONTENT' + 'x' * 390000}}).encode() + b'\n\n'
+        stream = header + payload + b'data: {"type":"response.completed","response":{}}\n\n'
         class Upstream(http.server.BaseHTTPRequestHandler):
             def log_message(self, *unused): pass
             def do_POST(self):
@@ -409,7 +437,7 @@ class ProxyTests(unittest.TestCase):
                 self.send_header('Content-Type', 'text/event-stream')
                 self.end_headers()
                 try:
-                    self.wfile.write(header + payload)
+                    self.wfile.write(stream)
                 except (BrokenPipeError, ConnectionResetError): pass
         server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), Upstream)
         threading.Thread(target=server.serve_forever, daemon=True).start()
@@ -422,23 +450,114 @@ class ProxyTests(unittest.TestCase):
                         data=b'{"model":"moonshotai/Kimi-K3","stream":true,"input":[]}',
                         headers={'Authorization': 'Bearer fixture-token'})
                     with urllib.request.build_opener(urllib.request.ProxyHandler({})).open(request) as response:
-                        response.read()
+                        received = response.read()
                 observed = json.loads(report.read_text())[0]
-                self.assertEqual(observed['failure'], 'event_body_limit')
-                self.assertFalse(observed['completed'])
+                self.assertNotIn('failure', observed)
+                self.assertTrue(observed['completed'])
+                self.assertEqual(received, stream)
                 diagnostics = observed['stream_diagnostics']
                 self.assertEqual(diagnostics['first_event_type_hint'], 'response.created')
-                self.assertEqual(diagnostics['event_bytes_at_stop'], len(header))
-                self.assertGreater(diagnostics['pending_line_bytes_at_stop'], 256 * 1024 - len(header))
-                self.assertLess(diagnostics['response_bytes'], len(header + payload))
+                self.assertEqual(diagnostics['large_response_envelopes'], 1)
                 self.assertEqual(diagnostics['cr_bytes'], 0)
-                self.assertEqual(diagnostics['lf_bytes'], 1)
-                self.assertEqual(diagnostics['blank_lines'], 0)
-                self.assertEqual(diagnostics['parsed_json_lines'], 0)
+                self.assertEqual(diagnostics['parsed_json_lines'], 2)
                 self.assertNotIn('PRIVATE_CONTENT', report.read_text())
                 self.assertNotIn('fixture-token', report.read_text())
         finally:
             server.shutdown(); server.server_close()
+
+
+class EnvelopeLimitTests(unittest.TestCase):
+    def observe(self, stream, request_count=1, maximum=8, status=200):
+        class Upstream(http.server.BaseHTTPRequestHandler):
+            def log_message(self, *unused): pass
+            def do_POST(self):
+                self.rfile.read(int(self.headers['Content-Length']))
+                self.send_response(status); self.end_headers()
+                try: self.wfile.write(stream)
+                except (BrokenPipeError, ConnectionResetError): pass
+        server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), Upstream)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        try:
+            with tempfile.TemporaryDirectory() as directory:
+                report = Path(directory) / 'report.json'
+                budget = Path(directory) / 'budget.json'
+                budget.write_text(json.dumps({'used': 0, 'maximum': maximum}))
+                with EvaluationProxy('http://127.0.0.1:' + str(server.server_port), 'fixture-token',
+                                     report, budget, 'coding', 5) as proxy:
+                    request = urllib.request.Request(proxy.url + '/responses',
+                        data=b'{"model":"moonshotai/Kimi-K3","stream":true,"input":[]}',
+                        headers={'Authorization': 'Bearer fixture-token'})
+                    for _ in range(request_count):
+                        try:
+                            response = urllib.request.build_opener(urllib.request.ProxyHandler({})).open(request)
+                        except urllib.error.HTTPError as error:
+                            response = error
+                        with response:
+                            response.read()
+                self.assertNotIn('PRIVATE_CONTENT', report.read_text())
+                self.assertEqual(json.loads(budget.read_text())['used'], request_count)
+                return json.loads(report.read_text())[-1]
+        finally:
+            server.shutdown(); server.server_close()
+
+    def event(self, kind='response.created', size=390000, header=None, **response):
+        return ((('event: ' + header + '\n').encode() if header else b'') + b'data: ' +
+            json.dumps({'type': kind, 'response': {'fixture': 'PRIVATE_CONTENT' + 'x' * size, **response}}).encode() + b'\n\n')
+
+    def test_headerless_large_completion_preserves_usage(self):
+        result = self.observe(self.event('response.completed', usage={'input_tokens': 10, 'output_tokens': 2}))
+        self.assertTrue(result['completed'])
+        self.assertEqual(result['usage'], {'input_tokens': 10, 'output_tokens': 2})
+
+    def test_envelope_allowance_does_not_apply_to_later_text_events(self):
+        result = self.observe(self.event() + self.event('response.output_text.delta'))
+        self.assertEqual(result['failure'], 'event_body_limit')
+        self.assertEqual(result['stream_diagnostics']['large_response_envelopes'], 1)
+
+    def test_spoofed_envelope_header_cannot_admit_an_oversized_tool_event(self):
+        result = self.observe(self.event('response.function_call_arguments.delta', header='response.created'))
+        self.assertEqual(result['failure'], 'event_type_mismatch')
+        self.assertFalse(result['completed'])
+
+    def test_envelope_has_a_hard_limit_before_json_parsing(self):
+        result = self.observe(self.event(size=BODY_LIMIT + 256 * 1024, header='response.created'))
+        self.assertEqual(result['failure'], 'event_body_limit')
+        self.assertEqual(result['stream_diagnostics']['parsed_json_lines'], 0)
+
+    def test_large_envelope_cannot_hide_oversized_output(self):
+        result = self.observe(self.event('response.completed', size=0,
+            output=[{'type': 'message', 'content': 'x' * (256 * 1024)}]))
+        self.assertEqual(result['failure'], 'response_output_limit')
+        self.assertFalse(result['completed'])
+
+    def test_large_envelope_rejects_model_mismatch(self):
+        result = self.observe(self.event(model='PRIVATE_CONTENT'))
+        self.assertEqual(result['failure'], 'response_model_mismatch')
+
+    def test_total_stream_limit_still_applies_to_bounded_envelopes(self):
+        result = self.observe(self.event(size=1100000) * 8)
+        self.assertEqual(result['failure'], 'response_body_limit')
+
+    def test_explicit_unlimited_budget_still_counts_requests(self):
+        result = self.observe(self.event('response.completed', size=0), request_count=2, maximum=None)
+        self.assertTrue(result['completed'])
+        self.assertEqual(result['request_id'], 2)
+
+    def test_large_http_validation_error_reports_only_allowlisted_locations(self):
+        stream = json.dumps({'detail': [{'type': 'missing', 'loc': ['body', 'input', 4, 'id'],
+            'msg': 'PRIVATE_CONTENT', 'input': 'PRIVATE_CONTENT' + 'x' * 390000},
+            {'type': 'PRIVATE_CONTENT', 'loc': ['PRIVATE_CONTENT'], 'msg': 'PRIVATE_CONTENT'}]}).encode()
+        result = self.observe(stream, status=422)
+        self.assertEqual(result['failure'], 'upstream_http_error')
+        self.assertEqual(result['upstream_validation'], {'count': 2, 'errors': [
+            {'type': 'missing', 'loc': ['body', 'input', 4, 'id']}, {'type': 'other', 'loc': ['other']}]})
+        self.assertFalse(result['completed'])
+
+    def test_http_error_body_remains_bounded(self):
+        result = self.observe(b'x' * (BODY_LIMIT + 65536), status=422)
+        self.assertEqual(result['failure'], 'upstream_http_error')
+        self.assertTrue(result['error_body_limit'])
+        self.assertNotIn('upstream_validation', result)
 
 
 if __name__ == '__main__': unittest.main()

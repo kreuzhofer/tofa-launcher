@@ -20,13 +20,14 @@ from evaluation_report import approval_failures
 
 def run(options, root):
     budget = root / 'budget.json'
-    budget.write_text(json.dumps({'used': 0, 'maximum': 12}))
+    request_limit = None if getattr(options, 'no_request_limit', False) else 12
+    budget.write_text(json.dumps({'used': 0, 'maximum': request_limit}))
     names = ('TOFA_EVAL_BUDGET', 'TOFA_EVAL_CASE', 'TOFA_EVAL_MODEL', 'TOFA_EVAL_GUARDIAN_MODEL')
     before = {name: os.environ.get(name) for name in names}
     os.environ.update(TOFA_EVAL_BUDGET=str(budget), TOFA_EVAL_CASE='coding',
                       TOFA_EVAL_MODEL=options.model, TOFA_EVAL_GUARDIAN_MODEL=options.guardian_model)
     report = {'model': options.model, 'guardian_model': options.guardian_model,
-              'support_status': 'Experimental', 'request_limit': 12, 'output_tokens_per_request': 4096,
+              'support_status': 'Experimental', 'request_limit': request_limit, 'output_tokens_per_request': 4096,
               'coding_turn_seconds': 180, 'guardian_turn_seconds': 120, 'approvals': [], 'passed': False}
     native_state = None
     try:
@@ -63,6 +64,8 @@ def run(options, root):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--no-request-limit', action='store_true',
+                        help='explicitly remove the request-count budget; retain counts, output/body bounds and deadlines')
     for name in ('launcher', 'codex', 'model', 'guardian-model', 'output'):
         parser.add_argument('--' + name, required=True)
     options = parser.parse_args()

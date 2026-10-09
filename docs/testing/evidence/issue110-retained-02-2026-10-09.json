@@ -1,0 +1,405 @@
+{
+  "candidate": "v0.1.0-rc.16",
+  "binary_sha256": "8a49f71e5a8782f6cb044ede0a9399da249a5c309382bc74378770bc9632c82c",
+  "runner_baseline": "9538008",
+  "runner_changes": "bounded response envelopes and explicit uncapped request count",
+  "runner_sha256": {
+    "evaluation_proxy.py": "d0c370fed4466d697a9a0fa01dd4604927051b0dcf8239b53709cd7fefc50494",
+    "qualification_pair.py": "b13365d6e29c44ec146688f467048c17ca7506776a8b294442e12c0824661caa",
+    "qualify_windows.py": "5c76493973c64dbeb5c16dbac17321f0962c464e5458df4931f94086f39cf47e"
+  },
+  "client": "codex-cli 0.160.1",
+  "request_limit": null,
+  "credential_policy": "reuse and retain normal Windows login; no purge",
+  "stages": [
+    {
+      "name": "install",
+      "status": "passed"
+    },
+    {
+      "name": "repeat_install_and_fresh_terminal",
+      "status": "passed"
+    },
+    {
+      "name": "live",
+      "status": "failed"
+    },
+    {
+      "name": "failure_cleanup_preserving_login",
+      "status": "passed"
+    }
+  ],
+  "outcome": "failed",
+  "used_requests": 2,
+  "live": {
+    "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+    "guardian_model": "zai-org/GLM-5.3-Flash",
+    "support_status": "Experimental",
+    "request_limit": null,
+    "output_tokens_per_request": 4096,
+    "coding_turn_seconds": 180,
+    "guardian_turn_seconds": 120,
+    "approvals": [],
+    "passed": false,
+    "coding": {
+      "turns": [
+        {
+          "exit_code": 1,
+          "tools_succeeded": 0,
+          "turn_completed": false,
+          "client_error": true,
+          "metadata_warning": false,
+          "timed_out": false,
+          "reasoning_items": 0,
+          "answer_items": 1,
+          "reasoning_output_tokens": null,
+          "elapsed_ms": 8198.707,
+          "file_checks": {
+            "summary_status": "missing",
+            "unexpected_field_count": null,
+            "expected_fields_match": {
+              "count": false,
+              "total": false,
+              "max": false
+            },
+            "input_preserved": true
+          },
+          "files_correct": false,
+          "streams": [
+            {
+              "kind": "task",
+              "status": 200,
+              "reasoning_effort": "high",
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 1,
+              "tool_results": 0,
+              "completed": true,
+              "text_deltas": 3,
+              "tool_deltas": 5,
+              "headers_ms": 1076.901,
+              "first_delta_ms": 3466.294,
+              "completed_ms": 3888.963,
+              "decision": null,
+              "started_ms": 1101.514,
+              "stream_diagnostics": {
+                "request_bytes": 390932,
+                "response_bytes": 1219766,
+                "content_type": "text/event-stream",
+                "content_encoding": "",
+                "cr_bytes": 0,
+                "lf_bytes": 78,
+                "lines": 78,
+                "blank_lines": 26,
+                "parsed_json_lines": 26,
+                "first_event_type_hint": "response.created",
+                "last_event_type": "response.completed",
+                "event_bytes_at_stop": 0,
+                "pending_line_bytes_at_stop": 0,
+                "large_response_envelopes": 3,
+                "ordinary_event_limit_bytes": 262144,
+                "response_envelope_limit_bytes": 1310720
+              },
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 98725,
+                "output_tokens": 116
+              },
+              "ended_ms": 4994.261
+            },
+            {
+              "kind": "task",
+              "status": 422,
+              "reasoning_effort": "high",
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 2,
+              "tool_results": 1,
+              "completed": false,
+              "text_deltas": 0,
+              "tool_deltas": 0,
+              "headers_ms": 174.535,
+              "first_delta_ms": null,
+              "completed_ms": null,
+              "decision": null,
+              "started_ms": 5789.565,
+              "stream_diagnostics": {
+                "request_bytes": 392120,
+                "response_bytes": 364621,
+                "content_type": "application/json",
+                "content_encoding": "",
+                "cr_bytes": 0,
+                "lf_bytes": 0,
+                "lines": 0,
+                "blank_lines": 0,
+                "parsed_json_lines": 0,
+                "first_event_type_hint": null,
+                "last_event_type": null,
+                "event_bytes_at_stop": 0,
+                "pending_line_bytes_at_stop": 0,
+                "large_response_envelopes": 0,
+                "ordinary_event_limit_bytes": 262144,
+                "response_envelope_limit_bytes": 1310720
+              },
+              "stage": "stream_read",
+              "failure": "upstream_http_error",
+              "upstream_validation": {
+                "count": 224,
+                "errors": [
+                  {
+                    "type": "string_type",
+                    "loc": [
+                      "body",
+                      "input",
+                      "other"
+                    ]
+                  },
+                  {
+                    "type": "string_type",
+                    "loc": [
+                      "body",
+                      "input",
+                      "other",
+                      3,
+                      "other",
+                      "other",
+                      "content",
+                      "other"
+                    ]
+                  },
+                  {
+                    "type": "literal_error",
+                    "loc": [
+                      "body",
+                      "input",
+                      "other",
+                      3,
+                      "other",
+                      "other",
+                      "content",
+                      "other",
+                      0,
+                      "other",
+                      "type"
+                    ]
+                  },
+                  {
+                    "type": "missing",
+                    "loc": [
+                      "body",
+                      "input",
+                      "other",
+                      3,
+                      "other",
+                      "other",
+                      "content",
+                      "other",
+                      0,
+                      "other",
+                      "other"
+                    ]
+                  },
+                  {
+                    "type": "literal_error",
+                    "loc": [
+                      "body",
+                      "input",
+                      "other",
+                      3,
+                      "other",
+                      "other",
+                      "content",
+                      "other",
+                      0,
+                      "other",
+                      "type"
+                    ]
+                  },
+                  {
+                    "type": "literal_error",
+                    "loc": [
+                      "body",
+                      "input",
+                      "other",
+                      3,
+                      "other",
+                      "other",
+                      "content",
+                      "other",
+                      0,
+                      "other",
+                      "type"
+                    ]
+                  },
+                  {
+                    "type": "missing",
+                    "loc": [
+                      "body",
+                      "input",
+                      "other",
+                      3,
+                      "other",
+                      "other",
+                      "role"
+                    ]
+                  },
+                  {
+                    "type": "literal_error",
+                    "loc": [
+                      "body",
+                      "input",
+                      "other",
+                      3,
+                      "other",
+                      "other",
+                      "type"
+                    ]
+                  },
+                  {
+                    "type": "literal_error",
+                    "loc": [
+                      "body",
+                      "input",
+                      "other",
+                      3,
+                      "other",
+                      "other",
+                      "content",
+                      0,
+                      "other",
+                      "type"
+                    ]
+                  },
+                  {
+                    "type": "missing",
+                    "loc": [
+                      "body",
+                      "input",
+                      "other",
+                      3,
+                      "other",
+                      "other",
+                      "content",
+                      0,
+                      "other",
+                      "other"
+                    ]
+                  },
+                  {
+                    "type": "literal_error",
+                    "loc": [
+                      "body",
+                      "input",
+                      "other",
+                      3,
+                      "other",
+                      "other",
+                      "content",
+                      0,
+                      "other",
+                      "type"
+                    ]
+                  },
+                  {
+                    "type": "literal_error",
+                    "loc": [
+                      "body",
+                      "input",
+                      "other",
+                      3,
+                      "other",
+                      "other",
+                      "content",
+                      0,
+                      "other",
+                      "type"
+                    ]
+                  },
+                  {
+                    "type": "missing",
+                    "loc": [
+                      "body",
+                      "input",
+                      "other",
+                      3,
+                      "other",
+                      "other",
+                      "role"
+                    ]
+                  },
+                  {
+                    "type": "literal_error",
+                    "loc": [
+                      "body",
+                      "input",
+                      "other",
+                      3,
+                      "other",
+                      "other",
+                      "type"
+                    ]
+                  },
+                  {
+                    "type": "missing",
+                    "loc": [
+                      "body",
+                      "input",
+                      "other",
+                      3,
+                      "other",
+                      "other",
+                      "id"
+                    ]
+                  },
+                  {
+                    "type": "missing",
+                    "loc": [
+                      "body",
+                      "input",
+                      "other",
+                      3,
+                      "other",
+                      "other",
+                      "content",
+                      0,
+                      "other",
+                      "annotations"
+                    ]
+                  }
+                ]
+              },
+              "ended_ms": 6131.353
+            }
+          ],
+          "streaming_observed": true,
+          "passed": false
+        }
+      ],
+      "same_session": false,
+      "scratch_config_preserved": true,
+      "scratch_auth_absent": true,
+      "scratch_settings_preserved": true,
+      "harness_defect": false,
+      "passed": false
+    },
+    "native_sandbox_home_reused": true,
+    "native_config_auth_preserved": true,
+    "owned_native_sessions_removed": true,
+    "owned_native_session_count": 1,
+    "used_requests": 2
+  },
+  "preservation": {
+    "normal_tofa_and_codex_files": true,
+    "saved_vault_login_retained": true,
+    "user_path": true,
+    "machine_path": true
+  },
+  "cleanup": {
+    "test_binary_removed": true,
+    "install_ownership_removed": true,
+    "owned_path_removed": true,
+    "scratch_removed": true
+  }
+}
