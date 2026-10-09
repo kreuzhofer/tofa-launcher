@@ -80,13 +80,48 @@ Restarting the verified JavaScript helpers temporarily restored sandboxed shell
 execution, but restarting JavaScript tooling reproduced the failure. It is not
 a durable fix or evidence that the sandbox needs broader permissions.
 
-Save work before a coordinated Codex runtime restart/update and repeat both a
-sandboxed shell command and a JavaScript-helper-then-shell check. An independent
-controller is required if stopping the agent's own desktop/server. An available
-desktop update has not been tested as a remedy. Do not delete sandbox accounts,
-credentials, or setup state, weaken ACLs, or disable the sandbox to conceal this
-failure. See the [measured evidence](windows-local-evidence-2026-10-09.md).
-Track durable recovery in [#108](https://github.com/kreuzhofer/tofa-launcher/issues/108).
+The retained VM now uses an explicit **managed-daemon pin to Codex 0.160.1**.
+That vendor package passed the same probe with the JavaScript helpers active;
+0.162.0 failed. The supported updater restarted the daemon, preserved sessions,
+and the resumed native agent passed sandboxed reads, edits, boundary-denial
+checks, the full Go suite, vet, and build after JavaScript helper startup. See
+[#108](https://github.com/kreuzhofer/tofa-launcher/issues/108) and the
+[recovery evidence](windows-codex-sandbox-recovery-2026-10-09.md).
+
+The standalone CLI remains 0.162.0. From an ordinary native PowerShell window,
+`codex app-server daemon version` should show managed/running daemon 0.160.1.
+Use this explicit retained executable for standalone sandbox probes:
+
+```powershell
+$recoveryCodex = Join-Path $env:USERPROFILE '.codex/packages/standalone/releases/0.160.1-aarch64-pc-windows-msvc/bin/codex.exe'
+& $recoveryCodex --version
+& $recoveryCodex sandbox -P :workspace -- powershell.exe -NoProfile -Command Get-Location
+```
+
+If the pin needs to be reapplied, save work and use an independent native
+PowerShell controller or terminal, outside the agent being restarted. Verify the
+retained executable exists and reports 0.160.1, then run:
+
+```powershell
+& $recoveryCodex app-server daemon update --from-cli --yes
+if ($LASTEXITCODE -ne 0) { throw 'Codex daemon pin failed' }
+& $recoveryCodex app-server daemon version
+```
+
+This is a supported package pin, not a patched 0.162.0 binary. Do not silently
+remove it: `codex app-server daemon update` returns the daemon to production
+updates and may interrupt work. Test a future candidate with its JavaScript
+helper active before switching, then repeat the read/edit/test and boundary
+checks in a fresh native session. Confirm saved sessions remain available and
+existing authentication still works. The standalone `codex update` command did
+not offer a newer engine during recovery; the Store offered no desktop upgrade
+even though doctor advertised one. A desktop update is not an established fix.
+
+No UAC or new login was required for the measured recovery; other installations
+may require OS consent. Do not delete sandbox accounts, credentials, or setup
+state, weaken ACLs, add Defender exclusions, or disable the sandbox to conceal
+this failure. The [earlier evidence](windows-local-evidence-2026-10-09.md)
+records the original failure and temporary helper-stop experiment.
 
 ## Boundaries for release work
 
