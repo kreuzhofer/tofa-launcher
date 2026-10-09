@@ -50,6 +50,7 @@ if args[:1] == ["api"]:
     else:
         sys.exit("Unexpected API request")
 elif args[:2] == ["release", "create"]:
+    pathlib.Path(os.environ["FIXTURE_DIST"]).parent.joinpath('notes.md').write_text(pathlib.Path(args[args.index('--notes-file')+1]).read_text())
     if mode == "upload-error":
         sys.exit("Upload failed; draft remains private")
 elif args[:2] == ["release", "download"]:
@@ -151,18 +152,55 @@ elif args[:2] != ["release", "edit"]:
                 self.assertNotEqual(result.returncode, 0)
                 self.assertFalse(any(c[:2] == ["release", "edit"] for c in self.calls()))
 
-    def test_version_uses_explicit_prerelease_tags_and_rejects_invalid_tags(self):
-        for tag in ("v0.1.0-rc.1", "v1.20.3-beta.2", "v2.0.0-preview"):
+    def test_version_accepts_stable_and_prerelease_tags_and_rejects_invalid_tags(self):
+        for tag in ("v0.1.0", "v1.20.3", "v0.1.0-rc.1", "v1.20.3-beta.2", "v2.0.0-preview"):
             result = self.command("version", GITHUB_REF=f"refs/tags/{tag}")
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertEqual(result.stdout.strip(), tag)
-        for tag in ("latest", "v1.0.0", "v01.0.0-rc.1", "v1.0.0-01", "v1.0.0-", "v1.0.0-rc/1"):
+        for tag in ("latest", "v01.0.0", "v01.0.0-rc.1", "v1.0.0-01", "v1.0.0-", "v1.0.0-rc/1"):
             result = self.command("version", GITHUB_REF=f"refs/tags/{tag}")
             self.assertNotEqual(result.returncode, 0, tag)
             self.assertIn("Invalid prerelease version", result.stderr)
         result = self.command("version", GITHUB_REF="refs/heads/main")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(result.stdout.strip(), "v0.0.0-ci")
+
+    def stable_bundle(self):
+        old = self.version
+        self.version = 'v1.2.3'
+        for path in self.dist.glob('tofa_*'):
+            path.rename(self.dist/path.name.replace(old, self.version))
+        (self.dist/'SHA256SUMS').write_text(''.join(
+            hashlib.sha256(p.read_bytes()).hexdigest()+'  '+p.name+'\n'
+            for p in sorted(self.dist.iterdir()) if p.name != 'SHA256SUMS'))
+        self.env['GITHUB_REF'] = 'refs/tags/'+self.version
+
+    def test_stable_becomes_latest_only_after_verifying_uploaded_bytes(self):
+        self.stable_bundle()
+        result = self.publish()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        calls = self.calls()
+        create = next(c for c in calls if c[:2] == ['release', 'create'])
+        self.assertIn('--draft', create)
+        self.assertIn('--latest=false', create)
+        self.assertIn('--prerelease=false', create)
+        self.assertEqual(calls[-1][:3], ['release', 'edit', self.version])
+        self.assertIn('--latest=true', calls[-1])
+        self.assertIn('--prerelease=false', calls[-1])
+        notes = (self.work/'notes.md').read_text()
+        self.assertIn('/releases/latest/download/install.sh', notes)
+        self.assertIn('/releases/latest/download/install.ps1', notes)
+        self.assertIn('sh install.sh\n', notes)
+
+    def test_stable_failure_never_changes_latest(self):
+        self.stable_bundle()
+        for mode in ('upload-error', 'corrupt-download', 'missing-download', 'moved-tag'):
+            with self.subTest(mode=mode):
+                self.log.unlink(missing_ok=True)
+                result = self.publish(API_MODE=mode)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertTrue(self.calls(), 'Failure must exercise the publication boundary')
+                self.assertFalse(any(c[:2] == ['release', 'edit'] for c in self.calls()))
 
 
 if __name__ == "__main__":

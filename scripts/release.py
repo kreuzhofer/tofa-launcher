@@ -1,4 +1,4 @@
-"""Validate and publish checked prereleases. No inference credentials are used."""
+"""Validate and publish checked stable releases and prereleases. No inference credentials are used."""
 import argparse
 import hashlib
 import json
@@ -18,6 +18,13 @@ def prerelease(version):
            for part in version.split("-", 1)[1].split(".")):
         raise ValueError("Invalid prerelease version: numeric identifiers cannot have leading zeros")
     return version
+
+
+def release_version(version):
+    number = r"(?:0|[1-9][0-9]*)"
+    if re.fullmatch(rf"v{number}\.{number}\.{number}", version):
+        return version
+    return prerelease(version)
 
 
 def gh(*args):
@@ -49,7 +56,7 @@ def verify_bundle(dist, version):
 
 def publish(dist, version):
     if os.environ.get("GITHUB_EVENT_NAME") != "push" or os.environ.get("GITHUB_REF") != "refs/tags/" + version:
-        raise ValueError("Publication requires an explicit prerelease tag push")
+        raise ValueError("Publication requires an explicit release tag push")
     if json.loads(os.environ.get("REQUIRED_RESULTS", "{}")) != {"artifacts": "success", "native": "success"}:
         raise ValueError("Every required job must succeed before publication")
     verify_bundle(dist, version)
@@ -65,21 +72,27 @@ def publish(dist, version):
             raise ValueError("Release tag does not match the checked source commit")
 
     verify_tag()
+    is_prerelease = '-' in version
+    prerelease_flag = '--prerelease' if is_prerelease else '--prerelease=false'
+    channel = 'Experimental prerelease' if is_prerelease else 'Stable release'
+    install_base = f'https://github.com/{repository}/releases/' + (f'download/{version}' if is_prerelease else 'latest/download')
+    shell_version = f' --version {version}' if is_prerelease else ''
+    powershell_version = f' -Version {version}' if is_prerelease else ''
     files = sorted(dist.iterdir())
     with tempfile.TemporaryDirectory(prefix="tofa release ") as temp:
         notes = pathlib.Path(temp) / "notes.md"
-        notes.write_text(f"""Experimental prerelease `{version}` from commit `{commit}`.
+        notes.write_text(f"""{channel} `{version}` from commit `{commit}`.
 
-Install using this tag for both the downloaded installer and its version argument:
+{'Install this pinned prerelease explicitly:' if is_prerelease else 'Install the latest stable release without a version argument:'}
 
 ```sh
-curl -fsSL https://github.com/{repository}/releases/download/{version}/install.sh -o install.sh
-sh install.sh --version {version}
+curl -fsSL {install_base}/install.sh -o install.sh
+sh install.sh{shell_version}
 ```
 
 ```powershell
-$Installer = Invoke-RestMethod https://github.com/{repository}/releases/download/{version}/install.ps1
-& ([scriptblock]::Create($Installer)) -Version {version}
+$Installer = Invoke-RestMethod {install_base}/install.ps1 -ErrorAction Stop
+& ([scriptblock]::Create($Installer)){powershell_version}
 ```
 
 All six binaries are cross-built. Native macOS ARM64, Linux amd64 and Windows amd64
@@ -92,7 +105,7 @@ credential is required by release CI. Signing/notarization is not provided.
 Changed release files require a new candidate tag; existing assets are not replaced.
 """)
         gh("release", "create", version, *(str(path) for path in files), "--repo", repository,
-           "--draft", "--prerelease", "--latest=false", "--verify-tag", "--title", version,
+           "--draft", prerelease_flag, "--latest=false", "--verify-tag", "--title", version,
            "--notes-file", str(notes))
         downloaded = pathlib.Path(temp) / "download"
         downloaded.mkdir()
@@ -100,8 +113,8 @@ Changed release files require a new candidate tag; existing assets are not repla
         if {p.name: p.read_bytes() for p in downloaded.iterdir()} != {p.name: p.read_bytes() for p in files}:
             raise ValueError("Uploaded release differs from the checked bundle; draft remains private")
         verify_tag()
-        gh("release", "edit", version, "--repo", repository, "--draft=false", "--prerelease",
-           "--latest=false", "--verify-tag")
+        gh("release", "edit", version, "--repo", repository, "--draft=false", prerelease_flag,
+           "--latest=false" if is_prerelease else "--latest=true", "--verify-tag")
 
 
 def main():
@@ -110,7 +123,7 @@ def main():
     parser.add_argument("dist", nargs="?", type=pathlib.Path)
     args = parser.parse_args()
     ref = os.environ.get("GITHUB_REF", "")
-    version = prerelease(ref.removeprefix("refs/tags/")) if ref.startswith("refs/tags/") else "v0.0.0-ci"
+    version = release_version(ref.removeprefix("refs/tags/")) if ref.startswith("refs/tags/") else "v0.0.0-ci"
     if args.command == "version":
         print(version)
     else:

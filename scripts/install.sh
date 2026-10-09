@@ -1,5 +1,5 @@
 #!/bin/sh
-# Prototype installer: curl -fsSL <repo>/scripts/install.sh | sh -s -- --version TAG
+# Omit --version to install the latest stable release; explicit tags also work.
 set -eu
 umask 077
 fail() { printf '%s\n' "tofa: $*" >&2; exit 1; }
@@ -27,8 +27,19 @@ if [ -d "$root" ] && [ ! -f "$root/.tofa-install" ]; then
 fi
 if [ -f "$root/.tofa-install" ]; then [ "$(cat "$root/.tofa-install")" = tofa-install-v1 ] || fail 'unknown install manifest'; fi
 if [ "$version" = latest ]; then
- version=$(curl -fsSL --proto '=https' https://api.github.com/repos/kreuzhofer/tofa-launcher/releases/latest | sed -n 's/.*"tag_name": *"\([A-Za-z0-9._-]*\)".*/\1/p')
- [ -n "$version" ] || fail 'no published release found; select an existing --version'
+ # Resolve GitHub's stable-release redirect once, without a JSON parser runtime.
+ resolved=$(curl -fsSL --proto '=https' --proto-redir '=https' --connect-timeout 15 --max-time 60 \
+  -o /dev/null -w '%{url_effective}' https://github.com/kreuzhofer/tofa-launcher/releases/latest) \
+  || fail 'could not resolve latest stable release; retry or select an existing --version'
+ case "$resolved" in
+  https://github.com/kreuzhofer/tofa-launcher/releases/tag/*) version=${resolved##*/} ;;
+  *) fail 'invalid latest stable release URL' ;;
+ esac
+ # Reject extra path components, query strings, newlines and prerelease tags.
+ [ "$resolved" = "https://github.com/kreuzhofer/tofa-launcher/releases/tag/$version" ] || fail 'invalid latest stable release URL'
+ case "$version" in ''|*[!0-9.v]*) fail 'invalid latest stable release tag' ;; esac
+ printf '%s\n' "$version" | grep -Eq '^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$' \
+  || fail 'invalid latest stable release tag'
 fi
 asset="tofa_${version}_${platform}_${arch}"
 base=${TOFA_RELEASE_BASE_URL:-"https://github.com/kreuzhofer/tofa-launcher/releases/download/$version"}

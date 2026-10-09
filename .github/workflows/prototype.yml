@@ -1,4 +1,4 @@
-name: Checks and prereleases
+name: Checks and releases
 on:
   push:
     branches: [main, prototype/direct-launcher]
@@ -42,6 +42,9 @@ jobs:
       - run: go vet ./...
       - run: python3 scripts/install_test.py
         if: runner.os != 'Windows'
+      - name: Latest stable installer checks
+        if: runner.os != 'Windows'
+        run: python3 scripts/install_latest_test.py -v
       - uses: actions/download-artifact@v4
         with:
           name: checked-candidate
@@ -93,6 +96,10 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: ./scripts/windows_test.ps1
+      - name: Latest stable Windows installer checks
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/windows_latest_test.ps1
       - name: Native Windows candidate installation lifecycle
         if: runner.os == 'Windows'
         shell: pwsh
@@ -139,7 +146,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     concurrency:
-      group: prerelease-${{ github.ref }}
+      group: release-${{ github.ref }}
       cancel-in-progress: false
     permissions:
       contents: write
