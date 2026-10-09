@@ -487,6 +487,9 @@ python3 scripts/windows_template_test.py -v
 
 Python is a **development test tool**, not a runtime or installer dependency.
 
+For ordinary work in the retained Windows 11 ARM64 VM, see
+[persistent Windows-local development](docs/testing/windows-local-development.md)
+and the [verified baseline and limitations](docs/testing/windows-local-evidence-2026-10-09.md).
 For dedicated Windows 11 ARM64 UTM test templates, see
 [template preparation and native readiness](docs/testing/windows-template.md).
 The picker checks compile the public launcher with a loopback provider and a fake
