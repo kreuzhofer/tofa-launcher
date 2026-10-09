@@ -1,0 +1,40 @@
+{
+  "snapshot_date": "2026-10-09",
+  "source": "https://tokenfactory.nebius.com/api/public/models_info",
+  "source_sha256": "86f49dfa3bb1facbbb6d65efc760219626e8bd4146c517582e1b21c28b723032",
+  "model": {
+    "model_id": "nvidia/Nemotron-3_5-Lightning",
+    "model_type": "text2text",
+    "model_name": "Nemotron-3.5-Lightning",
+    "model_description": "NVIDIA's 30B-parameter hybrid MoE model with 3B active parameters per token, designed for efficient agentic reasoning, tool use, coding, and long-context workflows.",
+    "label": "cheap",
+    "regions": [
+      {
+        "country_code": "FI",
+        "name": "eu-north1"
+      }
+    ],
+    "external_provider": false,
+    "tags": [
+      "1M context",
+      "reasoning",
+      "code",
+      "function calling",
+      "MTP"
+    ],
+    "use_cases": [
+      "text",
+      "reasoning",
+      "function_calling",
+      "code",
+      "context_and_rag",
+      "responses_api"
+    ],
+    "context_window_k": 1024,
+    "max_model_len": 1048576,
+    "tokens_per_second": 314.12,
+    "input_price_per_million_tokens": 0.06,
+    "output_price_per_million_tokens": 0.24,
+    "quantization": "bf16"
+  }
+}

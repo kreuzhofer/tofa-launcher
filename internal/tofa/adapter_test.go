@@ -27,7 +27,7 @@ func adapterFixture(t *testing.T, upstream http.HandlerFunc, client func(string,
 			t.Error("upstream credentials or project changed")
 		}
 		if request.URL.Path == "/models" {
-			io.WriteString(writer, `{"data":[{"id":"fixture-model"},{"id":"moonshotai/Kimi-K3"},{"id":"zai-org/GLM-5.3-Flash"},{"id":"deepseek-ai/DeepSeek-V4.1-Flash"},{"id":"zai-org/GLM-5.3"},{"id":"nvidia/Nemotron-3-Ultra-550b-a55b"}]}`)
+			io.WriteString(writer, `{"data":[{"id":"fixture-model"},{"id":"moonshotai/Kimi-K3"},{"id":"zai-org/GLM-5.3-Flash"},{"id":"deepseek-ai/DeepSeek-V4.1-Flash"},{"id":"zai-org/GLM-5.3"},{"id":"nvidia/Nemotron-3-Ultra-550b-a55b"},{"id":"nvidia/Nemotron-3_5-Lightning"}]}`)
 			return
 		}
 		upstream(writer, request)

@@ -315,8 +315,11 @@ release qualification. Other eligible desktop
 pairs are always enabled and marked Experimental. The launcher sets the default;
 the desktop picker offers all eligible available models, and each conversation
 keeps its own selected main across relaunches. The configured Guardian applies
-to every Token Factory main. Automatic titles retain the captured Kimi launch-default
-route; other mains report unsupported naming explicitly. See
+to every Token Factory main. Automatic titles use the fixed naming model
+`nvidia/Nemotron-3_5-Lightning`, independently of main and Guardian. Current
+implementation and live UI qualification are tracked in #111; this is not part
+of the published rc16 preview. An unavailable naming model produces an explicit
+error without substituting another model or blocking main conversations. See
 [tested versions, lifecycle, and limitations](docs/codex-desktop.md).
 The [shared-history qualification](docs/releases/desktop-shared-history-final-2026-09-24.md)
 records passing live workflow, shutdown and preservation checks for the pinned

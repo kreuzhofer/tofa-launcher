@@ -185,12 +185,23 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 				return
 			}
 			titleRouted := false
-			if selectedModel == "moonshotai/Kimi-K3" {
+			if selectedModel != "" {
 				body, titleRouted, err = routeDesktopTitle(body)
 				if err != nil {
 					notice(err.Error())
 					http.Error(writer, "request adapter: "+err.Error(), http.StatusBadRequest)
 					return
+				}
+				if titleRouted {
+					if route := adapter.desktop.Load(); route == nil || route.namingUnavailable != "" {
+						message := "automatic naming is unavailable before desktop routing is ready"
+						if route != nil {
+							message = route.namingUnavailable
+						}
+						notice(message)
+						http.Error(writer, "request adapter: "+message, http.StatusBadRequest)
+						return
+					}
 				}
 			}
 			if selectedModel != "" {
@@ -213,13 +224,13 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 				message := ""
 				if isDesktopCompaction(payload.ClientMetadata) {
 					message = "automatic context compaction is unsupported; request was not sent upstream. Select a model with enough context or start a new conversation; the saved conversation history is retained."
-				} else if isDesktopTitle(payload.ClientMetadata) && selectedModel != "moonshotai/Kimi-K3" {
-					message = "automatic title generation is unavailable for main " + selectedModel + "; request was not sent upstream"
+				} else if isDesktopTitle(payload.ClientMetadata) && !titleRouted {
+					message = "automatic title generation is unavailable: unsupported desktop title contract; request was not sent upstream"
 				} else if !isReview && isApprovalReviewCandidate(review) {
 					message = "unsupported desktop approval review contract; request was not sent upstream"
 				} else if isReview && payload.Model != guardian {
 					message = "unsupported Guardian model; relaunch with the configured --guardian-model; request was not sent upstream"
-				} else if !allowedMain && !(payload.Model == guardian && isReview) {
+				} else if !allowedMain && !(payload.Model == guardian && isReview) && !titleRouted {
 					message = "unsupported model; request was not sent upstream"
 					if _, err := metadataFor(payload.Model); err == nil {
 						message = "Token Factory conversation model " + payload.Model + " is unavailable in this launch's project catalog; request was not sent upstream. Check project availability and relaunch to refresh the catalog, or explicitly select an available model."
@@ -298,13 +309,9 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 		}),
 	}
 	fmt.Fprintln(a.Out, "Route: per-launch Responses request adapter (assistant-history repair).")
-	if selectedModel == "moonshotai/Kimi-K3" {
-		fmt.Fprintln(a.Out, "Automatic title routing: gpt-5.6-luna -> moonshotai/Kimi-K3 (captured thread_title contract only; other auxiliary requests remain unsupported).")
-		fmt.Fprintln(a.Out, "Automatic title routing: gpt-6-luna -> moonshotai/Kimi-K3 (same verified thread_title contract).")
-		fmt.Fprintln(a.Out, "Automatic title adaptation: code-mode tools relocated intact; title schema moved to final-answer instructions; desktop still validates the title.")
-	}
-	if selectedModel != "" && selectedModel != "moonshotai/Kimi-K3" {
-		fmt.Fprintf(a.Out, "Automatic title generation is unsupported for main %s; no naming model fallback.\n", selectedModel)
+	if selectedModel != "" {
+		fmt.Fprintf(a.Out, "Naming: %s (automatic desktop titles; independent of main and Guardian; no fallback).\n", desktopNamingModel)
+		fmt.Fprintln(a.Out, "Automatic title routing: recognized gpt-5.6-luna/gpt-6-luna thread_title requests use the naming model; tools and title schema are retained. Other auxiliary requests remain unsupported.")
 	}
 	go func() {
 		err := adapter.server.Serve(listener)

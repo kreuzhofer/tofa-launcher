@@ -217,6 +217,9 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 	// Snapshot the available eligible mains once for the catalog and request route.
 	mainModels := []string{}
 	for _, available := range models {
+		if available.ID == desktopNamingModel {
+			continue // Dedicated naming role; do not add it to the main picker/catalog.
+		}
 		if _, err := metadataFor(available.ID); err != nil {
 			fmt.Fprintf(a.Out, "Desktop model unavailable: %s: %v\n", available.ID, err)
 			continue
@@ -280,6 +283,10 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 		}
 	}()
 	route := &desktopRoute{Bridge: bridge, Engine: bundle.engine, Home: home, ready: make(chan struct{}), claim: make(chan int, 1), mainPID: &atomic.Int64{}}
+	route.namingUnavailable = desktopNamingUnavailable(models)
+	if route.namingUnavailable != "" {
+		fmt.Fprintln(a.Out, "Automatic naming unavailable:", route.namingUnavailable)
+	}
 	route.mainModels = make(map[string]bool, len(mainModels))
 	for _, identity := range mainModels {
 		route.mainModels[identity] = true
