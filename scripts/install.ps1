@@ -33,7 +33,17 @@ if (![Tofa.InstallArchitecture]::IsWow64Process2([IntPtr]::new(-1),[ref]$Process
  throw [ComponentModel.Win32Exception]::new([Runtime.InteropServices.Marshal]::GetLastWin32Error())
 }
 $Arch=switch ($NativeMachine) {0xAA64 {'arm64'} 0x8664 {'amd64'} default {throw "Unsupported native Windows architecture: $NativeMachine"}}
-if ($Version -eq 'latest') {$Version=(Invoke-RestMethod "https://api.github.com/repos/$Repo/releases/latest").tag_name}
+if ($Version -eq 'latest') {
+ try {$Release=Invoke-RestMethod "https://api.github.com/repos/$Repo/releases/latest" -TimeoutSec 60}
+ catch {throw 'Could not resolve latest stable release; retry or select an existing -Version'}
+ if ($Release.tag_name -isnot [string] -or
+     $Release.tag_name -cnotmatch '\Av(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\z' -or
+     $Release.prerelease -isnot [bool] -or $Release.prerelease -or
+     $Release.draft -isnot [bool] -or $Release.draft) {
+  throw 'Invalid latest stable release metadata'
+ }
+ $Version=$Release.tag_name
+}
 if ($Version -notmatch '^[A-Za-z0-9._-]+$') {throw 'Invalid resolved release tag'}
 $Asset="tofa_${Version}_windows_${Arch}.exe"
 $Base="https://github.com/$Repo/releases/download/$Version"

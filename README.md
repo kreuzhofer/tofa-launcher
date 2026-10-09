@@ -26,9 +26,15 @@ Claude, other desktop modes and browser OAuth remain outside the current scope.
 
 ## Installation
 
-Use the version-pinned commands below to install **v0.1.0-rc.14** directly from
-GitHub. The installer downloads only the binary matching your operating system
-and CPU.
+The commands below install the **latest stable release** without a version
+argument. The installer resolves one stable tag, then downloads that tag's binary
+and checksum manifest for your operating system and CPU. Rerunning it upgrades
+the installation while retaining saved preferences and login.
+
+**Before the first stable release is published, these latest-release URLs have no
+release to select.** Use the [explicit-version commands](#install-a-specific-version)
+for a prerelease. Resolution failures stop installation; they never select a
+prerelease automatically.
 
 Installation is per user and needs no administrator privileges. The installer
 verifies the binary's SHA-256 checksum, updates your PATH and prints the exact
@@ -38,17 +44,14 @@ and a Token Factory API key and project ID are required to launch it.
 ### macOS and Linux
 
 ```sh
-version=v0.1.0-rc.14
-curl -fsSL "https://github.com/kreuzhofer/tofa-launcher/releases/download/$version/install.sh" -o install.sh &&
-  sh install.sh --version "$version"
+curl -fsSL https://github.com/kreuzhofer/tofa-launcher/releases/latest/download/install.sh -o install.sh &&
+  sh install.sh
 ```
 
 Installs into `~/.local/share/tofa/bin`. Follow the printed PATH activation command
 or open a new terminal. Bash, zsh and fish receive shell-specific instructions.
 
-Use the same tag for the script download and `--version`. Prereleases must be
-selected explicitly: the installer's default `latest` looks for a stable release
-and does not select a prerelease. Add `--no-modify-path` for manual setup instructions.
+Add `--no-modify-path` for manual setup instructions.
 Rerun the installer to upgrade; saved preferences and credentials are retained.
 
 ### Windows PowerShell
@@ -57,17 +60,32 @@ Requires Windows 10 version 1709 or later. The installer detects the native
 AMD64 or ARM64 host, including when PowerShell runs under emulation.
 
 ```powershell
-$Version = 'v0.1.0-rc.14'
-$Installer = Invoke-RestMethod "https://github.com/kreuzhofer/tofa-launcher/releases/download/$Version/install.ps1" -ErrorAction Stop
-& ([scriptblock]::Create($Installer)) -Version $Version
+$Installer = Invoke-RestMethod https://github.com/kreuzhofer/tofa-launcher/releases/latest/download/install.ps1 -ErrorAction Stop
+& ([scriptblock]::Create($Installer))
 ```
 
 Installs into `%LOCALAPPDATA%\tofa\install\bin`. Follow the printed PowerShell PATH
 activation command or open a new terminal.
 
-Use the same tag for the script download and `-Version`; `latest` does not select
-prereleases. Add `-NoModifyPath` for manual PATH setup.
+Add `-NoModifyPath` for manual PATH setup.
 Rerun the installer to upgrade; saved preferences and credentials are retained.
+
+### Install a specific version
+
+Explicit versions remain available for prereleases, reproducible installs and
+rollback. Use the same tag for the installer download and its version argument:
+
+```sh
+version=v0.1.0-rc.15
+curl -fsSL "https://github.com/kreuzhofer/tofa-launcher/releases/download/$version/install.sh" -o install.sh &&
+  sh install.sh --version "$version"
+```
+
+```powershell
+$Version = 'v0.1.0-rc.15'
+$Installer = Invoke-RestMethod "https://github.com/kreuzhofer/tofa-launcher/releases/download/$Version/install.ps1" -ErrorAction Stop
+& ([scriptblock]::Create($Installer)) -Version $Version
+```
 
 ### First launch and upgrades
 
@@ -79,7 +97,7 @@ tofa auth login
 tofa launch codex --model 'moonshotai/Kimi-K3' --allow-unverified
 ```
 
-`tofa --version` should print `tofa v0.1.0-rc.14`. Login is needed for first setup;
+`tofa --version` prints the installed version. Login is needed for first setup;
 when upgrading, rerun the installer and reuse your saved login.
 
 To exercise automatic approval review, select **Approve for me** in Codex's
@@ -153,11 +171,15 @@ Retain the license and notice files when redistributing standalone binaries.
 The local build creates files only. Cross-compilation does not establish native
 execution or real-machine qualification on every target.
 
-### Publishing a prerelease
+### Publishing releases
 
-Push a new explicit prerelease tag such as `v0.1.0-rc.14` to the intended source
-commit. Tags must use `vMAJOR.MINOR.PATCH-PRERELEASE`; stable tags and malformed
-versions fail validation. Ordinary branch pushes and manual CI runs never publish.
+Push a new explicit tag to the intended source commit: `vMAJOR.MINOR.PATCH` for
+an approved stable release, or `vMAJOR.MINOR.PATCH-PRERELEASE` for an experimental
+candidate. Malformed versions fail validation. Ordinary branch pushes and manual
+CI runs never publish. A stable tag push authorizes publication and selection as
+GitHub Latest after the checks below; push it only after the coordinated native
+release-readiness decision. Adding stable-tag support does not itself approve the
+first stable release.
 
 The workflow builds one candidate bundle, then runs native race tests, vet and
 actual-binary installation lifecycle checks on macOS, Linux and Windows. Every
@@ -167,10 +189,18 @@ and needs no real inference credential.
 
 Publication uploads a private draft, downloads and compares every asset with the
 checked bundle, verifies the tag still names the checked commit, then publishes it
-explicitly as a prerelease. An existing release (including a partial draft) makes a
+as a prerelease with Latest disabled, or as a stable release marked Latest. Failed
+verification leaves the draft private and does not update Latest. An existing
+release (including a partial draft) makes a
 retry fail without overwriting assets or repointing the tag. Use a new candidate
 version for changed release files; investigate an interrupted draft before taking
 any manual recovery action. The publication job alone has `contents: write`.
+
+After the first approved stable publication, smoke-test both permanent installer
+URLs without a version argument on Mac and Windows and record the resolved tag,
+installed binary hash, native architecture and preservation checks. Controlled
+latest-release tests in CI establish resolver behavior before that public endpoint
+exists; they are not evidence of the first real stable install.
 
 All six OS/CPU artifacts have cross-build evidence. Native lifecycle execution
 covers macOS ARM64, Linux amd64 and Windows amd64. Maintainer qualification with
