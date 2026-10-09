@@ -10,6 +10,8 @@ import (
 // The desktop independently parses JSON and validates title and description.
 const desktopTitleSchema = `{"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","properties":{"title":{"type":"string","minLength":1,"maxLength":36},"description":{"type":"string","minLength":1}},"required":["title","description"],"additionalProperties":false}`
 
+const desktopNamingModel = "nvidia/Nemotron-3_5-Lightning"
+
 func isDesktopTitle(metadataJSON json.RawMessage) bool {
 	var metadata map[string]json.RawMessage
 	var turnJSON string
@@ -35,7 +37,7 @@ func routeDesktopTitle(body []byte) ([]byte, bool, error) {
 	if (model != "gpt-5.6-luna" && model != "gpt-6-luna") || !isDesktopTitle(payload["client_metadata"]) {
 		return body, false, nil
 	}
-	textOptions, schema, valid := desktopTitleFormat(payload)
+	_, _, valid := desktopTitleFormat(payload)
 	unsupported := errors.New("automatic title generation is unavailable: unsupported desktop title contract; request was not sent upstream")
 	if !valid || len(payload["tools"]) != 0 || len(payload["instructions"]) != 0 {
 		return nil, false, unsupported
@@ -60,16 +62,15 @@ func routeDesktopTitle(body []byte) ([]byte, bool, error) {
 			return nil, false, unsupported
 		}
 	}
-	// Token Factory rejects additional_tools input items. Relocate all captured
-	// definitions intact, and retain the full schema as final-answer guidance:
-	// Kimi rejects constrained decoding together with tools (#33).
-	payload["tools"] = additional.Tools
+	// Lightning's Responses endpoint rejects namespace tools, include, reasoning
+	// and prompt_cache_key (live engine replay, #111). Naming is explicitly
+	// tool-free and uses provider-default reasoning. Retain the native prompt
+	// and output schema; the desktop still validates and persists the result.
+	delete(payload, "include")
+	delete(payload, "reasoning")
+	delete(payload, "prompt_cache_key")
 	payload["input"], _ = json.Marshal(input[1:])
-	canonicalSchema, _ := json.Marshal(schema)
-	payload["instructions"], _ = json.Marshal("For this desktop thread title, return your final answer as JSON matching this complete schema (no markdown or extra text):\n" + string(canonicalSchema))
-	delete(textOptions, "format")
-	payload["text"], _ = json.Marshal(textOptions)
-	payload["model"] = json.RawMessage(`"moonshotai/Kimi-K3"`)
+	payload["model"], _ = json.Marshal(desktopNamingModel)
 	result, err := json.Marshal(payload)
 	return result, true, err
 }

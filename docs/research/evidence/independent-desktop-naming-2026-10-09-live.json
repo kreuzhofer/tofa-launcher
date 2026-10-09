@@ -1,0 +1,83 @@
+{
+  "user_authorized_saved_login_reuse": true,
+  "credential_modified": false,
+  "actual_ui_acceptance": "pending",
+  "requests": [
+    {
+      "completion_event": "response.completed",
+      "description": "Python integer addition type promotion",
+      "generated_title": "Explain Python integer addition",
+      "response_id": "resp_d620c04a",
+      "response_model": "nvidia/Nemotron-3_5-Lightning",
+      "usage": {
+        "input_tokens": 5249,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cached_tokens_per_turn": [
+            0
+          ],
+          "input_tokens_per_turn": [
+            5249
+          ]
+        },
+        "output_tokens": 2976,
+        "output_tokens_details": {
+          "output_tokens_per_turn": [
+            2976
+          ],
+          "reasoning_tokens": 2953,
+          "tool_output_tokens": 0,
+          "tool_output_tokens_per_turn": [
+            0
+          ]
+        },
+        "total_tokens": 8225
+      },
+      "native_model": "gpt-5.6-luna",
+      "upstream_model": "nvidia/Nemotron-3_5-Lightning",
+      "launch_main": "zai-org/GLM-5.3",
+      "http_status": 200,
+      "elapsed_ms_including_fixture_start": 13505.504,
+      "source": "installed bundled engine; current native title prompt; synthetic conversation",
+      "actual_ui": false
+    },
+    {
+      "completion_event": "response.completed",
+      "description": "Python int addition carry type preservation",
+      "generated_title": "Explain Python integer addition",
+      "response_id": "resp_f5d1e7c8",
+      "response_model": "nvidia/Nemotron-3_5-Lightning",
+      "usage": {
+        "input_tokens": 6038,
+        "input_tokens_details": {
+          "cached_tokens": 0,
+          "cached_tokens_per_turn": [
+            0
+          ],
+          "input_tokens_per_turn": [
+            6038
+          ]
+        },
+        "output_tokens": 1851,
+        "output_tokens_details": {
+          "output_tokens_per_turn": [
+            1851
+          ],
+          "reasoning_tokens": 1827,
+          "tool_output_tokens": 0,
+          "tool_output_tokens_per_turn": [
+            0
+          ]
+        },
+        "total_tokens": 7889
+      },
+      "native_model": "gpt-6-luna",
+      "upstream_model": "nvidia/Nemotron-3_5-Lightning",
+      "launch_main": "zai-org/GLM-5.3",
+      "http_status": 200,
+      "elapsed_ms_including_fixture_start": 8602.646,
+      "source": "installed bundled engine; current native title prompt; synthetic conversation",
+      "actual_ui": false
+    }
+  ]
+}

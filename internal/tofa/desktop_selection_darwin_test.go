@@ -23,7 +23,7 @@ func TestDesktopSupportedMainLaunchesWithoutExperimentalOptIn(t *testing.T) {
 			if _, err := os.Stat(capture); err != nil {
 				t.Fatal("supported selection did not launch desktop:", err)
 			}
-			for _, want := range []string{"Main: " + main, "Guardian: zai-org/GLM-5.3-Flash", "Status: supported", "Route: adapted", "Automatic title generation is unsupported for main " + main} {
+			for _, want := range []string{"Main: " + main, "Guardian: zai-org/GLM-5.3-Flash", "Status: supported", "Route: adapted", "Naming: nvidia/Nemotron-3_5-Lightning"} {
 				if !strings.Contains(output.String(), want) {
 					t.Errorf("missing %q in %s", want, output.String())
 				}
@@ -135,7 +135,7 @@ func TestDesktopNamingAndGuardianLanesRemainScoped(t *testing.T) {
 			}
 		})
 	}
-	for _, model := range []string{"gpt-6-luna", "deepseek-ai/DeepSeek-V4.1-Flash", "moonshotai/Kimi-K3"} {
+	for _, model := range []string{"deepseek-ai/DeepSeek-V4.1-Flash", "moonshotai/Kimi-K3"} {
 		body, err := os.ReadFile("testdata/desktop-luna6-title-request.json")
 		if err != nil {
 			t.Fatal(err)
@@ -149,7 +149,7 @@ func TestDesktopNamingAndGuardianLanesRemainScoped(t *testing.T) {
 		}
 	}
 	stop()
-	if upstream.Load() != 0 || !strings.Contains(output.String(), "Automatic title generation is unsupported for main deepseek-ai/DeepSeek-V4.1-Flash") {
+	if upstream.Load() != 0 || !strings.Contains(output.String(), "Naming: nvidia/Nemotron-3_5-Lightning") {
 		t.Fatal("unsupported lane reached provider or naming limitation was hidden")
 	}
 }
@@ -221,7 +221,9 @@ func TestDesktopUnavailableMainExplainsRecovery(t *testing.T) {
 		if err != nil || response.StatusCode != http.StatusBadRequest || calls.Load() != 0 {
 			t.Fatalf("unavailable model escaped: %d %s", response.StatusCode, body)
 		}
-		if model != "zai-org/GLM-5.3" && (!strings.Contains(string(body), "missing bundled model metadata") || !strings.Contains(string(body), "select an available model")) { t.Errorf("missing incompatible-model recovery: %s", body) }
+		if model != "zai-org/GLM-5.3" && (!strings.Contains(string(body), "missing bundled model metadata") || !strings.Contains(string(body), "select an available model")) {
+			t.Errorf("missing incompatible-model recovery: %s", body)
+		}
 		if model == "zai-org/GLM-5.3" && !strings.Contains(string(body), "unavailable in this launch's project catalog") {
 			t.Fatalf("missing recovery instructions: %s", body)
 		}

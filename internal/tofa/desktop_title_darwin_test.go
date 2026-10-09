@@ -49,22 +49,17 @@ func TestDesktopPreservesRoutedTitleContractAndFailures(t *testing.T) {
 					if err != nil {
 						t.Fatal(err)
 					}
-					original["model"] = "moonshotai/Kimi-K3"
+					original["model"] = "nvidia/Nemotron-3_5-Lightning"
 					input := original["input"].([]any)
-					original["tools"] = input[0].(map[string]any)["tools"]
+					delete(original, "reasoning")
+					delete(original, "include")
+					delete(original, "prompt_cache_key")
 					original["input"] = input[1:]
-					schema, _ := json.Marshal(titleFormat(original)["schema"])
-					delete(original["text"].(map[string]any), "format")
 					app, _ := adapterFixture(t, func(w http.ResponseWriter, r *http.Request) {
 						raw, err := io.ReadAll(r.Body)
 						got := jsonValue(t, raw).(map[string]any)
-						instructions, _ := got["instructions"].(string)
-						if !strings.Contains(instructions, string(schema)) || !strings.Contains(instructions, "final answer") {
-							t.Error("complete final-answer title schema was lost")
-						}
-						delete(got, "instructions")
 						if err != nil || !reflect.DeepEqual(got, original) {
-							t.Error("title adaptation changed tool definitions, input, metadata, reasoning or other settings")
+							t.Error("title adaptation changed prompt, schema, metadata or unrelated settings")
 						}
 						w.WriteHeader(tc.status)
 						io.WriteString(w, tc.response)
@@ -237,7 +232,7 @@ func TestDesktopRejectsChangedLuna6TitleContracts(t *testing.T) {
 
 // Replays the title helper's current thread/start and turn/start contract at
 // the bundled-engine boundary, retaining the launcher's merged native catalog.
-func TestDesktopBundledEngineRoutesAutomaticTitleToKimi(t *testing.T) {
+func TestDesktopBundledEngineRoutesAutomaticTitleToLightning(t *testing.T) {
 	installed := os.Getenv("TOFA_TEST_DESKTOP_ENGINE")
 	if installed == "" {
 		t.Skip("set TOFA_TEST_DESKTOP_ENGINE")
@@ -265,12 +260,12 @@ func TestDesktopBundledEngineRoutesAutomaticTitleToKimi(t *testing.T) {
 						return
 					}
 				}
-				if body["model"] != "moonshotai/Kimi-K3" || body["tools"] == nil || body["instructions"] == nil || body["text"].(map[string]any)["format"] != nil {
+				if body["model"] != "nvidia/Nemotron-3_5-Lightning" || body["tools"] != nil || body["instructions"] != nil || body["text"].(map[string]any)["format"] == nil {
 					t.Errorf("current title contract changed: model=%v tools=%v", body["model"], body["tools"])
 				}
 				emitFixtureResponse(w, fixtureMessage(title))
 			}, nil)
-			child, stop := liveDesktopFixture(t, app, bundle, capture)
+			child, stop := liveDesktopFixture(t, app, bundle, capture, "--model", "zai-org/GLM-5.3")
 			e := openDesktopEngine(t, child)
 			started := e.call("thread/start", map[string]any{
 				"model": model, "modelProvider": nil,
@@ -326,7 +321,7 @@ func TestDesktopBundledEngineRoutesAutomaticTitleToKimi(t *testing.T) {
 			}
 			e.close()
 			stop()
-			if !strings.Contains(output.String(), "Automatic title routing: "+model+" -> moonshotai/Kimi-K3") {
+			if !strings.Contains(output.String(), "Naming: nvidia/Nemotron-3_5-Lightning") {
 				t.Fatal("title routing not announced in launcher output")
 			}
 		})

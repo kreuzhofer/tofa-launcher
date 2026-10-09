@@ -48,8 +48,8 @@ const help = `tofa — Token Factory launcher (prototype)
 
 Supported desktop pairs: deepseek-ai/DeepSeek-V4.1-Flash or zai-org/GLM-5.3 main
 with zai-org/GLM-5.3-Flash Guardian, on the pinned macOS desktop adapted route.
-Automatic naming remains unsupported for these mains. See docs/codex-desktop.md
-for tested versions and evidence limits. Desktop experimental models are always enabled
+Desktop naming uses nvidia/Nemotron-3_5-Lightning independently of main and Guardian.
+See docs/codex-desktop.md for naming qualification status and evidence limits. Desktop experimental models are always enabled
 and labelled Experimental. The desktop picker offers every eligible available model;
 --model sets the initial/default main and each conversation keeps its own selection.
 Supported CLI mains on macOS ARM64: deepseek-ai/DeepSeek-V4.1-Flash,

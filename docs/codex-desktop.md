@@ -58,13 +58,18 @@ Beyond the two supported pairs, metadata-compatible pairs among `zai-org/GLM-5.3
 `nvidia/Nemotron-3-Ultra-550b-a55b` are experimentally selectable. Each descriptor
 uses its own dated provider metadata; text-only candidates do not inherit Kimi's
 image capability. Offline routing tests do not qualify live model behavior.
-Naming retains the separately announced launch-default contract: a Kimi default
-routes recognized title requests to Kimi, while other defaults report unavailable
-naming. Changing a conversation main does not select a new naming model.
+The development naming policy uses one fixed model,
+`nvidia/Nemotron-3_5-Lightning`, for recognized automatic title requests,
+independently of launch main, conversation main and Guardian. Changing a main
+does not change the naming model. [#111 qualification](research/independent-desktop-naming-2026-10-09.md)
+observed generated titles with GLM and DeepSeek, persistence across relaunch and
+manual-title preservation on the pinned Mac app. Naming took 6.3–28.2 seconds;
+the provisional first-message title can remain visible while generation completes.
+This development implementation is not included in rc16.
 The [five-model comparison](evaluation/desktop-comparison-2026-09-29.md) records
 main/Guardian outcomes, naming limits, timings, shared costs and promotion provenance.
-Support covers the pinned headless bundled-engine baseline, not Electron UI or
-release qualification. See the [offline selection evidence](evaluation/desktop-selection-2026-09-28.md).
+Main/Guardian support labels cover the pinned headless bundled-engine baseline,
+not comprehensive Electron UI or release qualification. See the [offline selection evidence](evaluation/desktop-selection-2026-09-28.md).
 
 ### Switching launch modes and recovering a conversation
 
@@ -486,21 +491,32 @@ The [#55 implementation checks](releases/desktop-model-routing-2026-09-30.md)
 record per-conversation routing, capability changes, CLI-default isolation and
 the remaining Electron UI qualification.
 
-Automatic titles when the launch main is Kimi use an explicit,
-announced title-only route from the desktop's native Luna request to Kimi. For the
-captured contract, the adapter relocates code-mode tools intact and moves the
-complete title schema to final-answer instructions; the desktop still validates
-the generated title and description. Different models, source markers, schemas
-or tool inventories fail explicitly. App-backed title lookups remain unqualified.
-See the [#52 current contract and live qualification](research/desktop-shared-title-generation.md).
-The observed `gpt-6-luna` selection has a separate verified inventory: four
-`functions` tools, `clock.sleep`, and six `collaboration` tools. The original
-`gpt-5.6-luna` inventory remains three `functions` tools. Both inventories retain
-their complete definitions; they are not interchangeable. The bundled-engine
-replay verifies both. The [#35 correction](releases/desktop-prerelease-routing-2026-09-25.md)
-records the newer model's live failure and the remaining live qualification work.
-The [#33 evidence](research/desktop-title-generation.md) concerns an older client
-and isolated profile; it is not the current shared-profile qualification.
+The development naming route recognizes the captured `gpt-5.6-luna` and
+`gpt-6-luna` title requests by both source markers, exact title schema and tool
+inventory. It sends those requests to `nvidia/Nemotron-3_5-Lightning` as tool-free
+naming, retaining the prompt and structured-output schema. Live qualification found
+that Lightning rejects namespace tools, `include`, `reasoning` and `prompt_cache_key`.
+The naming route omits those fields and uses provider-default reasoning; the
+launcher announces this policy. Main, Guardian, native
+catalog descriptors and CLI title routing remain unchanged. There is no naming
+picker, configurable fallback, or automatic substitution.
+
+The naming model must appear in the project's launch-time catalog and have
+compatible dedicated provider metadata. If unavailable, naming fails explicitly
+while main conversations remain usable. Changed title contracts and upstream
+errors are surfaced; provisional first-message titles are not generated-title
+successes. The desktop still validates and persists titles under its existing
+rules, including manual-title protection. Client cancellation propagates upstream;
+this work does not increase the desktop's naming deadline.
+
+The [#111 qualification record](research/independent-desktop-naming-2026-10-09.md)
+records passing live provider/engine and operator-confirmed Mac UI checks, including
+persistence and manual-title preservation. The 28.2-second GLM naming result was
+close to the unchanged native 30-second deadline; broader reliability is unqualified.
+rc16 retains the older Kimi-only route.
+The [#52 report](research/desktop-shared-title-generation.md) records historical
+Kimi generation and persistence; it is not evidence of Lightning behavior.
+
 The recognized non-strict automatic-review workaround remains unchanged. Native
 auxiliary requests outside the captured title contract, compaction endpoints, web search, account-backed services, and
 Chat/Work/voice are not qualified. The public `--guardian-model` selects the reviewer. No `--direct`, evaluation-only
