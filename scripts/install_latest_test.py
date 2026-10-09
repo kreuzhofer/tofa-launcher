@@ -26,6 +26,9 @@ class LatestInstallerTests(unittest.TestCase):
         (self.install / 'bin').mkdir()
         (self.install / 'bin/tofa').write_text('original executable')
         (self.install / 'unrelated').write_text('preserve me')
+        self.config = self.root / 'config/tofa'
+        self.config.mkdir(parents=True)
+        (self.config / 'config.yml').write_bytes(b'version: 1\nproject_id: synthetic-project\nmodel: synthetic-model\n')
         self.before = self.snapshot()
         shim = self.tools / 'curl'
         shim.write_text('#!' + sys.executable + '\n' + '''
@@ -65,8 +68,9 @@ else:
         self.env.pop('TOFA_RELEASE_BASE_URL', None)
 
     def snapshot(self):
-        return {str(p.relative_to(self.install)): p.read_bytes()
-                for p in self.install.rglob('*') if p.is_file()}
+        return {str(p.relative_to(self.root)): p.read_bytes()
+                for directory in (self.install, self.config)
+                for p in directory.rglob('*') if p.is_file()}
 
     def run_installer(self, *args, **env):
         return subprocess.run(['sh', str(ROOT/'scripts/install.sh'), '--no-modify-path', *args],

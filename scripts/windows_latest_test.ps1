@@ -49,6 +49,10 @@ try{
  [IO.File]::WriteAllText($Bin,'old fixture binary')
  $Sentinel=Join-Path $env:TOFA_INSTALL_DIR 'unrelated.txt'
  [IO.File]::WriteAllText($Sentinel,'preserve me')
+ $Config=Join-Path $env:LOCALAPPDATA 'tofa/config.yml'
+ New-Item -ItemType Directory -Path (Split-Path $Config) -Force | Out-Null
+ [IO.File]::WriteAllText($Config,"version: 1`nproject_id: synthetic-project`nmodel: synthetic-model`n")
+ $ConfigBefore=[Convert]::ToBase64String([IO.File]::ReadAllBytes($Config))
  foreach($Mode in @('prerelease','draft','missing','wrong-type','string-flag','unavailable','download-failure','checksum-mismatch')){
   $global:TofaLatestMode=$Mode; $global:TofaLatestCalls=0; $global:TofaLatestDownloads=0; $Rejected=$false
   try{& "$PSScriptRoot/install.ps1" -NoModifyPath}catch{$Rejected=$true}
@@ -56,6 +60,7 @@ try{
   if($Mode -notin @('download-failure','checksum-mismatch')){Assert ($global:TofaLatestDownloads -eq 0) 'Invalid metadata reached asset download'}
   Assert ([IO.File]::ReadAllText($Bin) -eq 'old fixture binary') "Failed latest install changed binary: $Mode"
   Assert ([IO.File]::ReadAllText($Sentinel) -eq 'preserve me') 'Unrelated state changed'
+  Assert ([Convert]::ToBase64String([IO.File]::ReadAllBytes($Config)) -eq $ConfigBefore) "Failed latest install changed settings: $Mode"
  }
  $global:TofaLatestMode='ok'
  foreach($Tag in @('v1.2.3-rc.1','v01.2.3','v1.2','../escape',"v1.2.3`nv2.3.4")){
@@ -64,6 +69,7 @@ try{
   Assert $Rejected "Invalid latest tag accepted: $Tag"
   Assert ($global:TofaLatestDownloads -eq 0) 'Invalid tag reached asset download'
   Assert ([IO.File]::ReadAllText($Bin) -eq 'old fixture binary') 'Invalid tag changed installation'
+  Assert ([Convert]::ToBase64String([IO.File]::ReadAllBytes($Config)) -eq $ConfigBefore) 'Invalid tag changed settings'
  }
  $global:TofaLatestTag='v1.2.3'; $global:TofaLatestCalls=0
  & "$PSScriptRoot/install.ps1" -NoModifyPath
