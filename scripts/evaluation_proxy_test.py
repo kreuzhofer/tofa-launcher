@@ -12,13 +12,65 @@ import unittest
 import urllib.error
 import urllib.request
 
-from evaluation_proxy import EvaluationProxy, BODY_LIMIT
+from evaluation_proxy import EvaluationProxy, BODY_LIMIT, initial_event_hint
 
 
 ASSESSMENT = {'required': ['outcome'], 'properties': {'outcome': {'type': 'string', 'enum': ['allow', 'deny']}}}
 
 
 class ProxyTests(unittest.TestCase):
+    def test_event_type_hints_are_fixed_labels_not_captured_payloads(self):
+        for prefix, expected in (
+            (b'event: response.created\r\ndata: {"private":"SECRET"}', 'response.created'),
+            (b'data: {"type":"response.created","private":"SECRET"', 'response.created'),
+            (b'data: {"type":"PRIVATE_SECRET"}', 'unrecognized'),
+            (b'event: PRIVATE_SECRET\n', 'unrecognized'),
+            (b'data: {"response":{"type":"response.created"}}', None),
+            (b'data: {"type":"response.cre', None),
+        ):
+            with self.subTest(expected=expected):
+                self.assertEqual(initial_event_hint(prefix), expected)
+
+    def test_stream_diagnostics_do_not_export_unknown_headers_or_events(self):
+        class Upstream(http.server.BaseHTTPRequestHandler):
+            def log_message(self, *unused): pass
+            def do_POST(self):
+                self.rfile.read(int(self.headers['Content-Length']))
+                self.send_response(200)
+                self.send_header('Content-Type', 'PRIVATE_HEADER')
+                self.send_header('Content-Encoding', 'PRIVATE_ENCODING')
+                self.end_headers()
+                self.wfile.write(b'data: {"type":"PRIVATE_EVENT","delta":"PRIVATE_CONTENT"}\r\n\r\n')
+        server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), Upstream)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        try:
+            with tempfile.TemporaryDirectory() as directory:
+                report = Path(directory) / 'report.json'
+                with EvaluationProxy('http://127.0.0.1:' + str(server.server_port), 'fixture-token',
+                                     report, None, 'coding', 5) as proxy:
+                    request = urllib.request.Request(proxy.url + '/responses',
+                        data=b'{"model":"moonshotai/Kimi-K3","stream":true,"input":[]}',
+                        headers={'Authorization': 'Bearer fixture-token'})
+                    with urllib.request.build_opener(urllib.request.ProxyHandler({})).open(request) as response:
+                        response.read()
+                observed = json.loads(report.read_text())[0]
+                diagnostics = observed['stream_diagnostics']
+                self.assertEqual(diagnostics['content_type'], 'other')
+                self.assertEqual(diagnostics['content_encoding'], 'other')
+                self.assertEqual(diagnostics['first_event_type_hint'], 'unrecognized')
+                self.assertEqual(diagnostics['last_event_type'], 'unrecognized')
+                self.assertEqual(diagnostics['cr_bytes'], 2)
+                self.assertEqual(diagnostics['lf_bytes'], 2)
+                self.assertEqual(diagnostics['lines'], 2)
+                self.assertEqual(diagnostics['blank_lines'], 1)
+                self.assertEqual(diagnostics['parsed_json_lines'], 1)
+                self.assertEqual(observed['failure'], 'response_incomplete')
+                self.assertNotIn('PRIVATE_', report.read_text())
+                self.assertNotIn('fixture-token', report.read_text())
+                self.assertLess(len(report.read_bytes()), 4000)
+        finally:
+            server.shutdown(); server.server_close()
+
     def test_approval_proposal_executes_a_benign_marker_in_the_native_shell(self):
         with tempfile.TemporaryDirectory() as directory:
             report = Path(directory) / 'observations.json'
@@ -302,9 +354,11 @@ class ProxyTests(unittest.TestCase):
             def log_message(self, *unused): pass
             def do_POST(self):
                 self.rfile.read(int(self.headers['Content-Length']))
-                self.send_response(200); self.end_headers()
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/event-stream; charset=utf-8')
+                self.end_headers()
                 line = ('data: ' + json.dumps({'type': 'response.output_text.delta',
-                                              'delta': 'x' * 263000}) + '\n\n').encode()
+                                              'delta': 'PRIVATE_PAYLOAD' + 'x' * 263000}) + '\n\n').encode()
                 if multiline: line = (b':' + b'x' * 150000 + b'\n') * 2 + b'\n'
                 self.wfile.write(line)
                 self.wfile.write(b'data: {"type":"response.completed"}\n\n')
@@ -326,6 +380,15 @@ class ProxyTests(unittest.TestCase):
                 self.assertEqual(observed['failure'], 'event_body_limit')
                 self.assertFalse(observed['completed'])
                 self.assertEqual(observed['text_deltas'], 0)
+                diagnostics = observed['stream_diagnostics']
+                self.assertEqual(diagnostics['content_type'], 'text/event-stream')
+                self.assertGreater(diagnostics['response_bytes'], 256 * 1024)
+                self.assertGreater(diagnostics['event_bytes_at_stop'] + diagnostics['pending_line_bytes_at_stop'], 256 * 1024)
+                self.assertEqual(diagnostics['cr_bytes'], 0)
+                self.assertEqual(diagnostics['parsed_json_lines'], 0)
+                self.assertEqual(diagnostics['first_event_type_hint'], None if multiline else 'response.output_text.delta')
+                self.assertNotIn('PRIVATE_PAYLOAD', report.read_text())
+                self.assertNotIn('fixture-token', report.read_text())
         finally:
             server.shutdown(); server.server_close()
 

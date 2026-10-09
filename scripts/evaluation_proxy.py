@@ -9,6 +9,7 @@ import http.server
 import json
 import os
 from pathlib import Path
+import re
 import socket
 import select
 import threading
@@ -23,6 +24,28 @@ BODY_LIMIT = 1024 * 1024
 OUTPUT_LIMIT = 4096
 MARKER = 'tofa-evaluation-benign-marker'
 MARKER_COMMAND = ('Write-Output ' if os.name == 'nt' else 'printf ') + MARKER
+
+# Only fixed protocol labels may enter diagnostic reports. Never retain arbitrary
+# event/header values or the bounded prefix used to identify an initial event.
+EVENT_TYPES = frozenset(('response.created', 'response.in_progress',
+    'response.output_item.added', 'response.output_item.done',
+    'response.content_part.added', 'response.content_part.done',
+    'response.output_text.delta', 'response.output_text.done',
+    'response.function_call_arguments.delta', 'response.function_call_arguments.done',
+    'response.reasoning_summary_text.delta', 'response.reasoning_text.delta',
+    'response.completed', 'response.failed', 'response.incomplete', 'error'))
+
+
+def event_type_label(value):
+    return value if isinstance(value, str) and value in EVENT_TYPES else 'unrecognized'
+
+
+def initial_event_hint(prefix):
+    # A hint only: no oversized JSON parsing, and no claim that framing is valid.
+    match = re.search(rb'(?:^|[\r\n])event: *([A-Za-z0-9._-]{1,80})[\r\n]', prefix)
+    if not match:
+        match = re.search(rb'(?:^|[\r\n])data: ?\{\s*"type"\s*:\s*"([^"\r\n]{1,80})"', prefix)
+    return event_type_label(match[1].decode('ascii', errors='replace')) if match else None
 
 
 def fixture_response(item, model=MODEL, usage=None):
@@ -162,6 +185,14 @@ class EvaluationProxy:
                           'headers_ms': None, 'first_delta_ms': None, 'completed_ms': None,
                           'decision': None, 'started_ms': round((time.monotonic() - owner.started) * 1000, 3)}
                 index = owner.append(record)
+                diagnostics = {'request_bytes': len(encoded), 'response_bytes': 0,
+                    'content_type': None, 'content_encoding': None,
+                    'cr_bytes': 0, 'lf_bytes': 0, 'lines': 0, 'blank_lines': 0,
+                    'parsed_json_lines': 0, 'first_event_type_hint': None,
+                    'last_event_type': None, 'event_bytes_at_stop': 0,
+                    'pending_line_bytes_at_stop': 0}
+                record['stream_diagnostics'] = diagnostics
+                prefix, pending, event_bytes = b'', b'', 0
                 start = time.perf_counter()
                 deadline = time.monotonic() + timeout
                 text = ''
@@ -193,6 +224,10 @@ class EvaluationProxy:
                     if adapter_socket is not None:
                         adapter_socket.settimeout(max(0.001, deadline - time.monotonic()))
                     response = connection.getresponse()
+                    content_type = response.getheader('Content-Type', '').split(';', 1)[0].strip().lower()
+                    encoding = response.getheader('Content-Encoding', '').strip().lower()
+                    diagnostics['content_type'] = content_type if content_type in ('text/event-stream', 'application/json', '') else 'other'
+                    diagnostics['content_encoding'] = encoding if encoding in ('', 'identity', 'gzip', 'deflate', 'br') else 'other'
                     record.update(status=response.status, headers_ms=round((time.perf_counter() - start) * 1000, 3))
                     self.send_response(response.status)
                     self.send_header('Content-Type', response.getheader('Content-Type', 'text/event-stream'))
@@ -209,20 +244,29 @@ class EvaluationProxy:
                         chunk = response.read1(65536)
                         if not chunk: break
                         total += len(chunk)
+                        diagnostics['response_bytes'] = total
+                        diagnostics['cr_bytes'] += chunk.count(b'\r')
+                        diagnostics['lf_bytes'] += chunk.count(b'\n')
+                        prefix += chunk[:1024 - len(prefix)]
+                        diagnostics['first_event_type_hint'] = initial_event_hint(prefix)
                         if total > 8 * 1024 * 1024:
                             record['failure'] = 'response_body_limit'; break
                         pending += chunk
                         while b'\n' in pending:
                             line, pending = pending.split(b'\n', 1)
+                            diagnostics['lines'] += 1
                             event_bytes += len(line) + 1
                             if event_bytes > 256 * 1024:
                                 record['failure'] = 'event_body_limit'; break
                             if not line.rstrip(b'\r'):
+                                diagnostics['blank_lines'] += 1
                                 event_bytes = 0
                             if not line.startswith(b'data: '): continue
                             try: event = json.loads(line[6:])
                             except (ValueError, UnicodeDecodeError): continue
+                            diagnostics['parsed_json_lines'] += 1
                             kind = event.get('type') if isinstance(event, dict) else None
+                            diagnostics['last_event_type'] = event_type_label(kind)
                             delta = event.get('delta') if isinstance(event, dict) else None
                             if kind in ('response.output_text.delta', 'response.function_call_arguments.delta') and isinstance(delta, str) and delta:
                                 field = 'text_deltas' if kind == 'response.output_text.delta' else 'tool_deltas'
@@ -278,6 +322,8 @@ class EvaluationProxy:
                         record['failure'] = 'deadline_incomplete' if isinstance(error, (TimeoutError, socket.timeout)) else 'transport_failure'
                         record['transport_error'] = True
                 finally:
+                    diagnostics['event_bytes_at_stop'] = event_bytes
+                    diagnostics['pending_line_bytes_at_stop'] = len(pending)
                     finished.set()
                     watcher.join(timeout=1)
                     connection.close()

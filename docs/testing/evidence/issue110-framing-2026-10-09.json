@@ -1,0 +1,43 @@
+{
+  "actual_paid_inference": false,
+  "results": [
+    {
+      "case": "lf_two_bounded_events",
+      "total_fixture_bytes": 300229,
+      "max_fixture_event_bytes": 150073,
+      "completed": true,
+      "failure": null,
+      "text_deltas": 0,
+      "tool_deltas": 0
+    },
+    {
+      "case": "crlf_two_bounded_events",
+      "total_fixture_bytes": 300235,
+      "max_fixture_event_bytes": 150075,
+      "completed": true,
+      "failure": null,
+      "text_deltas": 0,
+      "tool_deltas": 0
+    },
+    {
+      "case": "cr_two_bounded_events",
+      "total_fixture_bytes": 300229,
+      "max_fixture_event_bytes": 150073,
+      "completed": false,
+      "failure": "event_body_limit",
+      "text_deltas": 0,
+      "tool_deltas": 0
+    },
+    {
+      "case": "lf_one_oversized_event",
+      "total_fixture_bytes": 263156,
+      "max_fixture_event_bytes": 263073,
+      "completed": false,
+      "failure": "event_body_limit",
+      "text_deltas": 0,
+      "tool_deltas": 0
+    }
+  ],
+  "probe_exit_code": 1,
+  "interpretation": "Known CR-only framing defect; not proof of the original live failure cause."
+}
