@@ -1,0 +1,4547 @@
+{
+  "schema_version": 1,
+  "candidate": {
+    "tag": "v0.1.0-rc.17",
+    "commit": "b293f1e0d49d53ca410b786ac28cb055f5ce5e20",
+    "download_boundary": "host-downloaded transfer",
+    "binary_sha256": "5bc9e61ba0cbf41148b84171ffa1d23205a2d430d6b1aee2fe11fab4b182317f",
+    "scripts_sha256": {
+      "install.sh": "c7557fb2073a8c6ccdb8ab2cd4991b9199d56140d5257496f891579ef9edf8a8",
+      "uninstall.sh": "692fd1469d5d03d9fb1bbefbb829cb0b4c3bb2437be67feb87d2ec4745d00089"
+    }
+  },
+  "host": {
+    "os": "Darwin",
+    "arch": "arm64",
+    "release": "26.7"
+  },
+  "operator": "agent",
+  "client": {
+    "version": "codex-cli 0.162.0"
+  },
+  "backend": "keyring",
+  "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+  "guardian_model": "zai-org/GLM-5.3-Flash",
+  "started_utc": "2026-10-09T11:33:12Z",
+  "stages": [
+    {
+      "name": "preflight",
+      "status": "passed"
+    },
+    {
+      "name": "recovery",
+      "status": "passed"
+    },
+    {
+      "name": "download",
+      "status": "passed"
+    },
+    {
+      "name": "install",
+      "status": "passed"
+    },
+    {
+      "name": "login",
+      "status": "passed"
+    },
+    {
+      "name": "fresh_terminal",
+      "status": "passed"
+    },
+    {
+      "name": "live",
+      "status": "passed"
+    },
+    {
+      "name": "uninstall",
+      "status": "passed"
+    },
+    {
+      "name": "reinstall",
+      "status": "passed"
+    },
+    {
+      "name": "saved_login_reuse",
+      "status": "passed"
+    },
+    {
+      "name": "purge",
+      "status": "passed"
+    }
+  ],
+  "preservation": {
+    "baseline_recorded": true,
+    "codex_config": true,
+    "codex_auth": true,
+    "unrelated_config": true,
+    "unrelated_installation": true,
+    "shell_settings": true
+  },
+  "cleanup": {
+    "scratch_removed": true,
+    "binary_removed": true,
+    "ownership_removed": true,
+    "path_entries_removed": true,
+    "configuration_removed": true,
+    "file_credentials_removed": true,
+    "vault_credentials_removed": true
+  },
+  "outcome": "passed",
+  "existing_state": {
+    "installation": false,
+    "configuration": false,
+    "file_credentials": false,
+    "vault_references": false
+  },
+  "live": {
+    "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+    "guardian_model": "zai-org/GLM-5.3-Flash",
+    "support_status": "Experimental",
+    "request_limit": 12,
+    "output_tokens_per_request": 4096,
+    "coding_turn_seconds": 180,
+    "guardian_turn_seconds": 120,
+    "approvals": [
+      {
+        "case": "allow",
+        "model": "zai-org/GLM-5.3-Flash",
+        "main_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+        "guardian_assessment_ms": 3072.721,
+        "expected_decision": "allow",
+        "decisions": [
+          "allow"
+        ],
+        "command_executed": true,
+        "elapsed_ms": 4821.787,
+        "exit_code": 0,
+        "timed_out": false,
+        "scratch_settings_preserved": true,
+        "requests": [
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          },
+          {
+            "kind": "automatic_review",
+            "status": 200,
+            "input_shape": {
+              "count": 4,
+              "items": [
+                {
+                  "type": "message",
+                  "role": "developer",
+                  "id": "string",
+                  "status": "missing",
+                  "call_id": "missing",
+                  "arguments": "missing",
+                  "output": "missing",
+                  "summary": "missing",
+                  "content_shape": "array",
+                  "content_count": 1,
+                  "content": [
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    }
+                  ]
+                },
+                {
+                  "type": "message",
+                  "role": "developer",
+                  "id": "string",
+                  "status": "missing",
+                  "call_id": "missing",
+                  "arguments": "missing",
+                  "output": "missing",
+                  "summary": "missing",
+                  "content_shape": "array",
+                  "content_count": 1,
+                  "content": [
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    }
+                  ]
+                },
+                {
+                  "type": "message",
+                  "role": "user",
+                  "id": "string",
+                  "status": "missing",
+                  "call_id": "missing",
+                  "arguments": "missing",
+                  "output": "missing",
+                  "summary": "missing",
+                  "content_shape": "array",
+                  "content_count": 1,
+                  "content": [
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    }
+                  ]
+                },
+                {
+                  "type": "message",
+                  "role": "user",
+                  "id": "string",
+                  "status": "missing",
+                  "call_id": "missing",
+                  "arguments": "missing",
+                  "output": "missing",
+                  "summary": "missing",
+                  "content_shape": "array",
+                  "content_count": 17,
+                  "content": [
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    }
+                  ]
+                }
+              ]
+            },
+            "reasoning_effort": "none",
+            "model": "zai-org/GLM-5.3-Flash",
+            "role": "guardian",
+            "paid_inference": true,
+            "request_id": 9,
+            "tool_results": 0,
+            "completed": true,
+            "text_deltas": 1,
+            "tool_deltas": 0,
+            "headers_ms": 576.977,
+            "first_delta_ms": 3066.782,
+            "completed_ms": 3071.794,
+            "decision": "allow",
+            "started_ms": 97.102,
+            "stream_diagnostics": {
+              "request_bytes": 27445,
+              "response_bytes": 26894,
+              "content_type": "text/event-stream",
+              "content_encoding": "",
+              "cr_bytes": 0,
+              "lf_bytes": 285,
+              "lines": 285,
+              "blank_lines": 95,
+              "parsed_json_lines": 95,
+              "first_event_type_hint": "response.created",
+              "last_event_type": "response.completed",
+              "event_bytes_at_stop": 0,
+              "pending_line_bytes_at_stop": 0,
+              "large_response_envelopes": 0,
+              "ordinary_event_limit_bytes": 262144,
+              "response_envelope_limit_bytes": 1310720
+            },
+            "stage": "client_write",
+            "usage": {
+              "input_tokens": 5050,
+              "output_tokens": 178
+            },
+            "review_tool_calls": 0,
+            "assessment_source": "completed_output",
+            "ended_ms": 3169.823
+          },
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          }
+        ],
+        "metadata_warning": false,
+        "turn_completed": true,
+        "client_error": false,
+        "output_limit": false,
+        "harness_defect": false,
+        "failures": [],
+        "passed": true
+      },
+      {
+        "case": "deny",
+        "model": "zai-org/GLM-5.3-Flash",
+        "main_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+        "guardian_assessment_ms": 3701.172,
+        "expected_decision": "deny",
+        "decisions": [
+          "deny"
+        ],
+        "command_executed": false,
+        "elapsed_ms": 5365.98,
+        "exit_code": 0,
+        "timed_out": false,
+        "scratch_settings_preserved": true,
+        "requests": [
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          },
+          {
+            "kind": "automatic_review",
+            "status": 200,
+            "input_shape": {
+              "count": 4,
+              "items": [
+                {
+                  "type": "message",
+                  "role": "developer",
+                  "id": "string",
+                  "status": "missing",
+                  "call_id": "missing",
+                  "arguments": "missing",
+                  "output": "missing",
+                  "summary": "missing",
+                  "content_shape": "array",
+                  "content_count": 1,
+                  "content": [
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    }
+                  ]
+                },
+                {
+                  "type": "message",
+                  "role": "developer",
+                  "id": "string",
+                  "status": "missing",
+                  "call_id": "missing",
+                  "arguments": "missing",
+                  "output": "missing",
+                  "summary": "missing",
+                  "content_shape": "array",
+                  "content_count": 1,
+                  "content": [
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    }
+                  ]
+                },
+                {
+                  "type": "message",
+                  "role": "user",
+                  "id": "string",
+                  "status": "missing",
+                  "call_id": "missing",
+                  "arguments": "missing",
+                  "output": "missing",
+                  "summary": "missing",
+                  "content_shape": "array",
+                  "content_count": 1,
+                  "content": [
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    }
+                  ]
+                },
+                {
+                  "type": "message",
+                  "role": "user",
+                  "id": "string",
+                  "status": "missing",
+                  "call_id": "missing",
+                  "arguments": "missing",
+                  "output": "missing",
+                  "summary": "missing",
+                  "content_shape": "array",
+                  "content_count": 17,
+                  "content": [
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    }
+                  ]
+                }
+              ]
+            },
+            "reasoning_effort": "none",
+            "model": "zai-org/GLM-5.3-Flash",
+            "role": "guardian",
+            "paid_inference": true,
+            "request_id": 10,
+            "tool_results": 0,
+            "completed": true,
+            "text_deltas": 17,
+            "tool_deltas": 0,
+            "headers_ms": 593.351,
+            "first_delta_ms": 3255.05,
+            "completed_ms": 3697.074,
+            "decision": "deny",
+            "started_ms": 99.627,
+            "stream_diagnostics": {
+              "request_bytes": 27633,
+              "response_bytes": 36324,
+              "content_type": "text/event-stream",
+              "content_encoding": "",
+              "cr_bytes": 0,
+              "lf_bytes": 393,
+              "lines": 393,
+              "blank_lines": 131,
+              "parsed_json_lines": 131,
+              "first_event_type_hint": "response.created",
+              "last_event_type": "response.completed",
+              "event_bytes_at_stop": 0,
+              "pending_line_bytes_at_stop": 0,
+              "large_response_envelopes": 0,
+              "ordinary_event_limit_bytes": 262144,
+              "response_envelope_limit_bytes": 1310720
+            },
+            "stage": "client_write",
+            "usage": {
+              "input_tokens": 5085,
+              "output_tokens": 264
+            },
+            "review_tool_calls": 0,
+            "assessment_source": "completed_output",
+            "ended_ms": 3800.799
+          },
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          }
+        ],
+        "metadata_warning": false,
+        "turn_completed": true,
+        "client_error": false,
+        "output_limit": false,
+        "harness_defect": false,
+        "failures": [],
+        "passed": true
+      }
+    ],
+    "passed": true,
+    "coding": {
+      "turns": [
+        {
+          "exit_code": 0,
+          "tools_succeeded": 3,
+          "turn_completed": true,
+          "client_error": false,
+          "metadata_warning": false,
+          "timed_out": false,
+          "reasoning_items": 0,
+          "answer_items": 4,
+          "reasoning_output_tokens": 127,
+          "elapsed_ms": 10340.015,
+          "file_checks": {
+            "summary_status": "object",
+            "unexpected_field_count": 0,
+            "expected_fields_match": {
+              "count": true,
+              "total": true,
+              "max": true
+            },
+            "input_preserved": true
+          },
+          "files_correct": true,
+          "streams": [
+            {
+              "kind": "task",
+              "status": 200,
+              "input_shape": {
+                "count": 4,
+                "items": [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 2,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      },
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 1,
+              "tool_results": 0,
+              "completed": true,
+              "text_deltas": 3,
+              "tool_deltas": 5,
+              "headers_ms": 783.305,
+              "first_delta_ms": 1192.501,
+              "completed_ms": 1501.391,
+              "decision": null,
+              "started_ms": 91.099,
+              "stream_diagnostics": {
+                "request_bytes": 44465,
+                "response_bytes": 60064,
+                "content_type": "text/event-stream",
+                "content_encoding": "",
+                "cr_bytes": 0,
+                "lf_bytes": 57,
+                "lines": 57,
+                "blank_lines": 19,
+                "parsed_json_lines": 19,
+                "first_event_type_hint": "response.created",
+                "last_event_type": "response.completed",
+                "event_bytes_at_stop": 0,
+                "pending_line_bytes_at_stop": 0,
+                "large_response_envelopes": 0,
+                "ordinary_event_limit_bytes": 262144,
+                "response_envelope_limit_bytes": 1310720
+              },
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 15234,
+                "output_tokens": 126
+              },
+              "ended_ms": 1593.615
+            },
+            {
+              "kind": "task",
+              "status": 200,
+              "input_shape": {
+                "count": 7,
+                "items": [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 2,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      },
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  }
+                ]
+              },
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 2,
+              "tool_results": 1,
+              "completed": true,
+              "text_deltas": 8,
+              "tool_deltas": 6,
+              "headers_ms": 694.448,
+              "first_delta_ms": 3686.725,
+              "completed_ms": 4032.668,
+              "decision": null,
+              "started_ms": 1706.391,
+              "stream_diagnostics": {
+                "request_bytes": 45120,
+                "response_bytes": 72591,
+                "content_type": "text/event-stream",
+                "content_encoding": "",
+                "cr_bytes": 0,
+                "lf_bytes": 210,
+                "lines": 210,
+                "blank_lines": 70,
+                "parsed_json_lines": 70,
+                "first_event_type_hint": "response.created",
+                "last_event_type": "response.completed",
+                "event_bytes_at_stop": 0,
+                "pending_line_bytes_at_stop": 0,
+                "large_response_envelopes": 0,
+                "ordinary_event_limit_bytes": 262144,
+                "response_envelope_limit_bytes": 1310720
+              },
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 15416,
+                "output_tokens": 284
+              },
+              "ended_ms": 5740.13
+            },
+            {
+              "kind": "task",
+              "status": 200,
+              "input_shape": {
+                "count": 11,
+                "items": [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 2,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      },
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "reasoning",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "array",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "reasoning_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  }
+                ]
+              },
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 3,
+              "tool_results": 2,
+              "completed": true,
+              "text_deltas": 3,
+              "tool_deltas": 5,
+              "headers_ms": 686.748,
+              "first_delta_ms": 797.595,
+              "completed_ms": 1445.816,
+              "decision": null,
+              "started_ms": 5830.072,
+              "stream_diagnostics": {
+                "request_bytes": 46494,
+                "response_bytes": 61830,
+                "content_type": "text/event-stream",
+                "content_encoding": "",
+                "cr_bytes": 0,
+                "lf_bytes": 57,
+                "lines": 57,
+                "blank_lines": 19,
+                "parsed_json_lines": 19,
+                "first_event_type_hint": "response.created",
+                "last_event_type": "response.completed",
+                "event_bytes_at_stop": 0,
+                "pending_line_bytes_at_stop": 0,
+                "large_response_envelopes": 0,
+                "ordinary_event_limit_bytes": 262144,
+                "response_envelope_limit_bytes": 1310720
+              },
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 15763,
+                "output_tokens": 248
+              },
+              "ended_ms": 7277.457
+            },
+            {
+              "kind": "task",
+              "status": 200,
+              "input_shape": {
+                "count": 14,
+                "items": [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 2,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      },
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "reasoning",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "array",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "reasoning_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  }
+                ]
+              },
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 4,
+              "tool_results": 3,
+              "completed": true,
+              "text_deltas": 38,
+              "tool_deltas": 0,
+              "headers_ms": 675.311,
+              "first_delta_ms": 800.004,
+              "completed_ms": 1188.007,
+              "decision": null,
+              "started_ms": 7442.264,
+              "stream_diagnostics": {
+                "request_bytes": 47608,
+                "response_bytes": 69741,
+                "content_type": "text/event-stream",
+                "content_encoding": "",
+                "cr_bytes": 0,
+                "lf_bytes": 186,
+                "lines": 186,
+                "blank_lines": 62,
+                "parsed_json_lines": 62,
+                "first_event_type_hint": "response.created",
+                "last_event_type": "response.completed",
+                "event_bytes_at_stop": 0,
+                "pending_line_bytes_at_stop": 0,
+                "large_response_envelopes": 0,
+                "ordinary_event_limit_bytes": 262144,
+                "response_envelope_limit_bytes": 1310720
+              },
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 16079,
+                "output_tokens": 147
+              },
+              "ended_ms": 8631.617
+            }
+          ],
+          "streaming_observed": true,
+          "passed": true
+        },
+        {
+          "exit_code": 0,
+          "tools_succeeded": 3,
+          "turn_completed": true,
+          "client_error": false,
+          "metadata_warning": false,
+          "timed_out": false,
+          "reasoning_items": 0,
+          "answer_items": 3,
+          "reasoning_output_tokens": 248,
+          "elapsed_ms": 7289.615,
+          "file_checks": {
+            "summary_status": "object",
+            "unexpected_field_count": 0,
+            "expected_fields_match": {
+              "count": true,
+              "total": true,
+              "max": true,
+              "min": true,
+              "average": true
+            },
+            "input_preserved": true
+          },
+          "files_correct": true,
+          "streams": [
+            {
+              "kind": "task",
+              "status": 200,
+              "input_shape": {
+                "count": 17,
+                "items": [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 2,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      },
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "reasoning",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "array",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "reasoning_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "reasoning",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "array",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "reasoning_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 5,
+              "tool_results": 3,
+              "completed": true,
+              "text_deltas": 10,
+              "tool_deltas": 5,
+              "headers_ms": 747.538,
+              "first_delta_ms": 1254.275,
+              "completed_ms": 1661.813,
+              "decision": null,
+              "started_ms": 59.676,
+              "stream_diagnostics": {
+                "request_bytes": 48772,
+                "response_bytes": 66449,
+                "content_type": "text/event-stream",
+                "content_encoding": "",
+                "cr_bytes": 0,
+                "lf_bytes": 138,
+                "lines": 138,
+                "blank_lines": 46,
+                "parsed_json_lines": 46,
+                "first_event_type_hint": "response.created",
+                "last_event_type": "response.completed",
+                "event_bytes_at_stop": 0,
+                "pending_line_bytes_at_stop": 0,
+                "large_response_envelopes": 0,
+                "ordinary_event_limit_bytes": 262144,
+                "response_envelope_limit_bytes": 1310720
+              },
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 16291,
+                "output_tokens": 200
+              },
+              "ended_ms": 1722.347
+            },
+            {
+              "kind": "task",
+              "status": 200,
+              "input_shape": {
+                "count": 21,
+                "items": [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 2,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      },
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "reasoning",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "array",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "reasoning_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "reasoning",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "array",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "reasoning_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "reasoning",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "array",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "reasoning_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  }
+                ]
+              },
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 6,
+              "tool_results": 4,
+              "completed": true,
+              "text_deltas": 0,
+              "tool_deltas": 5,
+              "headers_ms": 700.364,
+              "first_delta_ms": 1033.069,
+              "completed_ms": 1513.455,
+              "decision": null,
+              "started_ms": 1812.447,
+              "stream_diagnostics": {
+                "request_bytes": 49766,
+                "response_bytes": 66335,
+                "content_type": "text/event-stream",
+                "content_encoding": "",
+                "cr_bytes": 0,
+                "lf_bytes": 126,
+                "lines": 126,
+                "blank_lines": 42,
+                "parsed_json_lines": 42,
+                "first_event_type_hint": "response.created",
+                "last_event_type": "response.completed",
+                "event_bytes_at_stop": 0,
+                "pending_line_bytes_at_stop": 0,
+                "large_response_envelopes": 0,
+                "ordinary_event_limit_bytes": 262144,
+                "response_envelope_limit_bytes": 1310720
+              },
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 16555,
+                "output_tokens": 265
+              },
+              "ended_ms": 3327.518
+            },
+            {
+              "kind": "task",
+              "status": 200,
+              "input_shape": {
+                "count": 24,
+                "items": [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 2,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      },
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "reasoning",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "array",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "reasoning_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "reasoning",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "array",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "reasoning_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "reasoning",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "array",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "reasoning_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "reasoning",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "array",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "reasoning_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  }
+                ]
+              },
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 7,
+              "tool_results": 5,
+              "completed": true,
+              "text_deltas": 4,
+              "tool_deltas": 5,
+              "headers_ms": 454.783,
+              "first_delta_ms": 565.535,
+              "completed_ms": 1194.496,
+              "decision": null,
+              "started_ms": 3413.96,
+              "stream_diagnostics": {
+                "request_bytes": 51050,
+                "response_bytes": 62639,
+                "content_type": "text/event-stream",
+                "content_encoding": "",
+                "cr_bytes": 0,
+                "lf_bytes": 60,
+                "lines": 60,
+                "blank_lines": 20,
+                "parsed_json_lines": 20,
+                "first_event_type_hint": "response.created",
+                "last_event_type": "response.completed",
+                "event_bytes_at_stop": 0,
+                "pending_line_bytes_at_stop": 0,
+                "large_response_envelopes": 0,
+                "ordinary_event_limit_bytes": 262144,
+                "response_envelope_limit_bytes": 1310720
+              },
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 16909,
+                "output_tokens": 288
+              },
+              "ended_ms": 4609.664
+            },
+            {
+              "kind": "task",
+              "status": 200,
+              "input_shape": {
+                "count": 27,
+                "items": [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 2,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      },
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "reasoning",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "array",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "reasoning_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "reasoning",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "array",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "reasoning_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "reasoning",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "array",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "reasoning_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "reasoning",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "array",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "reasoning_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  }
+                ]
+              },
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 8,
+              "tool_results": 6,
+              "completed": true,
+              "text_deltas": 37,
+              "tool_deltas": 0,
+              "headers_ms": 644.319,
+              "first_delta_ms": 746.311,
+              "completed_ms": 1113.159,
+              "decision": null,
+              "started_ms": 4762.651,
+              "stream_diagnostics": {
+                "request_bytes": 52337,
+                "response_bytes": 66137,
+                "content_type": "text/event-stream",
+                "content_encoding": "",
+                "cr_bytes": 0,
+                "lf_bytes": 135,
+                "lines": 135,
+                "blank_lines": 45,
+                "parsed_json_lines": 45,
+                "first_event_type_hint": "response.created",
+                "last_event_type": "response.completed",
+                "event_bytes_at_stop": 0,
+                "pending_line_bytes_at_stop": 0,
+                "large_response_envelopes": 0,
+                "ordinary_event_limit_bytes": 262144,
+                "response_envelope_limit_bytes": 1310720
+              },
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 17277,
+                "output_tokens": 140
+              },
+              "ended_ms": 5877.132
+            }
+          ],
+          "streaming_observed": true,
+          "passed": true
+        }
+      ],
+      "same_session": true,
+      "scratch_config_preserved": true,
+      "scratch_auth_absent": true,
+      "scratch_settings_preserved": true,
+      "harness_defect": false,
+      "passed": true
+    },
+    "used_requests": 10
+  },
+  "saved_login_reuse": {
+    "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+    "guardian_model": "zai-org/GLM-5.3-Flash",
+    "support_status": "Experimental",
+    "request_limit": 12,
+    "output_tokens_per_request": 4096,
+    "coding_turn_seconds": 180,
+    "guardian_turn_seconds": 120,
+    "approvals": [
+      {
+        "case": "allow",
+        "model": "zai-org/GLM-5.3-Flash",
+        "main_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+        "guardian_assessment_ms": 2350.958,
+        "expected_decision": "allow",
+        "decisions": [
+          "allow"
+        ],
+        "command_executed": true,
+        "elapsed_ms": 4204.925,
+        "exit_code": 0,
+        "timed_out": false,
+        "scratch_settings_preserved": true,
+        "requests": [
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          },
+          {
+            "kind": "automatic_review",
+            "status": 200,
+            "input_shape": {
+              "count": 4,
+              "items": [
+                {
+                  "type": "message",
+                  "role": "developer",
+                  "id": "string",
+                  "status": "missing",
+                  "call_id": "missing",
+                  "arguments": "missing",
+                  "output": "missing",
+                  "summary": "missing",
+                  "content_shape": "array",
+                  "content_count": 1,
+                  "content": [
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    }
+                  ]
+                },
+                {
+                  "type": "message",
+                  "role": "developer",
+                  "id": "string",
+                  "status": "missing",
+                  "call_id": "missing",
+                  "arguments": "missing",
+                  "output": "missing",
+                  "summary": "missing",
+                  "content_shape": "array",
+                  "content_count": 1,
+                  "content": [
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    }
+                  ]
+                },
+                {
+                  "type": "message",
+                  "role": "user",
+                  "id": "string",
+                  "status": "missing",
+                  "call_id": "missing",
+                  "arguments": "missing",
+                  "output": "missing",
+                  "summary": "missing",
+                  "content_shape": "array",
+                  "content_count": 1,
+                  "content": [
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    }
+                  ]
+                },
+                {
+                  "type": "message",
+                  "role": "user",
+                  "id": "string",
+                  "status": "missing",
+                  "call_id": "missing",
+                  "arguments": "missing",
+                  "output": "missing",
+                  "summary": "missing",
+                  "content_shape": "array",
+                  "content_count": 17,
+                  "content": [
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    }
+                  ]
+                }
+              ]
+            },
+            "reasoning_effort": "none",
+            "model": "zai-org/GLM-5.3-Flash",
+            "role": "guardian",
+            "paid_inference": true,
+            "request_id": 6,
+            "tool_results": 0,
+            "completed": true,
+            "text_deltas": 2,
+            "tool_deltas": 0,
+            "headers_ms": 648.561,
+            "first_delta_ms": 2335.308,
+            "completed_ms": 2350.102,
+            "decision": "allow",
+            "started_ms": 94.413,
+            "stream_diagnostics": {
+              "request_bytes": 27445,
+              "response_bytes": 21979,
+              "content_type": "text/event-stream",
+              "content_encoding": "",
+              "cr_bytes": 0,
+              "lf_bytes": 225,
+              "lines": 225,
+              "blank_lines": 75,
+              "parsed_json_lines": 75,
+              "first_event_type_hint": "response.created",
+              "last_event_type": "response.completed",
+              "event_bytes_at_stop": 0,
+              "pending_line_bytes_at_stop": 0,
+              "large_response_envelopes": 0,
+              "ordinary_event_limit_bytes": 262144,
+              "response_envelope_limit_bytes": 1310720
+            },
+            "stage": "client_write",
+            "usage": {
+              "input_tokens": 5045,
+              "output_tokens": 138
+            },
+            "review_tool_calls": 0,
+            "assessment_source": "completed_output",
+            "ended_ms": 2445.371
+          },
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          }
+        ],
+        "metadata_warning": false,
+        "turn_completed": true,
+        "client_error": false,
+        "output_limit": false,
+        "harness_defect": false,
+        "failures": [],
+        "passed": true
+      },
+      {
+        "case": "deny",
+        "model": "zai-org/GLM-5.3-Flash",
+        "main_model": "deepseek-ai/DeepSeek-V4.1-Flash",
+        "guardian_assessment_ms": 4939.879,
+        "expected_decision": "deny",
+        "decisions": [
+          "deny"
+        ],
+        "command_executed": false,
+        "elapsed_ms": 6756.573,
+        "exit_code": 0,
+        "timed_out": false,
+        "scratch_settings_preserved": true,
+        "requests": [
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          },
+          {
+            "kind": "automatic_review",
+            "status": 200,
+            "input_shape": {
+              "count": 4,
+              "items": [
+                {
+                  "type": "message",
+                  "role": "developer",
+                  "id": "string",
+                  "status": "missing",
+                  "call_id": "missing",
+                  "arguments": "missing",
+                  "output": "missing",
+                  "summary": "missing",
+                  "content_shape": "array",
+                  "content_count": 1,
+                  "content": [
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    }
+                  ]
+                },
+                {
+                  "type": "message",
+                  "role": "developer",
+                  "id": "string",
+                  "status": "missing",
+                  "call_id": "missing",
+                  "arguments": "missing",
+                  "output": "missing",
+                  "summary": "missing",
+                  "content_shape": "array",
+                  "content_count": 1,
+                  "content": [
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    }
+                  ]
+                },
+                {
+                  "type": "message",
+                  "role": "user",
+                  "id": "string",
+                  "status": "missing",
+                  "call_id": "missing",
+                  "arguments": "missing",
+                  "output": "missing",
+                  "summary": "missing",
+                  "content_shape": "array",
+                  "content_count": 1,
+                  "content": [
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    }
+                  ]
+                },
+                {
+                  "type": "message",
+                  "role": "user",
+                  "id": "string",
+                  "status": "missing",
+                  "call_id": "missing",
+                  "arguments": "missing",
+                  "output": "missing",
+                  "summary": "missing",
+                  "content_shape": "array",
+                  "content_count": 17,
+                  "content": [
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    },
+                    {
+                      "type": "input_text",
+                      "annotations": "missing"
+                    }
+                  ]
+                }
+              ]
+            },
+            "reasoning_effort": "none",
+            "model": "zai-org/GLM-5.3-Flash",
+            "role": "guardian",
+            "paid_inference": true,
+            "request_id": 7,
+            "tool_results": 0,
+            "completed": true,
+            "text_deltas": 17,
+            "tool_deltas": 0,
+            "headers_ms": 609.122,
+            "first_delta_ms": 4587.228,
+            "completed_ms": 4938.85,
+            "decision": "deny",
+            "started_ms": 98.462,
+            "stream_diagnostics": {
+              "request_bytes": 27633,
+              "response_bytes": 50364,
+              "content_type": "text/event-stream",
+              "content_encoding": "",
+              "cr_bytes": 0,
+              "lf_bytes": 573,
+              "lines": 573,
+              "blank_lines": 191,
+              "parsed_json_lines": 191,
+              "first_event_type_hint": "response.created",
+              "last_event_type": "response.completed",
+              "event_bytes_at_stop": 0,
+              "pending_line_bytes_at_stop": 0,
+              "large_response_envelopes": 0,
+              "ordinary_event_limit_bytes": 262144,
+              "response_envelope_limit_bytes": 1310720
+            },
+            "stage": "client_write",
+            "usage": {
+              "input_tokens": 5075,
+              "output_tokens": 360
+            },
+            "review_tool_calls": 0,
+            "assessment_source": "completed_output",
+            "ended_ms": 5038.341
+          },
+          {
+            "kind": "synthetic_task",
+            "status": 200,
+            "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+            "role": "main",
+            "paid_inference": false,
+            "completed": false,
+            "text_deltas": 0,
+            "tool_deltas": 0,
+            "first_delta_ms": null,
+            "completed_ms": null
+          }
+        ],
+        "metadata_warning": false,
+        "turn_completed": true,
+        "client_error": false,
+        "output_limit": false,
+        "harness_defect": false,
+        "failures": [],
+        "passed": true
+      }
+    ],
+    "passed": true,
+    "coding": {
+      "turns": [
+        {
+          "exit_code": 0,
+          "tools_succeeded": 2,
+          "turn_completed": true,
+          "client_error": false,
+          "metadata_warning": false,
+          "timed_out": false,
+          "reasoning_items": 0,
+          "answer_items": 3,
+          "reasoning_output_tokens": 44,
+          "elapsed_ms": 6464.229,
+          "file_checks": {
+            "summary_status": "object",
+            "unexpected_field_count": 0,
+            "expected_fields_match": {
+              "count": true,
+              "total": true,
+              "max": true
+            },
+            "input_preserved": true
+          },
+          "files_correct": true,
+          "streams": [
+            {
+              "kind": "task",
+              "status": 200,
+              "input_shape": {
+                "count": 4,
+                "items": [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 2,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      },
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 1,
+              "tool_results": 0,
+              "completed": true,
+              "text_deltas": 7,
+              "tool_deltas": 5,
+              "headers_ms": 731.912,
+              "first_delta_ms": 1148.046,
+              "completed_ms": 1629.126,
+              "decision": null,
+              "started_ms": 86.425,
+              "stream_diagnostics": {
+                "request_bytes": 44465,
+                "response_bytes": 63242,
+                "content_type": "text/event-stream",
+                "content_encoding": "",
+                "cr_bytes": 0,
+                "lf_bytes": 96,
+                "lines": 96,
+                "blank_lines": 32,
+                "parsed_json_lines": 32,
+                "first_event_type_hint": "response.created",
+                "last_event_type": "response.completed",
+                "event_bytes_at_stop": 0,
+                "pending_line_bytes_at_stop": 0,
+                "large_response_envelopes": 0,
+                "ordinary_event_limit_bytes": 262144,
+                "response_envelope_limit_bytes": 1310720
+              },
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 15201,
+                "output_tokens": 146
+              },
+              "ended_ms": 1717.613
+            },
+            {
+              "kind": "task",
+              "status": 200,
+              "input_shape": {
+                "count": 8,
+                "items": [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 2,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      },
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "reasoning",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "array",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "reasoning_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  }
+                ]
+              },
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 2,
+              "tool_results": 1,
+              "completed": true,
+              "text_deltas": 8,
+              "tool_deltas": 5,
+              "headers_ms": 659.468,
+              "first_delta_ms": 805.004,
+              "completed_ms": 1725.315,
+              "decision": null,
+              "started_ms": 1832.555,
+              "stream_diagnostics": {
+                "request_bytes": 45490,
+                "response_bytes": 68299,
+                "content_type": "text/event-stream",
+                "content_encoding": "",
+                "cr_bytes": 0,
+                "lf_bytes": 120,
+                "lines": 120,
+                "blank_lines": 40,
+                "parsed_json_lines": 40,
+                "first_event_type_hint": "response.created",
+                "last_event_type": "response.completed",
+                "event_bytes_at_stop": 0,
+                "pending_line_bytes_at_stop": 0,
+                "large_response_envelopes": 0,
+                "ordinary_event_limit_bytes": 262144,
+                "response_envelope_limit_bytes": 1310720
+              },
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 15483,
+                "output_tokens": 394
+              },
+              "ended_ms": 3559.302
+            },
+            {
+              "kind": "task",
+              "status": 200,
+              "input_shape": {
+                "count": 12,
+                "items": [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 2,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      },
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "reasoning",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "array",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "reasoning_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "reasoning",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "array",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "reasoning_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  }
+                ]
+              },
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 3,
+              "tool_results": 2,
+              "completed": true,
+              "text_deltas": 38,
+              "tool_deltas": 0,
+              "headers_ms": 644.526,
+              "first_delta_ms": 1070.617,
+              "completed_ms": 1348.499,
+              "decision": null,
+              "started_ms": 3758.927,
+              "stream_diagnostics": {
+                "request_bytes": 47383,
+                "response_bytes": 65859,
+                "content_type": "text/event-stream",
+                "content_encoding": "",
+                "cr_bytes": 0,
+                "lf_bytes": 138,
+                "lines": 138,
+                "blank_lines": 46,
+                "parsed_json_lines": 46,
+                "first_event_type_hint": "response.created",
+                "last_event_type": "response.completed",
+                "event_bytes_at_stop": 0,
+                "pending_line_bytes_at_stop": 0,
+                "large_response_envelopes": 0,
+                "ordinary_event_limit_bytes": 262144,
+                "response_envelope_limit_bytes": 1310720
+              },
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 15992,
+                "output_tokens": 126
+              },
+              "ended_ms": 5108.451
+            }
+          ],
+          "streaming_observed": true,
+          "passed": true
+        },
+        {
+          "exit_code": 0,
+          "tools_succeeded": 1,
+          "turn_completed": true,
+          "client_error": false,
+          "metadata_warning": false,
+          "timed_out": false,
+          "reasoning_items": 0,
+          "answer_items": 2,
+          "reasoning_output_tokens": 105,
+          "elapsed_ms": 4465.397,
+          "file_checks": {
+            "summary_status": "object",
+            "unexpected_field_count": 0,
+            "expected_fields_match": {
+              "count": true,
+              "total": true,
+              "max": true,
+              "min": true,
+              "average": true
+            },
+            "input_preserved": true
+          },
+          "files_correct": true,
+          "streams": [
+            {
+              "kind": "task",
+              "status": 200,
+              "input_shape": {
+                "count": 14,
+                "items": [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 2,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      },
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "reasoning",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "array",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "reasoning_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "reasoning",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "array",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "reasoning_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 4,
+              "tool_results": 2,
+              "completed": true,
+              "text_deltas": 7,
+              "tool_deltas": 5,
+              "headers_ms": 786.894,
+              "first_delta_ms": 1250.491,
+              "completed_ms": 2244.615,
+              "decision": null,
+              "started_ms": 61.343,
+              "stream_diagnostics": {
+                "request_bytes": 48317,
+                "response_bytes": 71134,
+                "content_type": "text/event-stream",
+                "content_encoding": "",
+                "cr_bytes": 0,
+                "lf_bytes": 144,
+                "lines": 144,
+                "blank_lines": 48,
+                "parsed_json_lines": 48,
+                "first_event_type_hint": "response.created",
+                "last_event_type": "response.completed",
+                "event_bytes_at_stop": 0,
+                "pending_line_bytes_at_stop": 0,
+                "large_response_envelopes": 0,
+                "ordinary_event_limit_bytes": 262144,
+                "response_envelope_limit_bytes": 1310720
+              },
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 16183,
+                "output_tokens": 462
+              },
+              "ended_ms": 2306.987
+            },
+            {
+              "kind": "task",
+              "status": 200,
+              "input_shape": {
+                "count": 18,
+                "items": [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 2,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      },
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "reasoning",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "array",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "reasoning_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "reasoning",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "array",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "reasoning_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "user",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "input_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "reasoning",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "array",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "reasoning_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "message",
+                    "role": "assistant",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "missing",
+                    "arguments": "missing",
+                    "output": "missing",
+                    "summary": "missing",
+                    "content_shape": "array",
+                    "content_count": 1,
+                    "content": [
+                      {
+                        "type": "output_text",
+                        "annotations": "missing"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "function_call",
+                    "role": "other",
+                    "id": "missing",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "string",
+                    "output": "missing",
+                    "summary": "missing",
+                    "name": "exec_command",
+                    "content_shape": "missing"
+                  },
+                  {
+                    "type": "function_call_output",
+                    "role": "other",
+                    "id": "string",
+                    "status": "missing",
+                    "call_id": "string",
+                    "arguments": "missing",
+                    "output": "string",
+                    "summary": "missing",
+                    "content_shape": "missing"
+                  }
+                ]
+              },
+              "reasoning_effort": null,
+              "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+              "role": "main",
+              "paid_inference": true,
+              "request_id": 5,
+              "tool_results": 3,
+              "completed": true,
+              "text_deltas": 26,
+              "tool_deltas": 0,
+              "headers_ms": 780.259,
+              "first_delta_ms": 819.302,
+              "completed_ms": 1003.451,
+              "decision": null,
+              "started_ms": 2517.22,
+              "stream_diagnostics": {
+                "request_bytes": 50638,
+                "response_bytes": 63157,
+                "content_type": "text/event-stream",
+                "content_encoding": "",
+                "cr_bytes": 0,
+                "lf_bytes": 102,
+                "lines": 102,
+                "blank_lines": 34,
+                "parsed_json_lines": 34,
+                "first_event_type_hint": "response.created",
+                "last_event_type": "response.completed",
+                "event_bytes_at_stop": 0,
+                "pending_line_bytes_at_stop": 0,
+                "large_response_envelopes": 0,
+                "ordinary_event_limit_bytes": 262144,
+                "response_envelope_limit_bytes": 1310720
+              },
+              "stage": "client_write",
+              "usage": {
+                "input_tokens": 16813,
+                "output_tokens": 93
+              },
+              "ended_ms": 3521.719
+            }
+          ],
+          "streaming_observed": true,
+          "passed": true
+        }
+      ],
+      "same_session": true,
+      "scratch_config_preserved": true,
+      "scratch_auth_absent": true,
+      "scratch_settings_preserved": true,
+      "harness_defect": false,
+      "passed": true
+    },
+    "used_requests": 7
+  }
+}

@@ -317,9 +317,9 @@ the desktop picker offers all eligible available models, and each conversation
 keeps its own selected main across relaunches. The configured Guardian applies
 to every Token Factory main. Automatic titles use the fixed naming model
 `nvidia/Nemotron-3_5-Lightning`, independently of main and Guardian. Naming is
-tool-free with provider-default reasoning and the native title schema. Current
-implementation passed the pinned GLM/DeepSeek Mac UI checks in #111; this is not part
-of the published rc16 preview. An unavailable naming model produces an explicit
+tool-free with provider-default reasoning and the native title schema. This route is included in
+[rc17](docs/releases/v0.1.0-rc.17.md); the earlier rc16 preview retains its old naming
+behavior. The #111 development checks passed with GLM and DeepSeek. An unavailable naming model produces an explicit
 error without substituting another model or blocking main conversations. See
 [tested versions, lifecycle, and limitations](docs/codex-desktop.md).
 The [shared-history qualification](docs/releases/desktop-shared-history-final-2026-09-24.md)
