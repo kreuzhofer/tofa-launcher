@@ -63,7 +63,7 @@ expression = sys.argv[1].removeprefix('${{').removesuffix('}}').strip()
 expression = expression.replace('&&', ' and ').replace('||', ' or ')
 for event, ref, native, artifacts in itertools.product(
         ['push', 'pull_request', 'workflow_dispatch'],
-        ['refs/heads/main', 'refs/tags/v0.1.0-rc.1'],
+        ['refs/heads/main', 'refs/tags/v0.1.0-rc.1', 'refs/tags/v1.0.0'],
         ['success', 'failure', 'cancelled', 'skipped', ''],
         ['success', 'failure', 'cancelled', 'skipped', '']):
     context = dict(github=NS(event_name=event, ref=ref),
@@ -109,7 +109,7 @@ for event, ref, native, artifacts in itertools.product(
 		output := filepath.Join(t.TempDir(), "outputs")
 		cmd := exec.Command("bash", "-e", "-o", "pipefail", "-c", step.Run)
 		cmd.Dir = ".."
-		cmd.Env = append(os.Environ(), "GITHUB_REF=refs/tags/v1.0.0", "GITHUB_OUTPUT="+output)
+		cmd.Env = append(os.Environ(), "GITHUB_REF=refs/tags/v01.0.0", "GITHUB_OUTPUT="+output)
 		if out, err := cmd.CombinedOutput(); err == nil {
 			t.Fatalf("invalid version must fail the workflow step: %s", out)
 		}
