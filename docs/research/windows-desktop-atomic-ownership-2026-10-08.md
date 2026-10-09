@@ -1,5 +1,10 @@
 # Windows desktop atomic ownership — 2026-10-08
 
+**2026-10-09 update:** the planned experiment below completed with a negative
+ownership result. The maintainer retained the ordinary-desktop requirement;
+see the [decision, upstream inquiry and continuation criteria](#maintainer-decision-and-upstream-inquiry---2026-10-09).
+The original research and plan remain below as historical evidence.
+
 Research and test plan for [#102](https://github.com/kreuzhofer/tofa-launcher/issues/102),
 following the completed negative experiment in #85. **Retained target source is
 from Oct 5; it does not identify the Oct 7 measured binary's behavior.**
@@ -161,3 +166,55 @@ instead of adding retries, profile tricks, or a lock that ordinary starts ignore
 This research changed documentation only. Source fingerprints and relative
 Markdown links were checked locally; no runtime tests or VM operations were run
 for this note.
+
+## Maintainer decision and upstream inquiry - 2026-10-09
+
+The maintainer chose to retain the ordinary Windows desktop experience and
+pursue a supported upstream ownership contract. See
+[ADR 0004](../adr/0004-windows-desktop-awaits-supported-ownership.md).
+The [completed negative experiment](https://github.com/kreuzhofer/tofa-launcher/blob/e1cd869cf750042990666268caef6bdd350e74d1/docs/testing/windows-atomic-ownership-evidence-2026-10-08.md)
+is the starting evidence. #102 remains open for the upstream contract and its
+validation; #87 remains blocked. Do not repeat #85/#86 discovery/catalog work
+or implement the production route merely because local development now works.
+
+### Inquiry draft, not sent
+
+We are investigating a launcher integration with the ordinary Windows ARM64
+desktop that preserves native account/history, sandbox and approval enforcement.
+On package `OpenAI.Codex_26.930.7945.0_arm64__2p2nqsd0c76g0`, our bounded
+synthetic test observed the desktop connect to a precreated `codex-ipc` server
+before launcher admission, then reconnect after server replacement. We collected
+connection identity and queued byte counts, not message bodies; these results
+do not establish credential exposure or exploitability.
+
+Can the Windows desktop expose a supported acquisition and lifetime contract for
+the intended ordinary user/profile that also serializes ordinary native starts?
+Before any IPC traffic, can it either authenticate the exact owned server and
+user/session, or use an isolated endpoint that cannot join an unrelated router?
+The contract must cover pipe precreation, bind collision, replacement/reconnect,
+crash and update behavior, with observable refusal and release. Alternatively,
+can native IPC be disabled for an owned stdio-main-engine launch without breaking
+the desktop's supported behavior?
+
+Please identify the supported API or configuration, applicable desktop/engine
+versions, and intended user/session boundary. If neither route is supported,
+please state that limitation explicitly.
+
+### Mac-session continuation
+
+The Mac session coordinates the shared release under #103. It can use the draft
+above after the maintainer identifies and authorizes an upstream recipient or
+channel. No upstream vendor message has been sent; publishing this record to
+the project's own issue tracker is not vendor outreach.
+
+Record an upstream response or authoritative contract reference in #102. A
+response can justify a new bounded experiment, but cannot itself qualify the
+production route. Before unblocking #87, demonstrate the supported acquisition,
+intended user/profile/engine identity, competing ordinary starts, IPC
+precreation/replacement refusal, ownership lifetime, cleanup and preservation
+required by #102. Preserve the original negative evidence and any remaining
+untested conditions. If no supported contract is available, leave the gate
+blocked and return to the maintainer for a scope decision.
+
+No launcher behavior, runtime configuration or native test result changed in
+this decision update. ADRs 0002/0003 remain in force.
