@@ -1,0 +1,239 @@
+{
+  "go_race": {
+    "command": "go test -race ./...",
+    "initial_status": "failed",
+    "failed_tests": [
+      "TestDesktopRefusesInvalidNativeCatalog",
+      "TestDesktopStartupProbeDoesNotBecomeConversationEngine"
+    ],
+    "failure_details": "Two invalid-catalog subtests failed at the earlier bundled-engine version probe; the startup-probe test failed at ordinary engine configuration.",
+    "isolated_retry": {
+      "status": "passed",
+      "command": "go test -race ./internal/tofa -run 'TestDesktop(RefusesInvalidNativeCatalog|StartupProbeDoesNotBecomeConversationEngine)$' -count=1 -v",
+      "seconds": 19.634
+    },
+    "note": "No code changed between the full race run and isolated retry. Initial failures are retained rather than reporting a clean full run."
+  },
+  "go_vet": {
+    "command": "go vet ./...",
+    "status": "passed"
+  },
+  "python": {
+    "initial_traversal": [
+      {
+        "file": "build_test.py",
+        "exit_code": 0,
+        "tests": 6,
+        "seconds": 154.37
+      },
+      {
+        "file": "capability_client_test.py",
+        "exit_code": 0,
+        "tests": 2,
+        "seconds": 0.2
+      },
+      {
+        "file": "capability_evaluation_test.py",
+        "exit_code": 1,
+        "tests": 9,
+        "seconds": 9.07
+      },
+      {
+        "file": "capability_observer_test.py",
+        "exit_code": 1,
+        "tests": 14,
+        "seconds": 17.01
+      },
+      {
+        "file": "desktop_evaluation_test.py",
+        "exit_code": 0,
+        "tests": 23,
+        "seconds": 3.42
+      },
+      {
+        "file": "desktop_history_test.py",
+        "exit_code": 0,
+        "tests": 3,
+        "seconds": 0.07
+      },
+      {
+        "file": "desktop_ownership_test.py",
+        "exit_code": 0,
+        "tests": 5,
+        "seconds": 0.09
+      },
+      {
+        "file": "desktop_picker_test.py",
+        "exit_code": 0,
+        "tests": 21,
+        "seconds": 0.09
+      },
+      {
+        "file": "evaluation_client_test.py",
+        "exit_code": 0,
+        "tests": 11,
+        "seconds": 0.07
+      },
+      {
+        "file": "evaluation_proxy_test.py",
+        "exit_code": 0,
+        "tests": 30,
+        "seconds": 24.5
+      },
+      {
+        "file": "install_latest_test.py",
+        "exit_code": 0,
+        "tests": 5,
+        "seconds": 2.32
+      },
+      {
+        "file": "install_test.py",
+        "exit_code": 0,
+        "tests": 2,
+        "seconds": 1.31
+      },
+      {
+        "file": "lifecycle_test.py",
+        "exit_code": 0,
+        "tests": 4,
+        "seconds": 4.64
+      },
+      {
+        "file": "live_compat_test.py",
+        "exit_code": 0,
+        "tests": 20,
+        "seconds": 85.87
+      },
+      {
+        "file": "model_evaluation_test.py",
+        "exit_code": 0,
+        "tests": 40,
+        "seconds": 13.14
+      },
+      {
+        "file": "picker_test.py",
+        "exit_code": 0,
+        "tests": 40,
+        "seconds": 31.53
+      },
+      {
+        "file": "qualify_macos_test.py",
+        "exit_code": 0,
+        "tests": 22,
+        "seconds": 81.7
+      },
+      {
+        "file": "qualify_windows_test.py",
+        "exit_code": 0,
+        "tests": 17,
+        "seconds": 0.14
+      },
+      {
+        "file": "release_test.py",
+        "exit_code": 0,
+        "tests": 8,
+        "seconds": 6.36
+      },
+      {
+        "file": "terminal_test.py",
+        "exit_code": 0,
+        "tests": 2,
+        "seconds": 0.72
+      },
+      {
+        "file": "trace_codex_test.py",
+        "exit_code": 0,
+        "tests": 6,
+        "seconds": 6.75
+      },
+      {
+        "file": "windows_catalog_test.py",
+        "exit_code": 0,
+        "tests": 18,
+        "seconds": 57.88
+      },
+      {
+        "file": "windows_desktop_test.py",
+        "exit_code": 0,
+        "tests": 34,
+        "seconds": 161.8
+      },
+      {
+        "file": "windows_guardian_test.py",
+        "exit_code": 0,
+        "tests": 9,
+        "seconds": 79.5
+      },
+      {
+        "file": "windows_ownership_test.py",
+        "exit_code": 0,
+        "tests": 7,
+        "seconds": 0.48
+      },
+      {
+        "file": "windows_process_test.py",
+        "exit_code": 0,
+        "tests": 10,
+        "seconds": 0.08
+      },
+      {
+        "file": "windows_run_test.py",
+        "exit_code": 0,
+        "tests": 41,
+        "seconds": 104.98
+      },
+      {
+        "file": "windows_template_test.py",
+        "exit_code": 0,
+        "tests": 26,
+        "seconds": 31.98
+      }
+    ],
+    "review_fix_reruns": [
+      {
+        "file": "capability_evaluation_test.py",
+        "tests": 9,
+        "exit_code": 0
+      },
+      {
+        "file": "capability_observer_test.py",
+        "tests": 15,
+        "exit_code": 0
+      }
+    ],
+    "skipped": {
+      "capability_client_test.py": 2,
+      "desktop_evaluation_test.py": 16,
+      "desktop_history_test.py": 3,
+      "desktop_ownership_test.py": 5,
+      "desktop_picker_test.py": 21,
+      "evaluation_client_test.py": 11,
+      "qualify_windows_test.py": 17,
+      "windows_process_test.py": 7
+    },
+    "note": "The initial traversal overlapped the intentionally failing review regressions. Both affected suites were rerun after the fixes; every other suite passed. Opt-in installed CLI tests were run separately."
+  },
+  "cross_build": {
+    "command": "sh scripts/build.sh v0.0.0-capability-118",
+    "status": "passed",
+    "targets": [
+      "darwin/amd64",
+      "darwin/arm64",
+      "linux/amd64",
+      "linux/arm64",
+      "windows/amd64",
+      "windows/arm64"
+    ]
+  },
+  "installed_cli_calibration": {
+    "status": "passed",
+    "tests": 2,
+    "evidence": "calibrations.json",
+    "paid_inference": false
+  },
+  "reviews": {
+    "standards_remaining_findings": 0,
+    "spec_remaining_findings": 0
+  },
+  "desktop_ui": "not_run / ui_check_pending"
+}

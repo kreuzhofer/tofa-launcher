@@ -494,6 +494,11 @@ auth operation is running, then remove that **empty** lock directory and retry.
 
 ## Review and validation
 
+For the explicitly invoked macOS CLI/Desktop capability pilot (cases 03/04/05/07),
+see the [bounded capability evaluator](docs/evaluation/capabilities.md). Its default
+preflight performs no inference; live attempts and operator preview observations
+remain separate from model-support qualification.
+
 Read [the Go walkthrough](docs/prototype/REVIEW.md) and
 [the evidence and limitations](docs/prototype/VALIDATION.md).
 

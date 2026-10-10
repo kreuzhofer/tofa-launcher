@@ -7,6 +7,10 @@ import (
 	"errors"
 )
 
+func evaluationDesktopPreflight(context.Context, string) error {
+	return errors.New("Desktop evaluation requires macOS arm64")
+}
+
 func (a *App) launchDesktop(context.Context, Store, []string) error {
 	return errors.New("experimental codex-desktop requires the tested macOS arm64 application; use launch codex for the CLI")
 }
