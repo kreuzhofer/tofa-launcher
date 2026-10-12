@@ -120,6 +120,10 @@ class CommandTests(unittest.TestCase):
     def test_cancellation_only_stops_the_owned_attempt(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
+            (root / 'sitecustomize.py').write_text('import socket\n'
+                'def unavailable(*args):\n'
+                '    raise RuntimeError("loopback startup must not require reverse DNS")\n'
+                'socket.getfqdn = unavailable\n')
             executable = root / 'client'
             fixture = SCRIPT.parent / 'fixtures/capability_launcher.py'
             executable.write_text('#!/bin/sh\nexec ' + shlex.quote(sys.executable) + ' ' + shlex.quote(str(fixture)) + ' "$@"\n')
@@ -130,13 +134,16 @@ class CommandTests(unittest.TestCase):
                 '--case', '05', '--client', 'cli', '--model', 'moonshotai/Kimi-K3',
                 '--launcher', str(executable), '--codex', str(executable),
                 '--skill-root', str(root / 'skills'), '--codex-home', str(root / 'home')]
-            process = subprocess.Popen(command, env=dict(os.environ, CAPABILITY_FIXTURE_SLOW='1'),
+            process = subprocess.Popen(command, env=dict(os.environ, CAPABILITY_FIXTURE_SLOW='1', PYTHONPATH=str(root)),
                                        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             try:
                 deadline = time.monotonic() + 10
                 while time.monotonic() < deadline:
                     markers = list((root / 'runs').glob('*/workspace/started'))
                     if markers: break
+                    if process.poll() is not None:
+                        _, stderr = process.communicate()
+                        self.fail('owned client exited before readiness: ' + stderr)
                     time.sleep(.05)
                 self.assertTrue(markers, 'owned client did not start')
                 run = markers[0].parent.parent

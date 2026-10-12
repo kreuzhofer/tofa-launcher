@@ -14,6 +14,7 @@ from pathlib import Path
 import secrets
 import select
 import socket
+import socketserver
 import threading
 import time
 from urllib.parse import urlsplit
@@ -29,6 +30,14 @@ GUARDIAN_SCHEMA = {'type': 'object', 'additionalProperties': False,
         'user_authorization': {'type': 'string', 'enum': ['unknown', 'low', 'medium', 'high']},
         'outcome': {'type': 'string', 'enum': ['allow', 'deny']}, 'rationale': {'type': 'string'}},
     'required': ['outcome']}
+
+
+class LoopbackServer(http.server.ThreadingHTTPServer):
+    def server_bind(self):
+        # Numeric loopback listeners need no reverse DNS. HTTPServer's lookup
+        # can stall startup before the watchdog or owned client starts.
+        socketserver.TCPServer.server_bind(self)
+        self.server_name, self.server_port = self.server_address
 
 
 def tool_contract(tools):
@@ -205,7 +214,7 @@ class Observer:
                     owner.endpoint, owner.token = body['endpoint'], body['token']
                 self.reply(200, {'ready': True})
 
-        self.server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+        self.server = LoopbackServer(('127.0.0.1', 0), Handler)
         self.server.daemon_threads = True
         self.port = self.server.server_port
         self.url = 'http://127.0.0.1:' + str(self.port)

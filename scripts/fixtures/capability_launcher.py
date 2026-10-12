@@ -9,6 +9,9 @@ import threading
 import time
 from urllib.parse import urlsplit
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from capability_observer import LoopbackServer
+
 
 def post(endpoint, path, token, body):
     target = urlsplit(endpoint)
@@ -41,7 +44,7 @@ elif sys.argv[1] == 'launch':
             if os.environ.get('CAPABILITY_FIXTURE_USAGE') == 'missing': del event['response']['usage']
             elif os.environ.get('CAPABILITY_FIXTURE_USAGE') == 'partial': del event['response']['usage']['output_tokens']
             self.wfile.write(('data: ' + json.dumps(event) + '\n\n').encode())
-    server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), Upstream)
+    server = LoopbackServer(('127.0.0.1', 0), Upstream)
     threading.Thread(target=server.serve_forever, daemon=True).start()
     try:
         post(config['endpoint'], '/register', config['secret'],

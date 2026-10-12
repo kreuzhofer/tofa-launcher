@@ -11,6 +11,7 @@ import unittest
 import uuid
 
 from evaluation_proxy import fixture_response, message
+from capability_observer import LoopbackServer
 
 
 @unittest.skipUnless(sys.platform == 'darwin' and os.environ.get('TOFA_TEST_CODEX'), 'set TOFA_TEST_CODEX on macOS for real-client calibration')
@@ -36,13 +37,16 @@ class InstalledCapabilityTests(unittest.TestCase):
                 item = message('Open fixtures/sample-deck.pptx and fixtures/sample-deck.pdf.')
                 if case == '07':
                     if not any(row.get('type') == 'function_call_output' for row in body['input']):
+                        # Keep the declared runtime PATH instead of replacing it
+                        # through a user's login-shell startup configuration.
                         item = {'id': 'fc_probe', 'type': 'function_call', 'name': 'exec_command',
                                 'call_id': 'probe', 'status': 'completed',
-                                'arguments': json.dumps({'cmd': 'python3 probe.py; printf "wrapper done\\n"', 'max_output_tokens': 500})}
+                                'arguments': json.dumps({'cmd': 'python3 probe.py; printf "wrapper done\\n"',
+                                                         'login': False, 'max_output_tokens': 500})}
                     else:
                         item = message('The probe failed because its synthetic dependency is unavailable. Next step: supply the fixture dependency; nothing was installed.')
                 self.wfile.write(fixture_response(item, body['model']))
-        server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), Provider)
+        server = LoopbackServer(('127.0.0.1', 0), Provider)
         threading.Thread(target=server.serve_forever, daemon=True).start()
         try:
             # Keep native configuration and installed skills; only the launcher

@@ -8,13 +8,23 @@ import threading
 import time
 import unittest
 from contextlib import contextmanager
+from unittest.mock import patch
 
-from capability_observer import Observer
+from capability_observer import LoopbackServer, Observer
 
 SCRIPT_ROOT = Path(__file__).resolve().parent.parent
 
 
 class BoundaryTests(unittest.TestCase):
+    def test_listener_registration_does_not_require_reverse_dns(self):
+        with tempfile.TemporaryDirectory() as directory:
+            run = Path(directory); (run / 'workspace').mkdir()
+            with patch('socket.getfqdn', side_effect=AssertionError('unexpected reverse DNS')):
+                with Observer(run, model='moonshotai/Kimi-K3', guardian='zai-org/GLM-5.3-Flash',
+                              limits={'seconds': 180, 'requests': 12, 'output_tokens': 4096}) as observer:
+                    self.post(observer, '/register', {'endpoint': 'http://127.0.0.1:1',
+                              'token': 'client-token'}, observer.secret, 200)
+
     @contextmanager
     def boundary(self, limits=None, response=None, case='05', prompt=None):
         seen = []
@@ -32,7 +42,7 @@ class BoundaryTests(unittest.TestCase):
                 event = {'type': 'response.completed', 'response': {'model': model, 'output': [],
                          'usage': {'input_tokens': 3, 'output_tokens': 2}}}
                 self.wfile.write(('data: ' + json.dumps(event) + '\n\n').encode())
-        server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), Upstream)
+        server = LoopbackServer(('127.0.0.1', 0), Upstream)
         threading.Thread(target=server.serve_forever, daemon=True).start()
         try:
             with tempfile.TemporaryDirectory() as directory:
@@ -249,7 +259,7 @@ class BoundaryTests(unittest.TestCase):
                 self.send_header('Content-Type', 'text/event-stream')
                 self.end_headers()
                 self.wfile.write(b'data: {"type":"response.completed","response":{"model":"moonshotai/Kimi-K3","output":[],"usage":{"input_tokens":3,"output_tokens":2}}}\n\n')
-        server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), Upstream)
+        server = LoopbackServer(('127.0.0.1', 0), Upstream)
         threading.Thread(target=server.serve_forever, daemon=True).start()
         try:
             with tempfile.TemporaryDirectory() as directory:

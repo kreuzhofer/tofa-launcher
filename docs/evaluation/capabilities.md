@@ -102,7 +102,8 @@ in force; an observed protected-settings change is reported, not restored from
 a snapshot over concurrent user edits.
 
 The request observer is registered by a new launch using an ephemeral authenticated
-loopback handshake. It captures ordered instruction-role summaries and tool-schema
+loopback handshake. Numeric loopback listeners do not depend on reverse DNS for
+startup. It captures ordered instruction-role summaries and tool-schema
 hashes **before** launcher adaptations. Raw requests stay in the private run
 directory. System, developer and user messages are hashed in order, including
 workspace or skill instructions delivered in user messages. Image inputs,
@@ -173,7 +174,7 @@ The optional installed-client calibration uses synthetic loopback responses and
 synthetic launcher credentials while retaining the installed CLI and skills.
 Every calibration attempt is retained privately and has zero paid inference.
 The [#118 calibration record](evidence/capabilities-118/calibrations.json) indexes
-all five development attempts and links the two final redacted exports. Installed
+development attempts and links the redacted exports. Installed
 CLI 0.162.0 passed case 05 handoff and case 07 recovery against synthetic responses
 with persistent skills/settings preserved. These checks validate observation and
 supervision, not the named model's ability to perform the tasks.
@@ -181,6 +182,11 @@ The [validation record](evidence/capabilities-118/validation.json) includes all
 28 Python suites, review-fix reruns, cross-builds and Go checks. Two existing
 Desktop startup tests failed in the full race run and passed unchanged in an
 isolated retry; both outcomes are recorded.
+The first PR CI run passed the full macOS race suite but exposed a reverse-DNS
+startup dependency in the new cancellation test. Numeric listeners now bypass
+that lookup; all 25 command/boundary tests pass, including startup and cancellation
+with reverse DNS unavailable. Follow-up CLI calibration retains two local Python
+environment failures before the successful runs with an explicitly scoped runtime.
 The Desktop executable fixtures test the native launch/ownership and naming
 boundaries without claiming UI qualification. Real Desktop previews remain an
 operator check. No 24-cell campaign, release or Supported promotion is performed.

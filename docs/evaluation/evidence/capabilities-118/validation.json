@@ -235,5 +235,27 @@
     "standards_remaining_findings": 0,
     "spec_remaining_findings": 0
   },
-  "desktop_ui": "not_run / ui_check_pending"
+  "desktop_ui": "not_run / ui_check_pending",
+  "ci_followup": {
+    "failed_run": "https://github.com/kreuzhofer/tofa-launcher/actions/runs/38231407493",
+    "failure": "macOS cancellation fixture not ready within 10 seconds; other synthetic attempts took about 72 seconds each",
+    "reproduction": "Observer construction and public-command cancellation both fail when socket.getfqdn is unavailable",
+    "fix": "Bind numeric loopback servers without reverse DNS, including synthetic fixtures",
+    "limits_changed": false,
+    "targeted_tests": {
+      "command_tests": 9,
+      "observer_tests": 16,
+      "status": "passed",
+      "python": "3.12.14"
+    },
+    "installed_cli_calibrations": {
+      "passed": 2,
+      "prior_environment_failures_retained": 2,
+      "runtime": "Python 3.12 scoped on PATH with non-login synthetic tool shell",
+      "paid_inference": false
+    },
+    "initial_ci_other_checks": "Artifact, Linux and Windows jobs passed; macOS full race suite passed before the evaluator-stage failure",
+    "standards_remaining_findings": 0,
+    "spec_remaining_findings": 0
+  }
 }
