@@ -7,6 +7,7 @@ import subprocess
 import plistlib
 import re
 import platform
+from xml.parsers.expat import ExpatError
 
 from presentation_runtime import from_loader_output, inventory, sha256
 
@@ -27,7 +28,13 @@ def desktop_identity(bundle, engine):
     bundle = Path(bundle).resolve()
     packaged = bundle / 'Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex'
     if Path(engine).resolve() != packaged.resolve(): raise ValueError('native_bundled_engine_required')
-    plist = plistlib.loads((bundle / 'Contents/Info.plist').read_bytes())
+    try:
+        plist = plistlib.loads((bundle / 'Contents/Info.plist').read_bytes())
+    except (ValueError, ExpatError) as error:
+        raise ValueError('invalid_native_desktop_metadata') from error
+    if not isinstance(plist, dict) or any(not isinstance(plist.get(name), str) or not plist[name].strip()
+            for name in ('CFBundleShortVersionString', 'CFBundleVersion')):
+        raise ValueError('invalid_native_desktop_metadata')
     return {'version': plist['CFBundleShortVersionString'], 'build': plist['CFBundleVersion'],
         'application_sha256': sha256(bundle / 'Contents/Resources/app.asar'),
         'executable_sha256': sha256(bundle / 'Contents/MacOS/ChatGPT'),
