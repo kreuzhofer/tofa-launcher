@@ -17,7 +17,7 @@
   "actual_cli_runtime_tests": {
     "status": "passed",
     "tests": 7,
-    "seconds": 39.963,
+    "seconds": 43.63,
     "paid_inference": false,
     "scope": "Actual CLI completion/delivery, HTTP pre-forward policy drift, copied-evidence tampering, cancellation and loader boundaries"
   },
@@ -44,9 +44,12 @@
     "evaluator-reviewed.log": "c483b290586b0122c87aeed540d371589739d306d8aa3228ffda0b065d916d13",
     "review-boundaries-red.log": "e4fe4bd5d53743a0c6ab70894614a785ec3333b8059d94a034ba0fa84529e9f0",
     "review-boundaries-green.log": "feb69581c520060771035141719b390143e2ce5194031d94427e953041f05ec3",
-    "contradictory-loader-red.log": "7262287c25c7c4d1719d488aec170f34d7801cec21ac8b85d321e33a7338f116"
+    "contradictory-loader-red.log": "7262287c25c7c4d1719d488aec170f34d7801cec21ac8b85d321e33a7338f116",
+    "runtime-final-review.log": "5569269ca51995dd875e805ea9a7bee1775b9d8982ee2c4c9c2c8ad8ca473f69",
+    "structured-contract-red.log": "7ade25e2a01c2820c36f5c5c6da1aedc0060799ca636a5fe4b5f98dc84530b09",
+    "evidence-final-review.log": "f9b551dccf9a096b490b33f8eefc71e7332b796b9ed7e5ff16c9161be20c46a8"
   },
-  "review": "Initial Standards: 2 documented failures plus 1 duplication heuristic; initial Spec: 4 actionable gaps. Fixes implemented; follow-up pending.",
+  "review": "Initial and first follow-up findings corrected; second focused follow-up pending. Actual native Desktop qualification remains deferred.",
   "desktop": "assets checked only; operator deferred native workflow and previews",
   "completion": "Not complete; integration branch retained; no merge or ticket closure.",
   "python_full_reviewed": {

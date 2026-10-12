@@ -157,7 +157,7 @@ def smoke_execution(output, workspace):
     return artifacts
 
 
-def qualify(path, *, client, client_identity, home, skill, application_identity=None):
+def qualify(path, *, client, client_identity, home, skill, application_identity=None, client_executable=None):
     path = Path(path)
     if path.is_symlink(): raise ValueError('qualification_evidence_unavailable')
     path = path.resolve()
@@ -174,6 +174,9 @@ def qualify(path, *, client, client_identity, home, skill, application_identity=
             ('runtime', 'observed_versions', 'preservation', 'artifacts', 'thread_identity')):
         raise ValueError('malformed_qualification_evidence')
     client_path = Path(proof.get('client_executable', ''))
+    selected_path = Path(client_executable) if client_executable is not None else client_path
+    if selected_path.resolve() != client_path:
+        raise ValueError('qualification_client_path_mismatch')
     if not client_path.is_absolute() or sha256(client_path) != client_identity['sha256'] or (
             proof.get('host') != {'system': platform.system(), 'arch': platform.machine(), 'platform': platform.platform()}):
         raise ValueError('qualification_client_or_host_drift')
@@ -259,4 +262,4 @@ def qualify(path, *, client, client_identity, home, skill, application_identity=
     return {'contract': 'qualified-presentation-runtime-v1', 'client': client, 'provider': provider,
             'runtime': runtime, 'proof_sha256': sha256(path), 'loader_result_sha256': proof['loader_result_sha256'],
             'proof_path': str(path), 'client_identity': client_identity, 'home': str(home), 'skill': str(skill),
-            'application_identity': application_identity}
+            'application_identity': application_identity, 'client_executable': str(selected_path.absolute())}

@@ -116,6 +116,8 @@ class LoaderTests(unittest.TestCase):
             for output in ({'isError': True, **result}, {'success': False, **result}, {},
                     {**result, 'structuredContent': {'contract': 'supplied-presentation-runtime-v1',
                         'root': '/wrong-host', 'success': False}},
+                    *({**result, 'structuredContent': structured} for structured in
+                        ({}, {'root': '/wrong-host'}, {'contract': 'unknown-v2', 'root': '/wrong-host'})),
                     {'content': [{'type': 'text', 'text': text.replace('Override binaries:', 'Unavailable:')}]},
                     {'content': [{'type': 'text', 'text': text.replace('Python packages:', 'Unavailable:')}]},
                     {'content': [{'type': 'text', 'text': text.replace(str(root), '/other-host/runtime')}]},
@@ -235,6 +237,9 @@ class InstalledLoaderTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             temporary = Path(directory).resolve()
             copied = temporary / 'evidence'; shutil.copytree(proof.parent, copied, symlinks=True)
+            copied_binary = temporary / 'copied-codex'; shutil.copyfile(Path(os.environ['TOFA_TEST_CODEX']).resolve(), copied_binary)
+            with self.assertRaises(ValueError):
+                qualify(proof, client='cli', client_identity=identity, home=home, skill=skill, client_executable=copied_binary)
             owned_home = temporary / 'home'; owned_home.mkdir()
             managed = owned_home / 'managed_config.toml'; managed.write_text('# owned policy fixture\n')
             from capability_runtime import protected

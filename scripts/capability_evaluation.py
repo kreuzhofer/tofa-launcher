@@ -115,7 +115,8 @@ def environment(options):
                 if len(candidates) != 1: raise ValueError('presentation_skill_unavailable')
                 application = desktop_identity(options.app_bundle, options.codex) if options.client == 'desktop' else None
                 proof = qualify(qualification, client=options.client, client_identity=result['codex'],
-                    home=home, skill=candidates.pop(), application_identity=application)
+                    home=home, skill=candidates.pop(), application_identity=application,
+                    client_executable=Path(options.codex).expanduser().absolute())
                 result['presentation_runtime'].update(qualification=proof, status='qualified',
                     loader_result='verified_actual_client_call')
             except (OSError, ValueError, KeyError, TypeError, zipfile.BadZipFile):

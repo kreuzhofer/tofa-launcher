@@ -17,7 +17,7 @@ from urllib.parse import quote
 
 from capability_evaluation import digest, save, version
 from capability_observer import LoopbackServer, Observer
-from capability_runtime import protected, executable_versions, PROVIDERS, loader_tools, desktop_identity, harness_identity, catalog_tools, smoke_execution
+from capability_runtime import protected, executable_versions, PROVIDERS, loader_tools, desktop_identity, harness_identity, catalog_tools, smoke_execution, read_object
 from evaluation_proxy import fixture_response, message
 from presentation_runtime import from_loader_output, inventory
 
@@ -57,6 +57,9 @@ def main():
     parser.add_argument('--check', action='store_true', help='validate local assets without launch or inference')
     options = parser.parse_args()
     native = desktop_identity(options.app_bundle, options.codex) if options.client == 'desktop' else None
+    client_path = options.codex.resolve()
+    client_identity = version(client_path)
+    launcher_identity = version(options.launcher)
     expected = inventory(options.runtime_root)
     provider_name = PROVIDERS[options.client]
     expected['provider'] = provider_name
@@ -143,7 +146,7 @@ def main():
                     'script': str(Path(__file__).with_name('presentation_runtime.py').resolve())}
             save(run / 'observer.json', control)
             shim = run / 'bin'; shim.mkdir()
-            (shim / 'codex').write_text('#!/bin/sh\nexec ' + shlex.quote(str(options.codex.resolve())) + ' "$@"\n')
+            (shim / 'codex').write_text('#!/bin/sh\nexec ' + shlex.quote(str(client_path)) + ' "$@"\n')
             (shim / 'codex').chmod(0o700)
             env = dict(os.environ, CODEX_HOME=str(options.codex_home.resolve()), FIXTURE_ENDPOINT='http://127.0.0.1:' + str(provider.server_port),
                        PATH=str(shim) + os.pathsep + os.environ.get('PATH', ''), OTEL_SDK_DISABLED='true')
@@ -193,11 +196,20 @@ def main():
     except (OSError, ValueError, sqlite3.DatabaseError): thread = None
     native_preview = 'not_observed'
     if native and (run / 'operator.json').is_file():
-        observation = json.loads((run / 'operator.json').read_text())
-        if observation.get('status') == 'passed' and observation.get('artifacts') == {key: artifacts.get(key) for key in ('deck.pptx', 'deck.pdf')}:
-            native_preview = 'passed'
+        try:
+            observation = read_object(run / 'operator.json')
+            if observation.get('status') == 'passed' and observation.get('artifacts') == {key: artifacts.get(key) for key in ('deck.pptx', 'deck.pdf')}:
+                native_preview = 'passed'
+        except (OSError, ValueError): state['failure'] = 'native_preview_evidence_invalid'
     code = process.returncode if process else None
     ended = code == 0 if options.client == 'cli' else termination == 'operator_finished' and native_preview == 'passed'
+    if state['failure'] is None:
+        try:
+            if options.codex.resolve() != client_path or version(client_path) != client_identity:
+                state['failure'] = 'client_executable_drift'
+            elif native and desktop_identity(options.app_bundle, options.codex) != native:
+                state['failure'] = 'native_application_drift'
+        except (OSError, ValueError, subprocess.SubprocessError): state['failure'] = 'client_or_application_drift'
     if state['failure'] is None:
         if state['runtime'] is None: state['failure'] = 'actual_client_loader_unobserved'
         elif len(artifacts) != 3: state['failure'] = 'runtime_artifacts_incomplete'
@@ -210,8 +222,8 @@ def main():
             state['failure'] = 'qualification_delivery_unobserved'
     qualified = state['failure'] is None and state['runtime'] is not None and len(artifacts) == 3 and before == after and ended and thread is not None
     proof = {'schema': 'tofa-presentation-qualification-v1', 'status': 'qualified' if qualified else 'infra_blocked',
-        'client': options.client, 'client_identity': version(options.codex), 'launcher_identity': version(options.launcher),
-        'client_executable': str(options.codex.resolve()), 'app_bundle': str(options.app_bundle.resolve()) if native else None,
+        'client': options.client, 'client_identity': client_identity, 'launcher_identity': launcher_identity,
+        'client_executable': str(client_path), 'app_bundle': str(options.app_bundle.resolve()) if native else None,
         'host': {'system': platform.system(), 'arch': platform.machine(), 'platform': platform.platform()},
         'paid_inference': False, 'run': str(run), 'limits': limits, 'exit_code': code,
         'termination': termination, 'thread_identity': thread, 'observed_versions': observed_versions,
@@ -222,7 +234,7 @@ def main():
         'pdf_route': 'supplied_libreoffice',
         'native_preview': native_preview, 'native': native,
         'application_sha256': native['application_sha256'] if native else None,
-        'operator_sha256': digest(run / 'operator.json') if (run / 'operator.json').is_file() else None,
+        'operator_sha256': digest(run / 'operator.json') if (run / 'operator.json').is_file() and not (run / 'operator.json').is_symlink() else None,
         'harness': harness_identity()}
     save(run / 'qualification.json', proof)
     print(json.dumps({key: proof[key] for key in ('status', 'run', 'failure', 'loader_name',

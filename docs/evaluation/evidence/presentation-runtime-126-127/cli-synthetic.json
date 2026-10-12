@@ -2,7 +2,7 @@
   "schema": "tofa-presentation-runtime-evidence-v1",
   "scope": "actual installed CLI with synthetic loopback provider; not model capability or stock CLI baseline",
   "saved_status": "qualified",
-  "private_attempt_id": "425fa7c867814d27b8714a28eaabd8cf",
+  "private_attempt_id": "00a4453f9c5e412cb6b2b4e6ae4c824f",
   "paid_inference": false,
   "client_identity": {
     "sha256": "74c6a6d263f40d65f99c27a815275f5b4ed0bcc2baecc396b4cf3255498bdfc0",
@@ -19,8 +19,8 @@
     "additionalProperties": false
   },
   "loader_implementation": "scripts/presentation_runtime.py; launcher-owned STDIO MCP",
-  "loader_result_sha256": "e36b8ff35078481597b7eadeece8b147c3078bf096b03a9bb0894ec99165a15c",
-  "thread_identity_sha256": "90dd28771c7858148de5937722b38e6f3aded31c2bc2be6b1be6872c89a6739c",
+  "loader_result_sha256": "6d8779a8bef13e9f45382158c5268e54f5f71f841663189da2ebba8b623f9a10",
+  "thread_identity_sha256": "37849a8dcbb81a2eb1a8b5df9990663880ca142195bda0e9e744578023d60e55",
   "execution_host": "macOS arm64; ordinary persistent Codex home",
   "bundle_version": "26.1011.11113",
   "artifact_tool_version": "2.8.93",
@@ -74,13 +74,13 @@
   "libreoffice_manifest_declaration": "25.2-headless-codex.1",
   "pdf_route": "supplied_libreoffice",
   "artifacts": {
-    "deck.pptx": "0eb8683f9c2a0c41232de3d2e61d2a4a46703b4d8841182f126ed7c110661465",
-    "deck.pdf": "e9d8ec62bd5940b632cfe8cfb0335c762d5e8422d2aec6c2c345b30904b80fd9",
+    "deck.pptx": "f875f478bfa2116bd7a4e2c032c715e730fb4a8f5ecc5b2a43d0cff12031b8cc",
+    "deck.pdf": "0d3354df31375dd34556ef957c85f7c3bd184b04c8a38b483c25b9acd20f301f",
     "slide.png": "109e0b9a0bdb2aa9ea2bd0ab7f8108fba2104b2ee6eb46076bee1418d27190e4"
   },
   "finalization": {
     "schema": "presentation-finalization.v1",
-    "sha256": "0eb8683f9c2a0c41232de3d2e61d2a4a46703b4d8841182f126ed7c110661465",
+    "sha256": "f875f478bfa2116bd7a4e2c032c715e730fb4a8f5ecc5b2a43d0cff12031b8cc",
     "package_integrity": "pass",
     "first_party_import_passed": true,
     "font_selection_passed": true
@@ -98,14 +98,14 @@
   "settings_preserved": true,
   "protected_file_count": 27451,
   "harness": {
-    "presentation_calibration.py": "97a7a2f2650836d7ca8057aad0c4ebac14fcb3e1e2478836bda12aae1b215def",
-    "presentation_runtime.py": "f5e6f2a8845b877d28ba936314b29ea51550768d575bd33c8ad7f640a38a1ebc",
+    "presentation_calibration.py": "95dcb61253b1dac82a114648f9b04130ec38043d56539f39a74782355363f60b",
+    "presentation_runtime.py": "5e3cf36fd16f0b2037dd0df6a090360d8fc897551bd1b26f3325792f0264d075",
     "presentation_smoke.py": "028bb6f44676c53a2f345f379cef78b9eb78a8cd52012ac5ab37c63bfbf95b87",
-    "capability_runtime.py": "737897911120f8b8e9343d723fa6e404055d26b8731b718f2647e170b80fc1b4",
+    "capability_runtime.py": "e3c7f48819a33570b6af58768f5857ddceef79d8ae9ce9ae0d4fe9389b128023",
     "presentation_preview.py": "f54b72260e931adc05ae500e07be6e67cb63a230ef0f2ed7d6eefff5e3c494c7",
-    "capability_observer.py": "812791702f25aab7904666d94a9b9566dd98f8b67e49c7953cab6e193324e959",
+    "capability_observer.py": "b5492ac3ba263cc7e5ec3df790d45614f897eb3ffa426f92312028d5e0671a50",
     "capability_actions.py": "cada1c6b10fae235c28cd958c39b595b6260f94279ee226b5ef266f7a0e2efd7",
-    "capability_evaluation.py": "8684efb6864dabb3ee22123725fb13896b063f7d04eb61e286da8ce8a76a0397",
+    "capability_evaluation.py": "6c6073826714366b847724cd60f46b4db85351c197acf5890e1c08b181fefd06",
     "evaluation_proxy.py": "6b9cc7d9953ee62fc07a90b827d1052dbff33b54dd8155d52a7ae340480fd771",
     "presentation-smoke.mjs": "79bebf394dd730baf6123b963396f24031f78c6952d7884cfd9bd33f71e57be2"
   },

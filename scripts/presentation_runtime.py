@@ -110,7 +110,12 @@ def from_loader_output(output, provider):
                     raise ValueError('returned_runtime_identity_mismatch')
                 text.append(instructions(value))
             for key in ('content', 'contentItems', 'text', 'output', 'structuredContent'):
-                if key in value: collect(value[key])
+                if key in value:
+                    if key == 'structuredContent' and (not isinstance(value[key], dict) or
+                            value[key].get('contract') != 'supplied-presentation-runtime-v1' or
+                            provider != PROVIDER):
+                        raise ValueError('unsupported_structured_loader_result')
+                    collect(value[key])
     collect(output)
     combined = '\n'.join(text)
     labels = {'node': 'Node.js executable', 'node_modules': 'Node.js packages',

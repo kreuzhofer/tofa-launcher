@@ -198,7 +198,8 @@ class Observer:
             evidence = runtime_qualification
             verified = qualify(evidence['proof_path'], client=evidence['client'],
                 client_identity=evidence['client_identity'], home=Path(evidence['home']),
-                skill=Path(evidence['skill']), application_identity=evidence['application_identity'])
+                skill=Path(evidence['skill']), application_identity=evidence['application_identity'],
+                client_executable=evidence['client_executable'])
             if verified != evidence: raise ValueError('presentation_qualification_drift')
             self.runtime_qualification = verified
         self.run = Path(run)
@@ -386,7 +387,8 @@ class Observer:
                 try:
                     current = qualify(evidence['proof_path'], client=evidence['client'],
                         client_identity=evidence['client_identity'], home=Path(evidence['home']),
-                        skill=Path(evidence['skill']), application_identity=evidence['application_identity']) if evidence else None
+                        skill=Path(evidence['skill']), application_identity=evidence['application_identity'],
+                        client_executable=evidence['client_executable']) if evidence else None
                     qualified = evidence is not None and current == evidence
                 except (OSError, ValueError, TypeError):
                     self.reject(handler, 'presentation_runtime_environment_drift', 400, body, known_role=kind,
