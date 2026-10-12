@@ -26,12 +26,13 @@ type App struct {
 	Dir     string
 	Vault   Vault
 	// Endpoint and HTTP exist for local protocol tests. The CLI never overrides the endpoint.
-	Endpoint  string
-	HTTP      *http.Client
-	Listen    func(network, address string) (net.Listener, error)
-	RunClient func(args, env []string) error
-	Prompt    func(label string, secret bool) (string, error)
-	Uninstall func(purge bool) error
+	Endpoint   string
+	HTTP       *http.Client
+	Listen     func(network, address string) (net.Listener, error)
+	RunClient  func(args, env []string) error
+	Prompt     func(label string, secret bool) (string, error)
+	Uninstall  func(purge bool) error
+	evaluation *evaluationObserver
 }
 
 const help = `tofa — Token Factory launcher (prototype)
@@ -127,6 +128,16 @@ func (a *App) RunContext(ctx context.Context, args []string) error {
 		return a.launch(ctx, s, append([]string{target}, args...))
 	}
 	switch args[0] {
+	case "evaluation-protocol":
+		if len(args) == 3 && args[1] == "--app-bundle" {
+			if err := evaluationDesktopPreflight(ctx, args[2]); err != nil {
+				return err
+			}
+		} else if len(args) != 1 {
+			return errors.New("evaluation-protocol accepts only --app-bundle PATH")
+		}
+		fmt.Fprintln(a.Out, `{"version":1,"platform":"macos","observer":"per-launch"}`)
+		return nil
 	case "desktop-lifecycle":
 		return a.desktopLifecycle(ctx, args[1:])
 	case "auth":
@@ -262,6 +273,11 @@ func (a *App) launch(ctx context.Context, s Store, args []string) (result error)
 	if err != nil {
 		return err
 	}
+	a, ctx, finishEvaluation, err := a.evaluationContext(ctx, options.evaluation)
+	if err != nil {
+		return err
+	}
+	defer finishEvaluation()
 	model, guardian, project := &options.model, &options.guardian, &options.project
 	allow, direct := &options.allow, &options.direct
 	modelSelected, extra := options.modelSelected, options.extra

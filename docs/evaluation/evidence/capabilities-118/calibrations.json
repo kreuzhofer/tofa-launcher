@@ -1,0 +1,262 @@
+{
+  "kind": "installed CLI calibration with loopback synthetic provider and launcher credentials",
+  "paid_inference": false,
+  "model_capability_qualification": false,
+  "desktop_ui": "not_run / ui_check_pending",
+  "attempts": [
+    {
+      "run_id": "876c49b250f54832afb5b298b7b0e0fa",
+      "cell": {
+        "client": "cli",
+        "model": "moonshotai/Kimi-K3",
+        "case": "05",
+        "variant": "baseline",
+        "corpus": "capability-corpus-v3",
+        "platform": "Darwin/arm64"
+      },
+      "status": "completed",
+      "started_utc": "2026-10-10T18:52:22Z",
+      "request_counts": {
+        "main": 1,
+        "guardian": 0,
+        "auxiliary_title": 0
+      },
+      "settings_preserved": true,
+      "archive_id": "a6556b18d65d472eb8566d6e872ef986",
+      "private_evidence_sha256": "9323ba2c47353ad1f230c2bd7d12f774cdca1a2dcb77011a25f25c8266c14c9b",
+      "revision": "before_review_fixes"
+    },
+    {
+      "run_id": "e533e3d6708b49889a19e90f3987c31d",
+      "cell": {
+        "client": "cli",
+        "model": "moonshotai/Kimi-K3",
+        "case": "07",
+        "variant": "baseline",
+        "corpus": "capability-corpus-v3",
+        "platform": "Darwin/arm64"
+      },
+      "status": "completed",
+      "started_utc": "2026-10-10T18:59:06Z",
+      "request_counts": {
+        "main": 2,
+        "guardian": 0,
+        "auxiliary_title": 0
+      },
+      "settings_preserved": true,
+      "archive_id": "802969cdf428488cbf2cb0c91ad27a64",
+      "private_evidence_sha256": "1e190a11a5a184359682b5d07dbc096f7724b1bbf6285cbfef7cb23accd666d4",
+      "revision": "before_review_fixes"
+    },
+    {
+      "run_id": "5391ce18c05e48a297954e8e484e4434",
+      "cell": {
+        "client": "cli",
+        "model": "moonshotai/Kimi-K3",
+        "case": "05",
+        "variant": "baseline",
+        "corpus": "capability-corpus-v3",
+        "platform": "Darwin/arm64"
+      },
+      "status": "completed",
+      "started_utc": "2026-10-10T18:59:12Z",
+      "request_counts": {
+        "main": 1,
+        "guardian": 0,
+        "auxiliary_title": 0
+      },
+      "settings_preserved": true,
+      "archive_id": "b6cac8d650074923bb0990a7e6e883d4",
+      "private_evidence_sha256": "d3730ff207498ffa6cb0b45ff4c10798b3011a35f75d573da395b9ee3c5f1e9e",
+      "revision": "before_review_fixes"
+    },
+    {
+      "run_id": "f397538fc81b497a86ef9c838cda999d",
+      "cell": {
+        "client": "cli",
+        "model": "moonshotai/Kimi-K3",
+        "case": "07",
+        "variant": "baseline",
+        "corpus": "capability-corpus-v3",
+        "platform": "Darwin/arm64"
+      },
+      "status": "completed",
+      "started_utc": "2026-10-10T19:08:52Z",
+      "request_counts": {
+        "main": 2,
+        "guardian": 0,
+        "auxiliary_title": 0
+      },
+      "settings_preserved": true,
+      "archive_id": "f6cf30ac243d42479c844159f19f3a40",
+      "private_evidence_sha256": "5f45af173f3b9f86c4698476a7bf752b8461730345ac31cf9a2dd797663f9295",
+      "revision": "final",
+      "export": "installed-cli-07.json"
+    },
+    {
+      "run_id": "300d24813f96417d9ab792b8415c8a9d",
+      "cell": {
+        "client": "cli",
+        "model": "moonshotai/Kimi-K3",
+        "case": "05",
+        "variant": "baseline",
+        "corpus": "capability-corpus-v3",
+        "platform": "Darwin/arm64"
+      },
+      "status": "completed",
+      "started_utc": "2026-10-10T19:08:58Z",
+      "request_counts": {
+        "main": 1,
+        "guardian": 0,
+        "auxiliary_title": 0
+      },
+      "settings_preserved": true,
+      "archive_id": "c9a4908e9434473c8fdaa0df8d7aee53",
+      "private_evidence_sha256": "5f3ef98878acbbe1985549329ad646c696e1c68ec9e2786ce2f185580ee4ea71",
+      "revision": "final",
+      "export": "installed-cli-05.json"
+    },
+    {
+      "run_id": "70d4dbe5bccc41faac495f1f7753c7e4",
+      "cell": {
+        "client": "cli",
+        "model": "moonshotai/Kimi-K3",
+        "case": "07",
+        "variant": "baseline",
+        "corpus": "capability-corpus-v3",
+        "platform": "Darwin/arm64"
+      },
+      "status": "completed",
+      "started_utc": "2026-10-12T10:03:07Z",
+      "request_counts": {
+        "main": 2,
+        "guardian": 0,
+        "auxiliary_title": 0
+      },
+      "settings_preserved": true,
+      "archive_id": "3d876b1a21f948f6bffd6487712da33f",
+      "private_evidence_sha256": "81393865e0feebf8fbc89a06c62aebfa5e99d5b9c6d2dc71c1c28780eb13253a",
+      "revision": "dns-fix-initial",
+      "calibration_check": "failed",
+      "reason": "system_python3_blocked_by_xcode_license"
+    },
+    {
+      "run_id": "b4aa4e69d677471f9364d60c404cb956",
+      "cell": {
+        "client": "cli",
+        "model": "moonshotai/Kimi-K3",
+        "case": "05",
+        "variant": "baseline",
+        "corpus": "capability-corpus-v3",
+        "platform": "Darwin/arm64"
+      },
+      "status": "completed",
+      "started_utc": "2026-10-12T10:03:13Z",
+      "request_counts": {
+        "main": 1,
+        "guardian": 0,
+        "auxiliary_title": 0
+      },
+      "settings_preserved": true,
+      "archive_id": "acd0791eaff9424093d8ea97c6d8e513",
+      "private_evidence_sha256": "08befdcef3c81fb3450c68b12e25d29394f3de1fbecab21bd042457c03d7319c",
+      "revision": "dns-fix-initial",
+      "calibration_check": "passed"
+    },
+    {
+      "run_id": "62d443425d7c46448f9b0e79cd37938e",
+      "cell": {
+        "client": "cli",
+        "model": "moonshotai/Kimi-K3",
+        "case": "07",
+        "variant": "baseline",
+        "corpus": "capability-corpus-v3",
+        "platform": "Darwin/arm64"
+      },
+      "status": "completed",
+      "started_utc": "2026-10-12T10:05:01Z",
+      "request_counts": {
+        "main": 2,
+        "guardian": 0,
+        "auxiliary_title": 0
+      },
+      "settings_preserved": true,
+      "archive_id": "a1836c96919641be8f3e3df3f4efead7",
+      "private_evidence_sha256": "d763fb2825f59590b9b062696618dca98d24eff8b4ffa6d76e329b545cb32575",
+      "revision": "dns-fix-path-only",
+      "calibration_check": "failed",
+      "reason": "system_python3_blocked_by_xcode_license"
+    },
+    {
+      "run_id": "77c7f9d4eb604b7d9799dfc1240d5f88",
+      "cell": {
+        "client": "cli",
+        "model": "moonshotai/Kimi-K3",
+        "case": "05",
+        "variant": "baseline",
+        "corpus": "capability-corpus-v3",
+        "platform": "Darwin/arm64"
+      },
+      "status": "completed",
+      "started_utc": "2026-10-12T10:05:07Z",
+      "request_counts": {
+        "main": 1,
+        "guardian": 0,
+        "auxiliary_title": 0
+      },
+      "settings_preserved": true,
+      "archive_id": "1a454279d5944bbb9366801cf5e21c12",
+      "private_evidence_sha256": "57491b7e8e2a4fc52c1d2d92695e7a86f03563208715351100dd849844e71a4a",
+      "revision": "dns-fix-path-only",
+      "calibration_check": "passed"
+    },
+    {
+      "run_id": "8d50e769259549149b2b6b8cb4e8682c",
+      "cell": {
+        "client": "cli",
+        "model": "moonshotai/Kimi-K3",
+        "case": "07",
+        "variant": "baseline",
+        "corpus": "capability-corpus-v3",
+        "platform": "Darwin/arm64"
+      },
+      "status": "completed",
+      "started_utc": "2026-10-12T10:06:27Z",
+      "request_counts": {
+        "main": 2,
+        "guardian": 0,
+        "auxiliary_title": 0
+      },
+      "settings_preserved": true,
+      "archive_id": "73c45c9f97304919a6eb984d2e8f1993",
+      "private_evidence_sha256": "f1ecd780e640a8a8cb8d15f6c2d8fac9a385ae19a03ddb3991f0b46441a46f5d",
+      "revision": "dns-fix-non-login",
+      "calibration_check": "passed",
+      "export": "installed-cli-07-dns.json"
+    },
+    {
+      "run_id": "69c4ff15d38b46eaa37988af98322906",
+      "cell": {
+        "client": "cli",
+        "model": "moonshotai/Kimi-K3",
+        "case": "05",
+        "variant": "baseline",
+        "corpus": "capability-corpus-v3",
+        "platform": "Darwin/arm64"
+      },
+      "status": "completed",
+      "started_utc": "2026-10-12T10:06:33Z",
+      "request_counts": {
+        "main": 1,
+        "guardian": 0,
+        "auxiliary_title": 0
+      },
+      "settings_preserved": true,
+      "archive_id": "e615e02ec09243cdbd190ce6e95f877a",
+      "private_evidence_sha256": "e809eef0caa802bc46cec4331751e70298ec76ec4837046e7b3e5d5ac03e3c14",
+      "revision": "dns-fix-non-login",
+      "calibration_check": "passed",
+      "export": "installed-cli-05-dns.json"
+    }
+  ]
+}

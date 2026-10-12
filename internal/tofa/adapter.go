@@ -119,6 +119,11 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 				http.Error(writer, "request adapter: unauthorized", http.StatusUnauthorized)
 				return
 			}
+			if a.evaluation != nil && request.Method == http.MethodPost && request.URL.RequestURI() == "/evaluation-stop" {
+				writer.WriteHeader(http.StatusNoContent)
+				cancel()
+				return
+			}
 			if route := adapter.desktop.Load(); route != nil && request.Method == http.MethodGet && request.URL.Path == "/desktop-launch" && request.URL.RawPath == "" && request.URL.RawQuery == "" {
 				if route.ready != nil {
 					pid, _ := strconv.Atoi(request.Header.Get("X-Tofa-Parent-Pid"))
@@ -323,6 +328,14 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 		}
 		adapter.done <- err
 	}()
+	if a.evaluation != nil {
+		if err := a.evaluation.register(ctx, adapter); err != nil {
+			adapter.close()
+			<-adapter.done
+			return nil, err
+		}
+		fmt.Fprintln(a.Out, "Evaluation observer active: this launch has a fixed deadline; ordinary routing and approval enforcement are retained.")
+	}
 	return adapter, nil
 }
 

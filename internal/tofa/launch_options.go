@@ -12,6 +12,7 @@ type launchOptions struct {
 	model, guardian, project, bundle string
 	allow, direct, modelSelected     bool
 	extra                            []string
+	evaluation                       string
 }
 
 func parseLaunchOptions(target string, args []string) (launchOptions, error) {
@@ -21,6 +22,7 @@ func parseLaunchOptions(target string, args []string) (launchOptions, error) {
 	fs.StringVar(&o.guardian, "guardian-model", "", "")
 	fs.StringVar(&o.project, "project-id", "", "")
 	fs.BoolVar(&o.allow, "allow-unverified", false, "")
+	fs.StringVar(&o.evaluation, "evaluation-observer", "", "")
 	if target != "codex-desktop" {
 		fs.StringVar(&o.guardian, "evaluation-guardian-model", "", "")
 		fs.BoolVar(&o.direct, "direct", false, "")
@@ -32,6 +34,9 @@ func parseLaunchOptions(target string, args []string) (launchOptions, error) {
 		return o, err
 	}
 	o.extra = fs.Args()
+	if o.evaluation != "" && o.direct {
+		return o, errors.New("evaluation requires the adapted connection")
+	}
 	guardians := 0
 	projectSelected := false
 	fs.Visit(func(f *flag.Flag) {

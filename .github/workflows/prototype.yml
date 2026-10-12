@@ -73,6 +73,8 @@ jobs:
           python3 scripts/model_evaluation_test.py -v
           python3 scripts/evaluation_proxy_test.py -v
           python3 scripts/desktop_evaluation_test.py -v
+          python3 scripts/capability_evaluation_test.py -v
+          python3 scripts/capability_observer_test.py -v
       - name: Offline macOS qualification lifecycle
         if: runner.os != 'Windows'
         run: python3 scripts/qualify_macos_test.py -v

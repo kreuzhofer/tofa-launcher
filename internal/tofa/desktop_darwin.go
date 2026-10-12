@@ -25,6 +25,22 @@ import (
 
 type desktopBundle struct{ executable, engine, catalogVersion string }
 
+// Read-only refusal checks, repeated during the actual owned launch. A passing
+// snapshot is not an ownership claim and does not reserve the ordinary profile.
+func evaluationDesktopPreflight(ctx context.Context, bundle string) error {
+	if _, err := discoverDesktop(ctx, bundle); err != nil {
+		return err
+	}
+	profile, err := ordinaryDesktopProfile()
+	if err != nil {
+		return err
+	}
+	if err := refuseDesktopOwner(profile); err != nil {
+		return err
+	}
+	return refuseDesktopProcesses(ctx, profile)
+}
+
 const minimumDesktopVersion = "26.917.71314"
 const minimumDesktopEngineVersion = "0.155.0-alpha.16.4"
 const packagedDesktopEngine = "Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex"
@@ -162,6 +178,11 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 	if err != nil {
 		return err
 	}
+	a, ctx, finishEvaluation, err := a.evaluationContext(ctx, options.evaluation)
+	if err != nil {
+		return err
+	}
+	defer finishEvaluation()
 	model, guardian, project, path := &options.model, &options.guardian, &options.project, &options.bundle
 	modelSelected := options.modelSelected
 
