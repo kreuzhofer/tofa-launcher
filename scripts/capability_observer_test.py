@@ -28,7 +28,7 @@ class BoundaryTests(unittest.TestCase):
     def test_advertised_loader_does_not_qualify_a_deck_runtime(self):
         body = self.body()
         body['input'] = [{'type': 'additional_tools', 'tools': [
-            {'type': 'namespace', 'name': 'functions', 'tools': [
+            {'type': 'namespace', 'name': 'mcp__tofa_presentation_runtime', 'tools': [
                 {'type': 'function', 'name': 'load_workspace_dependencies',
                  'parameters': {'type': 'object'}}]}]}]
         with self.boundary(case='04') as (observer, seen):
@@ -38,6 +38,16 @@ class BoundaryTests(unittest.TestCase):
             self.assertEqual(observer.records[0]['presentation_runtime'], {
                 'required_tool': 'load_workspace_dependencies',
                 'advertised': 'present', 'qualified': False})
+
+    def test_unrelated_mcp_provider_with_the_same_loader_name_is_not_admitted(self):
+        body = self.body()
+        body['tools'] = [{'type': 'namespace', 'name': 'mcp__unrelated', 'tools': [
+            {'type': 'function', 'name': 'load_workspace_dependencies', 'parameters': {
+                'type': 'object', 'properties': {}, 'additionalProperties': False}}]}]
+        with self.boundary(case='03') as (observer, seen):
+            self.post(observer, '/responses', body, 'client-token', 400)
+            self.assertEqual(observer.reason, 'presentation_runtime_tool_missing')
+            self.assertEqual(seen, [])
 
     def test_deck_missing_required_runtime_tool_stops_before_inference(self):
         body = self.body()
@@ -67,7 +77,7 @@ class BoundaryTests(unittest.TestCase):
                               'token': 'client-token'}, observer.secret, 200)
 
     @contextmanager
-    def boundary(self, limits=None, response=None, case='05', prompt=None, guardian='zai-org/GLM-5.3-Flash'):
+    def boundary(self, limits=None, response=None, case='05', prompt=None, guardian='zai-org/GLM-5.3-Flash', qualification=None):
         seen = []
         class Upstream(http.server.BaseHTTPRequestHandler):
             def log_message(self, *args): pass
@@ -90,7 +100,8 @@ class BoundaryTests(unittest.TestCase):
                 run = Path(directory); (run / 'workspace').mkdir()
                 if prompt: (run / 'prompt.txt').write_text(prompt)
                 with Observer(run, model='moonshotai/Kimi-K3', guardian=guardian,
-                        limits=limits or {'seconds': 180, 'requests': 12, 'output_tokens': 4096}, case=case) as observer:
+                        limits=limits or {'seconds': 180, 'requests': 12, 'output_tokens': 4096}, case=case,
+                        runtime_qualification=qualification) as observer:
                     self.post(observer, '/register', {'endpoint': 'http://127.0.0.1:' + str(server.server_port),
                               'token': 'client-token'}, observer.secret, 200)
                     yield observer, seen

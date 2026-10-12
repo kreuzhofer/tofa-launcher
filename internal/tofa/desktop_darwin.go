@@ -183,6 +183,9 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 		return err
 	}
 	defer finishEvaluation()
+	if a.evaluation != nil && a.evaluation.PresentationRuntime != nil {
+		return errors.New("presentation MCP override is CLI-only; Desktop requires its native loader")
+	}
 	model, guardian, project, path := &options.model, &options.guardian, &options.project, &options.bundle
 	modelSelected := options.modelSelected
 

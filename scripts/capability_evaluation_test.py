@@ -53,6 +53,27 @@ def desktop_handoff(root, encoding, *, command='run', case='05', artifacts='pres
 
 class CommandTests(unittest.TestCase):
     @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
+    def test_self_declared_presentation_proof_cannot_unlock_paid_deck_inference(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            desktop_handoff(root, 'raw', case='03', client='cli', command='preflight')
+            proof = root / 'proof.json'
+            proof.write_text(json.dumps({'schema': 'tofa-presentation-qualification-v1',
+                                         'client': 'cli', 'status': 'qualified'}))
+            executable = root / 'FixtureDesktop.app/Contents/Resources/codex'
+            result = subprocess.run([sys.executable, str(SCRIPT), 'run', '--live', '--case', '03',
+                '--client', 'cli', '--model', 'moonshotai/Kimi-K3', '--launcher', str(executable),
+                '--codex', str(executable), '--codex-home', str(root / 'home'),
+                '--skill-root', str(root / 'skills'), '--private-root', str(root / 'runs'),
+                '--presentation-qualification', str(proof)], capture_output=True, text=True, timeout=15)
+            self.assertEqual(result.returncode, 1, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertEqual(report['status'], 'infra_blocked')
+            self.assertIn('presentation_qualification_invalid', report['blockers'])
+            self.assertIn('presentation_runtime_unqualified', report['blockers'])
+            self.assertEqual(report['requests'], [])
+
+    @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
     def test_decks_block_before_launch_with_installed_runtime_contract_provenance(self):
         for case, client in (('03', 'desktop'), ('04', 'cli')):
             with self.subTest(case=case, client=client), tempfile.TemporaryDirectory() as directory:

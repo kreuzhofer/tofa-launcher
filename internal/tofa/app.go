@@ -278,6 +278,13 @@ func (a *App) launch(ctx context.Context, s Store, args []string) (result error)
 		return err
 	}
 	defer finishEvaluation()
+	var runtimeArguments []string
+	if a.evaluation != nil && a.evaluation.PresentationRuntime != nil {
+		runtimeArguments, err = a.evaluation.PresentationRuntime.arguments(ctx)
+		if err != nil {
+			return err
+		}
+	}
 	model, guardian, project := &options.model, &options.guardian, &options.project
 	allow, direct := &options.allow, &options.direct
 	modelSelected, extra := options.modelSelected, options.extra
@@ -366,6 +373,7 @@ func (a *App) launch(ctx context.Context, s Store, args []string) (result error)
 		fmt.Fprintln(a.Out, "Model metadata: bundled candidate catalog (provider snapshot 2026-09-23).")
 	}
 	run := func(ctx context.Context, args, env []string) error {
+		args = append(append([]string{}, runtimeArguments...), args...)
 		if catalog != "" {
 			args = append([]string{"-c", "model_catalog_json=" + strconv.Quote(catalog)}, args...)
 		}

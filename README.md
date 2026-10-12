@@ -588,6 +588,10 @@ and a dated five-model candidate selection, use the bounded
 launcher's supported-model policy. The [2026-09-23 final comparison](docs/evaluation/selected-pairs-2026-09-23.md)
 links all five individual evaluations, selected-pair qualification and campaign cost totals.
 
+For opt-in presentation-runtime qualification and the human Desktop preview
+handoff, see the [runtime integration guide](docs/evaluation/presentation-runtime-126-127.md).
+Its synthetic checks and separate calibrations do not promote model support.
+
 For opt-in request diagnosis, see [Codex request tracing](docs/codex-tracing.md).
 The standalone harness records sanitized request metadata, status and timing;
 the released executable has no `--debug` flag. Traces must be enabled for a new

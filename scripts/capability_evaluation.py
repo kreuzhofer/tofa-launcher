@@ -14,7 +14,10 @@ import subprocess
 import sys
 import time
 import uuid
+import zipfile
 from urllib.parse import unquote
+
+from capability_runtime import qualify, desktop_identity
 
 CORPUS = Path(__file__).resolve().parent / 'fixtures/capabilities/v3/manifest.json'
 HELDOUT = CORPUS.parent.parent / 'incident-handover-v1/manifest.json'
@@ -102,6 +105,21 @@ def environment(options):
             'skill_implementations': [{key: item[key] for key in (
                 'location_sha256', 'sha256', 'resources_sha256', 'implementation_sha256', 'requirement_observed')}
                 for item in skills if item['presentation']]}
+        qualification = getattr(options, 'presentation_qualification', None)
+        if qualification:
+            try:
+                implementations = [item for item in skills if item['presentation']]
+                if len(implementations) != 1: raise ValueError('ambiguous_presentation_skill')
+                candidates = {path.parent.resolve() for root in roots for path in Path(root).expanduser().rglob('SKILL.md')
+                    if fingerprint(str(path.resolve())) == implementations[0]['location_sha256']}
+                if len(candidates) != 1: raise ValueError('presentation_skill_unavailable')
+                application = desktop_identity(options.app_bundle, options.codex) if options.client == 'desktop' else None
+                proof = qualify(qualification, client=options.client, client_identity=result['codex'],
+                    home=home, skill=candidates.pop(), application_identity=application)
+                result['presentation_runtime'].update(qualification=proof, status='qualified',
+                    loader_result='verified_actual_client_call')
+            except (OSError, ValueError, KeyError, TypeError, zipfile.BadZipFile):
+                result['presentation_runtime']['qualification_error'] = 'presentation_qualification_invalid'
     return result
 
 
@@ -144,8 +162,7 @@ def preflight(options):
                     'guardian': options.guardian, 'instruction_variant': options.variant})
     save(run / 'result.json', report)
     if options.case in ('03', '04'):
-        # No qualified client path currently supplies the installed skill's
-        # runtime contract. Node on PATH and a skill inventory cannot qualify it.
+        # Keep the #122 block unless exact actual-client evidence qualifies this lane.
         report['blockers'].append('presentation_runtime_unqualified')
     if case.get('client') and options.client != case['client']:
         report['blockers'].append('workflow_client_mismatch')
@@ -226,6 +243,13 @@ def preflight(options):
                 report['blockers'].append('bundled_engine_mismatch')
         except (OSError, ValueError, TypeError, KeyError, subprocess.SubprocessError):
             report['blockers'].append('desktop_inventory_unavailable')
+    runtime = report['provenance'].get('presentation_runtime', {})
+    if runtime.get('status') == 'qualified':
+        report['blockers'].remove('presentation_runtime_unqualified')
+        if 'presentation_node_runtime_missing' in report['blockers']:
+            report['blockers'].remove('presentation_node_runtime_missing')
+    elif runtime.get('qualification_error'):
+        report['blockers'].append(runtime['qualification_error'])
     if options.compare_with:
         try:
             previous = json.loads((Path(options.compare_with) / 'result.json').read_text())
@@ -378,9 +402,15 @@ def execute(options, run, report):
     executable.chmod(0o700)
     env['PATH'] = str(shim) + os.pathsep + env.get('PATH', '')
     code = None
-    with Observer(run, model=options.model, guardian=options.guardian, limits=report['limits'], case=options.case) as observer:
+    proof = report['provenance'].get('presentation_runtime', {}).get('qualification')
+    with Observer(run, model=options.model, guardian=options.guardian, limits=report['limits'], case=options.case,
+                  runtime_qualification=proof) as observer:
         config = run / 'observer.json'
-        save(config, dict(version=1, endpoint=observer.url, secret=observer.secret, seconds=report['limits']['seconds']))
+        control = dict(version=1, endpoint=observer.url, secret=observer.secret, seconds=report['limits']['seconds'])
+        if proof and options.client == 'cli':
+            control['presentation_runtime'] = {'root': proof['runtime']['root'],
+                'script': str(Path(__file__).with_name('presentation_runtime.py').resolve())}
+        save(config, control)
         target = 'codex' if options.client == 'cli' else 'codex-desktop'
         command = [str(binary), 'launch', target, '--model', options.model, '--guardian-model', options.guardian,
                    '--allow-unverified', '--evaluation-observer', str(config)]
@@ -457,6 +487,8 @@ def main():
     prepare.add_argument('--skill-root', action='append')
     prepare.add_argument('--codex-home', default=os.environ.get('CODEX_HOME', str(Path.home() / '.codex')))
     prepare.add_argument('--compare-with')
+    prepare.add_argument('--presentation-qualification', type=Path,
+                         help='retained actual-client runtime evidence; never a tool-presence bypass')
     live = commands.add_parser('run', parents=[prepare], add_help=False)
     live.add_argument('--live', action='store_true', help='explicitly authorize this bounded inference attempt')
     for mode in ('cancel', 'finish'):

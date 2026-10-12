@@ -1,0 +1,46 @@
+{
+  "schema": "tofa-presentation-runtime-verification-v1",
+  "go_full_race": {
+    "status": "passed",
+    "command": "GORACE=atexit_sleep_ms=0 go test -race ./... -count=1",
+    "seconds": 332.308,
+    "instrumentation_note": "Default race exit delay also reproduced a shutdown failure on unchanged #122; original failure logs retained. Race detection and production deadlines unchanged."
+  },
+  "python_full": {
+    "status": "passed",
+    "tests": 469,
+    "skipped": 84,
+    "seconds": 745.374,
+    "opt_ins": "real client, native Desktop GUI and native Windows disabled",
+    "ordering": "Full run preceded final Python native-path/cancellation/shape/binary hardening; changed boundaries checked separately afterward."
+  },
+  "actual_cli_runtime_tests": {
+    "status": "passed",
+    "tests": 7,
+    "seconds": 23.289,
+    "paid_inference": false,
+    "scope": "STDIO MCP, native parser and command refusal, synthetic cancellation, actual CLI artifacts/proof, HTTP live-result gate and copied-evidence tampering"
+  },
+  "go_vet": "passed",
+  "python_compilation": "passed before final boundary hardening; final compilation pending",
+  "bash_syntax": "passed",
+  "shellcheck": "unavailable",
+  "logs_sha256": {
+    "go-full-race.log": "207abb5066fd2c20bf2bf1bae20ad2598910a49b1284c3d3f7c16023616924db",
+    "go-baseline-shutdown.log": "0c50c72346ccf6cba0404d6b82eb734f88b030e4ccbc150b9f0f7ad3b762e5ab",
+    "go-failed-targeted.log": "91ebf8df01b76eaecb021ca6d5b2b7e10b5637579ade48818261a59b33766e8a",
+    "go-race-shutdown-controlled.log": "740a474526c1d85ef64cd89d20d74a08930afd5c3afd2a6cc9b6e508012b854f",
+    "go-full-race-controlled.log": "c20ed51f7860a1581fc488228ffadc825576c9f9ec89e96f70ef4d40ac98f770",
+    "go-vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "python-full.log": "908625db0ec07cd09f31cf3aae77f81f953fd10f3ddbdcebe2cf5d2aacb65e5b",
+    "runtime-final.log": "153faefc4a02a9aaa17bfcdee0a45f4365a3264069ba3c5a40f7759bee7bb860",
+    "cancellation-native-path-red.log": "bc073ef1d984bf4019fe5e5e683fbc01ff5a31f46009dc05e9dd526af95a5c62",
+    "native-binaries-red.log": "0b38fac997b0f94ffec79f480ae707c010043ab3c270e54b4c59bad2360a8c6a",
+    "qualification-shape-red.log": "381da75f84e9a01b6a5bce556d8649ca8bfb4b8b3357366aacdcf9796362ab93",
+    "live-loader-red.log": "3f2c699482b83048f4fc8f685d138e475d69dc6cfe73286ce6e325f67366a456",
+    "live-loader-green.log": "c7d26f598c5c106319a0a8451e7a03fa74ba0916c9aef4779feab20ab1049f3e"
+  },
+  "review": "pending",
+  "desktop": "assets checked only; operator deferred native workflow and previews",
+  "completion": "Not complete; integration branch retained; no merge or ticket closure."
+}

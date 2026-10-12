@@ -20,6 +20,8 @@ import time
 from urllib.parse import urlsplit
 
 from capability_actions import Actions, polling
+from capability_runtime import loader_tools, loader_call, qualify
+from presentation_runtime import inventory as runtime_inventory, from_loader_output
 
 BODY_LIMIT = 16 * 1024 * 1024
 EVENT_LIMIT = 32 * 1024 * 1024
@@ -160,14 +162,17 @@ def hashed(value):
 
 
 def presentation_tool_advertised(body):
-    tools = list(body.get('tools', []))
+    tools = [(None, tool) for tool in body.get('tools', [])]
     for item in body['input']:
-        tools.extend(item.get('tools', []))
+        tools.extend((None, tool) for tool in item.get('tools', []))
     while tools:
-        tool = tools.pop()
+        namespace, tool = tools.pop()
         if tool['type'] == 'namespace':
-            tools.extend(tool['tools'])
-        elif tool['name'] == 'load_workspace_dependencies':
+            tools.extend((tool['name'], child) for child in tool['tools'])
+        elif ((namespace in ('mcp__codex_app', 'mcp__tofa_presentation_runtime') and
+               tool['name'] == 'load_workspace_dependencies') or
+              (namespace is None and tool['name'] in ('mcp__codex_app__load_workspace_dependencies',
+               'mcp__tofa_presentation_runtime__load_workspace_dependencies'))):
             return True
     return False
 
@@ -193,7 +198,15 @@ def audit(body):
 
 
 class Observer:
-    def __init__(self, run, *, model, guardian, limits, case='05'):
+    def __init__(self, run, *, model, guardian, limits, case='05', runtime_qualification=None):
+        self.runtime_qualification = None
+        if runtime_qualification is not None:
+            evidence = runtime_qualification
+            verified = qualify(evidence['proof_path'], client=evidence['client'],
+                client_identity=evidence['client_identity'], home=Path(evidence['home']),
+                skill=Path(evidence['skill']), application_identity=evidence['application_identity'])
+            if verified != evidence: raise ValueError('presentation_qualification_drift')
+            self.runtime_qualification = verified
         self.run = Path(run)
         self.model, self.guardian, self.limits = model, guardian, limits
         self.secret = secrets.token_hex(32)
@@ -373,10 +386,29 @@ class Observer:
                     self.reject(handler, 'instruction_variant_missing', 400, body); return
             if self.case in ('03', '04'):
                 advertised = ('present' if presentation_tool_advertised(body) else 'absent') if kind == 'main' else 'not_observed'
-                reason = 'presentation_runtime_tool_missing' if advertised == 'absent' else 'presentation_runtime_unqualified'
-                self.reject(handler, reason, 400, body, known_role=kind,
-                    presentation_runtime={'required_tool': 'load_workspace_dependencies',
-                                          'advertised': advertised, 'qualified': False}); return
+                evidence = self.runtime_qualification
+                try:
+                    current = runtime_inventory(evidence['runtime']['root']) if evidence else None
+                    if current: current['provider'] = evidence['provider']
+                    qualified = evidence is not None and current == evidence['runtime']
+                except (OSError, ValueError): qualified = False
+                if not qualified or kind == 'main' and not loader_tools(body, evidence['provider']):
+                    reason = 'presentation_runtime_tool_missing' if advertised == 'absent' else 'presentation_runtime_unqualified'
+                    self.reject(handler, reason, 400, body, known_role=kind,
+                        presentation_runtime={'required_tool': 'load_workspace_dependencies',
+                                              'advertised': advertised, 'qualified': False}); return
+                if kind == 'main':
+                    try:
+                        for call in body['input']:
+                            if not loader_call(call, evidence['provider']): continue
+                            outputs = [item.get('output') for item in body['input'] if
+                                item.get('type') == 'function_call_output' and item.get('call_id') == call.get('call_id')]
+                            if json.loads(call.get('arguments', 'null')) != {} or len(outputs) != 1 or (
+                                    from_loader_output(outputs[0], evidence['provider']) != evidence['runtime']):
+                                raise ValueError('live_loader_result_invalid')
+                    except (OSError, ValueError, TypeError):
+                        self.reject(handler, 'presentation_runtime_result_invalid', 400, body, known_role=kind,
+                            presentation_runtime={'advertised': advertised, 'qualified': False}); return
             if kind == 'main':
                 failure = self.action_watch.observe(body)
                 if failure:
