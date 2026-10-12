@@ -1,8 +1,9 @@
 # Review of presentation runtime integration
 
 Reviewed against `2c8df027232a7d5b1a6da2f6c46c9ad4ccee32c9` (#122), through
-`c4524f0`, on `feat/126-127-presentation-runtime`. Two independent reviewers
-evaluated Standards and Spec. Follow-up reviews checked the corrected findings.
+`c4524f0`, with a focused follow-up at `7366ad7`, on
+`feat/126-127-presentation-runtime`. Two independent reviewers evaluated Standards
+and Spec. Follow-up reviews checked the corrected findings and computer-use amendment.
 The implementation remains on the integration branch; neither ticket is closed.
 
 ## Standards
@@ -16,6 +17,11 @@ Earlier findings about failed smoke execution, malformed evidence records and
 duplicated tool-catalog handling were corrected. Qualification requires a
 successful command result and matching artifact hashes; object-only evidence
 reads fail explicitly; provider/schema recognition uses a shared validator.
+
+The computer-use follow-up found no concrete Standards defects. The default human
+workflow remains intact, agent observations are separately attributed, and the
+evidence distinguishes modification-time candidates from proven content changes.
+Eight preview/evidence tests passed in the reviewer's check.
 
 ## Spec
 
@@ -36,3 +42,7 @@ The branch will remain unmerged and both tickets open until qualification is com
 
 Standards: 0 remaining findings. Spec: 0 implementation defects; 1 deferred native
 qualification gate. The outstanding Spec gate prevents completion.
+
+The Spec follow-up at `7366ad7` found no new defects or misclaims. It confirmed that
+the blocked native attempt does not claim a preview pass and that the fresh CLI
+proof cannot qualify Desktop.

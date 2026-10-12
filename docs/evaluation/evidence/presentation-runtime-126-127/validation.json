@@ -64,7 +64,9 @@
     "standards_remaining_findings": 0,
     "spec_remaining_implementation_defects": 0,
     "spec_deferred_qualification_gates": 1,
-    "record": "review.md"
+    "record": "review.md",
+    "computer_use_followup_revision": "7366ad7",
+    "computer_use_followup": "Both independent axes found no new defects or misclaims. Native app restriction and preservation drift remain explicit qualification blockers."
   },
   "desktop": "Actual native launch attempted with computer-use authorization; application access prohibited by tool, zero requests, no previews, protected-state drift detected. Owned application stopped.",
   "completion": "Not complete; native Desktop remains blocked. Integration branch local, no merge or ticket closure. Public publication awaits explicit approval requested after auto-review rejection.",
