@@ -1290,6 +1290,12 @@ func TestDesktopBridgePartialInstallationCleansUp(t *testing.T) {
 		t.Fatal(err)
 	}
 	dir := app.Dir
+	// This test must reach bridge copying, not Python/Xcode startup writes under
+	// the tiny file-size limit. Only the version probe can precede that copy.
+	engine := filepath.Join(bundle, "Contents/Resources/codex")
+	if err := os.WriteFile(engine, []byte("#!/bin/sh\n[ \"$1\" = --version ] || exit 97\nprintf 'codex-cli 0.155.0-alpha.16.4\\n'\n"), 0700); err != nil {
+		t.Fatal(err)
+	}
 	// A real filesystem write failure while copying the bridge. The limit is
 	// scoped to this child process; neither the test runner nor user files change.
 	command := exec.Command("/bin/sh", "-c", `ulimit -f 1; trap '' XFSZ; exec "$@"`, "fixture", executable, "--test-desktop-launch", dir, "launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified")

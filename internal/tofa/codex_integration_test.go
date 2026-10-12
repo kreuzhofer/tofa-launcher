@@ -38,6 +38,7 @@ func TestInstalledCodexToolAndContinuationThroughAdapter(t *testing.T) {
 				Status  string `json:"status"`
 				Content []struct {
 					Type        string          `json:"type"`
+					Text        string          `json:"text"`
 					Annotations json.RawMessage `json:"annotations"`
 				} `json:"content"`
 				Output json.RawMessage `json:"output"`
@@ -51,7 +52,15 @@ func TestInstalledCodexToolAndContinuationThroughAdapter(t *testing.T) {
 			writer.WriteHeader(400)
 			return
 		}
-		if !strings.Contains(payload.Instructions, "You are a coding agent running in the Codex CLI") {
+		codingInstructions := strings.Contains(payload.Instructions, "You are a coding agent running in the Codex CLI")
+		for _, item := range payload.Input {
+			if item.Role == "developer" {
+				for _, part := range item.Content {
+					codingInstructions = codingInstructions || part.Type == "input_text" && strings.Contains(part.Text, "You are a coding agent running in the Codex CLI")
+				}
+			}
+		}
+		if !codingInstructions {
 			t.Error("default coding instructions missing")
 			writer.WriteHeader(400)
 			return

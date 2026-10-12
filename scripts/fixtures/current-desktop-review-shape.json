@@ -1,0 +1,111 @@
+{
+  "model": "moonshotai/Kimi-K3",
+  "stream": true,
+  "instructions": null,
+  "input": [
+    {
+      "role": "developer",
+      "content": [
+        {
+          "type": "input_text",
+          "text": "Synthetic role placeholder."
+        }
+      ]
+    },
+    {
+      "role": "developer",
+      "content": [
+        {
+          "type": "input_text",
+          "text": "Synthetic role placeholder."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "input_text",
+          "text": "Synthetic role placeholder."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "input_text",
+          "text": "Synthetic role placeholder."
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "type": "function",
+      "name": "exec_command",
+      "parameters": {
+        "type": "object"
+      }
+    },
+    {
+      "type": "function",
+      "name": "write_stdin",
+      "parameters": {
+        "type": "object"
+      }
+    },
+    {
+      "type": "function",
+      "name": "view_image",
+      "parameters": {
+        "type": "object"
+      }
+    }
+  ],
+  "tool_choice": "auto",
+  "text": {
+    "format": {
+      "type": "json_schema",
+      "strict": false,
+      "schema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "risk_level": {
+            "type": "string",
+            "enum": [
+              "low",
+              "medium",
+              "high",
+              "critical"
+            ]
+          },
+          "user_authorization": {
+            "type": "string",
+            "enum": [
+              "unknown",
+              "low",
+              "medium",
+              "high"
+            ]
+          },
+          "outcome": {
+            "type": "string",
+            "enum": [
+              "allow",
+              "deny"
+            ]
+          },
+          "rationale": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "outcome"
+        ]
+      },
+      "name": "codex_output_schema"
+    }
+  }
+}

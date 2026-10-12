@@ -6,6 +6,13 @@ This is an explicitly invoked development tool, not release qualification or a
 Supported-model claim. The 24-cell campaign belongs to #119. No production prompt
 change is included.
 
+[#123](https://github.com/kreuzhofer/tofa-launcher/issues/123) introduces method
+`capability-evaluation-v2`: exact Markdown destinations may use UTF-8 percent
+encoding, rejected requests have private raw capture and redacted diagnostics,
+and the independently versioned incident-handover workflow is available as case
+18. Original reports and corpus v3 remain unchanged. See the
+[current-client qualification and its limits](capability-method-123.md).
+
 ## Commands
 
 Build the launcher from this revision. An older installed launcher cannot enforce
@@ -126,6 +133,7 @@ home; the default is the ordinary client home.
 | --- | ---: | ---: | ---: |
 | 05, 07 | 180 seconds | 12 | 4096 |
 | 03, 04 | 900 seconds | 80 | 8192 |
+| 18 (incident-handover-v1) | 900 seconds | 80 | 8192 |
 
 The deadline includes launch and operator startup time. The observer reserves a
 shared request slot atomically before contacting the adapter, counts native
@@ -162,6 +170,25 @@ V3 adds an unambiguous recovery marker. The unchanged deck fixtures originate in
 the retained prototype. [V1](https://github.com/kreuzhofer/tofa-launcher/tree/63898d1/scripts/prototype_capabilities)
 and [V2](https://github.com/kreuzhofer/tofa-launcher/tree/3c66976/scripts/prototype_capabilities),
 their earlier failures, calibrations and results remain preserved on their branch.
+
+Case 18 uses the separate
+[incident-handover-v1 manifest](../../scripts/fixtures/capabilities/incident-handover-v1/manifest.json),
+with the prompt and CSV predeclared in #119. Select `--case 18 --client desktop`
+with the same Desktop command above. Its preflight requires an inventoried
+document skill and seeds only `fixtures/incident.csv`. Generated files are
+`handover outputs/incident brief.docx` and `handover outputs/incident brief.pdf`.
+An inventory option does not install or activate a skill.
+
+The evaluator records input preservation and generated file sizes/hashes
+separately. Missing, empty, oversized or symlinked outputs fail file integrity.
+Present outputs leave it `inconclusive / document_validation_pending`: the
+operator must verify that both are valid documents with two pages and record a
+`file_integrity` observation. Inspect the incident facts, English prose, skill
+read-before-creation evidence, and both previews as separate criteria. References
+must target the exact files; destinations containing literal spaces need angle
+brackets, while percent-encoded destinations are decoded once for identity.
+Neither references nor file hashes establish document validity or preview success.
+Case 05 remains an unchanged-file handoff and cannot serve as held-out evidence.
 
 ```sh
 python3 scripts/capability_evaluation_test.py -v

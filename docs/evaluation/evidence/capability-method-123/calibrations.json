@@ -1,0 +1,47 @@
+{
+  "schema": "tofa-capability-method-calibrations-v1",
+  "entries": [
+    {
+      "case": "07",
+      "result": "installed-cli-07.json",
+      "status": "completed",
+      "method": "capability-evaluation-v2",
+      "main_requests": 2,
+      "settings_preserved": true,
+      "environment_drift": [],
+      "upstream": [
+        {
+          "model": "moonshotai/Kimi-K3",
+          "cap": 4096
+        },
+        {
+          "model": "moonshotai/Kimi-K3",
+          "cap": 4096
+        }
+      ],
+      "paid_inference": false,
+      "scope": "installed CLI with synthetic loopback provider and credentials; ordinary persistent skills/settings",
+      "preview": "not_run; no UI check",
+      "source": "qualified #118 launcher with #123 evaluator"
+    },
+    {
+      "case": "05",
+      "result": "installed-cli-05.json",
+      "status": "completed",
+      "method": "capability-evaluation-v2",
+      "main_requests": 1,
+      "settings_preserved": true,
+      "environment_drift": [],
+      "upstream": [
+        {
+          "model": "moonshotai/Kimi-K3",
+          "cap": 4096
+        }
+      ],
+      "paid_inference": false,
+      "scope": "installed CLI with synthetic loopback provider and credentials; ordinary persistent skills/settings",
+      "preview": "not_run; no UI check",
+      "source": "qualified #118 launcher with #123 evaluator"
+    }
+  ]
+}

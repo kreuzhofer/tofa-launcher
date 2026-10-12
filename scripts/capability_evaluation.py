@@ -14,10 +14,13 @@ import subprocess
 import sys
 import time
 import uuid
+from urllib.parse import unquote
 
 CORPUS = Path(__file__).resolve().parent / 'fixtures/capabilities/v3/manifest.json'
+HELDOUT = CORPUS.parent.parent / 'incident-handover-v1/manifest.json'
 DIMENSIONS = ('task_content', 'language', 'skill_use', 'file_integrity',
               'reference_syntax', 'visible_preview', 'repetition', 'recovery')
+PROTECTED_NAMES = ('codex_config', 'codex_auth', 'launcher_config', 'launcher_credentials')
 
 
 def digest(path):
@@ -70,7 +73,8 @@ def inventory(roots):
                 resources.append((str(resource.relative_to(path.parent)), digest(resource)))
             result.append({'location_sha256': fingerprint(str(path.resolve())), 'sha256': digest(path),
                            'resources_sha256': fingerprint(resources),
-                           'presentation': bool(re.search(r'(?im)^name:.*presentation', path.read_text()))})
+                           'presentation': bool(re.search(r'(?im)^name:.*presentation', path.read_text())),
+                           'document': bool(re.search(r'(?im)^name:.*document', path.read_text()))})
     return sorted(result, key=lambda item: item['location_sha256'])
 
 
@@ -102,7 +106,8 @@ def preflight(options):
     run.mkdir(mode=0o700)
     workspace = run / 'workspace'
     workspace.mkdir(mode=0o700)
-    corpus = json.loads(CORPUS.read_text())
+    corpus_path = HELDOUT if options.case == '18' else CORPUS
+    corpus = json.loads(corpus_path.read_text())
     case = corpus['cases'][options.case]
     fixtures = {name: corpus['fixtures'][name] for name in case['files']}
     cell = dict(client=options.client, model=options.model, case=options.case,
@@ -118,12 +123,18 @@ def preflight(options):
                   'guardian_retries': 'native_and_budgeted', 'currency_cap': None},
         criteria={key: {'status': 'not_run', 'reason': 'ui_check_pending' if key == 'visible_preview'
                         else 'not_observed'} for key in DIMENSIONS},
-        provenance={'corpus_sha256': digest(CORPUS), 'prompt_sha256': fingerprint(case['prompt']),
+        provenance={'method': 'capability-evaluation-v2',
+                    'corpus_sha256': digest(corpus_path), 'prompt_sha256': fingerprint(case['prompt']),
                     'fixture_hashes': fixtures, 'os': platform.platform(),
                     'guardian': options.guardian, 'instruction_variant': options.variant})
     save(run / 'result.json', report)
+    if case.get('client') and options.client != case['client']:
+        report['blockers'].append('workflow_client_mismatch')
+    if 'outputs' in case:
+        report['output_files'] = case['outputs']
+        report['criteria_contract'] = case['criteria']
     for name, expected in fixtures.items():
-        source = CORPUS.parent / name
+        source = corpus_path.parent / name
         if digest(source) != expected:
             report['blockers'].append('fixture_checksum_mismatch')
             continue
@@ -159,6 +170,8 @@ def preflight(options):
             report['blockers'].append('presentation_skill_missing')
         if options.case in ('03', '04') and report['provenance']['node'] is None:
             report['blockers'].append('presentation_node_runtime_missing')
+        if case.get('skill') == 'document' and not any(item['document'] for item in report['provenance']['skills']):
+            report['blockers'].append('document_skill_missing')
     except (OSError, ValueError, UnicodeError, subprocess.SubprocessError):
         report['blockers'].append('environment_inventory_unavailable')
     try:
@@ -201,7 +214,7 @@ def preflight(options):
                     not isinstance(previous.get('provenance'), dict)):
                 raise ValueError('invalid_comparison')
             compared = ('launcher', 'codex', 'desktop', 'os', 'settings', 'skills', 'python', 'node', 'shell',
-                        'environment_sha256', 'catalog_sha256', 'guardian', 'harness_sha256', 'corpus_sha256')
+                        'environment_sha256', 'catalog_sha256', 'guardian', 'harness_sha256', 'corpus_sha256', 'method')
             report['drift'] = [key for key in compared if previous['provenance'].get(key) != report['provenance'].get(key)]
             if report['drift']: report['blockers'].append('environment_drift')
         except (OSError, ValueError, UnicodeError):
@@ -220,6 +233,47 @@ def protected_settings(options):
     return [digest(path) if path.is_file() else None for path in paths]
 
 
+def has_markdown_links(text, paths, *, spaces_need_angles=False):
+    targets = set()
+    for destination in re.findall(r'\[[^\]]+\]\((<[^>]+>|[^)]+)\)', text):
+        enclosed = destination.startswith('<') and destination.endswith('>')
+        value = destination[1:-1] if enclosed else destination
+        if spaces_need_angles and not enclosed and any(char.isspace() for char in value): continue
+        try:
+            decoded = unquote(value, errors='strict')
+        except UnicodeDecodeError:
+            # An invalid URI destination cannot identify a requested artifact.
+            continue
+        targets.update((value, decoded))
+    return all(str(path) in targets for path in paths)
+
+
+def symlinked_workspace_path(workspace, path):
+    relative = path.relative_to(workspace)
+    return any(workspace.joinpath(*relative.parts[:index]).is_symlink()
+               for index in range(len(relative.parts) + 1))
+
+
+def artifact_inventory(workspace, names):
+    """File presence and hashes do not establish document validity or layout."""
+    artifacts = {}
+    for name in names:
+        path = workspace / name
+        try:
+            if symlinked_workspace_path(workspace, path):
+                artifacts[name] = {'status': 'unsafe_path'}
+            elif not path.is_file():
+                artifacts[name] = {'status': 'missing'}
+            elif not 0 < path.stat().st_size <= 128 * 1024 * 1024:
+                artifacts[name] = {'status': 'invalid_size'}
+            else:
+                artifacts[name] = dict(status='present', sha256=digest(path), bytes=path.stat().st_size,
+                                       validation='operator_check_pending')
+        except OSError:
+            artifacts[name] = {'status': 'unavailable'}
+    return artifacts
+
+
 def finish_report(run, report, observer, code, preserved):
     report.update(requests=observer.records, actions=observer.actions, exit_code=code,
                   elapsed_ms=observer.elapsed(), stop_reason=observer.reason, settings_preserved=preserved)
@@ -234,7 +288,7 @@ def finish_report(run, report, observer, code, preserved):
     reason = observer.reason
     infra = any(value.startswith(('unsupported_', 'unmatched_', 'workspace_', 'scope_')) or
                 value in ('stream_failure', 'upstream_http_error', 'response_incomplete',
-                          'instruction_variant_missing') for value in failures)
+                          'instruction_variant_missing', 'diagnostic_capture_failure') for value in failures)
     completed = any(r.get('completed') and r.get('final_answer') and r.get('role') == 'main' for r in observer.records)
     if not preserved:
         report['blockers'].append('protected_settings_changed')
@@ -247,17 +301,28 @@ def finish_report(run, report, observer, code, preserved):
     else:
         report['status'] = 'completed'
     criteria = report['criteria']
-    if report['cell']['case'] in ('05', '07'):
-        intact = all(not path.is_symlink() and path.is_file() and digest(path) == expected
+    if report['cell']['case'] in ('05', '07', '18'):
+        intact = all(not symlinked_workspace_path(run / 'workspace', path) and path.is_file() and digest(path) == expected
             for name, expected in report['provenance']['fixture_hashes'].items()
             for path in [fixture_path(run / 'workspace', name)])
         criteria['file_integrity'] = dict(status='passed' if intact else 'failed',
                                           reason='fixtures_unchanged' if intact else 'fixture_changed')
+    if report['cell']['case'] == '18':
+        report['input_integrity'] = criteria['file_integrity']
+        report['artifacts'] = artifact_inventory(run / 'workspace', report['output_files'])
+        present = all(item['status'] == 'present' for item in report['artifacts'].values())
+        criteria['file_integrity'] = dict(status='inconclusive' if intact and present else 'failed',
+            reason='document_validation_pending' if intact and present else
+                   'fixture_changed' if not intact else 'outputs_missing_or_unsafe')
+        if (run / 'final.txt').exists():
+            linked = has_markdown_links((run / 'final.txt').read_text(),
+                [run / 'workspace' / name for name in report['output_files']], spaces_need_angles=True)
+            criteria['reference_syntax'] = dict(status='passed' if linked else 'failed',
+                reason='absolute_markdown_links' if linked else 'missing_or_invalid_references')
     if (run / 'final.txt').exists() and report['cell']['case'] == '05':
         text = (run / 'final.txt').read_text()
         names = ('sample-deck.pptx', 'sample-deck.pdf')
-        linked = all(re.search(r'\[[^\]]+\]\(' + re.escape(str(run / 'workspace/fixtures' / name)) + r'\)', text)
-                     for name in names)
+        linked = has_markdown_links(text, [run / 'workspace/fixtures' / name for name in names])
         terminal = all('fixtures/' + name in text for name in names)
         passed = linked if report['cell']['client'] == 'desktop' else terminal
         criteria['reference_syntax'] = dict(status='passed' if passed else 'failed',
@@ -280,6 +345,10 @@ def execute(options, run, report):
     if report['blockers']:
         report['status'] = 'infra_blocked'; save(run / 'result.json', report); return
     before = protected_settings(options)
+    # Credential hashes are comparison-only; exported diagnostics identify the
+    # changed file category without exposing contents or their fingerprints.
+    report['protected_settings_hashes'] = {'before': {
+        name: value for name, value in zip(PROTECTED_NAMES, before) if name.endswith('_config')}}
     workspace = run / 'workspace'
     binary = Path(options.launcher).resolve()
     env = dict(os.environ, CODEX_HOME=str(Path(options.codex_home).expanduser().resolve()))
@@ -333,8 +402,14 @@ def execute(options, run, report):
                 process.terminate()
                 try: process.wait(timeout=5)
                 except subprocess.TimeoutExpired: process.kill(); process.wait(timeout=5)
-            try: preserved = before == protected_settings(options)
-            except OSError: preserved = False
+            try: after_settings = protected_settings(options)
+            except OSError: after_settings = None
+            preserved = before == after_settings
+            report['protected_settings_hashes'].update(
+                after={name: value for name, value in zip(PROTECTED_NAMES, after_settings)
+                       if name.endswith('_config')} if after_settings is not None else None,
+                changed=[name for name, previous, current in zip(PROTECTED_NAMES, before, after_settings)
+                         if previous != current] if after_settings is not None else ['unavailable'])
             try:
                 after = environment(options)
                 report['environment_drift_during_run'] = [key for key, value in after.items()
@@ -350,7 +425,7 @@ def main():
     commands = parser.add_subparsers(dest='command', required=True)
     prepare = commands.add_parser('preflight')
     prepare.add_argument('--private-root', required=True)
-    prepare.add_argument('--case', required=True, choices=('03', '04', '05', '07'))
+    prepare.add_argument('--case', required=True, choices=('03', '04', '05', '07', '18'))
     prepare.add_argument('--client', required=True, choices=('cli', 'desktop'))
     prepare.add_argument('--model', required=True)
     prepare.add_argument('--guardian', default='zai-org/GLM-5.3-Flash')

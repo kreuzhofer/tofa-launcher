@@ -26,7 +26,7 @@ class BoundaryTests(unittest.TestCase):
                               'token': 'client-token'}, observer.secret, 200)
 
     @contextmanager
-    def boundary(self, limits=None, response=None, case='05', prompt=None):
+    def boundary(self, limits=None, response=None, case='05', prompt=None, guardian='zai-org/GLM-5.3-Flash'):
         seen = []
         class Upstream(http.server.BaseHTTPRequestHandler):
             def log_message(self, *args): pass
@@ -48,7 +48,7 @@ class BoundaryTests(unittest.TestCase):
             with tempfile.TemporaryDirectory() as directory:
                 run = Path(directory); (run / 'workspace').mkdir()
                 if prompt: (run / 'prompt.txt').write_text(prompt)
-                with Observer(run, model='moonshotai/Kimi-K3', guardian='zai-org/GLM-5.3-Flash',
+                with Observer(run, model='moonshotai/Kimi-K3', guardian=guardian,
                         limits=limits or {'seconds': 180, 'requests': 12, 'output_tokens': 4096}, case=case) as observer:
                     self.post(observer, '/register', {'endpoint': 'http://127.0.0.1:' + str(server.server_port),
                               'token': 'client-token'}, observer.secret, 200)
@@ -92,6 +92,90 @@ class BoundaryTests(unittest.TestCase):
                 self.post(observer, '/responses', body, 'client-token', 400)
                 self.assertEqual(seen, [])
                 self.assertEqual(observer.reason, 'unsupported_request_contract')
+
+    def test_rejected_contract_retains_private_body_and_exports_only_shape(self):
+        body = self.body()
+        body.update(previous_response_id='private-native-id',
+                    client_metadata={'private-key': 'private-token'},
+                    tools=[{'type': 'function', 'name': 'private-tool',
+                            'description': 'private-prompt'}])
+        body['input'] = [{'role': 'user', 'content': 'private-prompt'}]
+        with self.boundary() as (observer, seen):
+            self.post(observer, '/responses', body, 'client-token', 400)
+            record = observer.records[0]
+            self.assertEqual(record['rejection_category'], 'prior_context')
+            self.assertEqual(record['shape']['fields']['previous_response_id'], 'string')
+            self.assertEqual(record['shape']['input'][0],
+                             {'type': 'message', 'role': 'user', 'content': 'string'})
+            self.assertEqual(record['shape']['tools'], [{'type': 'function'}])
+            raw = observer.run / 'rejected-request-1.json'
+            self.assertEqual(json.loads(raw.read_text()), body)
+            self.assertEqual(raw.stat().st_mode & 0o777, 0o600)
+            self.assertEqual(seen, [])
+            self.assertNotIn('private-', json.dumps(observer.records))
+
+    def test_unknown_shape_names_are_redacted_and_diagnostics_are_bounded(self):
+        body = self.body()
+        body['private-key'] = 'private-token'
+        body['input'] = [{'type': 'private-future-item', 'role': 'private-role'}] * 100
+        with self.boundary() as (observer, seen):
+            self.post(observer, '/responses', body, 'client-token', 400)
+            record = observer.records[0]
+            self.assertEqual(record['rejection_category'], 'input_item')
+            self.assertEqual(record['shape']['unknown_fields'], 1)
+            self.assertEqual(record['shape']['input_count'], 100)
+            self.assertLessEqual(len(record['shape']['input']), 64)
+            self.assertEqual(record['shape']['input'][0]['type'], 'unknown')
+            self.assertNotIn('private-', json.dumps(observer.records))
+            self.assertEqual(seen, [])
+
+    def test_rejected_null_and_malformed_json_retain_only_private_raw_bytes(self):
+        for raw, shape in ((b'null', {'body': 'null'}),
+                           (b'{"private-value":', {'body': 'unavailable'})):
+            with self.subTest(raw=raw), self.boundary() as (observer, seen):
+                connection = http.client.HTTPConnection('127.0.0.1', observer.port, timeout=2)
+                connection.request('POST', '/responses', raw, {'Authorization': 'Bearer client-token'})
+                response = connection.getresponse(); response.read(); connection.close()
+                self.assertEqual(response.status, 400)
+                self.assertEqual(observer.records[0]['shape'], shape)
+                self.assertEqual((observer.run / 'rejected-request-1.json').read_bytes(), raw)
+                self.assertNotIn('private-', json.dumps(observer.records))
+                self.assertEqual(seen, [])
+
+    def test_current_desktop_developer_role_review_is_an_observer_block(self):
+        # Structural replay of engine 0.162.0-alpha.17.2, with policy text and
+        # native IDs removed. This is a contract limit, not a Guardian decision.
+        body = json.loads((SCRIPT_ROOT / 'scripts/fixtures/current-desktop-review-shape.json').read_text())
+        with self.boundary(guardian='moonshotai/Kimi-K3') as (observer, seen):
+            self.post(observer, '/responses', body, 'client-token', 400)
+            record = observer.records[0]
+            self.assertEqual(record['rejection_category'], 'guardian')
+            self.assertEqual(record['shape']['fields']['instructions'], 'null')
+            self.assertEqual(record['shape']['input'][0]['role'], 'developer')
+            self.assertEqual(record['shape']['model_matches'], ['main', 'guardian'])
+            self.assertTrue(record['shape']['format']['guardian_schema_matches'])
+            self.assertTrue(record['raw_body_retained'])
+            self.assertEqual(observer.reason, 'unsupported_request_contract')
+            self.assertEqual(seen, [])
+
+    def test_unauthenticated_body_is_never_captured(self):
+        with self.boundary() as (observer, seen):
+            self.post(observer, '/responses', {'private-key': 'private-token'}, 'wrong-token', 401)
+            self.assertEqual(observer.records, [])
+            self.assertFalse(list(observer.run.glob('rejected-request-*')))
+            self.assertEqual(seen, [])
+
+    def test_private_capture_failure_stops_without_overwriting_evidence(self):
+        with self.boundary() as (observer, seen):
+            existing = observer.run / 'rejected-request-1.json'
+            existing.write_text('retained earlier evidence')
+            body = self.body(); body['previous_response_id'] = 'private-native-id'
+            self.post(observer, '/responses', body, 'client-token', 500)
+            self.assertEqual(observer.reason, 'diagnostic_capture_failure')
+            self.assertEqual(observer.records[0]['failure'], 'diagnostic_capture_failure')
+            self.assertFalse(observer.records[0]['raw_body_retained'])
+            self.assertEqual(existing.read_text(), 'retained earlier evidence')
+            self.assertEqual(seen, [])
 
     def test_absolute_deadline_bounds_stalled_and_trickling_streams(self):
         for trickle in (False, True):
