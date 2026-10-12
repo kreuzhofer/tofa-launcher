@@ -111,7 +111,11 @@ shutdown reproduction remain retained. Race detection and production ownership
 deadlines are unchanged. The full Python suite passed, with real-client/UI opt-ins
 disabled; the opt-in actual CLI checks ran separately.
 
+The [two-axis review](evidence/presentation-runtime-126-127/review.md) found no
+remaining implementation defects after the fixes. The final metadata boundary
+tests and refreshed actual CLI proof passed after the full suite.
+
 Remaining gates are the actual native Desktop call/workflow and human previews,
-its two fresh model calibrations, review findings and final qualification. The
+its two fresh model calibrations and final qualification. The
 broader #119 matrix, approval/resume qualification, guidance adoption, releases,
 Windows and supported-model promotion remain outside these runtime tickets.

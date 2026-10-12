@@ -17,12 +17,12 @@
   "actual_cli_runtime_tests": {
     "status": "passed",
     "tests": 7,
-    "seconds": 43.63,
+    "seconds": 40.683,
     "paid_inference": false,
     "scope": "Actual CLI completion/delivery, HTTP pre-forward policy drift, copied-evidence tampering, cancellation and loader boundaries"
   },
   "go_vet": "passed",
-  "python_compilation": "passed on reviewed candidate",
+  "python_compilation": "passed: 72 Python files; output explicitly placed in owned checks/compiled directory",
   "bash_syntax": "passed",
   "shellcheck": "unavailable",
   "logs_sha256": {
@@ -47,12 +47,48 @@
     "contradictory-loader-red.log": "7262287c25c7c4d1719d488aec170f34d7801cec21ac8b85d321e33a7338f116",
     "runtime-final-review.log": "5569269ca51995dd875e805ea9a7bee1775b9d8982ee2c4c9c2c8ad8ca473f69",
     "structured-contract-red.log": "7ade25e2a01c2820c36f5c5c6da1aedc0060799ca636a5fe4b5f98dc84530b09",
-    "evidence-final-review.log": "f9b551dccf9a096b490b33f8eefc71e7332b796b9ed7e5ff16c9161be20c46a8"
+    "evidence-final-review.log": "f9b551dccf9a096b490b33f8eefc71e7332b796b9ed7e5ff16c9161be20c46a8",
+    "python-full-reviewed.log": "96db649fc49aca919456f01a0fc67819107136e92df4dd6c942045d311bb107e",
+    "runtime-metadata-reviewed.log": "6df7deeac85dde422666c8a6219eaf683cf5b969c7c33f1cb6a91eb098c27f5e",
+    "native-metadata-red.log": "dd51f4edb21cd5973556e0be4cf86f73559a69bcc27a66956ca7d6510b13285d",
+    "native-metadata-green.log": "425a07d9a724ce4c3929828612b3375b172d9e5d0d5ab1411579cddb4a4bfea2",
+    "desktop-assets-final.json": "8548e8cd8487fe7ebc6e1937b1ba47d81b7e0a89a2e9e0104eb3ed6c4a7c46ea"
   },
-  "review": "Initial and first follow-up findings corrected; second focused follow-up pending. Actual native Desktop qualification remains deferred.",
+  "review": {
+    "standards_remaining_findings": 0,
+    "spec_remaining_implementation_defects": 0,
+    "spec_deferred_qualification_gates": 1,
+    "record": "review.md"
+  },
   "desktop": "assets checked only; operator deferred native workflow and previews",
   "completion": "Not complete; integration branch retained; no merge or ticket closure.",
   "python_full_reviewed": {
-    "status": "running; final candidate after review fixes"
+    "status": "passed",
+    "tests": 473,
+    "skipped": 85,
+    "seconds": 702.506,
+    "opt_ins": "real client, native Desktop GUI and native Windows disabled",
+    "ordering": "Started at 002720e. Final selected-client/structured-content/metadata fixes checked afterward with focused boundary tests and refreshed actual CLI qualification."
+  },
+  "native_metadata_boundary": {
+    "status": "passed",
+    "tests": 4,
+    "red_then_green": true,
+    "scope": "owned local plist files only; no native UI or spoofed native thread"
+  },
+  "desktop_asset_check": {
+    "status": "assets_ready",
+    "native_workflow_qualified": false,
+    "client_identity": {
+      "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+      "version": "codex-cli 0.162.0-alpha.17.2"
+    },
+    "native": {
+      "version": "26.1007.30912",
+      "build": "20156",
+      "application_sha256": "75e397e2280dde93b70a85aa926f4282c728eacc84dfeb15ba7fb6ddd84628af",
+      "executable_sha256": "2053a78d225a1492d0cb6896cfd83254af06c3277547e83d4d23fef88f00426e",
+      "native_transport_sha256": "ae60fd7129a8eafea42dc41e8692e95dda624d4406826edd74010148371113db"
+    }
   }
 }

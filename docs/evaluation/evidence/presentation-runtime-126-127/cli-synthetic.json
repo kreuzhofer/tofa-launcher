@@ -2,7 +2,7 @@
   "schema": "tofa-presentation-runtime-evidence-v1",
   "scope": "actual installed CLI with synthetic loopback provider; not model capability or stock CLI baseline",
   "saved_status": "qualified",
-  "private_attempt_id": "00a4453f9c5e412cb6b2b4e6ae4c824f",
+  "private_attempt_id": "cba60a1b5c6d44d0a6521a9c532e8445",
   "paid_inference": false,
   "client_identity": {
     "sha256": "74c6a6d263f40d65f99c27a815275f5b4ed0bcc2baecc396b4cf3255498bdfc0",
@@ -19,8 +19,8 @@
     "additionalProperties": false
   },
   "loader_implementation": "scripts/presentation_runtime.py; launcher-owned STDIO MCP",
-  "loader_result_sha256": "6d8779a8bef13e9f45382158c5268e54f5f71f841663189da2ebba8b623f9a10",
-  "thread_identity_sha256": "37849a8dcbb81a2eb1a8b5df9990663880ca142195bda0e9e744578023d60e55",
+  "loader_result_sha256": "bf26839f9662e5033ba5f6623f22d0256f6b6d78f4c0d67d6b4cfa1bb4e865e6",
+  "thread_identity_sha256": "195436e778abaf2c2b99632244502efc17a0a377d3ed3ece96d6b2945c5cdf39",
   "execution_host": "macOS arm64; ordinary persistent Codex home",
   "bundle_version": "26.1011.11113",
   "artifact_tool_version": "2.8.93",
@@ -64,26 +64,27 @@
     },
     "pdfinfo": {
       "sha256": "fee70ade670fb025343aca2b5c3a2aacacb8ed9edce1b716b233b5de924b6bf5",
-      "version": "pdfinfo version 26.05.0"
+      "version": "pdfinfo version 26.05.0\nCopyright 2005-2026 The Poppler Developers - http://poppler.freedesktop.org\nCopyright 1996-2011, 2022 Glyph & Cog, LLC"
     },
     "pdftoppm": {
       "sha256": "de772e88ab9977ccde25def9b403bf42675d75f5dd82b19fbd7d8123ad183159",
-      "version": "pdftoppm version 26.05.0"
+      "version": "pdftoppm version 26.05.0\nCopyright 2005-2026 The Poppler Developers - http://poppler.freedesktop.org\nCopyright 1996-2011, 2022 Glyph & Cog, LLC"
     }
   },
   "libreoffice_manifest_declaration": "25.2-headless-codex.1",
   "pdf_route": "supplied_libreoffice",
   "artifacts": {
-    "deck.pptx": "f875f478bfa2116bd7a4e2c032c715e730fb4a8f5ecc5b2a43d0cff12031b8cc",
-    "deck.pdf": "0d3354df31375dd34556ef957c85f7c3bd184b04c8a38b483c25b9acd20f301f",
+    "deck.pptx": "dab2c8b9013878694e9216fc35fe6e4c1a396d6bc3a9edd29108e8b64811abc1",
+    "deck.pdf": "517a602cd649b0ff70c66a21a973dbc3c9a612affdeaed7bb92aad7fad1b457d",
     "slide.png": "109e0b9a0bdb2aa9ea2bd0ab7f8108fba2104b2ee6eb46076bee1418d27190e4"
   },
   "finalization": {
     "schema": "presentation-finalization.v1",
-    "sha256": "f875f478bfa2116bd7a4e2c032c715e730fb4a8f5ecc5b2a43d0cff12031b8cc",
+    "sha256": "dab2c8b9013878694e9216fc35fe6e4c1a396d6bc3a9edd29108e8b64811abc1",
     "package_integrity": "pass",
     "first_party_import_passed": true,
-    "font_selection_passed": true
+    "font_selection_passed": true,
+    "layout_exit_code": 0
   },
   "limits": {
     "seconds": 180,
@@ -101,7 +102,7 @@
     "presentation_calibration.py": "95dcb61253b1dac82a114648f9b04130ec38043d56539f39a74782355363f60b",
     "presentation_runtime.py": "5e3cf36fd16f0b2037dd0df6a090360d8fc897551bd1b26f3325792f0264d075",
     "presentation_smoke.py": "028bb6f44676c53a2f345f379cef78b9eb78a8cd52012ac5ab37c63bfbf95b87",
-    "capability_runtime.py": "e3c7f48819a33570b6af58768f5857ddceef79d8ae9ce9ae0d4fe9389b128023",
+    "capability_runtime.py": "4fc01e201ee8e05f8269a5f7f965d3471a419c53e680f8255c774f817f536d0e",
     "presentation_preview.py": "f54b72260e931adc05ae500e07be6e67cb63a230ef0f2ed7d6eefff5e3c494c7",
     "capability_observer.py": "b5492ac3ba263cc7e5ec3df790d45614f897eb3ffa426f92312028d5e0671a50",
     "capability_actions.py": "cada1c6b10fae235c28cd958c39b595b6260f94279ee226b5ef266f7a0e2efd7",
@@ -117,5 +118,12 @@
     "platform": "macOS-26.7-arm64-arm-64bit"
   },
   "completed_delivery_verified": true,
-  "successful_execution_verified": true
+  "successful_execution_verified": true,
+  "client_executable": "/Users/daniel/.codex/packages/standalone/releases/0.162.1-aarch64-apple-darwin/bin/codex",
+  "qualification_sha256": "c7ad368d67b87a105ff283fe16cea0e514301a5a623cb2d696d7b446956d7e2c",
+  "skill_identity": {
+    "version": "26.1011.11113",
+    "skill_sha256": "bb3726eff35cb82241fd2c3b09fcdb18cc3bf3daefddf8df929d2e0bd4d2af2f",
+    "implementation_sha256": "45a8c01663a4b1dad6e80e1112223b8a19529b32be5f46a47a2dbc058806f55d"
+  }
 }
