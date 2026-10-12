@@ -1,0 +1,47 @@
+{
+  "schema": "tofa-presentation-runtime-assessment-v1",
+  "date_utc": "2026-10-12T16:57:10.733139+00:00",
+  "source_base": "2d5b713",
+  "review_baseline": "7a04fc2640cb58c6e7ca19d9e6d75b19972f94b0",
+  "outcome": "explicit_infrastructure_block_before_deck_inference",
+  "qualified_runtime_available": false,
+  "installed_skill": {
+    "version": "26.1011.11113",
+    "location_sha256": "76ef16ef24dfab0f5328c500b47cac1b79756c6263353bb8716de1c796e6cffe",
+    "sha256": "bb3726eff35cb82241fd2c3b09fcdb18cc3bf3daefddf8df929d2e0bd4d2af2f",
+    "resources_sha256": "49b788f881cf8daeadf9341a5547e8caae495266946d3457f2a5835436267562",
+    "implementation_sha256": "45a8c01663a4b1dad6e80e1112223b8a19529b32be5f46a47a2dbc058806f55d",
+    "requirement_observed": true
+  },
+  "required_tool": "load_workspace_dependencies",
+  "observed_client": {
+    "sha256": "74c6a6d263f40d65f99c27a815275f5b4ed0bcc2baecc396b4cf3255498bdfc0",
+    "version": "codex-cli 0.162.1"
+  },
+  "observed_required_tool": "absent from current CLI request; Desktop UI inventory remains unobserved",
+  "supplied_node_packages_binaries_python": "not_observed; no loader result; global executables do not establish supplied-runtime identity",
+  "calibration_test_sha256": "eaf335370853a68f694a5490e3fdc7e930347d8d1e5474dd9dae852702984649",
+  "calibration": "cli-runtime-calibration.json",
+  "setup_attempt": "cli-runtime-setup-block.json",
+  "setup_classification": "launcher refused the diagnostic 30-second observer contract before client requests; corrected to existing 180-second contract without changing launcher gates",
+  "command_import_attempt": "test invocation omitted scripts import path; failed before allocating an attempt; corrected PYTHONPATH=scripts",
+  "paid_inference_requests": 0,
+  "artifacts_created": 0,
+  "settings_preserved": true,
+  "environment_drift": [],
+  "task_content": "not_run",
+  "skill_use": "not_run",
+  "visible_preview": "not_run; ui_check_pending",
+  "skill_discovery_claim": "installed inventory only; no new model-driven skill discovery",
+  "no_substitute_installation": "command blocked before client launch; native diagnostic rejected before any model response or tool proposal",
+  "original_campaign_attempts_modified": false,
+  "fresh_03_04_campaign_resumed": false,
+  "desktop_ui_operated": false,
+  "windows_operated": false,
+  "remaining_prerequisite": "qualify a client/host path that exposes the required supplied-runtime loader and exact return provenance before enabling deck inference",
+  "gates": {
+    "native_approval_or_resume_qualified": false,
+    "guidance_adopted": false,
+    "supported_or_release_promoted": false
+  }
+}

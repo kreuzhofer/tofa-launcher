@@ -16,6 +16,47 @@ SCRIPT_ROOT = Path(__file__).resolve().parent.parent
 
 
 class BoundaryTests(unittest.TestCase):
+    def test_deck_naming_cannot_infer_before_runtime_qualification(self):
+        title = json.loads((SCRIPT_ROOT / 'internal/tofa/testdata/desktop-luna6-title-request.json').read_text())
+        with self.boundary(case='03') as (observer, seen):
+            self.post(observer, '/responses', title, 'client-token', 400)
+            self.assertEqual(seen, [])
+            self.assertEqual(observer.reason, 'presentation_runtime_unqualified')
+            self.assertEqual(observer.records[0]['role'], 'auxiliary_title')
+            self.assertEqual(observer.records[0]['presentation_runtime']['advertised'], 'not_observed')
+
+    def test_advertised_loader_does_not_qualify_a_deck_runtime(self):
+        body = self.body()
+        body['input'] = [{'type': 'additional_tools', 'tools': [
+            {'type': 'namespace', 'name': 'functions', 'tools': [
+                {'type': 'function', 'name': 'load_workspace_dependencies',
+                 'parameters': {'type': 'object'}}]}]}]
+        with self.boundary(case='04') as (observer, seen):
+            self.post(observer, '/responses', body, 'client-token', 400)
+            self.assertEqual(seen, [])
+            self.assertEqual(observer.reason, 'presentation_runtime_unqualified')
+            self.assertEqual(observer.records[0]['presentation_runtime'], {
+                'required_tool': 'load_workspace_dependencies',
+                'advertised': 'present', 'qualified': False})
+
+    def test_deck_missing_required_runtime_tool_stops_before_inference(self):
+        body = self.body()
+        body['tools'] = [{'type': 'namespace', 'name': 'functions', 'tools': [
+            {'type': 'function', 'name': 'exec_command', 'parameters': {'type': 'object'}}]}]
+        with self.boundary(case='03') as (observer, seen):
+            self.post(observer, '/responses', body, 'client-token', 400)
+            self.assertEqual(seen, [])
+            self.assertEqual(observer.reason, 'presentation_runtime_tool_missing')
+            record = observer.records[0]
+            self.assertEqual(record['role'], 'main')
+            self.assertFalse(record['forwarded'])
+            self.assertEqual(record['presentation_runtime'], {
+                'required_tool': 'load_workspace_dependencies',
+                'advertised': 'absent', 'qualified': False})
+            self.assertEqual(record['audit']['tools'][0]['source'], 'tools')
+            self.assertNotIn('exec_command', json.dumps(record))
+            self.assertTrue(record['raw_body_retained'])
+
     def test_listener_registration_does_not_require_reverse_dns(self):
         with tempfile.TemporaryDirectory() as directory:
             run = Path(directory); (run / 'workspace').mkdir()

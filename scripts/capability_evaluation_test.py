@@ -1,5 +1,6 @@
 """Behavioral tests of the explicitly invoked capability evaluator command."""
 import json
+import hashlib
 import os
 import platform
 import plistlib
@@ -14,7 +15,7 @@ import time
 SCRIPT = Path(__file__).with_name('capability_evaluation.py')
 
 
-def desktop_handoff(root, encoding, *, command='run', case='05', artifacts='present', settings_drift=False):
+def desktop_handoff(root, encoding, *, command='run', case='05', artifacts='present', settings_drift=False, client='desktop'):
     bundle = root / 'FixtureDesktop.app'
     contents = bundle / 'Contents'
     (contents / 'Resources').mkdir(parents=True)
@@ -33,8 +34,14 @@ def desktop_handoff(root, encoding, *, command='run', case='05', artifacts='pres
     if case == '18':
         (root / 'skills/documents').mkdir()
         (root / 'skills/documents/SKILL.md').write_text('---\nname: documents\n---\nSynthetic inventory only.\n')
+    if case in ('03', '04'):
+        skill = root / 'skills/presentations'
+        (skill / 'references').mkdir(parents=True)
+        (skill / 'SKILL.md').write_text('---\nname: presentations\n---\nSynthetic inventory only.\n')
+        (skill / 'references/implementation.md').write_text(
+            'Call `load_workspace_dependencies`. Do not install substitutes.\n')
     return subprocess.run([sys.executable, str(SCRIPT), command] + (['--live'] if command == 'run' else []) + [
-        '--private-root', str(root / 'runs'), '--case', case, '--client', 'desktop',
+        '--private-root', str(root / 'runs'), '--case', case, '--client', client,
         '--model', 'moonshotai/Kimi-K3', '--launcher', str(executable),
         '--codex', str(executable), '--app-bundle', str(bundle),
         '--codex-home', str(root / 'home'), '--skill-root', str(root / 'skills')],
@@ -45,6 +52,33 @@ def desktop_handoff(root, encoding, *, command='run', case='05', artifacts='pres
 
 
 class CommandTests(unittest.TestCase):
+    @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
+    def test_decks_block_before_launch_with_installed_runtime_contract_provenance(self):
+        for case, client in (('03', 'desktop'), ('04', 'cli')):
+            with self.subTest(case=case, client=client), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                result = desktop_handoff(root, 'raw', case=case, client=client, settings_drift=True)
+                self.assertEqual(result.returncode, 1, result.stderr)
+                report = json.loads(result.stdout)
+                self.assertEqual(report['status'], 'infra_blocked')
+                self.assertEqual(report['blockers'], ['presentation_runtime_unqualified'])
+                self.assertEqual(report['requests'], [])
+                run = root / 'runs' / report['run_id']
+                self.assertFalse((run / 'client.log').exists())
+                self.assertEqual((root / 'home/config.toml').read_text(), '# synthetic original settings\n')
+                self.assertEqual(list((run / 'workspace').iterdir()), [])
+                runtime = report['provenance']['presentation_runtime']
+                self.assertEqual(runtime['status'], 'unqualified')
+                self.assertEqual(runtime['required_tool'], 'load_workspace_dependencies')
+                self.assertEqual(runtime['loader_result'], 'not_observed')
+                implementation = 'Call `load_workspace_dependencies`. Do not install substitutes.\n'
+                self.assertEqual(runtime['skill_implementations'][0]['implementation_sha256'],
+                                 hashlib.sha256(implementation.encode()).hexdigest())
+                self.assertTrue(runtime['skill_implementations'][0]['requirement_observed'])
+                self.assertEqual(report['limits'], {'seconds': 900, 'requests': 80, 'output_tokens': 8192})
+                for criterion in ('task_content', 'skill_use', 'visible_preview'):
+                    self.assertEqual(report['criteria'][criterion]['status'], 'not_run')
+
     @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
     def test_protected_settings_drift_is_hash_audited_and_never_restored(self):
         with tempfile.TemporaryDirectory() as directory:

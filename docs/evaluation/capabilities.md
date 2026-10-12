@@ -13,6 +13,13 @@ and the independently versioned incident-handover workflow is available as case
 18. Original reports and corpus v3 remain unchanged. See the
 [current-client qualification and its limits](capability-method-123.md).
 
+[#122](https://github.com/kreuzhofer/tofa-launcher/issues/122) adds an explicit
+presentation runtime qualification block. Cases 03/04 on CLI and Desktop stop
+before client launch with `presentation_runtime_unqualified`; an installed skill
+and Node executable do not establish the required supplied runtime. The request
+boundary also blocks main and naming inference for these deck cases. See the
+[runtime contract, retained CLI diagnostic and remaining prerequisite](capability-runtime-122.md).
+
 ## Commands
 
 Build the launcher from this revision. An older installed launcher cannot enforce

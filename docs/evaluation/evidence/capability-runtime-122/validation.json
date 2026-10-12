@@ -1,0 +1,61 @@
+{
+  "schema": "tofa-presentation-runtime-validation-v1",
+  "synthetic_boundary_tests": {
+    "status": "passed",
+    "tests": 45
+  },
+  "red_first": [
+    {
+      "boundary": "main without loader",
+      "observed_status": 200,
+      "expected_status": 400
+    },
+    {
+      "boundary": "advertised loader without qualification",
+      "observed_status": 200,
+      "expected_status": 400
+    },
+    {
+      "boundary": "naming before runtime qualification",
+      "observed_status": 200,
+      "expected_status": 400
+    },
+    {
+      "boundary": "CLI/Desktop deck command",
+      "observed_status": "failed after launch",
+      "expected_status": "infra_blocked before launch"
+    }
+  ],
+  "python_compilation": "passed",
+  "go_vet": "passed",
+  "full_go_race": {
+    "status": "passed",
+    "command": "go test -race ./... -count=1",
+    "internal_package_seconds": 291.482,
+    "log_sha256": "2319fd0cc9e4fd3b534d12edf0f57c18d4bdff672dee34b923f247275547efa5",
+    "real_client_opt_ins": "disabled"
+  },
+  "full_python": {
+    "status": "passed",
+    "tests": 458,
+    "skipped": 83,
+    "seconds": 579.073,
+    "log_sha256": "aa03349686d0946236d9c1c90e5bfae87b728548d9862ff3afcb8b7f6d62cde5",
+    "inputs": "all discovered test modules; documented lifecycle distribution/version and terminal binary; real-client/GUI/native-Windows opt-ins disabled",
+    "runner_sha256": "93ae7cb36f177240dbc7d42bab40142000746bcfb184f7d0de46f190d4cd25d4"
+  },
+  "installed_cli_runtime_calibration": "passed; exact report retained",
+  "reviews": {
+    "standards": {
+      "findings": 0,
+      "status": "passed"
+    },
+    "spec": {
+      "findings": 0,
+      "status": "passed",
+      "explicit_block_outcome": "satisfied"
+    }
+  },
+  "evidence_identity_and_privacy": "passed; exact private calibration copies and current harness/test hashes verified",
+  "completion": "explicit blocking path implemented and reviewed; qualified runtime availability and fresh 03/04 campaign execution remain pending"
+}

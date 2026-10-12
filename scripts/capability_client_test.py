@@ -2,6 +2,8 @@
 import http.server
 import json
 import os
+import shlex
+import signal
 from pathlib import Path
 import subprocess
 import sys
@@ -9,13 +11,18 @@ import tempfile
 import threading
 import unittest
 import uuid
+from types import SimpleNamespace
 
 from evaluation_proxy import fixture_response, message
-from capability_observer import LoopbackServer
+from capability_observer import LoopbackServer, Observer
+from capability_evaluation import digest, environment, protected_settings, save, version
 
 
 @unittest.skipUnless(sys.platform == 'darwin' and os.environ.get('TOFA_TEST_CODEX'), 'set TOFA_TEST_CODEX on macOS for real-client calibration')
 class InstalledCapabilityTests(unittest.TestCase):
+    def test_installed_cli_deck_runtime_stops_before_provider_inference(self):
+        self.calibrate('03')
+
     def test_installed_cli_with_persistent_skills_delivers_unchanged_fixtures(self):
         self.calibrate('05')
 
@@ -65,6 +72,14 @@ class InstalledCapabilityTests(unittest.TestCase):
                         'upstream': seen, 'report': report}
             (root / 'calibration.json').write_text(json.dumps(evidence, indent=2))
             print('Retained calibration: ' + str(root / 'calibration.json'), file=sys.stderr)
+            if case == '03':
+                self.assertEqual(result.returncode, 1, json.dumps(report))
+                self.assertEqual(report['status'], 'infra_blocked')
+                self.assertIn('presentation_runtime_unqualified', report['blockers'])
+                self.assertEqual(seen, [])
+                self.assertEqual(report['requests'], [])
+                self.observe_runtime_boundary(root, launcher, env, report, seen)
+                return
             self.assertEqual(result.returncode, 0, json.dumps(report))
             self.assertEqual(seen, [{'model': 'moonshotai/Kimi-K3', 'cap': 4096}] * (2 if case == '07' else 1))
             self.assertEqual(report['criteria']['file_integrity']['status'], 'passed')
@@ -77,6 +92,75 @@ class InstalledCapabilityTests(unittest.TestCase):
                 self.assertEqual(report['actions']['diagnostic_calls'], 1)
         finally:
             server.shutdown(); server.server_close()
+
+
+    def observe_runtime_boundary(self, root, launcher, env, preflight, seen):
+        # This is a separate zero-inference request diagnostic. It does not
+        # resume the blocked command or count as a fresh campaign deck cell.
+        run = root / 'runtime-boundary'; run.mkdir(mode=0o700)
+        workspace = run / 'workspace'; workspace.mkdir(mode=0o700)
+        prompt = (root / 'runs' / preflight['run_id'] / 'prompt.txt').read_bytes()
+        (run / 'prompt.txt').write_bytes(prompt)
+        home = os.environ.get('CODEX_HOME', str(Path.home() / '.codex'))
+        options = SimpleNamespace(codex_home=home, launcher=launcher,
+                                  codex=os.environ['TOFA_TEST_CODEX'], case='03', skill_root=None)
+        before = protected_settings(options)
+        inventory_before = environment(options)
+        shim = run / 'bin'; shim.mkdir(mode=0o700)
+        executable = shim / 'codex'
+        executable.write_text('#!/bin/sh\nexec ' + shlex.quote(str(Path(options.codex).resolve())) + ' "$@"\n')
+        executable.chmod(0o700)
+        env = dict(env, CODEX_HOME=str(Path(home).expanduser().resolve()),
+                   PATH=str(shim) + os.pathsep + env.get('PATH', ''), OTEL_SDK_DISABLED='true')
+        # The launcher accepts its qualified 180/900-second observer contracts.
+        # This diagnostic additionally supervises the native process at 35 seconds.
+        limits = {'seconds': 180, 'requests': 1, 'output_tokens': 8192}
+        with Observer(run, model='moonshotai/Kimi-K3', guardian='zai-org/GLM-5.3-Flash',
+                      limits=limits, case='03') as observer:
+            config = run / 'observer.json'
+            save(config, dict(version=1, endpoint=observer.url, secret=observer.secret, seconds=limits['seconds']))
+            command = [str(launcher), 'launch', 'codex', '--model', 'moonshotai/Kimi-K3',
+                       '--guardian-model', 'zai-org/GLM-5.3-Flash', '--allow-unverified',
+                       '--evaluation-observer', str(config), '--', '--sandbox', 'workspace-write',
+                       'exec', '--ephemeral', '--skip-git-repo-check', '--json', '-']
+            process = subprocess.Popen(command, cwd=workspace, env=env, start_new_session=True,
+                                       stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+            try:
+                output, _ = process.communicate(prompt, timeout=35)
+            finally:
+                if process.poll() is None:
+                    os.killpg(process.pid, signal.SIGTERM)
+                    try: process.wait(timeout=5)
+                    except subprocess.TimeoutExpired:
+                        os.killpg(process.pid, signal.SIGKILL); process.wait(timeout=5)
+            (run / 'client.log').write_bytes(output); (run / 'client.log').chmod(0o600)
+        inventory_after = environment(options)
+        evidence = {
+            'schema': 'tofa-presentation-runtime-calibration-v1',
+            'scope': 'installed CLI request diagnostic; blocked command retained separately; not a campaign cell',
+            'paid_inference': False, 'client': version(options.codex), 'launcher': version(launcher),
+            'limits': limits, 'elapsed_ms': observer.elapsed(), 'exit_code': process.returncode,
+            'native_process_timeout_seconds': 35,
+            'runtime_contract': preflight['provenance']['presentation_runtime'],
+            'settings_preserved': before == protected_settings(options),
+            'environment_drift': [key for key in inventory_before if inventory_before[key] != inventory_after.get(key)],
+            'requests': observer.records, 'stop_reason': observer.reason, 'upstream': seen,
+            'harness_sha256': preflight['provenance']['harness_sha256'],
+            'rejected_body_sha256': digest(run / 'rejected-request-1.json') if (run / 'rejected-request-1.json').exists() else None,
+            'workspace_artifacts': sorted(path.name for path in workspace.iterdir()),
+            'criteria': preflight['criteria'], 'preflight': preflight,
+        }
+        save(root / 'runtime-calibration.json', evidence)
+        print('Retained runtime calibration: ' + str(root / 'runtime-calibration.json'), file=sys.stderr)
+        self.assertEqual(observer.reason, 'presentation_runtime_tool_missing')
+        self.assertEqual(seen, [])
+        self.assertEqual(len(observer.records), 1)
+        self.assertFalse(observer.records[0]['forwarded'])
+        self.assertEqual(observer.records[0]['presentation_runtime']['advertised'], 'absent')
+        self.assertTrue(evidence['settings_preserved'])
+        self.assertEqual(evidence['environment_drift'], [])
+        self.assertEqual(evidence['workspace_artifacts'], [])
+        self.assertTrue(evidence['rejected_body_sha256'])
 
 
 if __name__ == '__main__':

@@ -71,10 +71,16 @@ def inventory(roots):
                 if total > 128 * 1024 * 1024 or len(resources) >= 10000:
                     raise ValueError('skill_inventory_limit')
                 resources.append((str(resource.relative_to(path.parent)), digest(resource)))
-            result.append({'location_sha256': fingerprint(str(path.resolve())), 'sha256': digest(path),
-                           'resources_sha256': fingerprint(resources),
-                           'presentation': bool(re.search(r'(?im)^name:.*presentation', path.read_text())),
-                           'document': bool(re.search(r'(?im)^name:.*document', path.read_text()))})
+            item = {'location_sha256': fingerprint(str(path.resolve())), 'sha256': digest(path),
+                    'resources_sha256': fingerprint(resources),
+                    'presentation': bool(re.search(r'(?im)^name:.*presentation', path.read_text())),
+                    'document': bool(re.search(r'(?im)^name:.*document', path.read_text()))}
+            if item['presentation']:
+                implementation = path.parent / 'references/implementation.md'
+                item['implementation_sha256'] = digest(implementation) if implementation.is_file() else None
+                item['requirement_observed'] = implementation.is_file() and bool(re.search(
+                    r'Call `load_workspace_dependencies`\.', implementation.read_text()))
+            result.append(item)
     return sorted(result, key=lambda item: item['location_sha256'])
 
 
@@ -82,12 +88,21 @@ def environment(options):
     home = Path(options.codex_home).expanduser().resolve()
     roots = options.skill_root or [str(home / 'skills'), str(home / 'plugins/cache'),
                                   str(Path.home() / '.agents/skills')]
-    return dict(settings=settings(home), skills=inventory(roots), python=version(sys.executable),
+    skills = inventory(roots)
+    result = dict(settings=settings(home), skills=skills, python=version(sys.executable),
                 node=version(shutil.which('node')) if shutil.which('node') else None,
                 shell={'sha256': digest('/bin/zsh')},
                 launcher=version(options.launcher), codex=version(options.codex),
                 os=platform.platform(), environment_sha256=fingerprint({key: os.environ.get(key)
                     for key in ('PATH', 'SHELL', 'LANG', 'LC_ALL', 'NODE_PATH')}))
+    if options.case in ('03', '04'):
+        result['presentation_runtime'] = {
+            'contract': 'presentation-runtime-v1', 'status': 'unqualified',
+            'required_tool': 'load_workspace_dependencies', 'loader_result': 'not_observed',
+            'skill_implementations': [{key: item[key] for key in (
+                'location_sha256', 'sha256', 'resources_sha256', 'implementation_sha256', 'requirement_observed')}
+                for item in skills if item['presentation']]}
+    return result
 
 
 def preflight(options):
@@ -128,6 +143,10 @@ def preflight(options):
                     'fixture_hashes': fixtures, 'os': platform.platform(),
                     'guardian': options.guardian, 'instruction_variant': options.variant})
     save(run / 'result.json', report)
+    if options.case in ('03', '04'):
+        # No qualified client path currently supplies the installed skill's
+        # runtime contract. Node on PATH and a skill inventory cannot qualify it.
+        report['blockers'].append('presentation_runtime_unqualified')
     if case.get('client') and options.client != case['client']:
         report['blockers'].append('workflow_client_mismatch')
     if 'outputs' in case:
@@ -214,7 +233,8 @@ def preflight(options):
                     not isinstance(previous.get('provenance'), dict)):
                 raise ValueError('invalid_comparison')
             compared = ('launcher', 'codex', 'desktop', 'os', 'settings', 'skills', 'python', 'node', 'shell',
-                        'environment_sha256', 'catalog_sha256', 'guardian', 'harness_sha256', 'corpus_sha256', 'method')
+                        'environment_sha256', 'catalog_sha256', 'guardian', 'harness_sha256', 'corpus_sha256', 'method',
+                        'presentation_runtime')
             report['drift'] = [key for key in compared if previous['provenance'].get(key) != report['provenance'].get(key)]
             if report['drift']: report['blockers'].append('environment_drift')
         except (OSError, ValueError, UnicodeError):
@@ -286,7 +306,7 @@ def finish_report(run, report, observer, code, preserved):
         for r in observer.records) for role in ('main', 'guardian', 'auxiliary_title')}
     failures = [r['failure'] for r in observer.records if r.get('failure')]
     reason = observer.reason
-    infra = any(value.startswith(('unsupported_', 'unmatched_', 'workspace_', 'scope_')) or
+    infra = any(value.startswith(('unsupported_', 'unmatched_', 'workspace_', 'scope_', 'presentation_runtime_')) or
                 value in ('stream_failure', 'upstream_http_error', 'response_incomplete',
                           'instruction_variant_missing', 'diagnostic_capture_failure') for value in failures)
     completed = any(r.get('completed') and r.get('final_answer') and r.get('role') == 'main' for r in observer.records)

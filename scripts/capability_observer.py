@@ -159,6 +159,19 @@ def hashed(value):
     return {'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw)}
 
 
+def presentation_tool_advertised(body):
+    tools = list(body.get('tools', []))
+    for item in body['input']:
+        tools.extend(item.get('tools', []))
+    while tools:
+        tool = tools.pop()
+        if tool['type'] == 'namespace':
+            tools.extend(tool['tools'])
+        elif tool['name'] == 'load_workspace_dependencies':
+            return True
+    return False
+
+
 def audit(body):
     """Preserve ordering and omission, without exporting instruction/tool text."""
     instructions = []
@@ -288,7 +301,8 @@ class Observer:
         temporary.chmod(0o600)
         temporary.replace(self.run / 'requests.json')
 
-    def reject(self, handler, reason, status, body=UNAVAILABLE, *, category=None):
+    def reject(self, handler, reason, status, body=UNAVAILABLE, *, category=None,
+               known_role=None, presentation_runtime=None):
         with self.lock:
             record = {'role': 'unknown', 'forwarded': False, 'failure': reason,
                       'rejection_category': category or reason}
@@ -296,6 +310,10 @@ class Observer:
                 record['shape'] = request_shape(body, self.model, self.guardian)
             else:
                 record['shape'] = {'body': 'unavailable'}
+            if known_role:
+                record.update(role=known_role, audit=audit(body))
+            if presentation_runtime is not None:
+                record['presentation_runtime'] = presentation_runtime
             raw_bytes = getattr(handler, 'raw_request', None)
             record['raw_body_retained'] = False
             if raw_bytes is not None:
@@ -353,6 +371,12 @@ class Observer:
                 # this boundary instead of assuming the file was discovered.
                 if json.dumps(self.expected_instructions, ensure_ascii=False)[1:-1] not in json.dumps(body, ensure_ascii=False):
                     self.reject(handler, 'instruction_variant_missing', 400, body); return
+            if self.case in ('03', '04'):
+                advertised = ('present' if presentation_tool_advertised(body) else 'absent') if kind == 'main' else 'not_observed'
+                reason = 'presentation_runtime_tool_missing' if advertised == 'absent' else 'presentation_runtime_unqualified'
+                self.reject(handler, reason, 400, body, known_role=kind,
+                    presentation_runtime={'required_tool': 'load_workspace_dependencies',
+                                          'advertised': advertised, 'qualified': False}); return
             if kind == 'main':
                 failure = self.action_watch.observe(body)
                 if failure:
