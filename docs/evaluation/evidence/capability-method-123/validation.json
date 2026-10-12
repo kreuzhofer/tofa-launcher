@@ -133,9 +133,14 @@
     }
   },
   "desktop_operator": {
-    "status": "pending",
+    "status": "completed_negative_calibration",
     "scope": "one fresh GLM baseline handoff with method-v2 scoring; separate title visibility and both previews",
-    "automatic_launch": false
+    "automatic_launch": false,
+    "assessment": "desktop-assessment.json",
+    "report": "desktop-calibration-05.json",
+    "preview_status": "failed",
+    "automatic_title_visible": true,
+    "method_completion": "synthetic positives/negatives, retained CLI calibrations, and operator-started Desktop negative calibration; no model handoff pass"
   },
   "gates": {
     "campaign_complete": false,

@@ -69,9 +69,23 @@ The [verification record](evidence/capability-method-123/validation.json),
 and their limits. Passing
 synthetic checks qualifies observation and supervision only. A retained installed
 CLI calibration uses synthetic credentials and provider responses with the
-ordinary persistent skills/settings preserved. Desktop preview calibration is
-an asynchronous operator step: the human starts the bounded launch when ready,
-selects its freshly printed workspace, submits the exact prompt, waits for naming,
-and opens both references. A completed backend naming request does not establish
-visible title success. No production guidance adoption, campaign completion,
-release or Supported-model promotion follows from these method checks.
+ordinary persistent skills/settings preserved.
+
+The maintainer completed one asynchronous Desktop method calibration on the
+reviewed revision, recorded in the
+[exact export](evidence/capability-method-123/desktop-calibration-05.json) and
+[separate assessment](evidence/capability-method-123/desktop-assessment.json).
+One GLM 5.3 main request and one independent Lightning naming request completed
+with full usage counters, unchanged fixtures, preserved settings and no drift.
+The response provided both exact absolute fixture paths in inline code with no
+Markdown destinations. Reference syntax failed correctly, and the maintainer
+recorded failed previews. The automatic title was visible. This is a completed
+negative method calibration, not a successful handoff; no Guardian inference
+occurred. The specific preview-failure mechanism was not recorded.
+
+Future Desktop observations remain operator steps: start when ready, select the
+printed fresh workspace, submit its exact prompt, wait for naming, and check both
+references. Backend naming alone does not establish title visibility. No
+production guidance adoption, campaign completion, release or Supported-model
+promotion follows from these method checks. The original #119 matrix, repeated
+comparison and held-out model execution remain incomplete.
