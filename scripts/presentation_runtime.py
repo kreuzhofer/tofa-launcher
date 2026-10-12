@@ -109,7 +109,7 @@ def from_loader_output(output, provider):
                 if provider != PROVIDER or value != inventory(value.get('root', '')):
                     raise ValueError('returned_runtime_identity_mismatch')
                 text.append(instructions(value))
-            for key in ('content', 'contentItems', 'text', 'output'):
+            for key in ('content', 'contentItems', 'text', 'output', 'structuredContent'):
                 if key in value: collect(value[key])
     collect(output)
     combined = '\n'.join(text)

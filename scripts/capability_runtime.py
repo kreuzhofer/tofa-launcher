@@ -5,6 +5,8 @@ from pathlib import Path
 import zipfile
 import subprocess
 import plistlib
+import re
+import platform
 
 from presentation_runtime import from_loader_output, inventory, sha256
 
@@ -57,27 +59,45 @@ def executable_versions(runtime, workspace):
 
 
 def protected(home, skill, runtime):
-    files = [home / 'config.toml', home / 'auth.json']
+    files = [home / name for name in ('config.toml', 'auth.json', 'managed_config.toml',
+        'AGENTS.md', 'AGENTS.override.md')]
     for root in (home / 'skills', home / 'plugins/cache', home.parent / '.agents/skills', skill, runtime):
         files += [path for path in root.rglob('*') if path.is_file() and '__pycache__' not in path.parts and path.suffix != '.pyc']
     snapshot = {str(path): sha256(path) for path in set(files) if path.is_file()}
     return {'files': len(snapshot), 'sha256': hashlib.sha256(json.dumps(snapshot, sort_keys=True).encode()).hexdigest()}
 
 
+def catalog_tools(body):
+    """Validate the client's tool catalog and return its owning namespaces."""
+    if not isinstance(body, dict): raise ValueError('invalid_tool_catalog')
+    pending = []
+    if not isinstance(body.get('input', []), list): raise ValueError('invalid_tool_catalog')
+    for container in [body, *body.get('input', [])]:
+        if not isinstance(container, dict) or not isinstance(container.get('tools', []), list):
+            raise ValueError('invalid_tool_catalog')
+        pending += [(None, tool) for tool in container.get('tools', [])]
+    result = []
+    while pending:
+        parent, tool = pending.pop()
+        if not isinstance(tool, dict): raise ValueError('invalid_tool_catalog')
+        if tool.get('type') == 'namespace':
+            if not isinstance(tool.get('name'), str) or not isinstance(tool.get('tools'), list):
+                raise ValueError('invalid_tool_catalog')
+            pending += [(tool.get('name'), child) for child in tool.get('tools', [])]
+        else: result.append((parent, tool))
+    return result
+
+
 def loader_tools(body, provider):
     """Recognize the actual flat or namespaced MCP catalog, never a matching suffix."""
     namespace = 'mcp__' + provider
     full = namespace + '__load_workspace_dependencies'
-    pending = [(None, tool) for tool in body.get('tools', [])]
-    for item in body.get('input', []): pending += [(None, tool) for tool in item.get('tools', [])]
     result = []
-    while pending:
-        parent, tool = pending.pop()
-        if tool.get('type') == 'namespace':
-            pending += [(tool.get('name'), child) for child in tool.get('tools', [])]
-        elif ((parent is None and tool.get('name') == full) or
+    for parent, tool in catalog_tools(body):
+        if ((parent is None and tool.get('name') == full) or
               (parent == namespace and tool.get('name') == 'load_workspace_dependencies')):
             schema = tool.get('parameters', {})
+            if not isinstance(schema, dict): raise ValueError('invalid_loader_schema')
             if (tool.get('type') == 'function' and schema.get('type') == 'object' and
                     schema.get('properties') == {} and schema.get('additionalProperties') is False and
                     not schema.get('required')):
@@ -95,14 +115,53 @@ def read_json(path, limit=16 * 1024 * 1024):
     path = Path(path)
     if path.is_symlink() or not path.is_file() or not 0 < path.stat().st_size <= limit:
         raise ValueError('qualification_evidence_unavailable')
-    return json.loads(path.read_text())
+    try: return json.loads(path.read_text())
+    except (ValueError, RecursionError, UnicodeError) as error:
+        raise ValueError('malformed_qualification_json') from error
+
+
+def read_object(path):
+    value = read_json(path)
+    if not isinstance(value, dict): raise ValueError('malformed_qualification_record')
+    return value
+
+
+def smoke_execution(output, workspace):
+    """Require completed execution and the worker's last, artifact-bound success marker."""
+    texts, exits = [], []
+    def collect(value):
+        if isinstance(value, str):
+            texts.append(value)
+            try: decoded = json.loads(value)
+            except ValueError: return
+            if not isinstance(decoded, str): collect(decoded)
+        elif isinstance(value, list):
+            for item in value: collect(item)
+        elif isinstance(value, dict):
+            if value.get('isError') is True or value.get('success') is False: raise ValueError('presentation_smoke_failed')
+            for name in ('exit_code', 'exitCode'):
+                if name in value: exits.append(value[name])
+            for name in ('content', 'contentItems', 'text', 'output'):
+                if name in value: collect(value[name])
+    collect(output)
+    text = '\n'.join(texts)
+    exits += [int(value) for value in re.findall(r'Process exited with code (-?\d+)', text)]
+    if not exits or any(type(value) is not int or value != 0 for value in exits):
+        raise ValueError('presentation_smoke_failed')
+    markers = re.findall(r'(?m)^TOFA_PRESENTATION_SMOKE_PASS (\{[^\n]+\})$', text)
+    if len(markers) != 1: raise ValueError('presentation_smoke_failed')
+    marker = json.loads(markers[0])
+    artifacts = {name: sha256(workspace / 'output' / name) for name in ('deck.pptx', 'deck.pdf', 'slide.png')}
+    if marker != {'schema': 'tofa-presentation-smoke-v1', 'status': 'passed', 'artifacts': artifacts}:
+        raise ValueError('presentation_smoke_failed')
+    return artifacts
 
 
 def qualify(path, *, client, client_identity, home, skill, application_identity=None):
     path = Path(path)
     if path.is_symlink(): raise ValueError('qualification_evidence_unavailable')
     path = path.resolve()
-    proof = read_json(path)
+    proof = read_object(path)
     run = path.parent
     provider = PROVIDERS[client]
     if (not isinstance(proof, dict) or proof.get('schema') != 'tofa-presentation-qualification-v1' or proof.get('status') != 'qualified' or
@@ -114,13 +173,19 @@ def qualify(path, *, client, client_identity, home, skill, application_identity=
     if any(not isinstance(proof.get(name), dict) for name in
             ('runtime', 'observed_versions', 'preservation', 'artifacts', 'thread_identity')):
         raise ValueError('malformed_qualification_evidence')
+    client_path = Path(proof.get('client_executable', ''))
+    if not client_path.is_absolute() or sha256(client_path) != client_identity['sha256'] or (
+            proof.get('host') != {'system': platform.system(), 'arch': platform.machine(), 'platform': platform.platform()}):
+        raise ValueError('qualification_client_or_host_drift')
     if client == 'desktop' and (proof.get('native') != application_identity or
                                proof.get('native_preview') != 'passed'):
         raise ValueError('native_desktop_qualification_incomplete')
     if not isinstance(proof.get('thread_identity', {}).get('id'), str):
         raise ValueError('actual_client_thread_unobserved')
     if client == 'desktop':
-        observation = read_json(run / 'operator.json')
+        if desktop_identity(proof.get('app_bundle'), client_path) != application_identity:
+            raise ValueError('qualification_application_drift')
+        observation = read_object(run / 'operator.json')
         if (sha256(run / 'operator.json') != proof.get('operator_sha256') or
                 observation.get('schema') != 'tofa-native-presentation-preview-v1' or
                 observation.get('status') != 'passed' or not observation.get('operator') or
@@ -146,13 +211,26 @@ def qualify(path, *, client, client_identity, home, skill, application_identity=
     requests = sorted(run.glob('model-request-*.json'))
     observed_call = False
     for request in requests:
-        body = read_json(request)
+        body = read_object(request)
         if not loader_tools(body, provider): continue
         for call in body.get('input', []):
             if not loader_call(call, provider) or json.loads(call.get('arguments', 'null')) != {}: continue
             if any(item.get('type') == 'function_call_output' and item.get('call_id') == call.get('call_id') and
                    item.get('output') == output for item in body['input']): observed_call = True
     if not observed_call: raise ValueError('actual_client_loader_call_unobserved')
+    smoke = read_json(run / 'smoke-result.json')
+    smoke_execution(smoke, run / 'workspace')
+    records = read_json(run / 'requests.json')
+    if (not isinstance(records, list) or any(not isinstance(record, dict) or record.get('failure') for record in records) or
+            records != proof.get('requests') or not any(record.get('role') == 'main' and
+                record.get('completed') is True and record.get('final_answer') is True for record in records)):
+        raise ValueError('qualification_delivery_unobserved')
+    final = run / 'final.txt'
+    if final.is_symlink() or not final.is_file() or not 0 < final.stat().st_size <= 1024 * 1024:
+        raise ValueError('qualification_delivery_unobserved')
+    from capability_evaluation import has_markdown_links
+    if not has_markdown_links(final.read_text(), [run / 'workspace/output' / name for name in ('deck.pptx', 'deck.pdf')]):
+        raise ValueError('qualification_delivery_unobserved')
     preservation = proof.get('preservation', {})
     if not proof.get('settings_preserved') or preservation.get('before') != preservation.get('after') or (
             preservation.get('after') != protected(home, skill, Path(runtime['root']))):
@@ -170,10 +248,13 @@ def qualify(path, *, client, client_identity, home, skill, application_identity=
         raise ValueError('qualification_pdf_invalid')
     if not (run / 'workspace/output/slide.png').read_bytes().startswith(b'\x89PNG\r\n\x1a\n'):
         raise ValueError('qualification_render_invalid')
-    receipt = read_json(run / 'workspace/build/finalization.json')
+    receipt = read_object(run / 'workspace/build/finalization.json')
+    if any(not isinstance(receipt.get(name), dict) for name in ('packageIntegrity', 'firstPartyImport', 'fontSelection', 'presentationLayout')):
+        raise ValueError('malformed_finalization_receipt')
     if (receipt.get('finalSha256') != artifacts['deck.pptx'] or
             receipt.get('packageIntegrity', {}).get('status') != 'pass' or
-            receipt.get('firstPartyImport', {}).get('passed') is not True):
+            receipt.get('firstPartyImport', {}).get('passed') is not True or
+            receipt['fontSelection'].get('passed') is not True or receipt['presentationLayout'].get('exitCode') != 0):
         raise ValueError('qualification_finalization_failed')
     return {'contract': 'qualified-presentation-runtime-v1', 'client': client, 'provider': provider,
             'runtime': runtime, 'proof_sha256': sha256(path), 'loader_result_sha256': proof['loader_result_sha256'],

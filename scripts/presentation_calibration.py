@@ -12,24 +12,18 @@ import threading
 import time
 import uuid
 import sqlite3
+import platform
 from urllib.parse import quote
 
 from capability_evaluation import digest, save, version
 from capability_observer import LoopbackServer, Observer
-from capability_runtime import protected, executable_versions, PROVIDERS, loader_tools, desktop_identity, harness_identity
+from capability_runtime import protected, executable_versions, PROVIDERS, loader_tools, desktop_identity, harness_identity, catalog_tools, smoke_execution
 from evaluation_proxy import fixture_response, message
 from presentation_runtime import from_loader_output, inventory
 
 
 def tools(body):
-    pending = [(None, tool) for tool in body.get('tools', [])]
-    for item in body.get('input', []): pending += [(None, tool) for tool in item.get('tools', [])]
-    result = []
-    while pending:
-        namespace, tool = pending.pop()
-        if tool.get('type') == 'namespace': pending += [(tool['name'], child) for child in tool['tools']]
-        else: result.append((namespace, tool['name']))
-    return result
+    return [(namespace, tool.get('name')) for namespace, tool in catalog_tools(body)]
 
 
 def thread_identity(client, log, home, workspace, started):
@@ -126,10 +120,11 @@ def main():
                     state['failure'] = 'loader_result_unqualified'; item = message('Runtime qualification stopped.')
             else:
                 save(run / 'smoke-result.json', outputs['runtime-smoke'])
-                if all((workspace / 'output' / name).is_file() for name in ('deck.pptx', 'deck.pdf', 'slide.png')):
+                try:
+                    smoke_execution(outputs['runtime-smoke'], workspace)
                     item = message('[Deck](' + str(workspace / 'output/deck.pptx') + ') [PDF](' + str(workspace / 'output/deck.pdf') + ')')
-                else:
-                    state['failure'] = 'smoke_artifacts_unavailable'
+                except (OSError, ValueError):
+                    state['failure'] = 'presentation_smoke_failed'
                     item = message('The supplied-runtime smoke failed. No delivery was qualified.')
             self.send_response(200); self.send_header('Content-Type', 'text/event-stream'); self.end_headers()
             self.wfile.write(fixture_response(item, body['model']))
@@ -210,9 +205,14 @@ def main():
         elif thread is None: state['failure'] = 'fresh_actual_thread_unobserved'
         elif native and native_preview != 'passed': state['failure'] = 'native_preview_unobserved'
         elif not ended: state['failure'] = termination or 'actual_client_exit_failed'
+        elif any(record.get('failure') for record in records) or not any(record.get('role') == 'main' and
+                record.get('completed') is True and record.get('final_answer') is True for record in records):
+            state['failure'] = 'qualification_delivery_unobserved'
     qualified = state['failure'] is None and state['runtime'] is not None and len(artifacts) == 3 and before == after and ended and thread is not None
     proof = {'schema': 'tofa-presentation-qualification-v1', 'status': 'qualified' if qualified else 'infra_blocked',
         'client': options.client, 'client_identity': version(options.codex), 'launcher_identity': version(options.launcher),
+        'client_executable': str(options.codex.resolve()), 'app_bundle': str(options.app_bundle.resolve()) if native else None,
+        'host': {'system': platform.system(), 'arch': platform.machine(), 'platform': platform.platform()},
         'paid_inference': False, 'run': str(run), 'limits': limits, 'exit_code': code,
         'termination': termination, 'thread_identity': thread, 'observed_versions': observed_versions,
         'failure': state['failure'], 'loader_name': state['loader_name'], 'runtime': state['runtime'],

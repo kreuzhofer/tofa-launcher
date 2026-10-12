@@ -403,8 +403,13 @@ def execute(options, run, report):
     env['PATH'] = str(shim) + os.pathsep + env.get('PATH', '')
     code = None
     proof = report['provenance'].get('presentation_runtime', {}).get('qualification')
-    with Observer(run, model=options.model, guardian=options.guardian, limits=report['limits'], case=options.case,
-                  runtime_qualification=proof) as observer:
+    try:
+        observer = Observer(run, model=options.model, guardian=options.guardian, limits=report['limits'], case=options.case,
+            runtime_qualification=proof)
+    except (OSError, ValueError, TypeError, zipfile.BadZipFile):
+        report['blockers'].append('presentation_qualification_drift')
+        report['status'] = 'infra_blocked'; save(run / 'result.json', report); return
+    with observer:
         config = run / 'observer.json'
         control = dict(version=1, endpoint=observer.url, secret=observer.secret, seconds=report['limits']['seconds'])
         if proof and options.client == 'cli':

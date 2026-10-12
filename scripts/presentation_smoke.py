@@ -6,7 +6,7 @@ from pathlib import Path
 import shutil
 import subprocess
 
-from presentation_runtime import from_loader_output
+from presentation_runtime import from_loader_output, sha256
 
 
 def main():
@@ -39,6 +39,9 @@ def main():
                    cwd=workspace, env=env, check=True, timeout=60)
     subprocess.run([str(Path(paths['bin']) / 'pdfinfo'), str(workspace / 'output/deck.pdf')],
                    cwd=workspace, env=env, check=True, timeout=10)
+    print('TOFA_PRESENTATION_SMOKE_PASS ' + json.dumps({'schema': 'tofa-presentation-smoke-v1',
+        'status': 'passed', 'artifacts': {name: sha256(workspace / 'output' / name) for name in
+            ('deck.pptx', 'deck.pdf', 'slide.png')}}), flush=True)
 
 
 if __name__ == '__main__': main()

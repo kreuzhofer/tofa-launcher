@@ -17,12 +17,12 @@
   "actual_cli_runtime_tests": {
     "status": "passed",
     "tests": 7,
-    "seconds": 23.289,
+    "seconds": 39.963,
     "paid_inference": false,
-    "scope": "STDIO MCP, native parser and command refusal, synthetic cancellation, actual CLI artifacts/proof, HTTP live-result gate and copied-evidence tampering"
+    "scope": "Actual CLI completion/delivery, HTTP pre-forward policy drift, copied-evidence tampering, cancellation and loader boundaries"
   },
   "go_vet": "passed",
-  "python_compilation": "passed before final boundary hardening; final compilation pending",
+  "python_compilation": "passed on reviewed candidate",
   "bash_syntax": "passed",
   "shellcheck": "unavailable",
   "logs_sha256": {
@@ -38,9 +38,18 @@
     "native-binaries-red.log": "0b38fac997b0f94ffec79f480ae707c010043ab3c270e54b4c59bad2360a8c6a",
     "qualification-shape-red.log": "381da75f84e9a01b6a5bce556d8649ca8bfb4b8b3357366aacdcf9796362ab93",
     "live-loader-red.log": "3f2c699482b83048f4fc8f685d138e475d69dc6cfe73286ce6e325f67366a456",
-    "live-loader-green.log": "c7d26f598c5c106319a0a8451e7a03fa74ba0916c9aef4779feab20ab1049f3e"
+    "live-loader-green.log": "c7d26f598c5c106319a0a8451e7a03fa74ba0916c9aef4779feab20ab1049f3e",
+    "runtime-review-complete.log": "ab60f182cff030d8a9611026478ff8c0ff70d8c6c103f45c76533ef4bc3c307c",
+    "observer-reviewed.log": "2f47b6e948bb7a2260caf5b5068d8b185650b77a2f59bf22ed5d9c0a1dccdb56",
+    "evaluator-reviewed.log": "c483b290586b0122c87aeed540d371589739d306d8aa3228ffda0b065d916d13",
+    "review-boundaries-red.log": "e4fe4bd5d53743a0c6ab70894614a785ec3333b8059d94a034ba0fa84529e9f0",
+    "review-boundaries-green.log": "feb69581c520060771035141719b390143e2ce5194031d94427e953041f05ec3",
+    "contradictory-loader-red.log": "7262287c25c7c4d1719d488aec170f34d7801cec21ac8b85d321e33a7338f116"
   },
-  "review": "pending",
+  "review": "Initial Standards: 2 documented failures plus 1 duplication heuristic; initial Spec: 4 actionable gaps. Fixes implemented; follow-up pending.",
   "desktop": "assets checked only; operator deferred native workflow and previews",
-  "completion": "Not complete; integration branch retained; no merge or ticket closure."
+  "completion": "Not complete; integration branch retained; no merge or ticket closure.",
+  "python_full_reviewed": {
+    "status": "running; final candidate after review fixes"
+  }
 }

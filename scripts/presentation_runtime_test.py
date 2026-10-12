@@ -114,6 +114,8 @@ class LoaderTests(unittest.TestCase):
             result = {'content': [{'type': 'text', 'text': text}]}
             self.assertEqual(from_loader_output(result, 'codex_app')['provider'], 'codex_app')
             for output in ({'isError': True, **result}, {'success': False, **result}, {},
+                    {**result, 'structuredContent': {'contract': 'supplied-presentation-runtime-v1',
+                        'root': '/wrong-host', 'success': False}},
                     {'content': [{'type': 'text', 'text': text.replace('Override binaries:', 'Unavailable:')}]},
                     {'content': [{'type': 'text', 'text': text.replace('Python packages:', 'Unavailable:')}]},
                     {'content': [{'type': 'text', 'text': text.replace(str(root), '/other-host/runtime')}]},
@@ -201,7 +203,6 @@ class InstalledLoaderTests(unittest.TestCase):
         from capability_observer_test import BoundaryTests
         boundary = BoundaryTests()
         request = json.loads((proof.parent / 'model-request-2.json').read_text())
-        output = next(item for item in request['input'] if item.get('type') == 'function_call_output')
         for failed in (False, True):
             with self.subTest(live_loader_failed=failed), boundary.boundary(case='03', qualification=binding) as (observer, seen):
                 body = json.loads(json.dumps(request))
@@ -229,6 +230,35 @@ class InstalledLoaderTests(unittest.TestCase):
             (copied / 'loader-result.json').write_text('{}')
             with self.assertRaises(ValueError):
                 qualify(copied_proof, client='cli', client_identity=identity, home=home, skill=skill)
+        # Derivative fixtures exercise drift without changing ordinary settings
+        # or claiming another actual-client/native-UI qualification.
+        with tempfile.TemporaryDirectory() as directory:
+            temporary = Path(directory).resolve()
+            copied = temporary / 'evidence'; shutil.copytree(proof.parent, copied, symlinks=True)
+            owned_home = temporary / 'home'; owned_home.mkdir()
+            managed = owned_home / 'managed_config.toml'; managed.write_text('# owned policy fixture\n')
+            from capability_runtime import protected
+            fixture = json.loads(proof.read_text()); fixture['run'] = str(copied)
+            snapshot = protected(owned_home, skill, Path(fixture['runtime']['root']))
+            fixture['preservation'] = {'before': snapshot, 'after': snapshot}
+            copied_proof = copied / 'qualification.json'; copied_proof.write_text(json.dumps(fixture))
+            final = copied / 'final.txt'; final.write_text(final.read_text().replace(str(proof.parent), str(copied)))
+            owned_binding = qualify(copied_proof, client='cli', client_identity=identity, home=owned_home, skill=skill)
+            with boundary.boundary(case='03', qualification=owned_binding) as (observer, seen):
+                managed.write_text('# changed owned policy fixture\n')
+                boundary.post(observer, '/responses', request, 'client-token', 400)
+                self.assertEqual(observer.reason, 'presentation_runtime_environment_drift')
+                self.assertEqual(seen, [])
+            managed.write_text('# owned policy fixture\n')
+            for name in ('workspace/build/finalization.json', 'model-request-1.json'):
+                original = (copied / name).read_bytes()
+                (copied / name).write_text('[]')
+                with self.subTest(malformed=name), self.assertRaises(ValueError):
+                    qualify(copied_proof, client='cli', client_identity=identity, home=owned_home, skill=skill)
+                (copied / name).write_bytes(original)
+            (copied / 'smoke-result.json').write_text(json.dumps('Process exited with code 1\nOutput:\nfailed'))
+            with self.assertRaisesRegex(ValueError, 'presentation_smoke_failed'):
+                qualify(copied_proof, client='cli', client_identity=identity, home=owned_home, skill=skill)
 
 
 if __name__ == '__main__':
