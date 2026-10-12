@@ -1,0 +1,68 @@
+{
+  "schema": "tofa-native-computer-use-assessment-v1",
+  "authorization": "Maintainer explicitly requested Codex computer use while away for Desktop validation",
+  "status": "infra_blocked",
+  "private_attempt_id": "96b1c13589844f60a1e162c657512548",
+  "paid_inference": false,
+  "client_identity": {
+    "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+    "version": "codex-cli 0.162.0-alpha.17.2"
+  },
+  "native": {
+    "version": "26.1007.30912",
+    "build": "20156",
+    "application_sha256": "75e397e2280dde93b70a85aa926f4282c728eacc84dfeb15ba7fb6ddd84628af",
+    "executable_sha256": "2053a78d225a1492d0cb6896cfd83254af06c3277547e83d4d23fef88f00426e",
+    "native_transport_sha256": "ae60fd7129a8eafea42dc41e8692e95dda624d4406826edd74010148371113db"
+  },
+  "host": {
+    "system": "Darwin",
+    "arch": "arm64",
+    "platform": "macOS-26.7-arm64-arm-64bit"
+  },
+  "limits": {
+    "seconds": 180,
+    "requests": 8,
+    "output_tokens": 4096
+  },
+  "model_request_count": 0,
+  "artifacts": {},
+  "loader_call_observed": false,
+  "native_previews": "not_observed",
+  "observation_method": "computer_use",
+  "computer_use_blocker": "Computer Use is not allowed to use the app 'com.openai.codex' for safety reasons.",
+  "saved_qualification_failure": "actual_client_loader_unobserved",
+  "termination": "operator_cancelled",
+  "exit_code": 1,
+  "protected_state": {
+    "preserved": false,
+    "before_files": 27451,
+    "after_files": 27451,
+    "mtime_candidate_categories": {
+      "config.toml": 1,
+      ".mcp.json": 1,
+      ".codex-remote-plugin-install.json": 12
+    },
+    "attribution_limit": "mtime candidates, not a before/after content diff",
+    "shared_snapshot_restored": false
+  },
+  "cleanup": "Owned evaluator cancelled; subsequent application inventory reported com.openai.codex not running",
+  "source_sha256": {
+    "qualification.json": "c4af5e1cdb2aa2b116c021dfd5b065eee56677a95942e389031d2425efaa02b4",
+    "computer-use.json": "492b5cf83e46c88806ce2efdd2bee5ba8c3b513bb7edf4e9cd53593ba25dda13",
+    "preservation-drift-candidates.json": "733ded132bba22a8e9beeb4956f057584f656f9fb249da19690b1906cc28d197"
+  },
+  "qualification": "Native Desktop remains unqualified; implicit/explicit model calibrations cannot proceed",
+  "harness": {
+    "presentation_calibration.py": "95dcb61253b1dac82a114648f9b04130ec38043d56539f39a74782355363f60b",
+    "presentation_runtime.py": "5e3cf36fd16f0b2037dd0df6a090360d8fc897551bd1b26f3325792f0264d075",
+    "presentation_smoke.py": "028bb6f44676c53a2f345f379cef78b9eb78a8cd52012ac5ab37c63bfbf95b87",
+    "capability_runtime.py": "4fc01e201ee8e05f8269a5f7f965d3471a419c53e680f8255c774f817f536d0e",
+    "presentation_preview.py": "7787c5fe45901bd318360c9ddb22d8840f61fc6c1a62210a7a394147601a171b",
+    "capability_observer.py": "b5492ac3ba263cc7e5ec3df790d45614f897eb3ffa426f92312028d5e0671a50",
+    "capability_actions.py": "cada1c6b10fae235c28cd958c39b595b6260f94279ee226b5ef266f7a0e2efd7",
+    "capability_evaluation.py": "6c6073826714366b847724cd60f46b4db85351c197acf5890e1c08b181fefd06",
+    "evaluation_proxy.py": "6b9cc7d9953ee62fc07a90b827d1052dbff33b54dd8155d52a7ae340480fd771",
+    "presentation-smoke.mjs": "79bebf394dd730baf6123b963396f24031f78c6952d7884cfd9bd33f71e57be2"
+  }
+}

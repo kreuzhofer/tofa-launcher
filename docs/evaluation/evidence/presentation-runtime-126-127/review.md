@@ -27,9 +27,11 @@ The CLI synthetic workflow passed through the installed client. The two separate
 declared model calibrations remain negative and retain their original outcomes.
 
 One acceptance gate remains: #127 requires the successful native Desktop loader
-call, artifact workflow, human previews of both delivered files and two separately
-declared model calibrations. The maintainer deferred the operator step. Asset
-checks and the prepared handoff cannot satisfy that native qualification gate.
+call, artifact workflow, native previews of both delivered files and two separately
+declared model calibrations. The maintainer authorized computer use after initially
+deferring the operator step. The tool refused access to the application; the
+retained attempt observed no loader or previews and detected protected-state drift.
+Asset checks and the prepared handoff cannot satisfy that native qualification gate.
 The branch will remain unmerged and both tickets open until qualification is complete.
 
 Standards: 0 remaining findings. Spec: 0 implementation defects; 1 deferred native

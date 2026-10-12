@@ -2,7 +2,7 @@
   "schema": "tofa-presentation-runtime-evidence-v1",
   "scope": "actual installed CLI with synthetic loopback provider; not model capability or stock CLI baseline",
   "saved_status": "qualified",
-  "private_attempt_id": "cba60a1b5c6d44d0a6521a9c532e8445",
+  "private_attempt_id": "59f8449228aa4b26bf2663576360c905",
   "paid_inference": false,
   "client_identity": {
     "sha256": "74c6a6d263f40d65f99c27a815275f5b4ed0bcc2baecc396b4cf3255498bdfc0",
@@ -19,8 +19,8 @@
     "additionalProperties": false
   },
   "loader_implementation": "scripts/presentation_runtime.py; launcher-owned STDIO MCP",
-  "loader_result_sha256": "bf26839f9662e5033ba5f6623f22d0256f6b6d78f4c0d67d6b4cfa1bb4e865e6",
-  "thread_identity_sha256": "195436e778abaf2c2b99632244502efc17a0a377d3ed3ece96d6b2945c5cdf39",
+  "loader_result_sha256": "2eae0b0743e072b10286f0ac9864b21cf38a21b75538d4bfedf70a9a3792705c",
+  "thread_identity_sha256": "08ee9c17a9260a33f071554a0af91276de226c151390ba7404a623b42feacf4d",
   "execution_host": "macOS arm64; ordinary persistent Codex home",
   "bundle_version": "26.1011.11113",
   "artifact_tool_version": "2.8.93",
@@ -74,13 +74,13 @@
   "libreoffice_manifest_declaration": "25.2-headless-codex.1",
   "pdf_route": "supplied_libreoffice",
   "artifacts": {
-    "deck.pptx": "dab2c8b9013878694e9216fc35fe6e4c1a396d6bc3a9edd29108e8b64811abc1",
-    "deck.pdf": "517a602cd649b0ff70c66a21a973dbc3c9a612affdeaed7bb92aad7fad1b457d",
+    "deck.pptx": "a886fbcd4ebab4879b0f8e9b72a0ebff84a1a23eca671f294d22732aec655a42",
+    "deck.pdf": "a1d108ba33b73849ca01de5857add4376c90dfb302dc53faca26d0adb41a2f36",
     "slide.png": "109e0b9a0bdb2aa9ea2bd0ab7f8108fba2104b2ee6eb46076bee1418d27190e4"
   },
   "finalization": {
     "schema": "presentation-finalization.v1",
-    "sha256": "dab2c8b9013878694e9216fc35fe6e4c1a396d6bc3a9edd29108e8b64811abc1",
+    "sha256": "a886fbcd4ebab4879b0f8e9b72a0ebff84a1a23eca671f294d22732aec655a42",
     "package_integrity": "pass",
     "first_party_import_passed": true,
     "font_selection_passed": true,
@@ -103,7 +103,7 @@
     "presentation_runtime.py": "5e3cf36fd16f0b2037dd0df6a090360d8fc897551bd1b26f3325792f0264d075",
     "presentation_smoke.py": "028bb6f44676c53a2f345f379cef78b9eb78a8cd52012ac5ab37c63bfbf95b87",
     "capability_runtime.py": "4fc01e201ee8e05f8269a5f7f965d3471a419c53e680f8255c774f817f536d0e",
-    "presentation_preview.py": "f54b72260e931adc05ae500e07be6e67cb63a230ef0f2ed7d6eefff5e3c494c7",
+    "presentation_preview.py": "7787c5fe45901bd318360c9ddb22d8840f61fc6c1a62210a7a394147601a171b",
     "capability_observer.py": "b5492ac3ba263cc7e5ec3df790d45614f897eb3ffa426f92312028d5e0671a50",
     "capability_actions.py": "cada1c6b10fae235c28cd958c39b595b6260f94279ee226b5ef266f7a0e2efd7",
     "capability_evaluation.py": "6c6073826714366b847724cd60f46b4db85351c197acf5890e1c08b181fefd06",
@@ -120,10 +120,11 @@
   "completed_delivery_verified": true,
   "successful_execution_verified": true,
   "client_executable": "/Users/daniel/.codex/packages/standalone/releases/0.162.1-aarch64-apple-darwin/bin/codex",
-  "qualification_sha256": "c7ad368d67b87a105ff283fe16cea0e514301a5a623cb2d696d7b446956d7e2c",
+  "qualification_sha256": "9724c4988efce7f25af09c5d15263a825a41605db90de1219421a825de486383",
   "skill_identity": {
     "version": "26.1011.11113",
     "skill_sha256": "bb3726eff35cb82241fd2c3b09fcdb18cc3bf3daefddf8df929d2e0bd4d2af2f",
     "implementation_sha256": "45a8c01663a4b1dad6e80e1112223b8a19529b32be5f46a47a2dbc058806f55d"
-  }
+  },
+  "environment_note": "Fresh synthetic CLI proof after the blocked native attempt and its detected protected-state drift; prior attempts retained and never rewritten."
 }

@@ -17,7 +17,7 @@
   "actual_cli_runtime_tests": {
     "status": "passed",
     "tests": 7,
-    "seconds": 40.683,
+    "seconds": 41.571,
     "paid_inference": false,
     "scope": "Actual CLI completion/delivery, HTTP pre-forward policy drift, copied-evidence tampering, cancellation and loader boundaries"
   },
@@ -52,7 +52,13 @@
     "runtime-metadata-reviewed.log": "6df7deeac85dde422666c8a6219eaf683cf5b969c7c33f1cb6a91eb098c27f5e",
     "native-metadata-red.log": "dd51f4edb21cd5973556e0be4cf86f73559a69bcc27a66956ca7d6510b13285d",
     "native-metadata-green.log": "425a07d9a724ce4c3929828612b3375b172d9e5d0d5ab1411579cddb4a4bfea2",
-    "desktop-assets-final.json": "8548e8cd8487fe7ebc6e1937b1ba47d81b7e0a89a2e9e0104eb3ed6c4a7c46ea"
+    "desktop-assets-final.json": "8548e8cd8487fe7ebc6e1937b1ba47d81b7e0a89a2e9e0104eb3ed6c4a7c46ea",
+    "computer-use-preview-red.log": "a4f5b06b85d8b88dc3f066a1dbf8eaf1a829bbb2ce9561549396b48fc0fc3695",
+    "computer-use-preview-green.log": "a4d96865771157106886bc09fd1f3e2e4a46552d591f7f77f803d364c3f815b3",
+    "computer-use-evidence-green.log": "42a36a4a6528d3eae851ad6df6feb4bf4c288fb64333acd62ad370c915efe638",
+    "runtime-computer-use-reviewed.log": "b8c197c6cff07d55dbeb8c58bce7b34a8274c1084f12e62fcf3af1d6f082de07",
+    "native-computer-use-01.launch.txt": "cbd0016f7a24b354b05e493c6808a063aa594f5bf106f0ba66eab49a9a33f21e",
+    "native-computer-use-01.result.json": "6d383c40e9354653f146f49a027ba83017d2a564e2fa64e96288d2e4981e21c1"
   },
   "review": {
     "standards_remaining_findings": 0,
@@ -60,8 +66,8 @@
     "spec_deferred_qualification_gates": 1,
     "record": "review.md"
   },
-  "desktop": "assets checked only; operator deferred native workflow and previews",
-  "completion": "Not complete; integration branch retained; no merge or ticket closure.",
+  "desktop": "Actual native launch attempted with computer-use authorization; application access prohibited by tool, zero requests, no previews, protected-state drift detected. Owned application stopped.",
+  "completion": "Not complete; native Desktop remains blocked. Integration branch local, no merge or ticket closure. Public publication awaits explicit approval requested after auto-review rejection.",
   "python_full_reviewed": {
     "status": "passed",
     "tests": 473,
@@ -90,5 +96,16 @@
       "executable_sha256": "2053a78d225a1492d0cb6896cfd83254af06c3277547e83d4d23fef88f00426e",
       "native_transport_sha256": "ae60fd7129a8eafea42dc41e8692e95dda624d4406826edd74010148371113db"
     }
-  }
+  },
+  "computer_use_preview_attribution": {
+    "status": "passed",
+    "tests": 4,
+    "red_then_green": true,
+    "default_human_workflow": "preserved"
+  },
+  "computer_use_evidence_boundaries": {
+    "status": "passed",
+    "tests": 4
+  },
+  "post_full_suite_ordering": "The four preview-attribution tests, four evidence tests and seven actual CLI/runtime tests passed after the computer-use observation-method change; full Python suite result predates this small change."
 }

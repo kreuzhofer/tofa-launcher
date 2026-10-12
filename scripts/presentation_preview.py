@@ -1,4 +1,4 @@
-"""Record the human's native Desktop preview observation, then end that owned run."""
+"""Attribute a native Desktop preview observation, then end that owned run."""
 import argparse
 import json
 import os
@@ -13,6 +13,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('run', type=Path)
     parser.add_argument('--operator', required=True)
+    parser.add_argument('--observation-method', choices=('human', 'computer_use'), default='human')
     parser.add_argument('--status', choices=('passed', 'failed', 'not_observed'), required=True)
     parser.add_argument('--pptx', type=Path, required=True)
     parser.add_argument('--pdf', type=Path, required=True)
@@ -26,10 +27,12 @@ def main():
             raise ValueError('preview_requires_exact_owned_artifacts')
         files[name] = expected
     observation = {'schema': 'tofa-native-presentation-preview-v1', 'operator': options.operator,
+        'observation_method': options.observation_method,
         'status': options.status, 'utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
         'files': {name: str(path) for name, path in files.items()},
         'artifacts': {name: sha256(path) for name, path in files.items()},
-        'scope': 'human native PPTX and PDF preview observation; no other criterion is scored'}
+        'scope': ('human' if options.observation_method == 'human' else 'computer-use') +
+            ' native PPTX and PDF preview observation; no other criterion is scored'}
     descriptor = os.open(run / 'operator.json', os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
     with os.fdopen(descriptor, 'w') as stream: json.dump(observation, stream, indent=2)
     descriptor = os.open(run / 'finish.request', os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)

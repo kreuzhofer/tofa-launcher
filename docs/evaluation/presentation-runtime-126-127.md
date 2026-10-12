@@ -76,9 +76,24 @@ The prepared [operator handoff](../../scripts/presentation_operator.sh) checks
 assets, waits for human readiness, starts one bounded synthetic attempt, prints
 its fresh workspace/prompt and records a separately attributed native preview
 observation. It requires both exact delivered files and hashes. Missing or
-unobserved previews cannot produce a pass. The maintainer deferred this step.
-There is no actual Desktop loader/artifact/preview qualification evidence yet;
-its implicit and explicit model calibrations also remain pending.
+unobserved previews cannot produce a pass.
+
+The maintainer subsequently authorized Codex computer use while away. A bounded
+native attempt launched the actual application, but the computer-use tool refused
+access to `com.openai.codex` for safety reasons. The
+[retained attempt](evidence/presentation-runtime-126-127/native-computer-use.json)
+made zero model requests, produced no artifacts and observed no previews. The
+owned evaluator was cancelled and the application inventory confirmed it stopped.
+The observation recorder now attributes `computer_use` separately from human
+review; this attempt contains no preview pass.
+
+The attempt also detected protected-state drift: the before/after file counts
+were both 27,451, but content fingerprints differed. Modification-time candidates
+include `config.toml`, the computer-use plugin's `.mcp.json`, and twelve remote
+plugin installation metadata files. These candidates do not establish an exact
+content diff. No shared snapshot was restored. Earlier qualification files fail
+the current gate after this drift. There is still no successful native Desktop
+loader/artifact/preview qualification; its model calibrations remain blocked.
 
 Run from an interactive Terminal when ready, using already-built local assets:
 
