@@ -115,6 +115,28 @@ executable/parent provenance during startup and a controlled ordinary-versus-lau
 comparison, retaining native peer authorization. Repeating the same deck prompt
 cannot qualify this combination while native tool startup remains blocked.
 
+A subsequent [startup comparison](evidence/presentation-runtime-126-127/native-startup-comparison.json)
+localized the incompatibility to launcher process ancestry. In ordinary startup,
+bundled Node runs under the bundled engine directly under Desktop: three native
+`codex_app` ready events, no startup failure or peer rejection. Under the launcher,
+the ad-hoc-signed settings bridge remains between Desktop and the engine: seven
+peer rejections, one native startup failure, no ready event. Both attempts used
+30-second startup traces without submitting a prompt. The installed native
+component examines peer, parent and grandparent signing identities. No native
+authorization behavior was modified.
+
+The proposed correction is to replace the original Desktop child process with
+the bundled engine and move the existing settings interception into a separate
+pipe relay. It must retain the model-default isolation, main-engine registration,
+protocol forwarding and shutdown contracts. Regression tests at the existing
+launcher/app-server boundary and actual Desktop startup validation are pending;
+this diagnosis is not a qualified fix. Both startup lanes detected protected-state
+drift, so ordinary native startup itself also requires preservation investigation.
+The fixture's internal store exposed a remaining inherited-`TMPDIR` leak; that
+store was removed on shutdown. The private diagnostic now scopes temporary files
+to its fixed-root run, while the calibration harness still needs the corresponding
+regression and fix.
+
 All new presentation validation material uses the fixed root
 `/tmp/tofa-presentation-validation`. The manual wizard creates a fresh owned
 subdirectory under `runs/` for each attempt and ignores the inherited `TMPDIR`.
