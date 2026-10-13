@@ -1,10 +1,11 @@
 # Presentation evaluation to release
 
-Status: runtime implementation merged in #131; #126/#127 are closed. Current native
-qualification passed. Both focused live-model loader diagnostics failed before
-invocation. A headless provider comparison isolates a namespace-schema compatibility
-gap: both tested models call the flat function but neither calls its namespaced form.
-Model capability and release readiness remain unqualified.
+Status: runtime implementation merged in #131; the scoped loader correction and
+naming diagnostics merged in #132. #126–#129 are closed. Fresh current-harness
+native qualification and all four #130 preflights pass. The four model comparisons
+are predeclared and await the human operator. Model capability and release readiness
+remain unqualified. See [the current #130 handoff](presentation-comparison-130.md);
+the checkpoints below retain the diagnostic chronology and its limitations.
 The maintainer approved the three phases below on 2026-10-13. Cost is not a
 constraint; experimental bounds and separate outcomes remain part of the method.
 
@@ -51,8 +52,9 @@ an unplanned model. Broader campaign work is not silently reduced to these four 
 ## Continuity rules
 
 The integration branch is `feat/126-127-presentation-runtime` in the existing
-qualification checkout. Retain it until the review gate passes. Latest qualified
-production code is `630f523`; evidence checkpoint `c5431df`. The production binary
+qualification checkout. It remains retained after merge. Current implementation
+is `2fd66e4`; the unchanged namespace launcher uses Go source `deb5ac9`. Earlier
+production code `630f523` and checkpoint `c5431df` remain historical. The binary
 hash is recorded in the native and lifecycle evidence; documentation-only commits
 do not imply a different binary. New executable or harness bytes require checking
 which proofs have become stale before launch.
@@ -85,6 +87,16 @@ stable release are distinct actions. User authorization to implement/merge these
 runtime tickets is not a waiver of #119/#120/#106 or native-platform release gates.
 
 ## Current next action
+
+PR #132 merged as `2fd66e422e03d81a88166f219ae94ef7bc59190c` with all four
+required CI jobs green and zero Standards/Spec findings. #128/#129 are closed;
+the original intermittent naming cause remains unknown. Fresh native proof
+`manual.cMfarK/runs/b73cce4e34cb46e9b37eab82a127a913` passed independent validation
+and maintainer previews. Four preflights pass. Execute the predeclared #130
+comparison through `run-comparison-130.sh`, then independently assess its outcomes.
+No live model attempt has started at this checkpoint. No release is published.
+
+## Earlier checkpoints
 
 PR #131 merged as `de74659b4f0b458236fc0e4ffc6b59db65029645` after all
 macOS/Linux/Windows and artifact checks passed. The maintainer explicitly approved
