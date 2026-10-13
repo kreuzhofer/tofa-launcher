@@ -1,9 +1,10 @@
 # Presentation evaluation to release
 
-Status: runtime qualification and final integration review are complete. The
-maintainer explicitly approved public branch publication, PR merge and closure of
-#126/#127 on 2026-10-13; integration is proceeding. Model capability and release
-readiness remain unqualified.
+Status: runtime implementation merged in #131; #126/#127 are closed. Current native
+qualification passed. Both focused live-model loader diagnostics failed before
+invocation. A headless provider comparison isolates a namespace-schema compatibility
+gap: both tested models call the flat function but neither calls its namespaced form.
+Model capability and release readiness remain unqualified.
 The maintainer approved the three phases below on 2026-10-13. Cost is not a
 constraint; experimental bounds and separate outcomes remain part of the method.
 
@@ -85,15 +86,11 @@ runtime tickets is not a waiver of #119/#120/#106 or native-platform release gat
 
 ## Current next action
 
-The runtime branch is reviewed and ready at the recorded integration checkpoint.
-Automatic approval review rejected publishing the full branch to the public GitHub
-repository because merge/closure authorization did not explicitly authorize that
-public egress. The maintainer subsequently explicitly approved publishing this branch to the
-public repository, opening/merging its PR and closing #126/#127. That approval
-resolves the publication blocker; raw private runs and credentials stay local.
-The local PR body is prepared under the fixed validation root. #128 and #129 can
-proceed with local diagnosis while integration completes. #130 retains
-its native blockers. No raw private run data is part of the proposed push.
+PR #131 merged as `de74659b4f0b458236fc0e4ffc6b59db65029645` after all
+macOS/Linux/Windows and artifact checks passed. The maintainer explicitly approved
+public branch publication, merge and closure; #126/#127 are closed. The integration
+branch is retained. No release was published. #128/#129 remain diagnosis work;
+#130 retains its remaining native blockers.
 
 The first #129 feedback check has run against the retained captures: the qualified
 synthetic native run passes with one valid loader call/result; both live Kimi runs
@@ -101,5 +98,138 @@ fail with an advertised loader and zero invocations. The read-only check and its
 three-control result are retained beneath the fixed root in
 `checks/release-planning/check-loader-call.py` and `loader-feedback-loop.json`.
 This establishes a fast observable signal; it does not yet locate a provider-side
-or model-selection cause. Next: replay request adaptation locally, then use the
-separately declared actual-native diagnostic contract in #129.
+or model-selection cause. Controlled replay subsequently preserved the advertised
+loader through the real adapter for all captured main inputs; naming remains
+independent and unresolved.
+
+The focused native diagnostic now has a maintainer-requested 600-second observer
+deadline, including workspace setup (10 requests, 4096 output tokens). The
+synthetic qualification also allows 600 seconds (8 requests, 4096 output tokens).
+The unchanged, lifecycle-qualified production launcher accepts only 180/900-second
+outer guards, so 600-second runs explicitly use its 900-second guard while the
+observer enforces the declared 600-second deadline. Both values are recorded.
+Those initial attempts used the unchanged production launcher and retained bridge.
+
+An initial native requalification failed before launch because its control file
+sent 600 directly to the launcher. Its unedited evidence remains at private run
+`manual.1eergT/runs/6c1981469984486cb18961814fd7aa84`. The wizard now surfaces
+the launch error and stops before requesting previews. Regression tests first
+reproduced both the rejected contract and the misleading handoff, then passed.
+The affected suite ran 59 tests: 57 passed, 2 installed-CLI opt-ins skipped.
+A separate real bundled-CLI synthetic calibration using the unchanged production
+launcher passed with the corrected contract, observed the loader, delivered all
+three artifacts and preserved settings; no paid inference was used. Private run:
+`timeout-compatibility-cli/f5bde76a4cc14c0ead521df52bcf9cbb`.
+
+Fresh native qualification now passes against the current installed Pages plugin
+and harness revision `afbf6e0`, including maintainer-observed native PPTX/PDF
+previews and independent proof validation. The sanitized checkpoint is
+`evidence/presentation-runtime-126-127/native-requalification-after-update.json`.
+Historical proofs and failed attempts remain unchanged. Both focused model
+preflights pass and `run-loader-diagnostic.sh` now references the new proof.
+
+Both focused native attempts are now retained in
+`evidence/presentation-runtime-126-127/focused-native-loader-diagnostics.json`.
+The exact diagnostic prompt was observed in both initial main requests. Kimi
+completed four main requests, probed resource listing and claimed loader absence;
+GLM completed one main request and claimed absence without any tool call. Neither
+invoked the advertised loader or checked returned executable versions. Both
+preserved settings without environment drift. GLM's harness status `completed`
+means transport completion, not success at the loader task.
+
+The current native positive control passes the same call/result checker. Five
+controlled replays of the new Kimi/GLM main and title inputs passed through the
+real adapter with the race detector: main tool inventories survived unchanged;
+title requests stayed independent and tool-free. Live provider receipt or
+interpretation is not established by that local replay. Kimi naming had a stream
+failure while GLM naming completed; #128 remains unresolved.
+
+The predeclared headless comparison is complete: four direct provider requests,
+one per model/format, identical synthetic prompt/function definition within each
+pair. Both flat functions produced the expected call with `{}`; both namespace
+forms produced no call. All four had HTTP 200 and completed Responses. The Kimi
+namespace case emitted tool-like control text as ordinary text; GLM claimed no
+tools were available. No calls were executed. Protected state remained unchanged.
+See `evidence/presentation-runtime-126-127/provider-namespace-diagnostic.json`.
+
+This isolates a model/provider namespace compatibility gap without Desktop,
+the adapter, native runtime or the large native catalog. The provider's internal
+mechanism remains unobserved and one sample per cell is not a reliability claim.
+
+The approved [minimal adapter follow-up](presentation-namespace-followup.md) is
+implemented on the retained integration branch at `deb5ac9`. Kimi K3 and GLM 5.3
+main requests now receive flat aliases for namespaced functions; returned calls
+recover their original namespace/name. History, selectors and streaming events
+use the same mapping. Unsupported definitions and unmapped calls fail explicitly.
+Title and Guardian request contracts remain independently routed.
+
+Both live synthetic provider checks through the candidate adapter returned the
+expected original function identity; neither executed a tool. See
+`evidence/presentation-runtime-126-127/adapted-namespace-diagnostic.json` for the
+exact tested revision and limits. Captured native catalogs (271 definitions each)
+also pass controlled replay. Final targeted race tests pass, and independent
+standards/spec reviews report zero remaining findings at `deb5ac9`.
+
+The isolated candidate is `checks/tofa-namespace-candidate`, SHA-256
+`11d28bf933f5230bc9c06744d98726b51d096504e9e683471f21b9c369fbea1e`.
+The prior qualified binary and evidence remain retained. The final full race suite
+passes (`go test -race ./...`, adapter package 315.164 seconds). Clean exit, forced
+launcher crash and repeat launch preserve protected files byte-for-byte. Ordinary
+Desktop restart passes with three native MCP ready events and no failures or peer
+rejections; only the two approved executable references change back to the bundled
+engine. Node/CUA arithmetic, a real CLI tool call, ordinary effective-configuration
+comparison and owned temporary uninstall all pass. Normal launcher credentials
+remain unchanged. Evidence:
+`evidence/presentation-runtime-126-127/namespace-mcp-lifecycle.json` and
+`evidence/presentation-runtime-126-127/namespace-implementation-checks.json`.
+
+Fresh native synthetic qualification now passes for this exact candidate, including
+independent proof validation, the actual loader call/result, executable identities,
+artifacts, maintainer-observed native PPTX/PDF previews and settings preservation.
+See `evidence/presentation-runtime-126-127/namespace-native-requalification.json`.
+The preceding attempt timed out without preview observation and remains unchanged;
+the maintainer confirmed they had not inspected its previews.
+
+The existing `/tmp/tofa-presentation-validation/run-loader-diagnostic.sh` now pins
+this candidate and the fresh proof. Both network-enabled preflights pass. The
+predeclared fresh native Kimi and GLM attempts now pass the focused loader/version
+checks: one actual loader call/result each, followed by successful execution of
+the returned Node/Python paths and correct observed versions in the final answer.
+Each completed three main requests. Protected files stayed byte-identical, with
+no environment drift. The native loader returned no manifest path; neither model
+reported one, so that diagnostic request component remains unavailable.
+
+Both independent naming requests failed with `stream_failure`; the original
+aggregate `infra_blocked` records remain intact. Their main tool workflows passed.
+See `evidence/presentation-runtime-126-127/namespace-native-loader-diagnostics.json`.
+Controlled namespace/flat comparisons and the candidate's native results support
+the scoped namespace compatibility correction. Successful execution contradicts
+missing runtime/registration or a need for dependency installation. Provider
+internals and reliability across repeated tasks remain unestablished.
+
+#129 now has its native implementation evidence and remains open pending
+publication/merge disposition. Retain the integration branch. Next is #128's
+captured-request naming diagnosis before fresh #130 deck comparisons; this result
+does not promote support or release status, or change historical deck outcomes.
+
+#128 diagnostic implementation is now committed at `cf6cbec`, reviewed against
+`29e2983` with zero remaining Standards/Spec findings. The observer exports safe
+transport stages and categories and retains original exceptions/provider errors
+privately. Operator instructions distinguish completed main work from failed or
+pending naming. One explicitly approved headless replay of the captured naming
+request completed successfully; both local baseline/current adapter replays passed.
+This does not explain the intermittent native failure. The predeclared instrumented
+native attempt now passes both provider completion and maintainer-observed title
+visibility: run `32dee8c7142b41ef968da5677a04af5e`, 69.031 seconds including setup,
+unchanged launcher, protected settings preserved and no environment drift. Main
+and naming each completed one HTTP 200 response; no tools or Guardian requests ran.
+See [the #128 handoff](desktop-naming-128.md) and
+`evidence/presentation-runtime-126-127/naming-128-native.json`.
+
+The evaluation disposition is to retain instrumentation and independent naming
+outcomes in #130 without automatic retries or waiting on failed titles. The
+original intermittent cause and native runtime-regression status remain unknown;
+this success is not a naming fix or repeated-reliability claim. #128 and #129
+remain open pending integration publication/merge disposition. Resolve prerequisite
+tickets, freeze identities and requalify the changed harness before predeclaring
+#130's four fresh deck attempts. Retain the integration branch and historical proofs.

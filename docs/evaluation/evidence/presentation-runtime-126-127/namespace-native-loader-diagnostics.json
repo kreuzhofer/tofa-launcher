@@ -1,0 +1,147 @@
+{
+  "schema": "tofa-namespace-native-loader-diagnostic-v1",
+  "candidate_source": "deb5ac9",
+  "candidate_sha256": "11d28bf933f5230bc9c06744d98726b51d096504e9e683471f21b9c369fbea1e",
+  "attempts": [
+    {
+      "model": "zai-org/GLM-5.3",
+      "private_run": "runs/loader-manual.idhNBR/case-GLM-5.3/fcee1c896b7a487094640fdc129d1b0b",
+      "started_utc": "2026-10-13T18:27:28Z",
+      "corpus": "native-loader-selection-diagnostic-v2",
+      "exact_prompt_observed": true,
+      "limits": {
+        "seconds": 600,
+        "requests": 10,
+        "output_tokens": 4096
+      },
+      "launcher_seconds": 900,
+      "harness_status": "infra_blocked",
+      "stop_reason": "operator_finished",
+      "settings_preserved": true,
+      "protected_raw_equal": true,
+      "environment_drift": [],
+      "qualification_sha256": "8c553a00f90fb4d2909f61006dc70eb832c547ad8075f786595d2eaa9434a329",
+      "main": {
+        "requests": 3,
+        "completed_requests": 3,
+        "final_answer_observed": true,
+        "failures": []
+      },
+      "loader": {
+        "advertised": true,
+        "calls": 1,
+        "arguments": {},
+        "valid_native_results": 1,
+        "bundle_version": "26.1011.11113",
+        "verdict": "passed"
+      },
+      "versions": {
+        "returned_executable_paths_used": true,
+        "exit_code": 0,
+        "node": "v24.19.0",
+        "python": "3.12.14",
+        "final_answer_matches": true,
+        "verdict": "passed"
+      },
+      "manifest_path": {
+        "returned_by_native_loader": false,
+        "reported_by_model": false,
+        "disposition": "unavailable_in_loader_response; no path invented"
+      },
+      "naming": {
+        "requests": 1,
+        "completed_requests": 0,
+        "failures": [
+          "stream_failure"
+        ],
+        "native_title_visibility": "not_observed"
+      },
+      "provider_schema_evidence": "Candidate translation notice observed; exact flat-schema behavior established by prior controlled adapter replay and synthetic live-provider probes. No separate provider-side ingress capture.",
+      "source_sha256": {
+        "client.log": "086f12367f4a68c8a82cdb9c0ab8fbb258678b17844a610cf838201fa1a36ed0",
+        "diagnostic-contract.json": "3e805689c50b2b0eaab9578ef0f8f0537757fd076685bdbedaeb18254bd40dfe",
+        "final.txt": "4e06d650a89bdf85141efda120d9a978f84558b8f9afecc084e13ac33c8d4443",
+        "operator-result.json": "89bd2f2190e4ad5e5084a46625c085b40b6b8c8b3adf4847d6dc567d02b48e29",
+        "preflight.json": "8967742e3b346690cfe1f2113efb3d434072ddf767b867bf98af691f01fddff7",
+        "prompt.txt": "f4ca49137dea168f7b0823eba27b807223f2b1c9dba0e913c50aae1a0d33cc23",
+        "request-1.json": "16dd3ca8dc51fc32fac75f097530c0793109f94fd8d33d6413cf5d4933640180",
+        "request-2.json": "1984b2ec24edbcd5c998bee7b7ec363ef73e3e020951d293606230a73f60a7b8",
+        "request-3.json": "3dc3bd1fc1de5737d97cfe30d9a9ff05a77e5e11b8603b08851bbe01eee9e855",
+        "request-4.json": "8c8dd582c986ab40065ef419822ddf6e885822071d5a2ee82ffabd6e375abe88",
+        "requests.json": "8e927eda9f7d82c4e4b3e3e46842d510ab5778b5239f7c5043f953618a65e477",
+        "result.json": "9ecda6e02f88011269d16057aeeb88f66fdc3f06141ba02b95fb76532f7cb92b"
+      }
+    },
+    {
+      "model": "moonshotai/Kimi-K3",
+      "private_run": "runs/loader-manual.idhNBR/case-Kimi-K3/7ab9952b23304318b36a8788694a63f5",
+      "started_utc": "2026-10-13T18:25:59Z",
+      "corpus": "native-loader-selection-diagnostic-v2",
+      "exact_prompt_observed": true,
+      "limits": {
+        "seconds": 600,
+        "requests": 10,
+        "output_tokens": 4096
+      },
+      "launcher_seconds": 900,
+      "harness_status": "infra_blocked",
+      "stop_reason": "operator_finished",
+      "settings_preserved": true,
+      "protected_raw_equal": true,
+      "environment_drift": [],
+      "qualification_sha256": "8c553a00f90fb4d2909f61006dc70eb832c547ad8075f786595d2eaa9434a329",
+      "main": {
+        "requests": 3,
+        "completed_requests": 3,
+        "final_answer_observed": true,
+        "failures": []
+      },
+      "loader": {
+        "advertised": true,
+        "calls": 1,
+        "arguments": {},
+        "valid_native_results": 1,
+        "bundle_version": "26.1011.11113",
+        "verdict": "passed"
+      },
+      "versions": {
+        "returned_executable_paths_used": true,
+        "exit_code": 0,
+        "node": "v24.19.0",
+        "python": "3.12.14",
+        "final_answer_matches": true,
+        "verdict": "passed"
+      },
+      "manifest_path": {
+        "returned_by_native_loader": false,
+        "reported_by_model": false,
+        "disposition": "unavailable_in_loader_response; no path invented"
+      },
+      "naming": {
+        "requests": 1,
+        "completed_requests": 0,
+        "failures": [
+          "stream_failure"
+        ],
+        "native_title_visibility": "not_observed"
+      },
+      "provider_schema_evidence": "Candidate translation notice observed; exact flat-schema behavior established by prior controlled adapter replay and synthetic live-provider probes. No separate provider-side ingress capture.",
+      "source_sha256": {
+        "client.log": "bd19b99640532e10c4bf67730e3ce21073886eaea62a74bb8801eaaf0c5a22eb",
+        "diagnostic-contract.json": "3e805689c50b2b0eaab9578ef0f8f0537757fd076685bdbedaeb18254bd40dfe",
+        "final.txt": "c6c5c15662b4f010e82e2c855063d4191e8c45ec92416313042509aeb3b82616",
+        "operator-result.json": "eb819cd01295880d208f8887bf14ddda5ce2dcd6dd38ded2ef01525cfcd820a5",
+        "preflight.json": "9195d5b356cb889c9cd6ee49d8077eca4b68ab593195ce87f1cb9fbc6e85fa44",
+        "prompt.txt": "f4ca49137dea168f7b0823eba27b807223f2b1c9dba0e913c50aae1a0d33cc23",
+        "request-1.json": "b72fa75ec55cbd9fc63ce5a85e01e16323e024bb0fb86f2f123ce9767d85a078",
+        "request-2.json": "1bc78df6a52d13a2fed7b892955c6672533717def9df2a8b2af5acecac26d7b8",
+        "request-3.json": "ef6e1f21f2dae29840f423d9b7c116586781bc02337f64b1a697f3c923b8c31e",
+        "request-4.json": "6990a90e8d11269d9ac75ee4cf896f3e48546d6b5067b8f2d3d92ba1f177ff83",
+        "requests.json": "5df1aaca273a97e3c0fb7296abb365fec35b43ec2ac11bb7c021e3c5ac3fab63",
+        "result.json": "0771689bc36805f7260e95dcc8b37ec8b633275057cef47138c28dde008b8a70"
+      }
+    }
+  ],
+  "scope": "One native attempt per model establishes the focused loader/version path, not reliability or deck quality. Aggregate infra_blocked outcomes remain unchanged because independent naming streams failed. Manifest path was unavailable from the native loader.",
+  "scorer_sha256": "8d14ec60e89f12bd5cf4cad92a57979e9a20312d8bad3485768712be305d393e"
+}

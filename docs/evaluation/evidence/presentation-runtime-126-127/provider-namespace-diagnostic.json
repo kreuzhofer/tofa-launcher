@@ -1,0 +1,150 @@
+{
+  "schema": "tofa-provider-namespace-diagnostic-v1",
+  "source_revision": "d0f65c6",
+  "private_root": "checks/release-planning/namespace-probe-v1",
+  "endpoint": "https://api.tokenfactory.nebius.com/v1/responses",
+  "transport": "direct provider; no launcher adapter or native client",
+  "limits": {
+    "seconds_per_request": 600,
+    "inference_requests": 4,
+    "output_tokens_per_request": 4096,
+    "retries": 0,
+    "request_bytes": 65536,
+    "response_bytes": 8388608
+  },
+  "scope": "Single synthetic function, equivalent namespace and flat forms, fresh request per cell; no returned call executed",
+  "source_sha256": "c204a7c5f1a967809429c07ab3b12224a119dd001e84cbf1f187eccdfc1a82e7",
+  "raw_results_sha256": "963023fbcdd94fe475f6f7dde6c4d72e8d88e0975db4ea37bbbe265705eabef8",
+  "protected_state_unchanged": true,
+  "attempts": [
+    {
+      "label": "kimi-namespace",
+      "model": "moonshotai/Kimi-K3",
+      "format": "namespace",
+      "started_utc": "2026-10-13T16:48:26Z",
+      "elapsed_ms": 2232,
+      "http_status": 200,
+      "response_sha256": "8e74524f97cab77870ca23a70d2990cf11a692a21fe13f6d23a69d383d0d2a9c",
+      "tool_execution": false,
+      "request_sha256": "020aa0b5ad1afe182f9a456cd86c210d6ee49a1d367e4a83db9dad872e42b6f6",
+      "completed": true,
+      "valid_function_call": false,
+      "function_calls": [],
+      "usage": {
+        "input_tokens": 118,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 64
+        },
+        "output_tokens": 214,
+        "output_tokens_details": {
+          "reasoning_tokens": 184
+        },
+        "total_tokens": 332
+      },
+      "text_result": "tool-like control text emitted as ordinary text"
+    },
+    {
+      "label": "kimi-flat",
+      "model": "moonshotai/Kimi-K3",
+      "format": "flat",
+      "started_utc": "2026-10-13T16:48:28Z",
+      "elapsed_ms": 3503,
+      "http_status": 200,
+      "response_sha256": "3999570f886db6d6697e7c12f041a2cc4007e07b63b63d1c0f84b2e764b5ad11",
+      "tool_execution": false,
+      "request_sha256": "7e74303bb38cc151b138ccbde1321b80c537faf3260a2313ce633827c7e79e48",
+      "completed": true,
+      "valid_function_call": true,
+      "function_calls": [
+        {
+          "arguments": "{}",
+          "name": "record_probe",
+          "namespace": null
+        }
+      ],
+      "usage": {
+        "input_tokens": 205,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 172,
+        "output_tokens_details": {
+          "reasoning_tokens": 145
+        },
+        "total_tokens": 377
+      },
+      "text_result": "none"
+    },
+    {
+      "label": "glm-flat",
+      "model": "zai-org/GLM-5.3",
+      "format": "flat",
+      "started_utc": "2026-10-13T16:48:32Z",
+      "elapsed_ms": 1147,
+      "http_status": 200,
+      "response_sha256": "450574c1eba2fe74d044f3729a819ab99714cccfbf4bb95c6203d22262926d6d",
+      "tool_execution": false,
+      "request_sha256": "17de6440bed468fc45933b8ab0f395f8949868e2a560581d994ae818f15e7c61",
+      "completed": true,
+      "valid_function_call": true,
+      "function_calls": [
+        {
+          "arguments": "{}",
+          "name": "record_probe",
+          "namespace": null
+        }
+      ],
+      "usage": {
+        "input_tokens": 187,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 69,
+        "output_tokens_details": {
+          "reasoning_tokens": 64
+        },
+        "total_tokens": 256
+      },
+      "text_result": "none"
+    },
+    {
+      "label": "glm-namespace",
+      "model": "zai-org/GLM-5.3",
+      "format": "namespace",
+      "started_utc": "2026-10-13T16:48:33Z",
+      "elapsed_ms": 1949,
+      "http_status": 200,
+      "response_sha256": "c47420b44c8f22cb9605afaaaf530499962a693da192ae061584cf10ef9928c4",
+      "tool_execution": false,
+      "request_sha256": "d535c53387158b664bb724da6683065048c2b67db42db7c372c22eb35da453f0",
+      "completed": true,
+      "valid_function_call": false,
+      "function_calls": [],
+      "usage": {
+        "input_tokens": 44,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 189,
+        "output_tokens_details": {
+          "reasoning_tokens": 118
+        },
+        "total_tokens": 233
+      },
+      "text_result": "claims tools unavailable"
+    }
+  ],
+  "finding": "Both models produce a valid flat-function call but no namespaced-function call under otherwise identical synthetic requests. All four responses complete with HTTP 200.",
+  "inference": "Namespace tool definitions are not usable by these tested model/provider combinations in this request form. This isolates the failure upstream of Desktop runtime execution; the provider internal mechanism is not observed.",
+  "limitations": [
+    "One sample per model/format; no reliability or universal model-support claim.",
+    "No actual native tool executed in this headless experiment.",
+    "The full native catalog and continued tool history were not tested with a flat-schema treatment.",
+    "Independent naming failure remains unresolved."
+  ],
+  "next_action": "Implement and review reversible namespace-to-flat request mapping and flat-to-namespace response/history mapping in the optional adapter, then validate actual native loader execution before deck comparisons."
+}

@@ -15,7 +15,7 @@ import sqlite3
 import platform
 from urllib.parse import quote
 
-from capability_evaluation import digest, save, version
+from capability_evaluation import digest, save, version, launcher_seconds
 from capability_observer import LoopbackServer, Observer
 from capability_runtime import protected, executable_versions, PROVIDERS, loader_tools, desktop_identity, harness_identity, catalog_tools, smoke_execution, read_object
 from evaluation_proxy import fixture_response, message
@@ -149,7 +149,7 @@ def main():
             self.wfile.write(response)
     provider = LoopbackServer(('127.0.0.1', 0), Provider)
     threading.Thread(target=provider.serve_forever, daemon=True).start()
-    limits = {'seconds': 180, 'requests': 8, 'output_tokens': 4096}
+    limits = {'seconds': 600, 'requests': 8, 'output_tokens': 4096}
     process = None
     termination = None
     records = []
@@ -158,7 +158,7 @@ def main():
         observer_options = {'respond': synthetic_response} if options.production_launcher else {}
         with observer_type(run, model='moonshotai/Kimi-K3', guardian='zai-org/GLM-5.3-Flash', limits=limits, **observer_options) as observer:
             records = observer.records
-            control = dict(version=1, endpoint=observer.url, secret=observer.secret, seconds=180)
+            control = dict(version=1, endpoint=observer.url, secret=observer.secret, seconds=launcher_seconds(limits['seconds']))
             if options.client == 'cli':
                 control['presentation_runtime'] = {'root': str(options.runtime_root.resolve()),
                     'script': str(Path(__file__).with_name('presentation_runtime.py').resolve())}
@@ -187,7 +187,7 @@ def main():
                 process = subprocess.Popen(command, cwd=workspace, env=env, start_new_session=True,
                     stdin=subprocess.PIPE if options.client == 'cli' else subprocess.DEVNULL, stdout=log, stderr=log)
                 try:
-                    if options.client == 'cli': process.communicate((prompt + '\n').encode(), timeout=170)
+                    if options.client == 'cli': process.communicate((prompt + '\n').encode(), timeout=limits['seconds'] - 10)
                     else:
                         while process.poll() is None and not observer.reason:
                             if (run / 'finish.request').exists(): observer.stop('operator_finished')
@@ -255,6 +255,7 @@ def main():
         'host': {'system': platform.system(), 'arch': platform.machine(), 'platform': platform.platform()},
         'paid_inference': False, 'synthetic_transport': 'observer' if options.production_launcher else 'provider_fixture', 'run': str(run), 'limits': limits, 'exit_code': code,
         'termination': termination, 'thread_identity': thread, 'observed_versions': observed_versions,
+        'launcher_seconds': launcher_seconds(limits['seconds']),
         'failure': state['failure'], 'loader_name': state['loader_name'], 'runtime': state['runtime'],
         'loader_result_sha256': digest(run / 'loader-result.json') if (run / 'loader-result.json').exists() else None,
         'preservation': {'before': before, 'after': after, 'raw_before': raw_before, 'raw_after': raw_after},

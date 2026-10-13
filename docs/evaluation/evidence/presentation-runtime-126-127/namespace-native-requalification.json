@@ -1,0 +1,80 @@
+{
+  "schema": "tofa-native-requalification-checkpoint-v1",
+  "reason": "Reviewed namespace candidate and retained bridge identity qualification",
+  "candidate_source": "deb5ac9",
+  "record_source": "bfeed61",
+  "private_run": "runs/manual.kVBb7B/runs/fb8c65de32b442feae2fdd1deecbe791",
+  "proof_sha256": "8c553a00f90fb4d2909f61006dc70eb832c547ad8075f786595d2eaa9434a329",
+  "independent_current_environment_validation": "passed",
+  "status": "qualified",
+  "failure": null,
+  "loader_name": "mcp__codex_app__load_workspace_dependencies",
+  "limits": {
+    "seconds": 600,
+    "requests": 8,
+    "output_tokens": 4096
+  },
+  "launcher_seconds": 900,
+  "paid_inference": false,
+  "settings_preserved": true,
+  "termination": "operator_finished",
+  "exit_code": 1,
+  "native": {
+    "version": "26.1007.30912",
+    "build": "20156",
+    "application_sha256": "75e397e2280dde93b70a85aa926f4282c728eacc84dfeb15ba7fb6ddd84628af",
+    "executable_sha256": "2053a78d225a1492d0cb6896cfd83254af06c3277547e83d4d23fef88f00426e",
+    "native_transport_sha256": "ae60fd7129a8eafea42dc41e8692e95dda624d4406826edd74010148371113db"
+  },
+  "launcher_identity": {
+    "sha256": "11d28bf933f5230bc9c06744d98726b51d096504e9e683471f21b9c369fbea1e",
+    "version": "tofa dev-prototype"
+  },
+  "artifacts": {
+    "deck.pptx": "47653aad100410c69d85ed1826619ba535a3238a4fc016e7e78abdb5a6c51cb0",
+    "deck.pdf": "4db2519f453722e40ae64b6dabc39ca4f7d6eb8cb5bf7337c3bc8e0fa93fcfc1",
+    "slide.png": "109e0b9a0bdb2aa9ea2bd0ab7f8108fba2104b2ee6eb46076bee1418d27190e4"
+  },
+  "preview": {
+    "status": "passed",
+    "operator": "maintainer",
+    "method": "human",
+    "utc": "2026-10-13T18:22:01Z",
+    "source_sha256": "0e11aa3c3f1b7262a42bfc0b7c210ad0e5b124c283e0e6564423fe86c8585be4"
+  },
+  "focused_preflights": [
+    {
+      "model": "zai-org/GLM-5.3",
+      "status": "ready",
+      "limits": {
+        "seconds": 600,
+        "requests": 10,
+        "output_tokens": 4096
+      },
+      "run_id": "599c2bf7394a4f748b02d499023f9dd2",
+      "source_sha256": "82b080443d0ce8ee8e68829b4bbaba3b7644e0e28da586a1993ff76eaebc1b1f"
+    },
+    {
+      "model": "moonshotai/Kimi-K3",
+      "status": "ready",
+      "limits": {
+        "seconds": 600,
+        "requests": 10,
+        "output_tokens": 4096
+      },
+      "run_id": "875fa99574b24cbe84fb9c11d3181603",
+      "source_sha256": "1617422065fa17ed223dda9395bad3f03226a704469b24620eef37cd7761def4"
+    }
+  ],
+  "diagnostic_wizard_sha256": "e8750d4e517a764d1972fe670b8a86a7197d64f050f49f352ba4e4b6dfbaf934",
+  "prior_attempt": {
+    "private_run": "runs/manual.ZPUOqJ/runs/47e57232dffc4955b20c0849cdf844e0",
+    "status": "infra_blocked",
+    "failure": "native_preview_unobserved",
+    "termination": "deadline",
+    "operator_explanation": "Maintainer did not inspect previews before deadline; repeated with fresh run.",
+    "original_evidence_preserved": true
+  },
+  "preflight_limitations": "Initial sandboxed preflights could not access launcher/catalog; both passed with network-enabled execution. All attempts retained.",
+  "scope": "Synthetic native runtime and human preview qualification; live native model loader selection is the next gate and has not run with this proof."
+}

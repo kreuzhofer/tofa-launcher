@@ -1,0 +1,26 @@
+{
+  "source_commit": "deb5ac9d438f8607ad1b85d5b859aaf048df9b57",
+  "full_race_suite": {
+    "command": "go test -race ./...",
+    "exit_code": 0,
+    "log_sha256": "fe6581580830802e8601983fa2152450d1eec797dfb943b056a075036c81d643",
+    "internal_tofa_seconds": 315.164
+  },
+  "targeted_race_suite": "passed",
+  "vet": "passed; production code unchanged after vet",
+  "native_catalog_replay": {
+    "status": "passed",
+    "definitions_each": 271,
+    "models": [
+      "moonshotai/Kimi-K3",
+      "zai-org/GLM-5.3"
+    ]
+  },
+  "reviews": {
+    "fixed_base": "c6e508f",
+    "reviewed_head": "deb5ac9",
+    "standards_remaining_findings": 0,
+    "spec_remaining_findings": 0
+  },
+  "scope": "Automated candidate checks; native preview and live native loader checks remain separate."
+}

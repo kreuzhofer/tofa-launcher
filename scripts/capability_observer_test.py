@@ -16,6 +16,64 @@ SCRIPT_ROOT = Path(__file__).resolve().parent.parent
 
 
 class BoundaryTests(unittest.TestCase):
+    def test_provider_terminal_errors_are_private_and_distinct_from_truncation(self):
+        for kind in ('response.failed', 'response.incomplete', 'error'):
+            event = {'type': kind, 'response': {'error': {'message': 'private-provider-error'}}}
+            raw = ('data: ' + json.dumps(event) + '\n\n').encode()
+            def failed(handler, body):
+                handler.send_response(200); handler.end_headers(); handler.wfile.write(raw)
+            with self.subTest(kind=kind), self.boundary(response=failed) as (observer, _):
+                self.assertEqual(self.post(observer, '/responses', self.body(), 'client-token', 200), raw)
+                record = observer.records[0]
+                self.assertEqual(record.get('provider_failure'), {'event_type': kind})
+                self.assertEqual(record['transport_failure']['category'], 'provider_error')
+                self.assertFalse(record['completed'])
+                self.assertNotIn('private-provider-error', json.dumps(observer.records))
+                private = observer.run / 'provider-error-1.json'
+                self.assertEqual(private.stat().st_mode & 0o777, 0o600)
+                self.assertIn('private-provider-error', private.read_text())
+
+    def test_http_rejection_and_incomplete_stream_have_distinct_diagnostics(self):
+        for status, category in ((400, 'http_status'), (200, 'incomplete_response')):
+            def rejected(handler, body):
+                handler.send_response(status); handler.end_headers()
+                handler.wfile.write(b'private-provider-detail' if status == 400 else b'data: [DONE]\n\n')
+            with self.subTest(status=status), self.boundary(response=rejected) as (observer, _):
+                self.post(observer, '/responses', self.body(), 'client-token', status)
+                self.assertEqual(observer.records[0].get('transport_failure'), {
+                    'stage': 'upstream_read', 'category': category, 'exception_type': None})
+                self.assertNotIn('private-provider-detail', json.dumps(observer.records))
+
+    def test_private_upstream_status_text_never_enters_exported_records(self):
+        def malformed(handler, body):
+            handler.wfile.write(b'private-prompt-token\r\n\r\n')
+        with self.boundary(response=malformed) as (observer, _):
+            with self.assertRaises(http.client.RemoteDisconnected):
+                self.post(observer, '/responses', self.body(), 'client-token', 200)
+            record = observer.records[0]
+            self.assertEqual(record['transport_failure'], {
+                'stage': 'upstream_headers', 'category': 'invalid_headers',
+                'exception_type': 'BadStatusLine'})
+            self.assertNotIn('private-prompt-token', json.dumps(observer.records))
+            self.assertIn('private-prompt-token', (observer.run / 'transport-error-1.json').read_text())
+
+    def test_naming_disconnect_before_headers_retains_private_exception(self):
+        def disconnected(handler, body):
+            handler.close_connection = True
+        title = json.loads((SCRIPT_ROOT / 'internal/tofa/testdata/desktop-luna6-title-request.json').read_text())
+        with self.boundary(response=disconnected) as (observer, seen):
+            with self.assertRaises(http.client.RemoteDisconnected):
+                self.post(observer, '/responses', title, 'client-token', 200)
+            record = observer.records[0]
+            self.assertEqual(record['failure'], 'stream_failure')
+            self.assertEqual(record.get('transport_failure'), {
+                'stage': 'upstream_headers', 'category': 'peer_closed',
+                'exception_type': 'RemoteDisconnected'})
+            private = observer.run / 'transport-error-1.json'
+            self.assertEqual(private.stat().st_mode & 0o777, 0o600)
+            self.assertIn('RemoteDisconnected', json.loads(private.read_text())['traceback'])
+            self.assertIsNone(observer.reason)
+
     def test_deck_naming_cannot_infer_before_runtime_qualification(self):
         title = json.loads((SCRIPT_ROOT / 'internal/tofa/testdata/desktop-luna6-title-request.json').read_text())
         with self.boundary(case='03') as (observer, seen):

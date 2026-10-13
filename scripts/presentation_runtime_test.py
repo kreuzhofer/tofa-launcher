@@ -65,6 +65,11 @@ else:
             self.assertEqual(temporary.parent, attempts[0])
             self.assertTrue(all(Path(value) == temporary for value in observed['environment'].values()))
             self.assertEqual(list(inherited.iterdir()), [])
+            control = json.loads((attempts[0] / 'observer.json').read_text())
+            proof = json.loads((attempts[0] / 'qualification.json').read_text())
+            self.assertEqual(control['seconds'], 900)
+            self.assertEqual(proof['limits'], {'seconds': 600, 'requests': 8, 'output_tokens': 4096})
+            self.assertEqual(proof['launcher_seconds'], 900)
 
     def exchange(self, root, arguments=None):
         requests = [

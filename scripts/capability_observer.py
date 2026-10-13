@@ -17,6 +17,7 @@ import socket
 import socketserver
 import threading
 import time
+import traceback
 from urllib.parse import urlsplit
 
 from capability_actions import Actions, polling
@@ -455,6 +456,7 @@ class Observer:
                     return
         watcher = threading.Thread(target=disconnect, daemon=True)
         watcher.start()
+        stage = 'upstream_connect'
         try:
             connection.connect()
             with self.lock: self.active.add(connection.sock)
@@ -463,21 +465,26 @@ class Observer:
             if record is None:
                 for key in ('X-Tofa-Parent-Pid', 'X-Tofa-Main-Engine-Pid'):
                     if handler.headers.get(key): headers[key] = handler.headers[key]
+            stage = 'upstream_send'
             connection.request(handler.command, handler.path, None if body is None else json.dumps(body), headers)
+            stage = 'upstream_headers'
             response = connection.getresponse()
             if record is not None:
                 record.update(status=response.status, headers_ms=self.elapsed())
+            stage = 'client_write'
             handler.send_response(response.status)
             handler.send_header('Content-Type', response.getheader('Content-Type', 'application/json'))
             handler.end_headers()
             total, pending = 0, b''
             while True:
+                stage = 'upstream_read'
                 if time.monotonic() >= self.deadline: raise TimeoutError()
                 chunk = response.read1(65536)
                 if not chunk: break
                 total += len(chunk)
                 if total > RESPONSE_LIMIT: raise ValueError('response_body_limit')
                 if record is None or response.status != 200:
+                    stage = 'client_write'
                     handler.wfile.write(chunk); handler.wfile.flush(); continue
                 pending += chunk
                 if len(pending) > EVENT_LIMIT: raise ValueError('event_body_limit')
@@ -486,11 +493,18 @@ class Observer:
                     if not boundary: break
                     framed, pending = pending[:boundary.end()], pending[boundary.end():]
                     data = b'\n'.join(line[5:].lstrip(b' ') for line in framed.splitlines() if line.startswith(b'data:'))
+                    stage = 'event_decode'
                     if data and data != b'[DONE]': self.event(record, json.loads(data))
+                    stage = 'client_write'
                     handler.wfile.write(framed); handler.wfile.flush()
                 if record['completed']: break
             if record is not None and not record['completed']:
                 record['failure'] = 'upstream_http_error' if response.status != 200 else 'response_incomplete'
+                category = ('http_status' if response.status != 200 else 'provider_error' if record.get('provider_failure') else
+                    self.reason if self.reason in ('client_disconnected', 'deadline', 'operator_finished', 'operator_cancelled')
+                    else 'incomplete_response')
+                record['transport_failure'] = {'stage': 'upstream_read', 'category': category,
+                    'exception_type': None}
         except (OSError, http.client.HTTPException, ValueError, TypeError, AttributeError, KeyError) as error:
             if isinstance(error, TimeoutError) or time.monotonic() >= self.deadline:
                 self.stop('deadline')
@@ -498,6 +512,7 @@ class Observer:
                 self.stop('diagnostic_call_limit')
             if record is not None:
                 record['failure'] = self.reason or ('deadline' if isinstance(error, TimeoutError) else 'stream_failure')
+                self.transport_failure(record, stage, error)
         finally:
             finished.set()
             watcher.join(timeout=2)
@@ -508,8 +523,37 @@ class Observer:
                     self.persist()
             connection.close()
 
+    def transport_failure(self, record, stage, error):
+        # Export only fixed categories. Exception messages and tracebacks may
+        # contain private request content, so they stay in the private run.
+        category, kind = 'protocol_error', 'Other'
+        for cls, label in ((http.client.RemoteDisconnected, 'peer_closed'),
+                (ConnectionResetError, 'connection_reset'), (ConnectionRefusedError, 'connection_refused'),
+                (BrokenPipeError, 'broken_pipe'), (TimeoutError, 'timeout'),
+                (http.client.IncompleteRead, 'incomplete_read'), (http.client.BadStatusLine, 'invalid_headers'),
+                (http.client.HTTPException, 'http_protocol'), (OSError, 'io_error'),
+                (ValueError, 'invalid_response'), (TypeError, 'invalid_response'),
+                (AttributeError, 'invalid_response'), (KeyError, 'invalid_response')):
+            if isinstance(error, cls):
+                category, kind = label, cls.__name__
+                break
+        record['transport_failure'] = {'stage': stage, 'category': category, 'exception_type': kind}
+        self.retain_failure(record, 'transport', {'stage': stage, 'traceback': traceback.format_exc()[-65536:]})
+
+    def retain_failure(self, record, kind, detail):
+        path = self.run / (kind + '-error-' + str(record['number']) + '.json')
+        try:
+            descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            with os.fdopen(descriptor, 'w') as stream:
+                json.dump(detail, stream)
+        except OSError:
+            record['private_' + kind + '_error_retention_failed'] = True
+
     def event(self, record, event):
         if not isinstance(event, dict): raise ValueError('unsupported_response_contract')
+        if event.get('type') in ('response.failed', 'response.incomplete', 'error') and not record.get('provider_failure'):
+            record['provider_failure'] = {'event_type': event['type']}
+            self.retain_failure(record, 'provider', {'event_text': json.dumps(event)[:65536]})
         if event.get('type') in ('response.output_text.delta', 'response.function_call_arguments.delta'):
             record.setdefault('first_delta_ms', self.elapsed())
         items = ([event.get('item', {})] if event.get('type') == 'response.output_item.done' else

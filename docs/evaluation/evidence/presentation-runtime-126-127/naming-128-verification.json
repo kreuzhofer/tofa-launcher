@@ -1,0 +1,80 @@
+{
+  "schema": "tofa-naming-verification-v1",
+  "tested_revision": "cf6cbec7e4d54985ab392be6d11a8dd281a5fede",
+  "review_baseline": "29e2983",
+  "reviews": {
+    "standards_findings": 0,
+    "spec_findings": 0
+  },
+  "go": {
+    "race_suite": "passed",
+    "vet": "passed",
+    "production_source_unchanged_since": "deb5ac9"
+  },
+  "python": {
+    "initial_discovery": {
+      "tests": 455,
+      "failures": 6,
+      "errors": 7,
+      "skipped": 85,
+      "disposition": "Incorrect invocation omitted Go PATH and lifecycle/terminal arguments. Also one unrelated Windows lease timing failure; original log retained."
+    },
+    "discovery_with_go_toolchain": {
+      "tests": 495,
+      "failures": 0,
+      "errors": 6,
+      "skipped": 85,
+      "seconds": 590.842,
+      "disposition": "All six errors are missing required lifecycle/terminal binary arguments; corrected entry-point runs below pass."
+    },
+    "documented_entry_points": {
+      "lifecycle_tests": 4,
+      "terminal_tests": 2,
+      "result": "passed",
+      "distribution_source": "cf6cbec",
+      "version": "v0.0.0-test",
+      "private_distribution": "checks/naming-128/offline-build/dist"
+    },
+    "windows_lease_failure": {
+      "code_unchanged": true,
+      "isolated_recheck": "passed",
+      "later_full_run": "passed",
+      "disposition": "Intermittent test failure retained; no Windows code changed or reliability claim made."
+    },
+    "aggregate_after_invocation_correction": {
+      "passed": 410,
+      "skipped": 85,
+      "remaining_failures": 0,
+      "remaining_errors": 0,
+      "scope": "Combines discovery and required standalone entry points; not a claim that generic discovery exited zero."
+    },
+    "skips": "Existing opt-in installed-client/engine and platform gates were not enabled by the offline suite.",
+    "syntax_compile": "passed; no configured Python static type checker was run"
+  },
+  "native": {
+    "preflight": "ready",
+    "actual_attempt": "pending",
+    "human_visible_title": "not_observed",
+    "observer_seconds": 600,
+    "launcher_guard_seconds": 900,
+    "requests": 6,
+    "output_tokens_per_request": 4096,
+    "launcher_sha256": "11d28bf933f5230bc9c06744d98726b51d096504e9e683471f21b9c369fbea1e",
+    "wizard_sha256": "feee90cfd79917973cf34e0a0662d33be87bbba25ba668756bcee6a1820777b7"
+  },
+  "private_evidence_root": "/tmp/tofa-presentation-validation/checks/naming-128",
+  "private_file_sha256": {
+    "full-go-race.log": "440b05ac3abeeaff20c3a756281682dac68dd5e93f30e248dac40735d0626d88",
+    "vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "full-python.log": "a686473c39faab50f5103c4c6ddb81aa37a461310900d1e4002985e0b2e2de4d",
+    "full-python-qualified.log": "6ce273be026fcf7213afd4e8bfa0511f51e21f83eae1b597b37afa1e755aa33e",
+    "python-build-toolchain.log": "522886628121e402b58e897d81cb7cd79980c8ab7f8283bfc871f56d57b50397",
+    "lifecycle.log": "100a4d58568e61ae12b7a635e1d20818e86188c417d380e2f281a3adb94e6e6a",
+    "terminal.log": "f06b18a55b392eaf17e2b2d11dca32076d354b3ae5dad9009c86d84dd3af7519",
+    "windows-lease-targeted.log": "b98b642bc2198cbb0705c6864bf9ff4c41696cf1728a8eaa79f402f771431ce3",
+    "native-preflight-final.json": "4bc27931854d9f511f92a5377412337c51504d2a9884d2ec8346f83aff683462",
+    "native-diagnostic.py": "0f0cb15e61e6d8a546e431bc65af5fb93a1ed038cae777c730c199b8ac118d18",
+    "naming-status.py": "b2bbb61f2bb23bf0f64ffd5e9d06f8cf075053e338c95d23bdc4b6be6ef9ba7e"
+  },
+  "disposition": "Diagnostic implementation reviewed and checked. #128 stays open pending a bounded actual Desktop naming attempt; no naming fix, release promotion or historical outcome rewrite."
+}
