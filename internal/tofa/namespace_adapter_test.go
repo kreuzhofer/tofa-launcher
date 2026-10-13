@@ -205,8 +205,13 @@ func TestNamespaceAdapterPreservesGuardianCatalogAndResponse(t *testing.T) {
 		t.Run(model, func(t *testing.T) {
 			payload := jsonValue(t, []byte(guardianRequestFixture())).(map[string]any)
 			payload["model"] = model
-			catalog := jsonValue(t, []byte(namespaceCatalog))
-			payload["tools"] = catalog
+			catalog := payload["tools"]
+			// Keep the recognized three inspection tools. Namespace history is
+			// context for the review, not permission to translate its tool lane.
+			payload["input"] = append(payload["input"].([]any), map[string]any{
+				"type": "function_call", "namespace": "prior_context", "name": "inspect",
+				"call_id": "context-call", "arguments": "{}",
+			})
 			body, _ := json.Marshal(payload)
 			const decision = `{"outcome":"deny","rationale":"native review remains independent"}`
 			app, _ := adapterFixture(t, func(w http.ResponseWriter, r *http.Request) {

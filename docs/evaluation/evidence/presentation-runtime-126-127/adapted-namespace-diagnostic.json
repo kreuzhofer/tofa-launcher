@@ -1,0 +1,75 @@
+{
+  "schema": "tofa-adapted-namespace-diagnostic-v1",
+  "source_revision": "3bd3d82",
+  "private_root": "checks/release-planning/namespace-adapted-probe-v1",
+  "limits": {
+    "seconds_per_request": 600,
+    "inference_requests": 2,
+    "output_tokens_per_request": 4096,
+    "retries": 0
+  },
+  "status": "passed",
+  "protected_state_unchanged": true,
+  "attempts": [
+    {
+      "label": "kimi-namespace",
+      "model": "moonshotai/Kimi-K3",
+      "started_utc": "2026-10-13T17:06:19Z",
+      "elapsed_ms": 4130,
+      "http_status": 200,
+      "response_sha256": "eb6bc86aa844aff6eb111884decd8fc87051e2ca2257e1086b10c40cf4e2d57f",
+      "tool_execution": false,
+      "function_calls": [
+        {
+          "arguments": "{}",
+          "name": "record_probe",
+          "namespace": "mcp__diagnostic_probe"
+        }
+      ],
+      "usage": {
+        "input_tokens": 247,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 232,
+        "output_tokens_details": {
+          "reasoning_tokens": 169
+        },
+        "total_tokens": 479
+      },
+      "request_sha256": "020aa0b5ad1afe182f9a456cd86c210d6ee49a1d367e4a83db9dad872e42b6f6"
+    },
+    {
+      "label": "glm-namespace",
+      "model": "zai-org/GLM-5.3",
+      "started_utc": "2026-10-13T17:06:23Z",
+      "elapsed_ms": 1117,
+      "http_status": 200,
+      "response_sha256": "ffdf1927dd14fcabfc9985e7f8ab5d0821ea05e4f016b0634376064712a3d172",
+      "tool_execution": false,
+      "function_calls": [
+        {
+          "arguments": "{}",
+          "name": "record_probe",
+          "namespace": "mcp__diagnostic_probe"
+        }
+      ],
+      "usage": {
+        "input_tokens": 233,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "output_tokens": 138,
+        "output_tokens_details": {
+          "reasoning_tokens": 93
+        },
+        "total_tokens": 371
+      },
+      "request_sha256": "d535c53387158b664bb724da6683065048c2b67db42db7c372c22eb35da453f0"
+    }
+  ],
+  "harness_sha256": "fa95e779fc135a991ad0f0596f5f6587cdc3b4191b33320995ce1f4e38c8fdec",
+  "scope": "Real candidate adapter and live provider; synthetic prompt/function; restored native tool identity; no tool execution, Desktop launch or retained bridge replacement."
+}
