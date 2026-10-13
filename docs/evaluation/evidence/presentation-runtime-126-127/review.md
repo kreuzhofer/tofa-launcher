@@ -93,3 +93,30 @@ the production launcher after the fix. Production lifecycle and installed-asset
 preflight passed separately. Actual production native conversation/previews and
 two declared model calibrations remain acceptance work; these reviews do not
 claim that startup or synthetic inference satisfies those gates.
+
+## Final runtime acceptance review — c5431df with calibration evidence
+
+Fixed baseline remains `2c8df02`. Standards coverage combines the earlier full
+review and focused reviews of the settings relay, retained ownership/preservation,
+historical native identity binding and production synthetic observer. The final
+code has zero Standards findings; no further implementation check was requested
+beyond the reported passing checks because no executable code changed.
+
+Spec independently revalidated the production native `qualify()` proof against
+the current environment and checked both native calibration runs and maintainer
+observations. Both use accepted prompts, selected Kimi main, fixed GLM Guardian,
+fresh workspaces and existing bounds. Settings remained preserved without drift.
+The final Spec review found zero code defects or scope creep. Its one packaging
+item was to retain sanitized native calibration assessments and mark those runs
+complete; this is now captured in `native-model-calibrations.json` and the feature
+record's current status. Historical evidence keeps its original checkpoint.
+
+The tickets require separately declared calibration outcomes, not successful
+model performance. Their negative results do not reopen native runtime qualification
+or require retries for #126/#127 acceptance. The loader-selection and naming
+failures remain explicit, tracked as #129 and #128; #130 owns the post-diagnosis
+comparison. #119 campaign and #106 release acceptance remain separate.
+
+Standards: 0 findings. Spec: 0 code findings; sanitized evidence/status packaging
+completed and independently confirmed by the Spec reviewer. Zero remaining merge
+blockers for #126/#127; campaign and release gates remain separate.

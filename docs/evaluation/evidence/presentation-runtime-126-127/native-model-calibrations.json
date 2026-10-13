@@ -1,0 +1,218 @@
+{
+  "schema": "tofa-presentation-model-calibration-assessment-v1",
+  "implementation": "c5431df",
+  "retry_policy": "one declared native attempt per case; no outcome replaced",
+  "report_interpretation": "Both aggregate reports are infra_blocked because independent naming failed. Main-model completion and artifact judgments remain separate.",
+  "entries": [
+    {
+      "run_id": "fe88fcfbf9194a8f981679ae716de477",
+      "cell": {
+        "client": "desktop",
+        "model": "moonshotai/Kimi-K3",
+        "case": "03",
+        "variant": "baseline",
+        "corpus": "capability-corpus-v3",
+        "platform": "Darwin/arm64"
+      },
+      "status": "infra_blocked",
+      "limits": {
+        "seconds": 900,
+        "requests": 80,
+        "output_tokens": 8192
+      },
+      "stop_reason": "deadline",
+      "elapsed_ms": 904973.224,
+      "request_counts": {
+        "main": 70,
+        "guardian": 0,
+        "auxiliary_title": 1
+      },
+      "usage": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "complete": false
+      },
+      "settings_preserved": true,
+      "environment_drift_during_run": [],
+      "treatment": "qualified_native_desktop_supplied_runtime",
+      "matrix_membership": "excluded; fresh declared calibration only",
+      "runtime_proof_sha256": "c7a3fce33ad34b91284dbd38a499b1896db81b25fd71af3625ab7ba991752e8b",
+      "launcher": {
+        "sha256": "1f2b7a7b61c7214ceb46f0f0bb0c4952760875ceaee35838706837c4db76d519",
+        "version": "tofa dev-prototype"
+      },
+      "client": {
+        "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+        "version": "codex-cli 0.162.0-alpha.17.2"
+      },
+      "desktop": {
+        "version": "26.1007.30912",
+        "build": "20156",
+        "executable_sha256": "2053a78d225a1492d0cb6896cfd83254af06c3277547e83d4d23fef88f00426e",
+        "application_sha256": "75e397e2280dde93b70a85aa926f4282c728eacc84dfeb15ba7fb6ddd84628af",
+        "engine": {
+          "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+          "version": "codex-cli 0.162.0-alpha.17.2"
+        }
+      },
+      "harness": {
+        "capability_evaluation.py": "78b6b32934cc30000eeba34136d98c15bdf0e7f88be8b37fed08d27567a0dd0b",
+        "capability_observer.py": "b5492ac3ba263cc7e5ec3df790d45614f897eb3ffa426f92312028d5e0671a50",
+        "capability_actions.py": "cada1c6b10fae235c28cd958c39b595b6260f94279ee226b5ef266f7a0e2efd7"
+      },
+      "source_sha256": {
+        "result.json": "f1b98d21bc180fe8cb5f1f7a813ac4dd5127231b56545b9dd9e3e324805d66e7",
+        "operator-result.json": "d5e3456262dce72f0b3cd94fa171aeaaca24862cf2620361653f81adce6cdfe9",
+        "requests.json": "19b692762e82ea6c676a43fcc8b4864d8396aedf78dcb397c390b045d14358ff"
+      },
+      "loader_call_observed": false,
+      "installed_skill_read_observed": true,
+      "artifacts": [
+        {
+          "name": "gut-morgen-du-pitch-v2.pptx",
+          "sha256": "49e54317e01d8d3e7ffb69137c69d1d8d9681a024f06ba377628a7151dbdc12a",
+          "bytes": 34194,
+          "zip_integrity": true,
+          "slide_count": 5
+        }
+      ],
+      "failures": [
+        {
+          "role": "auxiliary_title",
+          "failure": "stream_failure"
+        }
+      ],
+      "assessment": {
+        "task_content": "five-slide compliment-app pitch present; design quality not independently scored",
+        "language": "German deck despite English prompt; no explicit output-language constraint; tracked separately in #124",
+        "skill_discovery": "installed presentation instructions read",
+        "skill_use": "loader advertised but never invoked; supplied-runtime workflow not followed",
+        "file_integrity": "PPTX ZIP valid with five slides; PDF missing; finalization not independently qualified",
+        "reference_syntax": "custom codex-file-citation for PPTX; no required absolute Markdown destinations or PDF reference",
+        "visible_preview": {
+          "status": "failed",
+          "reason": "native_preview_failed_or_missing",
+          "operator": "maintainer"
+        },
+        "repetition": {
+          "status": "passed",
+          "reason": "observed_action_equivalence"
+        },
+        "recovery": "not_applicable; deck case"
+      },
+      "observations": [
+        {
+          "id": "b4561fc7987740428e6ab6a406b72f7b",
+          "operator": "maintainer",
+          "criterion": "visible_preview",
+          "status": "failed",
+          "reason": "native_preview_failed_or_missing",
+          "observed_utc": "2026-10-13T14:40:59Z"
+        }
+      ]
+    },
+    {
+      "run_id": "01d80e9eeb0d42ff8ce9b481d26d15da",
+      "cell": {
+        "client": "desktop",
+        "model": "moonshotai/Kimi-K3",
+        "case": "04",
+        "variant": "baseline",
+        "corpus": "capability-corpus-v3",
+        "platform": "Darwin/arm64"
+      },
+      "status": "infra_blocked",
+      "limits": {
+        "seconds": 900,
+        "requests": 80,
+        "output_tokens": 8192
+      },
+      "stop_reason": "request_budget_limit",
+      "elapsed_ms": 812540.536,
+      "request_counts": {
+        "main": 79,
+        "guardian": 0,
+        "auxiliary_title": 1
+      },
+      "usage": {
+        "input_tokens": null,
+        "output_tokens": null,
+        "complete": false
+      },
+      "settings_preserved": true,
+      "environment_drift_during_run": [],
+      "treatment": "qualified_native_desktop_supplied_runtime",
+      "matrix_membership": "excluded; fresh declared calibration only",
+      "runtime_proof_sha256": "c7a3fce33ad34b91284dbd38a499b1896db81b25fd71af3625ab7ba991752e8b",
+      "launcher": {
+        "sha256": "1f2b7a7b61c7214ceb46f0f0bb0c4952760875ceaee35838706837c4db76d519",
+        "version": "tofa dev-prototype"
+      },
+      "client": {
+        "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+        "version": "codex-cli 0.162.0-alpha.17.2"
+      },
+      "desktop": {
+        "version": "26.1007.30912",
+        "build": "20156",
+        "executable_sha256": "2053a78d225a1492d0cb6896cfd83254af06c3277547e83d4d23fef88f00426e",
+        "application_sha256": "75e397e2280dde93b70a85aa926f4282c728eacc84dfeb15ba7fb6ddd84628af",
+        "engine": {
+          "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+          "version": "codex-cli 0.162.0-alpha.17.2"
+        }
+      },
+      "harness": {
+        "capability_evaluation.py": "78b6b32934cc30000eeba34136d98c15bdf0e7f88be8b37fed08d27567a0dd0b",
+        "capability_observer.py": "b5492ac3ba263cc7e5ec3df790d45614f897eb3ffa426f92312028d5e0671a50",
+        "capability_actions.py": "cada1c6b10fae235c28cd958c39b595b6260f94279ee226b5ef266f7a0e2efd7"
+      },
+      "source_sha256": {
+        "result.json": "9deef70630bdbbf8aa933ee2643502ff13bb76d822b1c2c8d43e5f41533d89a5",
+        "operator-result.json": "5b02c2268e46a1558be98ce642ebae2954a20717698e53dafd5433c154f6345b",
+        "requests.json": "8262165f88cc070b1cf084b5f87cabad9d84bf78ab08a1c2dce50047adcb4374"
+      },
+      "loader_call_observed": false,
+      "installed_skill_read_observed": true,
+      "artifacts": [],
+      "failures": [
+        {
+          "role": "auxiliary_title",
+          "failure": "stream_failure"
+        },
+        {
+          "role": "unknown",
+          "failure": "request_budget_limit"
+        }
+      ],
+      "assessment": {
+        "task_content": "not_delivered",
+        "language": "not_run; no delivered deck",
+        "skill_discovery": "installed presentation instructions read",
+        "skill_use": "loader advertised but never invoked; supplied-runtime workflow not followed",
+        "file_integrity": "not_run; no deck",
+        "reference_syntax": "not_run; no final delivery",
+        "visible_preview": {
+          "status": "failed",
+          "reason": "native_preview_failed_or_missing",
+          "operator": "maintainer"
+        },
+        "repetition": {
+          "status": "inconclusive",
+          "reason": "observed_action_equivalence"
+        },
+        "recovery": "not_applicable; deck case"
+      },
+      "observations": [
+        {
+          "id": "f8839af8ff794c69b9e4cd8c46e76ab5",
+          "operator": "maintainer",
+          "criterion": "visible_preview",
+          "status": "failed",
+          "reason": "native_preview_failed_or_missing",
+          "observed_utc": "2026-10-13T15:27:16Z"
+        }
+      ]
+    }
+  ]
+}

@@ -4,6 +4,24 @@ The implementation remains on `feat/126-127-presentation-runtime`, based on
 `2c8df02`. The maintainer chose to retain an integration branch until qualification
 is complete. Neither ticket is closed or merged into the main branch.
 
+## Current acceptance status
+
+Both client runtime lanes have successful actual-client loader/deck qualification;
+the production native lane also has human-confirmed PPTX/PDF previews. Both native
+model calibrations are now complete with negative outcomes, recorded separately
+in [the assessment](evidence/presentation-runtime-126-127/native-model-calibrations.json).
+Case 03 produced a five-slide German PPTX but no PDF and never invoked the loader;
+case 04 reached its request limit without artifacts or a loader call. Both read the
+installed skill. Independent naming failed in both; protected state was preserved.
+The maintainer recorded failed/missing preview outcomes for both attempts.
+
+The runtime tickets require retaining these calibrations, not successful model
+capability. Merge/closure depends on final Standards/Spec acceptance; runtime
+success does not promote these model combinations. Follow
+[the release plan](presentation-release-plan.md) for diagnosis, fresh model
+comparisons and existing campaign/release gates. Later sections retain the
+chronology; statements about pending gates describe their recorded checkpoint.
+
 ## Implemented CLI lane
 
 The optional evaluation observer configuration can register the launcher-owned
@@ -92,8 +110,8 @@ were both 27,451, but content fingerprints differed. Modification-time candidate
 include `config.toml`, the computer-use plugin's `.mcp.json`, and twelve remote
 plugin installation metadata files. These candidates do not establish an exact
 content diff. No shared snapshot was restored. Earlier qualification files fail
-the current gate after this drift. There is still no successful native Desktop
-loader/artifact/preview qualification; its model calibrations remain blocked.
+the current gate after this drift. At that checkpoint there was no successful native Desktop
+loader/artifact/preview qualification; its model calibrations remained blocked.
 
 The 2026-10-13 [manual attempt](evidence/presentation-runtime-126-127/native-manual.json)
 reached the actual Desktop conversation but failed with
