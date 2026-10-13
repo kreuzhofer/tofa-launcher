@@ -183,10 +183,16 @@ remain unchanged. Evidence:
 `evidence/presentation-runtime-126-127/namespace-mcp-lifecycle.json` and
 `evidence/presentation-runtime-126-127/namespace-implementation-checks.json`.
 
-The existing `/tmp/tofa-presentation-validation/run-manual.sh` now references this
-exact candidate and lifecycle evidence; its asset preflight passes. Next is a fresh
-human native PPTX/PDF preview check (600-second observer, 900-second outer guard),
-then bounded native Kimi/GLM loader checks using the new qualification proof.
-The earlier loader wizard still references the previous proof and must be updated
-after this new preview qualification. #129 stays open through native disposition;
+Fresh native synthetic qualification now passes for this exact candidate, including
+independent proof validation, the actual loader call/result, executable identities,
+artifacts, maintainer-observed native PPTX/PDF previews and settings preservation.
+See `evidence/presentation-runtime-126-127/namespace-native-requalification.json`.
+The preceding attempt timed out without preview observation and remains unchanged;
+the maintainer confirmed they had not inspected its previews.
+
+The existing `/tmp/tofa-presentation-validation/run-loader-diagnostic.sh` now pins
+this candidate and the fresh proof. Both network-enabled preflights pass. Next:
+one fresh Kimi and one fresh GLM native loader check, each with a 600-second observer
+and 900-second outer guard; naming is scored independently. These live model
+attempts have not yet run with this proof. #129 stays open through native disposition;
 #130 remains blocked on both diagnosis dispositions, including independent #128.
