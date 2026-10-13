@@ -132,3 +132,8 @@ artifacts. Final Desktop asset preflight passes. Independent re-review reports
 zero remaining Standards findings and zero remaining Spec implementation findings.
 See the [sanitized follow-up record](evidence/presentation-runtime-126-127/retained-mcp-evaluator.json).
 Native acceptance is still pending, so neither ticket is closed or merged.
+
+The subsequent [native manual run](evidence/presentation-runtime-126-127/native-success.json)
+now passes loader, artifact, preservation and human PPTX/PDF preview qualification,
+including independent proof revalidation. This qualifies the exact retained
+fixture bridge; native model calibrations and the production route remain pending.

@@ -63,7 +63,7 @@ loader or delivered a deck. Settings stayed preserved, and neither reported
 environment drift. These runs do not establish reliable model skill use,
 presentation quality, language reliability or supported-model status.
 
-## Desktop qualification remains pending
+## Desktop qualification history
 
 The calibration command has a separate native Desktop path. It launches the actual
 ChatGPT application with its bundled engine and normal local host. It supplies
@@ -216,3 +216,30 @@ Remaining gates are the actual native Desktop call/workflow and human previews,
 its two fresh model calibrations and final qualification. The
 broader #119 matrix, approval/resume qualification, guidance adoption, releases,
 Windows and supported-model promotion remain outside these runtime tickets.
+
+## Native runtime and preview qualification passed
+
+The maintainer completed the fresh Desktop run on 2026-10-13 at 12:18 UTC.
+Independent `qualify()` revalidation passed against the current application,
+engine, runtime, harness, bridge and protected settings. The genuine
+`mcp__codex_app__load_workspace_dependencies` call returned the supplied runtime;
+the actual Desktop session authored, finalized, rendered and delivered PPTX/PDF,
+and the maintainer recorded both native previews against the exact file hashes.
+See [sanitized native evidence](evidence/presentation-runtime-126-127/native-success.json).
+
+Raw settings fingerprints differ; the scoped normalized fingerprints match.
+Only the two authorized MCP executable references changed. All other protected
+settings, skills, plugins and runtime files passed preservation. The run ended
+with `operator_finished`; launcher exit 1 is the bounded observer shutdown,
+accepted by the existing native qualification contract alongside passed previews.
+No paid inference was used and this result does not score model capability.
+
+This qualifies ChatGPT 26.1007.30912 (20156), bundled engine
+0.162.0-alpha.17.2, supplied bundle 26.1011.11113 and the exact retained synthetic
+fixture bridge. The two independently declared native model calibrations remain.
+The production launcher uses a different bridge path/binary than the qualified
+fixture; its bridge must have matching lifecycle/runtime qualification before
+paid model inference. The existing production bridge hash differs from the
+qualified hash. Do not transplant the synthetic proof or silently widen its
+allowed references. No shared setting or production installation was changed
+while recording this result. Keep the integration branch and tickets open.

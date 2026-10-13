@@ -1,0 +1,109 @@
+{
+  "schema": "tofa-native-presentation-success-v1",
+  "implementation": "8e6984a",
+  "private_run": "manual.swddFk/runs/8ff5cdfcafd844f2a2855b730d928ccf",
+  "status": "qualified",
+  "independent_revalidation": "passed",
+  "paid_inference": false,
+  "qualification_sha256": "9ddb2b00072eebd8b4ed1cb7c7f3f16dcdfb22807b29af347ce39ff63bacf063",
+  "native": {
+    "version": "26.1007.30912",
+    "build": "20156",
+    "application_sha256": "75e397e2280dde93b70a85aa926f4282c728eacc84dfeb15ba7fb6ddd84628af",
+    "executable_sha256": "2053a78d225a1492d0cb6896cfd83254af06c3277547e83d4d23fef88f00426e",
+    "native_transport_sha256": "ae60fd7129a8eafea42dc41e8692e95dda624d4406826edd74010148371113db"
+  },
+  "client_identity": {
+    "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+    "version": "codex-cli 0.162.0-alpha.17.2"
+  },
+  "launcher_identity": {
+    "sha256": "9e18210e8783432107b15970973db6b66e2532a9fdbb9d9e47ad0b49239aa2b3",
+    "version": "tofa evaluation-fixture"
+  },
+  "host": {
+    "system": "Darwin",
+    "arch": "arm64",
+    "platform": "macOS-26.7-arm64-arm-64bit"
+  },
+  "loader_name": "mcp__codex_app__load_workspace_dependencies",
+  "loader_result_sha256": "cbcc5f412db0b80ffdb7b431a2b6aa624ac610e56778750ea4764614958ad941",
+  "runtime": {
+    "provider": "codex_app",
+    "bundle_version": "26.1011.11113",
+    "artifact_tool_version": "2.8.93",
+    "declared_versions": {
+      "node": "v24.19.0",
+      "python": "3.12.14"
+    },
+    "hashes": {
+      "manifest": "950908d9c4e5dd4b079b3201366eda2ab780e7423b71b7f8e0488c19e6831f4d",
+      "node": "743cbaf12bd9323937b85f6297d8182b086526510c9f9c5875fa74d2aad9072d",
+      "python": "39bf33dd80ffd5e8c087cbd52164cbe0d8485f73b44687d0d466b0f49e197129",
+      "artifact_package": "4c6ba2c3f71d8d8b8b24c3aca3627b860de5a3d95da3824191d93fed7f447a86",
+      "artifact_module": "0900e6e29e518a03fa1a49008257ddf525b0557ad3c4a38be60bfa9085bb85d7",
+      "soffice": "81c7db1c6dbcdd606d95abef337b4529aeda6a4fa1cf23a5a567f9c5655c8b66",
+      "pdfinfo": "fee70ade670fb025343aca2b5c3a2aacacb8ed9edce1b716b233b5de924b6bf5",
+      "pdftoppm": "de772e88ab9977ccde25def9b403bf42675d75f5dd82b19fbd7d8123ad183159",
+      "native_soffice": "bcf6686445e511336eef012ffcba63af7a2459299c32907244737b9d7d1ff0eb",
+      "native_pdfinfo": "45fa717fb4aaec4bfbefc3a07612ff2539dbfcce30fb30e976aa5d4a35bef802",
+      "native_pdftoppm": "d9d81b176e8fd38d07f2fbf4f84c17dc991c6bac3730ff3cad3239c4fcbed892"
+    }
+  },
+  "observed_versions": {
+    "node": {
+      "sha256": "743cbaf12bd9323937b85f6297d8182b086526510c9f9c5875fa74d2aad9072d",
+      "version": "v24.19.0"
+    },
+    "python": {
+      "sha256": "39bf33dd80ffd5e8c087cbd52164cbe0d8485f73b44687d0d466b0f49e197129",
+      "version": "Python 3.12.14"
+    },
+    "soffice": {
+      "sha256": "81c7db1c6dbcdd606d95abef337b4529aeda6a4fa1cf23a5a567f9c5655c8b66",
+      "version": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5"
+    },
+    "pdfinfo": {
+      "sha256": "fee70ade670fb025343aca2b5c3a2aacacb8ed9edce1b716b233b5de924b6bf5",
+      "version": "pdfinfo version 26.05.0\nCopyright 2005-2026 The Poppler Developers - http://poppler.freedesktop.org\nCopyright 1996-2011, 2022 Glyph & Cog, LLC"
+    },
+    "pdftoppm": {
+      "sha256": "de772e88ab9977ccde25def9b403bf42675d75f5dd82b19fbd7d8123ad183159",
+      "version": "pdftoppm version 26.05.0\nCopyright 2005-2026 The Poppler Developers - http://poppler.freedesktop.org\nCopyright 1996-2011, 2022 Glyph & Cog, LLC"
+    }
+  },
+  "artifacts": {
+    "deck.pptx": "8f03efad19673be01a39b34485d3bb2b6f66e53bd03f8b75544e20dc7a3b73fc",
+    "deck.pdf": "9fbc7f4d0965b02bb0bfcc0ab96beef5778130dedcc5301daca5aa94694773bd",
+    "slide.png": "109e0b9a0bdb2aa9ea2bd0ab7f8108fba2104b2ee6eb46076bee1418d27190e4"
+  },
+  "preservation": {
+    "raw_equal": false,
+    "normalized_equal": true,
+    "settings_preserved": true,
+    "policy_schema": "tofa-retained-mcp-policy-v1",
+    "bridge_sha256": "9e18210e8783432107b15970973db6b66e2532a9fdbb9d9e47ad0b49239aa2b3",
+    "lifecycle_evidence_sha256": "3fc8492491d0fef7ec75d88b9197d13365b20216190b35980abed32384e1255e"
+  },
+  "preview": {
+    "status": "passed",
+    "operator": "maintainer",
+    "observation_method": "human",
+    "utc": "2026-10-13T12:18:49Z",
+    "artifacts": {
+      "deck.pptx": "8f03efad19673be01a39b34485d3bb2b6f66e53bd03f8b75544e20dc7a3b73fc",
+      "deck.pdf": "9fbc7f4d0965b02bb0bfcc0ab96beef5778130dedcc5301daca5aa94694773bd"
+    },
+    "record_sha256": "2ed82945da4e745139a9726133d06f72935eeb3d0cb82fad44d1a2ba572d587a"
+  },
+  "termination": "operator_finished",
+  "exit_code": 1,
+  "request_count": 4,
+  "model_capability": "not_measured",
+  "remaining": [
+    "native implicit-discovery model calibration",
+    "native explicit-skill model calibration",
+    "matching qualified bridge for production launcher route",
+    "final review and merge/closure"
+  ]
+}
