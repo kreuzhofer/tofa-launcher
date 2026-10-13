@@ -18,6 +18,7 @@ import zipfile
 from urllib.parse import unquote
 
 from capability_runtime import qualify, desktop_identity
+from retained_mcp import normalized_digest, validate_policy
 
 CORPUS = Path(__file__).resolve().parent / 'fixtures/capabilities/v3/manifest.json'
 HELDOUT = CORPUS.parent.parent / 'incident-handover-v1/manifest.json'
@@ -117,6 +118,8 @@ def environment(options):
                 proof = qualify(qualification, client=options.client, client_identity=result['codex'],
                     home=home, skill=candidates.pop(), application_identity=application,
                     client_executable=Path(options.codex).expanduser().absolute())
+                if proof.get('retained_mcp'):
+                    result['settings']['config.toml'] = normalized_digest(home / 'config.toml', proof['retained_mcp'])
                 result['presentation_runtime'].update(qualification=proof, status='qualified',
                     loader_result='verified_actual_client_call')
             except (OSError, ValueError, KeyError, TypeError, zipfile.BadZipFile):
@@ -270,12 +273,14 @@ def preflight(options):
     return run, report
 
 
-def protected_settings(options):
+def protected_settings(options, *, retained_mcp=None):
     home = Path(options.codex_home).expanduser()
     launcher_home = Path(os.environ.get('XDG_CONFIG_HOME', str(Path.home() / '.config'))) / 'tofa'
     paths = [home / name for name in ('config.toml', 'auth.json')]
     paths += [launcher_home / name for name in ('config.yml', 'credentials.yml')]
-    return [digest(path) if path.is_file() else None for path in paths]
+    if retained_mcp is not None: validate_policy(retained_mcp, home)
+    return [(normalized_digest(path, retained_mcp) if retained_mcp is not None else digest(path))
+            if path.is_file() else None for path in paths]
 
 
 def has_markdown_links(text, paths, *, spaces_need_angles=False):
@@ -389,11 +394,14 @@ def execute(options, run, report):
         report['blockers'].append('explicit_live_mode_required')
     if report['blockers']:
         report['status'] = 'infra_blocked'; save(run / 'result.json', report); return
-    before = protected_settings(options)
+    proof = report['provenance'].get('presentation_runtime', {}).get('qualification')
+    policy = proof.get('retained_mcp') if proof else None
+    raw_before = protected_settings(options)
+    before = protected_settings(options, retained_mcp=policy) if policy else raw_before
     # Credential hashes are comparison-only; exported diagnostics identify the
     # changed file category without exposing contents or their fingerprints.
     report['protected_settings_hashes'] = {'before': {
-        name: value for name, value in zip(PROTECTED_NAMES, before) if name.endswith('_config')}}
+        name: value for name, value in zip(PROTECTED_NAMES, raw_before) if name.endswith('_config')}}
     workspace = run / 'workspace'
     binary = Path(options.launcher).resolve()
     env = dict(os.environ, CODEX_HOME=str(Path(options.codex_home).expanduser().resolve()))
@@ -458,14 +466,20 @@ def execute(options, run, report):
                 process.terminate()
                 try: process.wait(timeout=5)
                 except subprocess.TimeoutExpired: process.kill(); process.wait(timeout=5)
-            try: after_settings = protected_settings(options)
-            except OSError: after_settings = None
+            try:
+                raw_after = protected_settings(options)
+                after_settings = protected_settings(options, retained_mcp=policy) if policy else raw_after
+            except (OSError, ValueError):
+                raw_after = after_settings = None
             preserved = before == after_settings
             report['protected_settings_hashes'].update(
-                after={name: value for name, value in zip(PROTECTED_NAMES, after_settings)
-                       if name.endswith('_config')} if after_settings is not None else None,
-                changed=[name for name, previous, current in zip(PROTECTED_NAMES, before, after_settings)
-                         if previous != current] if after_settings is not None else ['unavailable'])
+                after={name: value for name, value in zip(PROTECTED_NAMES, raw_after)
+                       if name.endswith('_config')} if raw_after is not None else None,
+                changed=[name for name, previous, current in zip(PROTECTED_NAMES, raw_before, raw_after)
+                         if previous != current] if raw_after is not None else ['unavailable'])
+            if policy:
+                report['retained_mcp_preservation'] = {'policy': policy,
+                    'raw_equal': raw_before == raw_after, 'normalized_equal': preserved}
             try:
                 after = environment(options)
                 report['environment_drift_during_run'] = [key for key, value in after.items()

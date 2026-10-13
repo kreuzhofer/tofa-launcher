@@ -20,6 +20,7 @@ from capability_observer import LoopbackServer, Observer
 from capability_runtime import protected, executable_versions, PROVIDERS, loader_tools, desktop_identity, harness_identity, catalog_tools, smoke_execution, read_object
 from evaluation_proxy import fixture_response, message
 from presentation_runtime import from_loader_output, inventory
+from retained_mcp import retained_policy, LIFECYCLE
 
 
 def tools(body):
@@ -55,9 +56,16 @@ def main():
     parser.add_argument('--codex-home', type=Path, default=Path(os.environ.get('CODEX_HOME', str(Path.home() / '.codex'))))
     parser.add_argument('--app-bundle', type=Path)
     parser.add_argument('--check', action='store_true', help='validate local assets without launch or inference')
+    parser.add_argument('--retained-mcp-bridge', type=Path,
+        help='allow only the two verified retained Desktop MCP executable references')
+    parser.add_argument('--retained-mcp-evidence', type=Path, default=LIFECYCLE)
     options = parser.parse_args()
+    if options.retained_mcp_bridge and options.client != 'desktop':
+        raise ValueError('retained_mcp_desktop_only')
     native = desktop_identity(options.app_bundle, options.codex) if options.client == 'desktop' else None
     client_path = options.codex.resolve()
+    policy = retained_policy(options.codex_home.resolve(), client_path,
+        options.retained_mcp_bridge.absolute(), native, options.retained_mcp_evidence.absolute()) if options.retained_mcp_bridge else None
     client_identity = version(client_path)
     launcher_identity = version(options.launcher)
     expected = inventory(options.runtime_root)
@@ -65,7 +73,7 @@ def main():
     expected['provider'] = provider_name
     if options.check:
         print(json.dumps({'status': 'assets_ready', 'client': options.client, 'client_identity': version(options.codex),
-            'launcher_identity': version(options.launcher), 'native': native, 'runtime': expected, 'paid_inference': False}))
+            'launcher_identity': version(options.launcher), 'native': native, 'runtime': expected, 'retained_mcp': policy, 'paid_inference': False}))
         return 0
     root = options.private_root.resolve()
     if any((parent / '.git').exists() for parent in (root, *root.parents)):
@@ -76,7 +84,8 @@ def main():
     workspace = run / 'workspace'; workspace.mkdir(mode=0o700)
     prompt = 'Use the provided runtime loader and create the synthetic smoke deck.'
     (run / 'prompt.txt').write_text(prompt + '\n')
-    before = protected(options.codex_home, options.skill, options.runtime_root)
+    raw_before = protected(options.codex_home, options.skill, options.runtime_root)
+    before = protected(options.codex_home, options.skill, options.runtime_root, retained_mcp=policy) if policy else raw_before
     state = {'loader_name': None, 'runtime': None, 'calls': 0, 'failure': None}
     started = time.time()
     observed_versions = {}
@@ -192,7 +201,12 @@ def main():
     if state['runtime']:
         try: observed_versions = executable_versions(state['runtime'], workspace)
         except (OSError, ValueError, subprocess.SubprocessError): state['failure'] = 'supplied_executable_versions_unqualified'
-    after = protected(options.codex_home, options.skill, options.runtime_root)
+    raw_after = protected(options.codex_home, options.skill, options.runtime_root)
+    try:
+        after = protected(options.codex_home, options.skill, options.runtime_root, retained_mcp=policy) if policy else raw_after
+    except (OSError, ValueError):
+        after = None
+        state['failure'] = 'retained_mcp_preservation_failed'
     artifacts = {name: digest(workspace / 'output' / name) for name in ('deck.pptx', 'deck.pdf', 'slide.png') if (workspace / 'output' / name).is_file()}
     try: thread = thread_identity(options.client, run / 'client.log', options.codex_home, workspace, started)
     except (OSError, ValueError, sqlite3.DatabaseError): thread = None
@@ -231,7 +245,8 @@ def main():
         'termination': termination, 'thread_identity': thread, 'observed_versions': observed_versions,
         'failure': state['failure'], 'loader_name': state['loader_name'], 'runtime': state['runtime'],
         'loader_result_sha256': digest(run / 'loader-result.json') if (run / 'loader-result.json').exists() else None,
-        'preservation': {'before': before, 'after': after}, 'settings_preserved': before == after,
+        'preservation': {'before': before, 'after': after, 'raw_before': raw_before, 'raw_after': raw_after},
+        'retained_mcp': policy, 'settings_preserved': before == after,
         'artifacts': artifacts, 'requests': records, 'model_capability': 'not_measured',
         'pdf_route': 'supplied_libreoffice',
         'native_preview': native_preview, 'native': native,

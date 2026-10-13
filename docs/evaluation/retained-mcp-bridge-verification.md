@@ -4,7 +4,7 @@ The maintainer authorized verification of a narrower preservation requirement:
 the two host-written MCP executable references may point to a verified retained
 bridge. Other protected settings remain unchanged. This replaces the need for
 zero persistent executable-reference changes in this verification; it does not
-automatically qualify #127 or change its existing evidence validator.
+automatically qualify #127. The subsequently authorized evaluator exception is described below.
 
 ## Results
 
@@ -71,9 +71,47 @@ diagnostic attempts remain retained and are not counted as passes.
 No real browser/OS action was requested from computer use. No native presentation
 loader call, deck generation, preview, or model calibration was performed. The
 startup-only calibration runs correctly remain unqualified with no observed
-loader call. The existing strict preservation validator remains unchanged.
+loader call. The lifecycle record is historical evidence, not a presentation pass.
 
-Before resuming presentation qualification, encode the exact two-field exception
-with bridge ownership/lifetime checks in the evaluator, and use the retained
-fixture for native runs. Then complete the native loader/deck/preview and model
-calibration gates. Keep the integration branch unmerged until those pass.
+## Authorized evaluator exception
+
+`presentation_calibration.py --retained-mcp-bridge /absolute/path/to/tofa-desktop-engine`
+now opts the Desktop lane into a narrowly bound preservation policy. The bridge
+must already exist, be private and executable, match its versioned owner record,
+and match the binary hash in the completed lifecycle evidence. The record must
+include clean exit, crash, uninstall, ordinary restart, real CLI and ordinary
+engine checks for the same Desktop version/build. The policy binds the engine
+hash, native application identity, exact bridge path/hash and evidence hash.
+A changed or missing bridge, engine, owner or evidence fails revalidation. The
+policy never installs a bridge or repairs settings.
+
+Only `mcp_servers.node_repl.env.CODEX_CLI_PATH` in `config.toml` and
+`mcpServers.cua_repl.env.CODEX_CLI_PATH` in the exact versioned computer-use
+plugin `.mcp.json` can switch between the bundled engine and that bridge. Both
+files are compared as parsed settings with just those leaves normalized;
+formatting changes in those two files are consequently immaterial. Every other
+setting in them remains compared, and every other protected file keeps its byte
+hash. Missing leaves/files, duplicate JSON keys and any other executable path
+are rejected. Raw and normalized preservation fingerprints are retained.
+
+The exception is Desktop-only and opt-in; ordinary CLI and non-presentation
+checks remain strict. Qualification reuse and the live observer revalidate the
+policy. Live evaluation inherits it only from fully qualified presentation
+evidence, preserves raw config diagnostics, and still blocks all other drift.
+A different launcher bridge requires its own matching lifecycle evidence and
+fresh qualification; a synthetic fixture proof cannot silently authorize it.
+
+Regression tests ran red before implementation for the preservation interface,
+calibration command, live evaluator boundary and duplicate-key rejection. The
+54-test evaluator/observer run passed, as did the 12 runtime tests (two installed
+CLI opt-ins skipped there) and the two separately enabled real CLI tests. The
+latter created fresh PPTX/PDF/PNG artifacts through the installed loader and
+exercised qualification/observer tamper rejection. Additional bridge ownership
+and incomplete-evidence refusal checks passed. No Go implementation changed in
+this follow-up; the existing lifecycle race evidence remains applicable.
+
+The fixed manual wrapper now selects Python 3.12, the retained fixture store and
+the exact verified bridge. Its installed Desktop asset preflight passes. The
+native loader, deck, two previews and separate model calibrations still need to
+pass before merge or issue closure. Computer use's prior refusal to control
+ChatGPT Desktop remains respected; the wrapper requests a human observation.

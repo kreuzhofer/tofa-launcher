@@ -18,9 +18,10 @@ def harness_identity():
     directory = Path(__file__).parent
     names = ('presentation_calibration.py', 'presentation_runtime.py', 'presentation_smoke.py',
         'capability_runtime.py', 'presentation_preview.py', 'capability_observer.py',
-        'capability_actions.py', 'capability_evaluation.py', 'evaluation_proxy.py')
+        'capability_actions.py', 'capability_evaluation.py', 'evaluation_proxy.py', 'retained_mcp.py')
     return {path.name: sha256(path) for path in [*(directory / name for name in names),
-        directory / 'fixtures/presentation-smoke.mjs']}
+        directory / 'fixtures/presentation-smoke.mjs',
+        directory.parent / 'docs/evaluation/evidence/presentation-runtime-126-127/retained-mcp-lifecycle.json']}
 
 
 def desktop_identity(bundle, engine):
@@ -65,12 +66,19 @@ def executable_versions(runtime, workspace):
     return versions
 
 
-def protected(home, skill, runtime):
+def protected(home, skill, runtime, *, retained_mcp=None):
+    if retained_mcp is not None:
+        from retained_mcp import validate_policy, normalized_digest
+        validate_policy(retained_mcp, home)
+        # Both exact leaves must exist even if a whole file disappeared.
+        for path in (home / 'config.toml', Path(retained_mcp['plugin'])):
+            normalized_digest(path, retained_mcp)
     files = [home / name for name in ('config.toml', 'auth.json', 'managed_config.toml',
         'AGENTS.md', 'AGENTS.override.md')]
     for root in (home / 'skills', home / 'plugins/cache', home.parent / '.agents/skills', skill, runtime):
         files += [path for path in root.rglob('*') if path.is_file() and '__pycache__' not in path.parts and path.suffix != '.pyc']
-    snapshot = {str(path): sha256(path) for path in set(files) if path.is_file()}
+    snapshot = {str(path): normalized_digest(path, retained_mcp) if retained_mcp is not None else sha256(path)
+        for path in set(files) if path.is_file()}
     return {'files': len(snapshot), 'sha256': hashlib.sha256(json.dumps(snapshot, sort_keys=True).encode()).hexdigest()}
 
 
@@ -241,9 +249,13 @@ def qualify(path, *, client, client_identity, home, skill, application_identity=
     from capability_evaluation import has_markdown_links
     if not has_markdown_links(final.read_text(), [run / 'workspace/output' / name for name in ('deck.pptx', 'deck.pdf')]):
         raise ValueError('qualification_delivery_unobserved')
+    policy = proof.get('retained_mcp')
+    if policy is not None and (not isinstance(policy, dict) or client != 'desktop' or
+            policy.get('engine') != str(client_path) or policy.get('native') != application_identity):
+        raise ValueError('qualification_retained_mcp_identity_mismatch')
     preservation = proof.get('preservation', {})
     if not proof.get('settings_preserved') or preservation.get('before') != preservation.get('after') or (
-            preservation.get('after') != protected(home, skill, Path(runtime['root']))):
+            preservation.get('after') != protected(home, skill, Path(runtime['root']), retained_mcp=policy)):
         raise ValueError('qualification_protected_files_drift')
     artifacts = proof.get('artifacts', {})
     if set(artifacts) != {'deck.pptx', 'deck.pdf', 'slide.png'}: raise ValueError('qualification_artifacts_incomplete')
@@ -269,4 +281,5 @@ def qualify(path, *, client, client_identity, home, skill, application_identity=
     return {'contract': 'qualified-presentation-runtime-v1', 'client': client, 'provider': provider,
             'runtime': runtime, 'proof_sha256': sha256(path), 'loader_result_sha256': proof['loader_result_sha256'],
             'proof_path': str(path), 'client_identity': client_identity, 'home': str(home), 'skill': str(skill),
-            'application_identity': application_identity, 'client_executable': str(selected_path.absolute())}
+            'application_identity': application_identity, 'client_executable': str(selected_path.absolute()),
+            'retained_mcp': policy}

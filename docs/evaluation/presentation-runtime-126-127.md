@@ -143,24 +143,21 @@ fresh actual CLI deck run. Independent standards and spec reviews found no new
 implementation defects. These checks establish the process-layout fix, not full
 native presentation qualification.
 
-The strict native preservation gate remains blocked. The maintainer subsequently
-authorized a two-reference retained-bridge exception for verification. The
-[lifecycle checks](retained-mcp-bridge-verification.md) passed their scoped checks;
-the exception is not yet encoded in the qualification validator and no native
-presentation workflow is claimed. The earlier
-[settings diagnosis](presentation-native-settings-diagnosis.md) reproduces the
-two writes with exact installed functions and identifies the Desktop command
-selection/reconciliation boundary required for a fix. No supported launcher-only
-separation was found in the inspected build; the preservation repro remains red.
-A semantic before/after comparison identified
-two host-written fields: `mcp_servers.node_repl.env.CODEX_CLI_PATH` in `config.toml`
-and `mcpServers.cua_repl.env.CODEX_CLI_PATH` in the unified-computer-use plugin's
-`.mcp.json`. Desktop persists the temporary evaluation bridge into both. Ordinary
-startup also rewrites these fields. The qualification gate still rejects drift;
-no shared snapshot is restored and no preservation exception was added. Resolving
-this launch-integration issue precedes native loader/deck/preview qualification
-and the separately declared model calibrations. Subsequent Desktop drift also
-invalidates reuse of the otherwise successful fresh CLI proof.
+The maintainer authorized a narrow retained-bridge preservation exception after
+the [lifecycle checks](retained-mcp-bridge-verification.md). It is now implemented
+as an explicit Desktop calibration option, with bridge ownership, binary/engine
+identity and lifecycle-evidence checks. Only the two exact MCP executable fields
+can switch between the bundled engine and the verified retained bridge; all
+other settings and protected files stay checked. Raw and normalized fingerprints
+are retained, and qualification reuse revalidates the same policy.
+
+The earlier [settings diagnosis](presentation-native-settings-diagnosis.md)
+remains evidence for Desktop's writes and the unavailable zero-change upstream
+solution. The retained approach needs no shared snapshot restoration. Fresh
+runtime regressions and an actual CLI loader/deck run pass, and installed Desktop
+assets pass preflight. Native loader/deck/preview qualification and its separate
+model calibrations remain pending; startup and preflight alone cannot satisfy
+them. Keep the integration branch unmerged until those gates are complete.
 
 The calibration harness now scopes `TMPDIR`, `TMP`, and `TEMP` to a private `tmp`
 directory inside its run. The fixture dispatches saved engine references directly,
