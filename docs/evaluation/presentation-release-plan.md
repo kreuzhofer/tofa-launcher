@@ -2,7 +2,8 @@
 
 Status: runtime implementation merged in #131; #126/#127 are closed. Current native
 qualification passed. Both focused live-model loader diagnostics failed before
-invocation; provider tool-schema handling and model selection remain unresolved.
+invocation. A headless provider comparison isolates a namespace-schema compatibility
+gap: both tested models call the flat function but neither calls its namespaced form.
 Model capability and release readiness remain unqualified.
 The maintainer approved the three phases below on 2026-10-13. Cost is not a
 constraint; experimental bounds and separate outcomes remain part of the method.
@@ -143,8 +144,20 @@ title requests stayed independent and tool-free. Live provider receipt or
 interpretation is not established by that local replay. Kimi naming had a stream
 failure while GLM naming completed; #128 remains unresolved.
 
-Next: predeclare a headless provider comparison of equivalent namespace and flat
-function schemas with synthetic prompts/tools for both models. Execute no returned
-tool calls. This will distinguish schema handling from selection in the full
-native catalog before another human run or product change. #129 stays open;
-#130 remains blocked on both diagnosis dispositions.
+The predeclared headless comparison is complete: four direct provider requests,
+one per model/format, identical synthetic prompt/function definition within each
+pair. Both flat functions produced the expected call with `{}`; both namespace
+forms produced no call. All four had HTTP 200 and completed Responses. The Kimi
+namespace case emitted tool-like control text as ordinary text; GLM claimed no
+tools were available. No calls were executed. Protected state remained unchanged.
+See `evidence/presentation-runtime-126-127/provider-namespace-diagnostic.json`.
+
+This isolates a model/provider namespace compatibility gap without Desktop,
+the adapter, native runtime or the large native catalog. The provider's internal
+mechanism remains unobserved and one sample per cell is not a reliability claim.
+
+Next: the [proposed minimal adapter follow-up](presentation-namespace-followup.md)
+adds reversible namespace/flat translation with collision, streaming and history
+regressions, then requalifies the affected candidate before a fresh native check.
+No product translation has been applied yet. #129 stays open through disposition;
+#130 remains blocked on both diagnosis dispositions, including independent #128.
