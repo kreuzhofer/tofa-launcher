@@ -146,6 +146,23 @@ func TestNamespaceAdapterRejectsUnmappedProviderCalls(t *testing.T) {
 	}
 }
 
+func TestNamespaceAdapterRejectsMalformedHistoryCatalogAndSelector(t *testing.T) {
+	for _, body := range []string{
+		`{"model":"moonshotai/Kimi-K3","tools":"invalid","input":[{"type":"function_call","namespace":"old","name":"tool","call_id":"one","arguments":"{}"}]}`,
+		`{"model":"moonshotai/Kimi-K3","tools":` + namespaceCatalog + `,"input":[],"tool_choice":{"name":"unadvertised"}}`,
+		`{"model":"moonshotai/Kimi-K3","tools":` + namespaceCatalog + `,"input":{},"tool_choice":"auto"}`,
+	} {
+		app, _ := adapterFixture(t, func(http.ResponseWriter, *http.Request) { t.Error("malformed request reached provider") }, func(endpoint, token string) error {
+			response := adapterRequest(t, endpoint, token, body)
+			if response.StatusCode != 400 {
+				t.Fatalf("malformed request accepted: %d", response.StatusCode)
+			}
+			return nil
+		})
+		runAdapted(t, app)
+	}
+}
+
 func TestNamespaceAdapterStreamsBeforeCompletionAndCancels(t *testing.T) {
 	cancelled := make(chan struct{})
 	app, _ := adapterFixture(t, func(w http.ResponseWriter, r *http.Request) {

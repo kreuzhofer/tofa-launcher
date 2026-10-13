@@ -72,6 +72,18 @@ func adaptNamespaces(body []byte) ([]byte, *namespaceTranslation, error) {
 	if !active {
 		return body, nil, nil
 	}
+	if value := payload["tools"]; value != nil {
+		if _, ok := value.([]any); !ok {
+			return nil, nil, errors.New("namespace translation requires an array tool catalog")
+		}
+	}
+	if value := payload["input"]; value != nil {
+		switch value.(type) {
+		case string, []any:
+		default:
+			return nil, nil, errors.New("namespace translation requires string or array input")
+		}
+	}
 	mapping := &namespaceTranslation{aliases: map[string]toolAddress{}, flat: map[string]string{}}
 	known := map[string]toolAddress{}
 	reserve := func(address toolAddress) (string, error) {
@@ -148,7 +160,10 @@ func adaptNamespaces(body []byte) ([]byte, *namespaceTranslation, error) {
 	payload["tools"] = flat
 	for _, raw := range input {
 		item, ok := raw.(map[string]any)
-		if !ok || item["type"] != "function_call" {
+		if !ok {
+			return nil, nil, errors.New("invalid namespace history item")
+		}
+		if item["type"] != "function_call" {
 			continue
 		}
 		ns := item["namespace"]
@@ -200,7 +215,8 @@ func (mapping *namespaceTranslation) adaptChoice(choice map[string]any) error {
 		delete(choice, "namespace")
 		return nil
 	}
-	if mapping.flat[name] != kind || name == "" {
+	advertised, exists := mapping.flat[name]
+	if !exists || advertised != kind || (kind != "function" && kind != "custom") {
 		return errors.New("unmapped flat tool choice")
 	}
 	return nil
