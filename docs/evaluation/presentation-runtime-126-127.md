@@ -95,6 +95,26 @@ content diff. No shared snapshot was restored. Earlier qualification files fail
 the current gate after this drift. There is still no successful native Desktop
 loader/artifact/preview qualification; its model calibrations remain blocked.
 
+The 2026-10-13 [manual attempt](evidence/presentation-runtime-126-127/native-manual.json)
+reached the actual Desktop conversation but failed with
+`required_actual_client_loader_missing`. Both the raw and adapted main-request
+catalogs contained 238 tools and no native loader. No artifact or preview existed;
+the synthetic attempt used no paid inference. The native host log records
+`missing-code-signing-identity` peer rejections followed by
+`Codex app tools pipe closed` during `codex_app` startup. This localizes the failure
+to native tool startup; the exact rejected peer executable is not established.
+Both installed Node candidates pass read-only signature verification outside the
+agent sandbox. Initial sandboxed failures do not establish damaged installations.
+
+This attempt also failed protected-state preservation. A separate per-file hash
+comparison against the earlier manual baseline found changes to `config.toml` and
+the unified-computer-use plugin's `.mcp.json`, with no baseline files missing.
+That comparison does not establish changed content or causation and does not
+check added files. No shared snapshot was restored. Next diagnosis needs helper
+executable/parent provenance during startup and a controlled ordinary-versus-launcher
+comparison, retaining native peer authorization. Repeating the same deck prompt
+cannot qualify this combination while native tool startup remains blocked.
+
 All new presentation validation material uses the fixed root
 `/tmp/tofa-presentation-validation`. The manual wizard creates a fresh owned
 subdirectory under `runs/` for each attempt and ignores the inherited `TMPDIR`.
