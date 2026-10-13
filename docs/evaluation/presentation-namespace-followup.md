@@ -1,7 +1,9 @@
 # Implementation scope: preserve native tools through flat provider schemas
 
-Part of #119; diagnosis evidence in #129. Implementation is retained at `deb5ac9`;
-live synthetic provider checks pass. Native qualification remains a separate gate.
+Part of #119; diagnosis evidence in #129. Implementation is retained at `deb5ac9`.
+Live synthetic provider checks, native runtime/preview qualification and fresh
+Kimi/GLM native loader/version checks pass. Independent naming remains in #128;
+deck and release qualification remain separate gates.
 
 ## Problem and evidence
 

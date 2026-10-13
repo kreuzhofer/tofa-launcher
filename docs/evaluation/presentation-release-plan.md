@@ -191,8 +191,23 @@ The preceding attempt timed out without preview observation and remains unchange
 the maintainer confirmed they had not inspected its previews.
 
 The existing `/tmp/tofa-presentation-validation/run-loader-diagnostic.sh` now pins
-this candidate and the fresh proof. Both network-enabled preflights pass. Next:
-one fresh Kimi and one fresh GLM native loader check, each with a 600-second observer
-and 900-second outer guard; naming is scored independently. These live model
-attempts have not yet run with this proof. #129 stays open through native disposition;
-#130 remains blocked on both diagnosis dispositions, including independent #128.
+this candidate and the fresh proof. Both network-enabled preflights pass. The
+predeclared fresh native Kimi and GLM attempts now pass the focused loader/version
+checks: one actual loader call/result each, followed by successful execution of
+the returned Node/Python paths and correct observed versions in the final answer.
+Each completed three main requests. Protected files stayed byte-identical, with
+no environment drift. The native loader returned no manifest path; neither model
+reported one, so that diagnostic request component remains unavailable.
+
+Both independent naming requests failed with `stream_failure`; the original
+aggregate `infra_blocked` records remain intact. Their main tool workflows passed.
+See `evidence/presentation-runtime-126-127/namespace-native-loader-diagnostics.json`.
+Controlled namespace/flat comparisons and the candidate's native results support
+the scoped namespace compatibility correction. Successful execution contradicts
+missing runtime/registration or a need for dependency installation. Provider
+internals and reliability across repeated tasks remain unestablished.
+
+#129 now has its native implementation evidence and remains open pending
+publication/merge disposition. Retain the integration branch. Next is #128's
+captured-request naming diagnosis before fresh #130 deck comparisons; this result
+does not promote support or release status, or change historical deck outcomes.
