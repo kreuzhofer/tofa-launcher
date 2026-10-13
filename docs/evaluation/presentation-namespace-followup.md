@@ -1,7 +1,7 @@
-# Proposed implementation ticket: preserve native tools through flat provider schemas
+# Implementation scope: preserve native tools through flat provider schemas
 
-Part of #119; diagnosis evidence in #129. This is a proposed follow-up scope, not
-an implemented compatibility claim.
+Part of #119; diagnosis evidence in #129. Implementation is retained at `deb5ac9`;
+live synthetic provider checks pass. Native qualification remains a separate gate.
 
 ## Problem and evidence
 

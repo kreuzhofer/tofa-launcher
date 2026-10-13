@@ -1,0 +1,128 @@
+{
+  "schema": "tofa-retained-mcp-lifecycle-v1",
+  "baseline": "c6e508f",
+  "candidate_source": "deb5ac9",
+  "app_version": "26.1007.30912",
+  "app_build": "20156",
+  "scope": "exact namespace candidate binary; clean/crash/ordinary startup and owned temporary uninstall; not native presentation preview qualification",
+  "phases": {
+    "clean_exit": {
+      "private_run": "namespace-launcher-clean-20261013T172134Z",
+      "protected_raw_equal": true,
+      "protected_normalized_equal": true,
+      "calibration_exit_code": 1,
+      "crash": false,
+      "launcher_settings_preserved": true,
+      "node-repl": {
+        "initialize_and_arithmetic": "passed",
+        "bridge_verified": true
+      },
+      "cua-repl": {
+        "initialize_and_arithmetic": "passed",
+        "bridge_verified": true
+      }
+    },
+    "crash": {
+      "private_run": "namespace-launcher-crash-20261013T172304Z",
+      "protected_raw_equal": true,
+      "protected_normalized_equal": true,
+      "calibration_exit_code": 1,
+      "crash": true,
+      "launcher_settings_preserved": true,
+      "node-repl": {
+        "initialize_and_arithmetic": "passed",
+        "bridge_verified": true
+      },
+      "cua-repl": {
+        "initialize_and_arithmetic": "passed",
+        "bridge_verified": true
+      }
+    },
+    "clean_repeat": {
+      "private_run": "namespace-launcher-clean-20261013T172423Z",
+      "protected_raw_equal": true,
+      "protected_normalized_equal": true,
+      "calibration_exit_code": 1,
+      "crash": false,
+      "launcher_settings_preserved": true
+    },
+    "ordinary_restart": {
+      "private_run": "namespace-ordinary-clean-20261013T172534Z",
+      "protected_raw_equal": false,
+      "protected_normalized_equal": true,
+      "calibration_exit_code": -15,
+      "crash": false,
+      "launcher_settings_preserved": true
+    },
+    "uninstall": {
+      "real_launcher_settings_preserved": true,
+      "exit_code": 0,
+      "installation_removed": true,
+      "bridge_retained": true,
+      "bridge_detached": true,
+      "synthetic_credentials_removed": true,
+      "shared_state_preserved": true,
+      "ordinary_engine_version": "codex-cli 0.162.0-alpha.17.2",
+      "ordinary_engine_exit": 0,
+      "node-repl": {
+        "initialize_and_arithmetic": "passed",
+        "bridge_detached": true
+      },
+      "cua-repl": {
+        "initialize_and_arithmetic": "passed",
+        "bridge_detached": true
+      }
+    }
+  },
+  "verification": {
+    "real_cli_node_call": {
+      "exit_code": 0,
+      "requests": 2,
+      "tool": [
+        "mcp__node_repl",
+        "js"
+      ],
+      "marker_returned": true,
+      "negative_control": false
+    },
+    "ordinary_engine_config": {
+      "ordinary_effective_config_equal": true,
+      "method": "config/read",
+      "bridge_exists": true,
+      "token_factory_launch_context_supplied": false
+    },
+    "ordinary_native_readiness": {
+      "ready": 3,
+      "failed": 0,
+      "peer_rejections": 0
+    }
+  },
+  "tested_identity": {
+    "engine_sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+    "native": {
+      "version": "26.1007.30912",
+      "build": "20156",
+      "application_sha256": "75e397e2280dde93b70a85aa926f4282c728eacc84dfeb15ba7fb6ddd84628af",
+      "executable_sha256": "2053a78d225a1492d0cb6896cfd83254af06c3277547e83d4d23fef88f00426e",
+      "native_transport_sha256": "ae60fd7129a8eafea42dc41e8692e95dda624d4406826edd74010148371113db"
+    }
+  },
+  "tested_identity_sources": {
+    "runs/namespace-launcher-clean-20261013T172134Z/trace.json": "a1c328630eee74cf1b436fcb9a95019dc11cb6b422d3dfa9de3b907d5faaf530",
+    "runs/namespace-launcher-clean-20261013T172134Z/calibration/03b0e53209ce41fd8002af87350f5b0b/qualification.json": "f3a3716ff06c16fe275c2c2ed772d312ea9764ee66409c00062c84d6cfca79dd",
+    "runs/namespace-launcher-crash-20261013T172304Z/trace.json": "1f98ab80038a70107658fe3a051f6cac0306dd8e728972cd1c679e69f61c6c42",
+    "runs/namespace-launcher-crash-20261013T172304Z/calibration/3ae57ace41ce4ae6848e49565fe4adda/qualification.json": "30b6cea3e6ab6c07f6af516a33776560f2e2f1a46260e56a0edc50286b54764b",
+    "runs/namespace-launcher-clean-20261013T172423Z/trace.json": "5f61efc2b049eeeb61bbd72814015334066fa32acf828d74f37ffde9f252ce8e",
+    "runs/namespace-launcher-clean-20261013T172423Z/calibration/400b7053a6424c5fbf753f8d632630af/qualification.json": "50a51153a6687ffe5af43c2702e4cbedf8bb0320fe8cff376d6ba37b7b06ce30",
+    "runs/namespace-ordinary-clean-20261013T172534Z/trace.json": "82358f6aa30d85fc560f548006666f677c364eacfefa1fa2137afd64842d0590"
+  },
+  "source_sha256": {
+    "launcher-retained": "11d28bf933f5230bc9c06744d98726b51d096504e9e683471f21b9c369fbea1e"
+  },
+  "limitations": [
+    "Direct MCP arithmetic does not alone exercise its engine reference; separate real CLI and direct engine checks passed.",
+    "Uninstall targeted an owned temporary installation of the exact namespace candidate binary; the normal installation and credentials were preserved.",
+    "A scratch-script flag error stopped the first clean attempt before launch; its unmodified evidence is retained separately.",
+    "No native conversation or preview was submitted in startup lifecycle traces. Production Desktop qualification and model calibrations remain pending."
+  ]
+}

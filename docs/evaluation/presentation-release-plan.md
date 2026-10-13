@@ -108,7 +108,7 @@ synthetic qualification also allows 600 seconds (8 requests, 4096 output tokens)
 The unchanged, lifecycle-qualified production launcher accepts only 180/900-second
 outer guards, so 600-second runs explicitly use its 900-second guard while the
 observer enforces the declared 600-second deadline. Both values are recorded.
-The production launcher and retained MCP bridge have not been replaced.
+Those initial attempts used the unchanged production launcher and retained bridge.
 
 An initial native requalification failed before launch because its control file
 sent 600 directly to the launcher. Its unedited evidence remains at private run
@@ -156,8 +156,37 @@ This isolates a model/provider namespace compatibility gap without Desktop,
 the adapter, native runtime or the large native catalog. The provider's internal
 mechanism remains unobserved and one sample per cell is not a reliability claim.
 
-Next: the [proposed minimal adapter follow-up](presentation-namespace-followup.md)
-adds reversible namespace/flat translation with collision, streaming and history
-regressions, then requalifies the affected candidate before a fresh native check.
-No product translation has been applied yet. #129 stays open through disposition;
+The approved [minimal adapter follow-up](presentation-namespace-followup.md) is
+implemented on the retained integration branch at `deb5ac9`. Kimi K3 and GLM 5.3
+main requests now receive flat aliases for namespaced functions; returned calls
+recover their original namespace/name. History, selectors and streaming events
+use the same mapping. Unsupported definitions and unmapped calls fail explicitly.
+Title and Guardian request contracts remain independently routed.
+
+Both live synthetic provider checks through the candidate adapter returned the
+expected original function identity; neither executed a tool. See
+`evidence/presentation-runtime-126-127/adapted-namespace-diagnostic.json` for the
+exact tested revision and limits. Captured native catalogs (271 definitions each)
+also pass controlled replay. Final targeted race tests pass, and independent
+standards/spec reviews report zero remaining findings at `deb5ac9`.
+
+The isolated candidate is `checks/tofa-namespace-candidate`, SHA-256
+`11d28bf933f5230bc9c06744d98726b51d096504e9e683471f21b9c369fbea1e`.
+The prior qualified binary and evidence remain retained. The final full race suite
+passes (`go test -race ./...`, adapter package 315.164 seconds). Clean exit, forced
+launcher crash and repeat launch preserve protected files byte-for-byte. Ordinary
+Desktop restart passes with three native MCP ready events and no failures or peer
+rejections; only the two approved executable references change back to the bundled
+engine. Node/CUA arithmetic, a real CLI tool call, ordinary effective-configuration
+comparison and owned temporary uninstall all pass. Normal launcher credentials
+remain unchanged. Evidence:
+`evidence/presentation-runtime-126-127/namespace-mcp-lifecycle.json` and
+`evidence/presentation-runtime-126-127/namespace-implementation-checks.json`.
+
+The existing `/tmp/tofa-presentation-validation/run-manual.sh` now references this
+exact candidate and lifecycle evidence; its asset preflight passes. Next is a fresh
+human native PPTX/PDF preview check (600-second observer, 900-second outer guard),
+then bounded native Kimi/GLM loader checks using the new qualification proof.
+The earlier loader wizard still references the previous proof and must be updated
+after this new preview qualification. #129 stays open through native disposition;
 #130 remains blocked on both diagnosis dispositions, including independent #128.
