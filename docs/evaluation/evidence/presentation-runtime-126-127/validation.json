@@ -68,7 +68,7 @@
     "computer_use_followup_revision": "7366ad7",
     "computer_use_followup": "Both independent axes found no new defects or misclaims. Native app restriction and preservation drift remain explicit qualification blockers."
   },
-  "desktop": "Actual native launch attempted with computer-use authorization; application access prohibited by tool, zero requests, no previews, protected-state drift detected. Owned application stopped.",
+  "desktop": "Native codex_app startup reaches ready after ancestry fix, with zero peer rejections. Native loader call/deck/previews remain unobserved; host CODEX_CLI_PATH persistence remains a preservation blocker.",
   "completion": "Not complete; native Desktop remains blocked. Integration branch local, no merge or ticket closure. Public publication awaits explicit approval requested after auto-review rejection.",
   "python_full_reviewed": {
     "status": "passed",
@@ -109,5 +109,20 @@
     "status": "passed",
     "tests": 4
   },
-  "post_full_suite_ordering": "The four preview-attribution tests, four evidence tests and seven actual CLI/runtime tests passed after the computer-use observation-method change; full Python suite result predates this small change."
+  "post_full_suite_ordering": "The four preview-attribution tests, four evidence tests and seven actual CLI/runtime tests passed after the computer-use observation-method change; full Python suite result predates this small change.",
+  "native_relay_followup": {
+    "revision": "3cc3487",
+    "record": "native-relay.json",
+    "ancestry_regression": "red before fix, green after",
+    "calibration_temp_containment": "red before fix, green after",
+    "fixture_store_cleanup": "red before fix, green after",
+    "targeted_race_with_installed_engine": "passed, 26.104 seconds",
+    "full_go_race": "passed, internal/tofa 346.390 seconds; GORACE=atexit_sleep_ms=0",
+    "go_vet": "passed",
+    "affected_python_with_actual_cli": "16 tests passed, 62.219 seconds",
+    "actual_cli_run": "518f04195746440e9aee8e5f01965f06",
+    "actual_cli_preservation": "passed at capture; subsequent Desktop drift invalidates reuse",
+    "standards_findings": 0,
+    "spec_implementation_findings": 0
+  }
 }

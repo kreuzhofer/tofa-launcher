@@ -46,3 +46,34 @@ qualification gate. The outstanding Spec gate prevents completion.
 The Spec follow-up at `7366ad7` found no new defects or misclaims. It confirmed that
 the blocked native attempt does not claim a preview pass and that the fresh CLI
 proof cannot qualify Desktop.
+
+## Native ancestry follow-up — 3cc3487
+
+Original review baseline: `2c8df02`; focused follow-up: `807601c...3cc3487`.
+The maintainer confirmed launcher/app-server and actual Desktop startup test boundaries.
+
+### Standards
+
+No concrete Standards violation or baseline smell found. The engine retains the
+original Desktop child PID through `exec`. Pipe transfers and closure are
+consistent; relay startup failures kill and reap the child. Protocol errors check
+parent ownership before signalling the engine. Existing cancellation and ownership
+monitoring remain tied to the acknowledged engine PID. Fixture dispatch avoids
+allocating a credential store whose deferred cleanup would be lost during `exec`.
+ADR 0003's settings isolation remains intact without restoring shared snapshots.
+The reviewer did not repeat the reported Go/native checks; its sandboxed temporary
+file test could not start the loopback listener. The outside-sandbox run passed.
+
+### Spec
+
+No concrete new spec implementation defects found. The separate relay retains the
+model-default filter and acknowledges the actual engine PID without weakening
+routing, Guardian, naming, approval or ownership contracts. Temporary-file scoping
+and fixture cleanup support removal of owned resources.
+
+Qualification remains incomplete: #127 requires a successful native loader call,
+a delivered deck and native previews. Startup readiness establishes none of
+these. The two `CODEX_CLI_PATH` rewrites remain a preservation blocker under the
+requirement to block on background drift without restoring shared snapshots.
+
+Findings: Standards 0; Spec implementation defects 0; native qualification incomplete.

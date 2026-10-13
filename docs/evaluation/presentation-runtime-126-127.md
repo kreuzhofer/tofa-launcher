@@ -125,17 +125,42 @@ peer rejections, one native startup failure, no ready event. Both attempts used
 component examines peer, parent and grandparent signing identities. No native
 authorization behavior was modified.
 
-The proposed correction is to replace the original Desktop child process with
-the bundled engine and move the existing settings interception into a separate
-pipe relay. It must retain the model-default isolation, main-engine registration,
-protocol forwarding and shutdown contracts. Regression tests at the existing
-launcher/app-server boundary and actual Desktop startup validation are pending;
-this diagnosis is not a qualified fix. Both startup lanes detected protected-state
-drift, so ordinary native startup itself also requires preservation investigation.
-The fixture's internal store exposed a remaining inherited-`TMPDIR` leak; that
-store was removed on shutdown. The private diagnostic now scopes temporary files
-to its fixed-root run, while the calibration harness still needs the corresponding
-regression and fix.
+The correction in `3cc3487` replaces the original Desktop child process with
+the bundled engine. A separate child relay retains the existing model-default
+filter, protocol forwarding and main-engine acknowledgement. The signed native
+ancestry is now Desktop → bundled engine → bundled Node. Native authorization
+is unchanged. The [post-change verification](evidence/presentation-runtime-126-127/native-relay.json)
+records native `codex_app` readiness, zero peer rejections and no leftover fixture
+credential stores with the final build. A separate repeat failed the existing
+15-second ordinary-engine preflight before Desktop launched; that failed attempt
+remains retained and its cause is not established.
+
+Regression tests failed before the fixes for engine ancestry, inherited temporary
+directories and fixture credential stores orphaned by `exec`; all passed afterward.
+The installed-engine settings and lifecycle checks passed with race detection,
+as did the full Go race suite, `go vet`, and 16 affected Python tests including a
+fresh actual CLI deck run. Independent standards and spec reviews found no new
+implementation defects. These checks establish the process-layout fix, not full
+native presentation qualification.
+
+Native preservation remains blocked. A semantic before/after comparison identified
+two host-written fields: `mcp_servers.node_repl.env.CODEX_CLI_PATH` in `config.toml`
+and `mcpServers.cua_repl.env.CODEX_CLI_PATH` in the unified-computer-use plugin's
+`.mcp.json`. Desktop persists the temporary evaluation bridge into both. Ordinary
+startup also rewrites these fields. The qualification gate still rejects drift;
+no shared snapshot is restored and no preservation exception was added. Resolving
+this launch-integration issue precedes native loader/deck/preview qualification
+and the separately declared model calibrations. Subsequent Desktop drift also
+invalidates reuse of the otherwise successful fresh CLI proof.
+
+The calibration harness now scopes `TMPDIR`, `TMP`, and `TEMP` to a private `tmp`
+directory inside its run. The fixture dispatches saved engine references directly,
+avoiding a new synthetic credential store whose deferred cleanup would be lost
+on `exec`. Three leftover stores from the initial relay prototype were removed;
+all final-build fixture stores were cleaned up normally. Historical run evidence
+was retained. A final ordinary Desktop startup reconciled both stored MCP executable
+references back to the existing bundled engine. Both paths were verified afterward;
+this cleanup does not retroactively satisfy the failed preservation gate.
 
 All new presentation validation material uses the fixed root
 `/tmp/tofa-presentation-validation`. The manual wizard creates a fresh owned
