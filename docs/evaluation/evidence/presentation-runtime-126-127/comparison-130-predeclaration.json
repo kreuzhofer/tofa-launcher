@@ -156,11 +156,6 @@
       "node": "v24.19.0",
       "python": "3.12.14"
     },
-    "native_executables": {
-      "soffice": "/Users/daniel/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/libreoffice-headless/libreoffice/LibreOfficeDev.app/Contents/MacOS/soffice",
-      "pdfinfo": "/Users/daniel/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/poppler/bin/pdfinfo",
-      "pdftoppm": "/Users/daniel/.cache/codex-runtimes/codex-primary-runtime/dependencies/native/poppler/bin/pdftoppm"
-    },
     "hashes": {
       "manifest": "950908d9c4e5dd4b079b3201366eda2ab780e7423b71b7f8e0488c19e6831f4d",
       "node": "743cbaf12bd9323937b85f6297d8182b086526510c9f9c5875fa74d2aad9072d",
@@ -173,6 +168,11 @@
       "native_soffice": "bcf6686445e511336eef012ffcba63af7a2459299c32907244737b9d7d1ff0eb",
       "native_pdfinfo": "45fa717fb4aaec4bfbefc3a07612ff2539dbfcce30fb30e976aa5d4a35bef802",
       "native_pdftoppm": "d9d81b176e8fd38d07f2fbf4f84c17dc991c6bac3730ff3cad3239c4fcbed892"
+    },
+    "native_executables_relative_to_bundle": {
+      "soffice": "dependencies/native/libreoffice-headless/libreoffice/LibreOfficeDev.app/Contents/MacOS/soffice",
+      "pdfinfo": "dependencies/native/poppler/bin/pdfinfo",
+      "pdftoppm": "dependencies/native/poppler/bin/pdftoppm"
     }
   },
   "native_qualification": {
@@ -254,5 +254,13 @@
     "trace": "Every attempt has a fresh workspace; preview and title observations persist separately; unexpected outcomes halt without retry."
   },
   "live_attempts_started": 0,
-  "scope": "Predeclaration and prerequisite qualification only. No model outcome, reliability, support or release claim."
+  "scope": "Predeclaration and prerequisite qualification only. No model outcome, reliability, support or release claim.",
+  "prelaunch_reviews": {
+    "baseline": "2fd66e4",
+    "head": "fb2ed65",
+    "included_working_tree_change": "native executable paths made relative to the supplied bundle",
+    "standards_findings": 0,
+    "spec_findings": 0,
+    "scope": "Predeclaration and private operator controls only; live outcomes and their review remain pending."
+  }
 }

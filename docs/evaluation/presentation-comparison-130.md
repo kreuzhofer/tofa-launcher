@@ -76,7 +76,9 @@ macOS, Linux and Windows CI. The private batch gate was tested red first, then a
 four tests passed, covering declared identity/limits, drift, early stops, missing
 results and naming failure. Bash syntax passes and the wizard library matches its
 skill template byte-for-byte. Shellcheck is unavailable; control/data flow was
-inspected statically. The human wizard was not run end-to-end by the agent.
+inspected statically. The human wizard was not run end-to-end by the agent. Separate prelaunch
+Standards and Spec reviews against `2fd66e4` found zero issues in the declaration
+and private operator controls, including the public-path sanitization.
 
 After all retained attempts are independently assessed, run the required outcome
 review and update #119 with a resume, revise or remain-blocked decision. #130 stays
