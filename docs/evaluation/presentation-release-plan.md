@@ -1,9 +1,9 @@
 # Presentation evaluation to release
 
-Status: runtime qualification and final integration review are complete. The
-maintainer explicitly approved public branch publication, PR merge and closure of
-#126/#127 on 2026-10-13; integration is proceeding. Model capability and release
-readiness remain unqualified.
+Status: runtime implementation merged in #131; #126/#127 are closed. Current native
+qualification passed. Both focused live-model loader diagnostics failed before
+invocation; provider tool-schema handling and model selection remain unresolved.
+Model capability and release readiness remain unqualified.
 The maintainer approved the three phases below on 2026-10-13. Cost is not a
 constraint; experimental bounds and separate outcomes remain part of the method.
 
@@ -127,6 +127,24 @@ previews and independent proof validation. The sanitized checkpoint is
 Historical proofs and failed attempts remain unchanged. Both focused model
 preflights pass and `run-loader-diagnostic.sh` now references the new proof.
 
-Next: one fresh native Kimi loader/version diagnostic, followed by the GLM control,
-using that wizard under the fixed root. These live-model outcomes remain pending;
-qualification alone does not close #129 or establish deck quality.
+Both focused native attempts are now retained in
+`evidence/presentation-runtime-126-127/focused-native-loader-diagnostics.json`.
+The exact diagnostic prompt was observed in both initial main requests. Kimi
+completed four main requests, probed resource listing and claimed loader absence;
+GLM completed one main request and claimed absence without any tool call. Neither
+invoked the advertised loader or checked returned executable versions. Both
+preserved settings without environment drift. GLM's harness status `completed`
+means transport completion, not success at the loader task.
+
+The current native positive control passes the same call/result checker. Five
+controlled replays of the new Kimi/GLM main and title inputs passed through the
+real adapter with the race detector: main tool inventories survived unchanged;
+title requests stayed independent and tool-free. Live provider receipt or
+interpretation is not established by that local replay. Kimi naming had a stream
+failure while GLM naming completed; #128 remains unresolved.
+
+Next: predeclare a headless provider comparison of equivalent namespace and flat
+function schemas with synthetic prompts/tools for both models. Execute no returned
+tool calls. This will distinguish schema handling from selection in the full
+native catalog before another human run or product change. #129 stays open;
+#130 remains blocked on both diagnosis dispositions.

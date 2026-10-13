@@ -1,0 +1,142 @@
+{
+  "schema": "tofa-focused-loader-diagnostic-v1",
+  "source_revision": "bc6d967",
+  "native_positive_control": {
+    "advertised": true,
+    "calls": 1,
+    "valid_results": 1,
+    "failures": [],
+    "verdict": "passed"
+  },
+  "attempts": [
+    {
+      "model": "zai-org/GLM-5.3",
+      "private_run": "runs/loader-manual.9tuuFN/case-GLM-5.3/995103e7286c4c05a577b2d2f894d4c7",
+      "corpus": "native-loader-selection-diagnostic-v2",
+      "exact_prompt_observed": true,
+      "limits": {
+        "seconds": 600,
+        "requests": 10,
+        "output_tokens": 4096
+      },
+      "launcher_seconds": 900,
+      "harness_status": "completed",
+      "stop_reason": "operator_finished",
+      "elapsed_ms": 221999.191,
+      "blockers": [],
+      "settings_preserved": true,
+      "environment_drift": [],
+      "main": {
+        "requests": 1,
+        "completed_requests": 1,
+        "final_answer_observed": true,
+        "failures": []
+      },
+      "naming": {
+        "requests": 1,
+        "completed_requests": 1,
+        "failures": []
+      },
+      "loader_check": {
+        "advertised": true,
+        "calls": 0,
+        "valid_results": 0,
+        "failures": [],
+        "verdict": "loader_not_invoked"
+      },
+      "diagnostic_result": "failed_loader_not_invoked",
+      "native_loader_result": "not_observed",
+      "executable_versions": "not_observed",
+      "final_claim": "loader unavailable",
+      "qualification_sha256": "3b3a377ebf2ea29d9a8884a6647568c3f1482cd5f06db135c784c2afb89c4d5f",
+      "source_sha256": {
+        "result.json": "7f1a0f77bb86360952ece552b77d17ebc9b05e5bd06c1d320592ac3571b624d6",
+        "preflight.json": "80f85ee8fde53fe8689df3dbc211cb3e38ec855d1e4633654152e3010000b8ba",
+        "requests.json": "0e8d2745c61d365ea0e5c9ba8a1a6c0ad11385ea139f00473876b94f340917cc",
+        "final.txt": "a027779abd3b136529737773f9d535c161a241b9c11092611e767cbb7463e78c",
+        "operator-result.json": "b5b91f53b3c66422c949f77b0baefc28ee78caedba38af9fe313720aaa341b5f",
+        "diagnostic-contract.json": "3e805689c50b2b0eaab9578ef0f8f0537757fd076685bdbedaeb18254bd40dfe",
+        "prompt.txt": "f4ca49137dea168f7b0823eba27b807223f2b1c9dba0e913c50aae1a0d33cc23",
+        "request-1.json": "1a4847c69a532b63d73b1463faabafe896927cb79babed762011c35a48682d4c",
+        "request-2.json": "ffb892e07d2403f85ad9a852691d4de2abfec962630ea577d2e5e24cd0802b31"
+      }
+    },
+    {
+      "model": "moonshotai/Kimi-K3",
+      "private_run": "runs/loader-manual.9tuuFN/case-Kimi-K3/abe255cd4ea9412bb3f223c859cd1134",
+      "corpus": "native-loader-selection-diagnostic-v2",
+      "exact_prompt_observed": true,
+      "limits": {
+        "seconds": 600,
+        "requests": 10,
+        "output_tokens": 4096
+      },
+      "launcher_seconds": 900,
+      "harness_status": "infra_blocked",
+      "stop_reason": "operator_finished",
+      "elapsed_ms": 95108.994,
+      "blockers": [],
+      "settings_preserved": true,
+      "environment_drift": [],
+      "main": {
+        "requests": 4,
+        "completed_requests": 4,
+        "final_answer_observed": true,
+        "failures": []
+      },
+      "naming": {
+        "requests": 1,
+        "completed_requests": 0,
+        "failures": [
+          "stream_failure"
+        ]
+      },
+      "loader_check": {
+        "advertised": true,
+        "calls": 0,
+        "valid_results": 0,
+        "failures": [],
+        "verdict": "loader_not_invoked"
+      },
+      "diagnostic_result": "failed_loader_not_invoked",
+      "native_loader_result": "not_observed",
+      "executable_versions": "not_observed",
+      "final_claim": "loader unavailable",
+      "qualification_sha256": "3b3a377ebf2ea29d9a8884a6647568c3f1482cd5f06db135c784c2afb89c4d5f",
+      "source_sha256": {
+        "result.json": "88cf461a7f943db4b07e7a6494e9ceefa8122e71bb3dca4d52bfaa5eb54ebf90",
+        "preflight.json": "40e294e531247b2d77bd7b87051911926a719283089bc83bbe3c9bd12e089e84",
+        "requests.json": "4a47a2f0e95e30e164222ce3d58d01b85d94b17ca01d56ceacdd18635ab48fdc",
+        "final.txt": "dc0cff7bb142f1d4a3228f56d3970ded59132ec46fb16620423403499325d3b0",
+        "operator-result.json": "e7225e1b723bbf633f3298b8080fa16a083b4561184748001c1540c323da06e1",
+        "diagnostic-contract.json": "3e805689c50b2b0eaab9578ef0f8f0537757fd076685bdbedaeb18254bd40dfe",
+        "prompt.txt": "f4ca49137dea168f7b0823eba27b807223f2b1c9dba0e913c50aae1a0d33cc23",
+        "request-1.json": "d2cd03698892419faea7ce23d0c250d01db3c42f7b04372e8887ff732d9bdbb4",
+        "request-4.json": "abdbea1993d8b9dfdf637b439038f0d171706f61b64eb8a98b0743495f9b9cd5",
+        "request-5.json": "ce9ca6b5b428e4a26436748e708915870447b26a2b088dcc61ad086b00de1f16",
+        "request-2.json": "d12e81e0e219c6bab459d6d9a411000433414c9e11a4f239a38930a2c0d8f668",
+        "request-3.json": "9fb77db3b4c27b5cb188bb2015061b95b8236a38ad3fd36fc6b47ebbb8cb68c6"
+      }
+    }
+  ],
+  "controlled_adapter_replay": {
+    "passed": true,
+    "subtests": 5,
+    "race_detector": true,
+    "source_sha256": "17c7e9e034a3006529b9b025167dc177da762b280d0d8f26a56dbd17e72e2733",
+    "log_sha256": "f31a164d8ac37dbfa9399be57afee23715734afdfc6de70c5e16b1b497b5fdff",
+    "scope": "Exact new captured main requests preserve the loader inventory through the real adapter to a local controlled upstream; both title inputs are separately routed without tools."
+  },
+  "conclusions": [
+    "Both main turns finished without invoking the loader despite its advertised client schema.",
+    "Kimi resource discovery failures do not establish callable tool absence.",
+    "GLM transport completion is not diagnostic success.",
+    "Kimi naming failed while GLM naming completed, independently of both loader failures.",
+    "Native runtime control passes; neither model attempt reached native loader execution."
+  ],
+  "unresolved": [
+    "Live provider receipt and interpretation of namespace tool schemas versus model selection behavior.",
+    "Independent intermittent naming stream failure."
+  ],
+  "next_probe": "Predeclare a small headless provider comparison of equivalent namespace and flat function schemas for both models; use synthetic prompts/tools and execute no returned function calls. No product schema change is justified yet."
+}
