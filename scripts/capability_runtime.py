@@ -18,7 +18,7 @@ def harness_identity():
     directory = Path(__file__).parent
     names = ('presentation_calibration.py', 'presentation_runtime.py', 'presentation_smoke.py',
         'capability_runtime.py', 'presentation_preview.py', 'capability_observer.py',
-        'capability_actions.py', 'capability_evaluation.py', 'evaluation_proxy.py', 'retained_mcp.py')
+        'capability_actions.py', 'capability_evaluation.py', 'evaluation_proxy.py', 'retained_mcp.py', 'presentation_synthetic.py')
     return {path.name: sha256(path) for path in [*(directory / name for name in names),
         directory / 'fixtures/presentation-smoke.mjs',
         directory.parent / 'docs/evaluation/evidence/presentation-runtime-126-127/retained-mcp-lifecycle.json']}

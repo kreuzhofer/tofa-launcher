@@ -1,0 +1,127 @@
+{
+  "schema": "tofa-retained-mcp-lifecycle-v1",
+  "baseline": "c48eae4",
+  "app_version": "26.1007.30912",
+  "app_build": "20156",
+  "scope": "exact production binary; clean/crash/ordinary startup and owned temporary uninstall; not native presentation preview qualification",
+  "phases": {
+    "clean_exit": {
+      "private_run": "production-launcher-clean-20261013T123058Z",
+      "protected_raw_equal": false,
+      "protected_normalized_equal": true,
+      "calibration_exit_code": 1,
+      "crash": false,
+      "launcher_settings_preserved": true,
+      "node-repl": {
+        "initialize_and_arithmetic": "passed",
+        "bridge_verified": true
+      },
+      "cua-repl": {
+        "initialize_and_arithmetic": "passed",
+        "bridge_verified": true
+      }
+    },
+    "crash": {
+      "private_run": "production-launcher-crash-20261013T123311Z",
+      "protected_raw_equal": true,
+      "protected_normalized_equal": true,
+      "calibration_exit_code": 1,
+      "crash": true,
+      "launcher_settings_preserved": true,
+      "node-repl": {
+        "initialize_and_arithmetic": "passed",
+        "bridge_verified": true
+      },
+      "cua-repl": {
+        "initialize_and_arithmetic": "passed",
+        "bridge_verified": true
+      }
+    },
+    "clean_repeat": {
+      "private_run": "production-launcher-clean-20261013T123730Z",
+      "protected_raw_equal": true,
+      "protected_normalized_equal": true,
+      "calibration_exit_code": 1,
+      "crash": false,
+      "launcher_settings_preserved": true
+    },
+    "ordinary_restart": {
+      "private_run": "production-ordinary-clean-20261013T123844Z",
+      "protected_raw_equal": false,
+      "protected_normalized_equal": true,
+      "calibration_exit_code": -15,
+      "crash": false,
+      "launcher_settings_preserved": true
+    },
+    "uninstall": {
+      "real_launcher_settings_preserved": true,
+      "exit_code": 0,
+      "installation_removed": true,
+      "bridge_retained": true,
+      "bridge_detached": true,
+      "synthetic_credentials_removed": true,
+      "shared_state_preserved": true,
+      "ordinary_engine_version": "codex-cli 0.162.0-alpha.17.2",
+      "ordinary_engine_exit": 0,
+      "node-repl": {
+        "initialize_and_arithmetic": "passed",
+        "bridge_detached": true
+      },
+      "cua-repl": {
+        "initialize_and_arithmetic": "passed",
+        "bridge_detached": true
+      }
+    }
+  },
+  "verification": {
+    "real_cli_node_call": {
+      "exit_code": 0,
+      "requests": 2,
+      "tool": [
+        "mcp__node_repl",
+        "js"
+      ],
+      "marker_returned": true,
+      "negative_control": false
+    },
+    "ordinary_engine_config": {
+      "ordinary_effective_config_equal": true,
+      "method": "config/read",
+      "bridge_exists": true,
+      "token_factory_launch_context_supplied": false
+    },
+    "ordinary_native_readiness": {
+      "ready": 3,
+      "failed": 0,
+      "peer_rejections": 0
+    }
+  },
+  "tested_identity": {
+    "engine_sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+    "native": {
+      "version": "26.1007.30912",
+      "build": "20156",
+      "application_sha256": "75e397e2280dde93b70a85aa926f4282c728eacc84dfeb15ba7fb6ddd84628af",
+      "executable_sha256": "2053a78d225a1492d0cb6896cfd83254af06c3277547e83d4d23fef88f00426e",
+      "native_transport_sha256": "ae60fd7129a8eafea42dc41e8692e95dda624d4406826edd74010148371113db"
+    }
+  },
+  "tested_identity_sources": {
+    "runs/production-launcher-clean-20261013T123058Z/trace.json": "77c0cc1d20dccd892bf279a1ec2bbef84c8cf1ece0ba301a407f02c780020bdb",
+    "runs/production-launcher-clean-20261013T123058Z/calibration/0723c8fbdb644bb48c46c72a12810a52/qualification.json": "61fe634f98af071e4f96915956b33e323137fc58596cd16e4c1a971ea157d32d",
+    "runs/production-launcher-crash-20261013T123311Z/trace.json": "33bce363a9998856b9bf14148e25a71b2ee4f7fbf558fa41a1dfac14a0d9c660",
+    "runs/production-launcher-crash-20261013T123311Z/calibration/9ae2314283ed472485a6e2a790e5e4c3/qualification.json": "abdf36ff92a82a845c57ed1ccfc927307596c4fdaa289a4df82c3b78ac1049e6",
+    "runs/production-launcher-clean-20261013T123730Z/trace.json": "bffa2935104cc70a86de5b41988e2c6989ffdb8c40c177db167a3f23f0dc7082",
+    "runs/production-launcher-clean-20261013T123730Z/calibration/a7eb587d656d46c58d54a295678f69bc/qualification.json": "1eac672016bbcb5bd1e92d539371d7bec772b58eb5e422564b8368a40ff42968",
+    "runs/production-ordinary-clean-20261013T123844Z/trace.json": "68afed691df9867c4e36c7f9654a308c37ba062c5f5e4899292192662c251c2c"
+  },
+  "source_sha256": {
+    "launcher-retained": "1f2b7a7b61c7214ceb46f0f0bb0c4952760875ceaee35838706837c4db76d519"
+  },
+  "limitations": [
+    "Direct MCP arithmetic does not alone exercise its engine reference; separate real CLI and direct engine checks passed.",
+    "Uninstall targeted an owned temporary installation of the exact production binary; the normal installation and credentials were preserved.",
+    "Initial uninstall fixture was refused for unsafe parent directory mode. That failed attempt is retained; its unused synthetic credential was removed.",
+    "No native conversation or preview was submitted in startup lifecycle traces. Production Desktop qualification and model calibrations remain pending."
+  ]
+}

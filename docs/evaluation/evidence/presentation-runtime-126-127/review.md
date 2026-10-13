@@ -77,3 +77,19 @@ these. The two `CODEX_CLI_PATH` rewrites remain a preservation blocker under the
 requirement to block on background drift without restoring shared snapshots.
 
 Findings: Standards 0; Spec implementation defects 0; native qualification incomplete.
+
+## Production synthetic observer follow-up — baseline c48eae4
+
+Standards review found one concurrent audit persistence race in the new synthetic
+observer. A parallel HTTP regression reproduced the failure. The final record
+update and persistence now hold the observer lock; the regression and both other
+synthetic boundary tests pass. Follow-up Standards review found zero remaining
+findings. Spec review found zero new implementation defects.
+
+The observer uses the existing authenticated evaluation boundary, preserves native
+launch-control forwarding, rejects synthetic Guardian decisions and does not
+change the live model evaluator. A fresh real CLI runtime/deck check passed with
+the production launcher after the fix. Production lifecycle and installed-asset
+preflight passed separately. Actual production native conversation/previews and
+two declared model calibrations remain acceptance work; these reviews do not
+claim that startup or synthetic inference satisfies those gates.

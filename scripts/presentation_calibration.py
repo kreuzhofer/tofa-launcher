@@ -21,6 +21,7 @@ from capability_runtime import protected, executable_versions, PROVIDERS, loader
 from evaluation_proxy import fixture_response, message
 from presentation_runtime import from_loader_output, inventory
 from retained_mcp import retained_policy, LIFECYCLE
+from presentation_synthetic import SyntheticObserver
 
 
 def tools(body):
@@ -59,6 +60,8 @@ def main():
     parser.add_argument('--retained-mcp-bridge', type=Path,
         help='allow only the two verified retained Desktop MCP executable references')
     parser.add_argument('--retained-mcp-evidence', type=Path, default=LIFECYCLE)
+    parser.add_argument('--production-launcher', action='store_true',
+        help='serve synthetic Responses at the observer; use normal launcher/catalog credentials read-only')
     options = parser.parse_args()
     if options.retained_mcp_bridge and options.client != 'desktop':
         raise ValueError('retained_mcp_desktop_only')
@@ -89,6 +92,49 @@ def main():
     state = {'loader_name': None, 'runtime': None, 'calls': 0, 'failure': None}
     started = time.time()
     observed_versions = {}
+    def synthetic_response(body):
+        state['calls'] += 1
+        save(run / ('model-request-' + str(state['calls']) + '.json'), body)
+        outputs = {item.get('call_id'): item.get('output') for item in body.get('input', []) if item.get('type') == 'function_call_output'}
+        names = tools(body)
+        if body['model'] == 'nvidia/Nemotron-3_5-Lightning':
+            item = message(json.dumps({'title': 'Supplied runtime smoke', 'description': 'Synthetic native runtime check'}))
+        elif 'runtime-loader' not in outputs:
+            name = 'mcp__' + provider_name + '__load_workspace_dependencies'
+            if not loader_tools(body, provider_name):
+                state['failure'] = 'required_actual_client_loader_missing'
+                item = message('Runtime loader unavailable. No artifact was created.')
+            else:
+                state['loader_name'] = name
+                item = {'id': 'fc_runtime', 'type': 'function_call', 'name': 'load_workspace_dependencies',
+                        'namespace': 'mcp__' + provider_name,
+                        'call_id': 'runtime-loader', 'status': 'completed', 'arguments': '{}'}
+        elif 'runtime-smoke' not in outputs:
+            output = outputs['runtime-loader']; save(run / 'loader-result.json', output)
+            try:
+                state['runtime'] = from_loader_output(output, provider_name)
+                if state['runtime'] != expected: raise ValueError('returned_runtime_drift')
+                command = shlex.join([sys.executable, str(Path(__file__).with_name('presentation_smoke.py')),
+                    '--workspace', str(workspace), '--skill', str(options.skill.resolve()),
+                    '--provider', provider_name, '--loader-result', str(run / 'loader-result.json')])
+                executors = [(namespace, name) for namespace, name in names if name == 'exec_command']
+                if len(executors) != 1: raise ValueError('actual_client_exec_tool_missing')
+                item = {'id': 'fc_smoke', 'type': 'function_call', 'name': executors[0][1],
+                    'call_id': 'runtime-smoke', 'status': 'completed',
+                    'arguments': json.dumps({'cmd': command, 'login': False, 'yield_time_ms': 30000, 'max_output_tokens': 2000})}
+                if executors[0][0]: item['namespace'] = executors[0][0]
+            except (OSError, ValueError):
+                state['failure'] = 'loader_result_unqualified'; item = message('Runtime qualification stopped.')
+        else:
+            save(run / 'smoke-result.json', outputs['runtime-smoke'])
+            try:
+                smoke_execution(outputs['runtime-smoke'], workspace)
+                item = message('[Deck](' + str(workspace / 'output/deck.pptx') + ') [PDF](' + str(workspace / 'output/deck.pdf') + ')')
+            except (OSError, ValueError):
+                state['failure'] = 'presentation_smoke_failed'
+                item = message('The supplied-runtime smoke failed. No delivery was qualified.')
+        return fixture_response(item, body['model'])
+
     class Provider(http.server.BaseHTTPRequestHandler):
         def log_message(self, *unused): pass
         def do_GET(self):
@@ -98,48 +144,9 @@ def main():
         def do_POST(self):
             body = json.loads(self.rfile.read(int(self.headers['Content-Length'])))
             if self.path == '/evaluation-stop': self.send_response(204); self.end_headers(); return
-            state['calls'] += 1
-            save(run / ('model-request-' + str(state['calls']) + '.json'), body)
-            outputs = {item.get('call_id'): item.get('output') for item in body.get('input', []) if item.get('type') == 'function_call_output'}
-            names = tools(body)
-            if body['model'] == 'nvidia/Nemotron-3_5-Lightning':
-                item = message(json.dumps({'title': 'Supplied runtime smoke', 'description': 'Synthetic native runtime check'}))
-            elif 'runtime-loader' not in outputs:
-                name = 'mcp__' + provider_name + '__load_workspace_dependencies'
-                if not loader_tools(body, provider_name):
-                    state['failure'] = 'required_actual_client_loader_missing'
-                    item = message('Runtime loader unavailable. No artifact was created.')
-                else:
-                    state['loader_name'] = name
-                    item = {'id': 'fc_runtime', 'type': 'function_call', 'name': 'load_workspace_dependencies',
-                            'namespace': 'mcp__' + provider_name,
-                            'call_id': 'runtime-loader', 'status': 'completed', 'arguments': '{}'}
-            elif 'runtime-smoke' not in outputs:
-                output = outputs['runtime-loader']; save(run / 'loader-result.json', output)
-                try:
-                    state['runtime'] = from_loader_output(output, provider_name)
-                    if state['runtime'] != expected: raise ValueError('returned_runtime_drift')
-                    command = shlex.join([sys.executable, str(Path(__file__).with_name('presentation_smoke.py')),
-                        '--workspace', str(workspace), '--skill', str(options.skill.resolve()),
-                        '--provider', provider_name, '--loader-result', str(run / 'loader-result.json')])
-                    executors = [(namespace, name) for namespace, name in names if name == 'exec_command']
-                    if len(executors) != 1: raise ValueError('actual_client_exec_tool_missing')
-                    item = {'id': 'fc_smoke', 'type': 'function_call', 'name': executors[0][1],
-                        'call_id': 'runtime-smoke', 'status': 'completed',
-                        'arguments': json.dumps({'cmd': command, 'login': False, 'yield_time_ms': 30000, 'max_output_tokens': 2000})}
-                    if executors[0][0]: item['namespace'] = executors[0][0]
-                except (OSError, ValueError):
-                    state['failure'] = 'loader_result_unqualified'; item = message('Runtime qualification stopped.')
-            else:
-                save(run / 'smoke-result.json', outputs['runtime-smoke'])
-                try:
-                    smoke_execution(outputs['runtime-smoke'], workspace)
-                    item = message('[Deck](' + str(workspace / 'output/deck.pptx') + ') [PDF](' + str(workspace / 'output/deck.pdf') + ')')
-                except (OSError, ValueError):
-                    state['failure'] = 'presentation_smoke_failed'
-                    item = message('The supplied-runtime smoke failed. No delivery was qualified.')
+            response = synthetic_response(body)
             self.send_response(200); self.send_header('Content-Type', 'text/event-stream'); self.end_headers()
-            self.wfile.write(fixture_response(item, body['model']))
+            self.wfile.write(response)
     provider = LoopbackServer(('127.0.0.1', 0), Provider)
     threading.Thread(target=provider.serve_forever, daemon=True).start()
     limits = {'seconds': 180, 'requests': 8, 'output_tokens': 4096}
@@ -147,7 +154,9 @@ def main():
     termination = None
     records = []
     try:
-        with Observer(run, model='moonshotai/Kimi-K3', guardian='zai-org/GLM-5.3-Flash', limits=limits) as observer:
+        observer_type = SyntheticObserver if options.production_launcher else Observer
+        observer_options = {'respond': synthetic_response} if options.production_launcher else {}
+        with observer_type(run, model='moonshotai/Kimi-K3', guardian='zai-org/GLM-5.3-Flash', limits=limits, **observer_options) as observer:
             records = observer.records
             control = dict(version=1, endpoint=observer.url, secret=observer.secret, seconds=180)
             if options.client == 'cli':
@@ -161,6 +170,9 @@ def main():
             env = dict(os.environ, CODEX_HOME=str(options.codex_home.resolve()), FIXTURE_ENDPOINT='http://127.0.0.1:' + str(provider.server_port),
                        PATH=str(shim) + os.pathsep + os.environ.get('PATH', ''), OTEL_SDK_DISABLED='true',
                        TMPDIR=str(temporary), TMP=str(temporary), TEMP=str(temporary))
+            if options.production_launcher:
+                env.pop('FIXTURE_ENDPOINT', None)
+                env.pop('FIXTURE_RETAINED_DIR', None)
             command = [str(options.launcher.resolve()), 'launch', 'codex' if options.client == 'cli' else 'codex-desktop',
                 '--model', 'moonshotai/Kimi-K3', '--guardian-model', 'zai-org/GLM-5.3-Flash',
                 '--allow-unverified', '--evaluation-observer', str(run / 'observer.json')]
@@ -241,7 +253,7 @@ def main():
         'client': options.client, 'client_identity': client_identity, 'launcher_identity': launcher_identity,
         'client_executable': str(client_path), 'app_bundle': str(options.app_bundle.resolve()) if native else None,
         'host': {'system': platform.system(), 'arch': platform.machine(), 'platform': platform.platform()},
-        'paid_inference': False, 'run': str(run), 'limits': limits, 'exit_code': code,
+        'paid_inference': False, 'synthetic_transport': 'observer' if options.production_launcher else 'provider_fixture', 'run': str(run), 'limits': limits, 'exit_code': code,
         'termination': termination, 'thread_identity': thread, 'observed_versions': observed_versions,
         'failure': state['failure'], 'loader_name': state['loader_name'], 'runtime': state['runtime'],
         'loader_result_sha256': digest(run / 'loader-result.json') if (run / 'loader-result.json').exists() else None,

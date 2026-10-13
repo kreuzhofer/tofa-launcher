@@ -243,3 +243,46 @@ paid model inference. The existing production bridge hash differs from the
 qualified hash. Do not transplant the synthetic proof or silently widen its
 allowed references. No shared setting or production installation was changed
 while recording this result. Keep the integration branch and tickets open.
+
+## Production launcher qualification preparation
+
+The production bridge has now passed its own clean exit, forced launcher crash,
+clean repeat, owned temporary uninstall and ordinary Desktop restart checks.
+The [production lifecycle record](evidence/presentation-runtime-126-127/production-mcp-lifecycle.json)
+binds the exact production binary, bundled engine and native application hashes.
+Ordinary startup recorded three `codex_app` ready events, no failed startup events
+and no signature rejections. Both saved MCP tools remained callable after clean
+exit and crash; the detached temporary bridge remained callable after uninstall.
+The normal installation was preserved. Real launcher settings and credentials
+were unchanged in every phase, and protected settings matched after normalization
+of only the two authorized executable references.
+
+`presentation_calibration.py --production-launcher` uses a calibration-only
+synthetic observer at the existing authenticated evaluation boundary. It forwards
+native launch control to the actual production adapter, supplies synthetic model
+Responses locally, and explicitly rejects Guardian requests. The normal launcher
+reads its ordinary credentials/catalog; no endpoint override or credential copy
+is needed. The live model evaluator still uses the ordinary observer. This
+synthetic route cannot qualify paid inference, adapter inference or model behavior.
+
+The real CLI loader/deck workflow passed through the production launcher with this
+observer. Desktop assets and the exact production retained-bridge policy passed
+preflight. The fixed local handoff remains:
+
+```sh
+bash /tmp/tofa-presentation-validation/run-manual.sh
+```
+
+It now selects the production binary and production lifecycle record explicitly.
+All new run files remain under the agreed `/tmp/tofa-presentation-validation` root.
+The previous native fixture success remains historical evidence; the added harness
+module changes the qualification identity, so the old proof is not reused.
+A fresh production native loader/deck/preview run and the two separately declared
+native model calibrations remain required before merging or closing the tickets.
+
+Validation: 71 affected Python tests passed with two installed-client opt-ins
+skipped. After review exposed concurrent audit writes, a regression reproduced
+the failure; locking the final audit update made all three synthetic observer tests
+pass. A fresh actual CLI run passed after that fix. The production Go binary built
+successfully; no Go implementation changed in this follow-up. Both review axes
+report zero remaining implementation findings, with native acceptance still open.
