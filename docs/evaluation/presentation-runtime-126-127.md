@@ -286,3 +286,28 @@ the failure; locking the final audit update made all three synthetic observer te
 pass. A fresh actual CLI run passed after that fix. The production Go binary built
 successfully; no Go implementation changed in this follow-up. Both review axes
 report zero remaining implementation findings, with native acceptance still open.
+
+## Production native runtime and previews passed
+
+The fresh production run completed on 2026-10-13 at 12:54 UTC. Independent
+`qualify()` revalidation passed against the current native application, bundled
+engine, runtime, harness, production bridge and protected settings. The genuine
+`mcp__codex_app__load_workspace_dependencies` call and the complete
+create/finalize/render/deliver workflow passed. The maintainer recorded successful
+native PPTX and PDF previews against the exact delivered artifact hashes.
+See [production native evidence](evidence/presentation-runtime-126-127/production-native-success.json).
+
+The four synthetic requests used the calibration observer; no paid inference was
+performed. Raw preservation fingerprints differed only in the authorized MCP executable
+references; normalized fingerprints matched. The production launcher/bridge hash is
+`1f2b7a7b61c7214ceb46f0f0bb0c4952760875ceaee35838706837c4db76d519`.
+This closes the production runtime/preview gate without transferring the earlier
+fixture proof. It does not establish model capability.
+
+Both native model cases passed preflight using this production qualification:
+case 03 (implicit discovery) and case 04 (explicit installed-skill instruction),
+main `moonshotai/Kimi-K3`, Guardian `zai-org/GLM-5.3-Flash`, original prompts and
+baseline instructions. Each is a separate fresh declared calibration, bounded to
+900 seconds, 80 requests and 8192 output tokens per request. They remain outside
+the broader baseline matrix and supported-model promotion. The two live outcomes,
+final review and merge/closure remain pending; keep the integration branch.
