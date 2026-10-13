@@ -1,0 +1,118 @@
+{
+  "schema": "tofa-presentation-model-calibration-assessment-v1",
+  "retry_policy": "one declared attempt per case; no outcome replaced",
+  "entries": [
+    {
+      "run_id": "75e6e290057c49c8b047d1fdae8878ce",
+      "cell": {
+        "client": "cli",
+        "model": "moonshotai/Kimi-K3",
+        "case": "03",
+        "variant": "baseline",
+        "corpus": "capability-corpus-v3",
+        "platform": "Darwin/arm64"
+      },
+      "status": "infra_blocked",
+      "limits": {
+        "seconds": 900,
+        "requests": 80,
+        "output_tokens": 8192
+      },
+      "stop_reason": "unsupported_request_contract",
+      "request_counts": {
+        "main": 38,
+        "guardian": 0,
+        "auxiliary_title": 0
+      },
+      "usage": {
+        "input_tokens": 960782,
+        "output_tokens": 6957,
+        "complete": true
+      },
+      "settings_preserved": true,
+      "environment_drift_during_run": [],
+      "treatment": "launcher_owned_supplied_runtime_adapter",
+      "matrix_membership": "excluded; fresh declared calibration only",
+      "runtime_proof_sha256": "e01fb58868ab823743aaabe9d0a94493197e580ca85e3219262eb30411ff662a",
+      "harness": {
+        "capability_evaluation.py": "9f42da8bbd787d01aad2eb2a941a253c1f2be012d69418f7ee2c78fcc7e6c5aa",
+        "capability_observer.py": "961898623239b4641f0afa971bf2a00b8a9c7c253e0b48ece2a6801c74549b13",
+        "capability_actions.py": "cada1c6b10fae235c28cd958c39b595b6260f94279ee226b5ef266f7a0e2efd7"
+      },
+      "loader_call_observed": false,
+      "artifacts": [],
+      "assessment": {
+        "task_content": "not_delivered",
+        "language": "not_run; no delivered deck",
+        "skill_discovery": "installed instructions read",
+        "skill_use": "loader not invoked; not qualified by this model run",
+        "file_integrity": "not_run; no deck",
+        "terminal_delivery": "not_run; no deck",
+        "native_preview": "not_run; CLI"
+      },
+      "rejected": [
+        {
+          "failure": "unsupported_request_contract",
+          "category": "guardian",
+          "role": "unknown"
+        }
+      ]
+    },
+    {
+      "run_id": "46bfeeb70ab3479bb2c937f0ed37e55f",
+      "cell": {
+        "client": "cli",
+        "model": "moonshotai/Kimi-K3",
+        "case": "04",
+        "variant": "baseline",
+        "corpus": "capability-corpus-v3",
+        "platform": "Darwin/arm64"
+      },
+      "status": "failed",
+      "limits": {
+        "seconds": 900,
+        "requests": 80,
+        "output_tokens": 8192
+      },
+      "stop_reason": "request_budget_limit",
+      "request_counts": {
+        "main": 80,
+        "guardian": 0,
+        "auxiliary_title": 0
+      },
+      "usage": {
+        "input_tokens": 4274680,
+        "output_tokens": 48287,
+        "complete": true
+      },
+      "settings_preserved": true,
+      "environment_drift_during_run": [],
+      "treatment": "launcher_owned_supplied_runtime_adapter",
+      "matrix_membership": "excluded; fresh declared calibration only",
+      "runtime_proof_sha256": "e01fb58868ab823743aaabe9d0a94493197e580ca85e3219262eb30411ff662a",
+      "harness": {
+        "capability_evaluation.py": "9f42da8bbd787d01aad2eb2a941a253c1f2be012d69418f7ee2c78fcc7e6c5aa",
+        "capability_observer.py": "961898623239b4641f0afa971bf2a00b8a9c7c253e0b48ece2a6801c74549b13",
+        "capability_actions.py": "cada1c6b10fae235c28cd958c39b595b6260f94279ee226b5ef266f7a0e2efd7"
+      },
+      "loader_call_observed": false,
+      "artifacts": [],
+      "assessment": {
+        "task_content": "not_delivered",
+        "language": "not_run; no delivered deck",
+        "skill_discovery": "installed instructions read",
+        "skill_use": "loader not invoked; not qualified by this model run",
+        "file_integrity": "not_run; no deck",
+        "terminal_delivery": "not_run; no deck",
+        "native_preview": "not_run; CLI"
+      },
+      "rejected": [
+        {
+          "failure": "request_budget_limit",
+          "category": "request_budget_limit",
+          "role": "unknown"
+        }
+      ]
+    }
+  ]
+}

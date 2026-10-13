@@ -3,6 +3,7 @@ package tofa_test
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"os"
@@ -180,5 +181,45 @@ func TestDesktopIncompleteEnginePackageIsRefused(t *testing.T) {
 	}
 	if _, err := os.Stat(capture); !os.IsNotExist(err) {
 		t.Fatal("incomplete app bundle launched")
+	}
+}
+
+// Native app tools authenticate the Node peer, its engine parent and its Desktop
+// grandparent. A long-lived launcher intermediary breaks this installed contract.
+func TestDesktopEngineRetainsDirectNativeParent(t *testing.T) {
+	bundle, capture := desktopFixture(t, "ignore")
+	app, _ := adapterFixture(t, nil, nil)
+	child, stop := liveDesktopFixture(t, app, bundle, capture)
+	defer stop()
+	deadline := time.Now().Add(10 * time.Second)
+	for {
+		ancestry, err := os.ReadFile(capture + ".ancestry")
+		pid, pidErr := os.ReadFile(capture + ".pid")
+		if err == nil && pidErr == nil {
+			var observed struct {
+				PID    int
+				Parent int
+			}
+			if err := json.Unmarshal(ancestry, &observed); err != nil {
+				t.Fatal(err)
+			}
+			lock, err := os.Readlink(filepath.Join(child.Env["CODEX_ELECTRON_USER_DATA_PATH"], "SingletonLock"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			separator := strings.LastIndex(lock, "-")
+			if separator < 0 {
+				t.Fatal("missing native profile owner")
+			}
+			nativePID := lock[separator+1:]
+			if strconv.Itoa(observed.PID) != string(pid) || strconv.Itoa(observed.Parent) != nativePID {
+				t.Fatalf("bundled engine must replace Desktop child and retain native parent: engine=%d launched=%s parent=%d native=%s", observed.PID, pid, observed.Parent, nativePID)
+			}
+			return
+		}
+		if time.Now().After(deadline) {
+			t.Fatal("engine ancestry was not observed")
+		}
+		time.Sleep(10 * time.Millisecond)
 	}
 }

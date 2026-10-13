@@ -1,0 +1,138 @@
+{
+  "schema": "tofa-retained-mcp-lifecycle-v1",
+  "baseline": "2212cc1",
+  "app_version": "26.1007.30912",
+  "app_build": "20156",
+  "scope": "bridge lifetime and ordinary MCP/engine operation; not presentation qualification",
+  "phases": {
+    "clean_exit": {
+      "private_run": "retained-launcher-clean-20261013T105657Z",
+      "protected_raw_equal": false,
+      "protected_normalized_equal": null,
+      "calibration_exit_code": 1,
+      "crash": false,
+      "node-repl": {
+        "initialize_and_arithmetic": "passed",
+        "bridge_verified": true
+      },
+      "cua-repl": {
+        "initialize_and_arithmetic": "passed",
+        "bridge_verified": true
+      }
+    },
+    "crash": {
+      "private_run": "retained-launcher-crash-20261013T105859Z",
+      "protected_raw_equal": true,
+      "protected_normalized_equal": null,
+      "calibration_exit_code": 1,
+      "crash": true,
+      "node-repl": {
+        "initialize_and_arithmetic": "passed",
+        "bridge_verified": true
+      },
+      "cua-repl": {
+        "initialize_and_arithmetic": "passed",
+        "bridge_verified": true
+      }
+    },
+    "clean_repeat": {
+      "private_run": "retained-launcher-clean-20261013T110335Z",
+      "protected_raw_equal": true,
+      "protected_normalized_equal": true,
+      "calibration_exit_code": 1,
+      "crash": false
+    },
+    "ordinary_restart": {
+      "private_run": "retained-ordinary-clean-20261013T110457Z",
+      "protected_raw_equal": false,
+      "protected_normalized_equal": true,
+      "calibration_exit_code": -15,
+      "crash": false
+    },
+    "uninstall": {
+      "exit_code": 0,
+      "installation_removed": true,
+      "bridge_retained": true,
+      "bridge_detached": true,
+      "synthetic_credentials_removed": true,
+      "shared_state_preserved": true,
+      "ordinary_engine_version": "codex-cli 0.162.0-alpha.17.2",
+      "ordinary_engine_exit": 0,
+      "node-repl": {
+        "initialize_and_arithmetic": "passed",
+        "bridge_detached": true
+      },
+      "cua-repl": {
+        "initialize_and_arithmetic": "passed",
+        "bridge_detached": true
+      }
+    }
+  },
+  "verification": {
+    "real_cli_node_call": {
+      "exit_code": 0,
+      "requests": 2,
+      "tool": [
+        "mcp__node_repl",
+        "js"
+      ],
+      "marker_returned": true,
+      "negative_control": false
+    },
+    "ordinary_engine_config": {
+      "ordinary_effective_config_equal": true,
+      "method": "config/read",
+      "bridge_exists": true,
+      "token_factory_launch_context_supplied": false
+    },
+    "ordinary_native_readiness": {
+      "ready": 3,
+      "failed": 0,
+      "peer_rejections": 0
+    },
+    "tests": {
+      "lifecycle_race": "passed, 11.972s",
+      "fixture_race": "passed, 4.369s",
+      "installed_engine_race": "passed, 34.752s",
+      "fixture_go_vet": "passed",
+      "retention_regression": "red before fix, green after"
+    }
+  },
+  "current_state": {
+    "references_equal_bundled_engine": true,
+    "protected_state_matches_after_ordinary_restart": true
+  },
+  "limitations": [
+    "Direct MCP arithmetic also passes with an absent engine; it does not prove engine-path execution.",
+    "Missing-path real CLI control stopped at invalid automatic-review JSON; inconclusive for executable-path behavior.",
+    "No native presentation loader call, deck, preview, or model calibration was performed.",
+    "The existing presentation qualification gate has not been relaxed by this verification."
+  ],
+  "source_sha256": {
+    "launcher-retained": "9e18210e8783432107b15970973db6b66e2532a9fdbb9d9e47ad0b49239aa2b3",
+    "retained-bridge-baseline.log": "d8d9d0c0bf0246de6f69a5b5762e69191000a52d61ad0acf357edc24e6a8d7f3",
+    "retained-fixture-red.log": "02cdc9258bd1970c0b5cfdea78a1d3feace1aa279cbe62bbac3cb07772ae14f3",
+    "retained-fixture-green.log": "3291b734730f65cbd75d5a6a94f54a22ecc3c914620273af85050aa4329ad6bc",
+    "retained-installed-engine.log": "5651bb200ce9436d93c529292612b41a9b8959c48bc1d68133032f6df67e1c45",
+    "trace-retained-startup.py": "5c028d781a294900ac5343849719132657f0540100e06c0e280b64799352fabd",
+    "probe-saved-mcp.py": "e583d233efdf5cda43b63ae3e93a906d8a82dce95e30ef9b09775e2c8cc7b253",
+    "verify-cli-mcp.py": "724c0d6ff4a283bed6fb5609e455ebd2ecae5a6cf414405589e0e6e6801993c6",
+    "compare-ordinary-engine.py": "15533c81a17c9275a06dcf38495ff4cfda6530e13486cd6032b070334d9754be"
+  },
+  "fixture_main_sha256": "d3fb6d7b8e6acd1a08a9ed9074871e4ee79f482874a01baa7120df3049dfcee4",
+  "tested_identity": {
+    "engine_sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+    "native": {
+      "version": "26.1007.30912",
+      "build": "20156",
+      "application_sha256": "75e397e2280dde93b70a85aa926f4282c728eacc84dfeb15ba7fb6ddd84628af",
+      "executable_sha256": "2053a78d225a1492d0cb6896cfd83254af06c3277547e83d4d23fef88f00426e",
+      "native_transport_sha256": "ae60fd7129a8eafea42dc41e8692e95dda624d4406826edd74010148371113db"
+    }
+  },
+  "tested_identity_sources": {
+    "retained-launcher-clean-20261013T105657Z/calibration/eaf996383e4f4c41bd28405ab0eccd9f/qualification.json": "4552a52dce001d0fcab36a1cc1e556a2fbdb40bd0e624305a244b634e5035780",
+    "retained-launcher-crash-20261013T105859Z/calibration/05d24be5b375407cb77facb972aed429/qualification.json": "8969cbd4ae732ce5cdd267be642297fc26ec3db1312b054c445bcd3e0753247b",
+    "retained-launcher-clean-20261013T110335Z/calibration/35a53fe8aa4a46f1a5c088a98a10efa3/qualification.json": "cc0bf572a40c179660873937281f4aeeb01ed223960b871b36617682a6cef0d9"
+  }
+}

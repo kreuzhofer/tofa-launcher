@@ -1,0 +1,6 @@
+time_utc,event,impact
+09:00,Cache rollout began,None
+09:04,Stale entries served,12 synthetic users affected
+09:06,Rollout paused,No additional users affected
+09:10,Cache invalidated,All affected requests recovered
+09:15,Root cause confirmed: expiry omitted from new cache entries,No data loss

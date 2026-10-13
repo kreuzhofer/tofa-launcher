@@ -1,7 +1,9 @@
 """Behavioral tests of the explicitly invoked capability evaluator command."""
 import json
+import hashlib
 import os
 import platform
+import plistlib
 from pathlib import Path
 import subprocess
 import sys
@@ -13,7 +15,234 @@ import time
 SCRIPT = Path(__file__).with_name('capability_evaluation.py')
 
 
+def desktop_handoff(root, encoding, *, command='run', case='05', artifacts='present', settings_drift=False, client='desktop'):
+    bundle = root / 'FixtureDesktop.app'
+    contents = bundle / 'Contents'
+    (contents / 'Resources').mkdir(parents=True)
+    (contents / 'MacOS').mkdir()
+    (contents / 'Info.plist').write_bytes(plistlib.dumps({
+        'CFBundleShortVersionString': '0.0.0', 'CFBundleVersion': 'synthetic'}))
+    (contents / 'MacOS/ChatGPT').write_text('synthetic app; never executed')
+    (contents / 'Resources/app.asar').write_text('synthetic resources')
+    executable = contents / 'Resources/codex'
+    executable.write_text('#!/bin/sh\nexec ' + shlex.quote(sys.executable) + ' ' +
+        shlex.quote(str(SCRIPT.parent / 'fixtures/capability_launcher.py')) + ' "$@"\n')
+    executable.chmod(0o700)
+    (root / 'home').mkdir()
+    if settings_drift: (root / 'home/config.toml').write_text('# synthetic original settings\n')
+    (root / 'skills').mkdir()
+    if case == '18':
+        (root / 'skills/documents').mkdir()
+        (root / 'skills/documents/SKILL.md').write_text('---\nname: documents\n---\nSynthetic inventory only.\n')
+    if case in ('03', '04'):
+        skill = root / 'skills/presentations'
+        (skill / 'references').mkdir(parents=True)
+        (skill / 'SKILL.md').write_text('---\nname: presentations\n---\nSynthetic inventory only.\n')
+        (skill / 'references/implementation.md').write_text(
+            'Call `load_workspace_dependencies`. Do not install substitutes.\n')
+    return subprocess.run([sys.executable, str(SCRIPT), command] + (['--live'] if command == 'run' else []) + [
+        '--private-root', str(root / 'runs'), '--case', case, '--client', client,
+        '--model', 'moonshotai/Kimi-K3', '--launcher', str(executable),
+        '--codex', str(executable), '--app-bundle', str(bundle),
+        '--codex-home', str(root / 'home'), '--skill-root', str(root / 'skills')],
+        env=dict(os.environ, CAPABILITY_FIXTURE_REFERENCE_ENCODING=encoding,
+                 CAPABILITY_FIXTURE_ARTIFACTS=artifacts,
+                 CAPABILITY_FIXTURE_SETTING_DRIFT='1' if settings_drift else ''),
+        capture_output=True, text=True, timeout=15)
+
+
 class CommandTests(unittest.TestCase):
+    @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
+    def test_self_declared_presentation_proof_cannot_unlock_paid_deck_inference(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            desktop_handoff(root, 'raw', case='03', client='cli', command='preflight')
+            proof = root / 'proof.json'
+            proof.write_text(json.dumps({'schema': 'tofa-presentation-qualification-v1',
+                                         'client': 'cli', 'status': 'qualified'}))
+            executable = root / 'FixtureDesktop.app/Contents/Resources/codex'
+            result = subprocess.run([sys.executable, str(SCRIPT), 'run', '--live', '--case', '03',
+                '--client', 'cli', '--model', 'moonshotai/Kimi-K3', '--launcher', str(executable),
+                '--codex', str(executable), '--codex-home', str(root / 'home'),
+                '--skill-root', str(root / 'skills'), '--private-root', str(root / 'runs'),
+                '--presentation-qualification', str(proof)], capture_output=True, text=True, timeout=15)
+            self.assertEqual(result.returncode, 1, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertEqual(report['status'], 'infra_blocked')
+            self.assertIn('presentation_qualification_invalid', report['blockers'])
+            self.assertIn('presentation_runtime_unqualified', report['blockers'])
+            self.assertEqual(report['requests'], [])
+
+    @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
+    def test_decks_block_before_launch_with_installed_runtime_contract_provenance(self):
+        for case, client in (('03', 'desktop'), ('04', 'cli')):
+            with self.subTest(case=case, client=client), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                result = desktop_handoff(root, 'raw', case=case, client=client, settings_drift=True)
+                self.assertEqual(result.returncode, 1, result.stderr)
+                report = json.loads(result.stdout)
+                self.assertEqual(report['status'], 'infra_blocked')
+                self.assertEqual(report['blockers'], ['presentation_runtime_unqualified'])
+                self.assertEqual(report['requests'], [])
+                run = root / 'runs' / report['run_id']
+                self.assertFalse((run / 'client.log').exists())
+                self.assertEqual((root / 'home/config.toml').read_text(), '# synthetic original settings\n')
+                self.assertEqual(list((run / 'workspace').iterdir()), [])
+                runtime = report['provenance']['presentation_runtime']
+                self.assertEqual(runtime['status'], 'unqualified')
+                self.assertEqual(runtime['required_tool'], 'load_workspace_dependencies')
+                self.assertEqual(runtime['loader_result'], 'not_observed')
+                implementation = 'Call `load_workspace_dependencies`. Do not install substitutes.\n'
+                self.assertEqual(runtime['skill_implementations'][0]['implementation_sha256'],
+                                 hashlib.sha256(implementation.encode()).hexdigest())
+                self.assertTrue(runtime['skill_implementations'][0]['requirement_observed'])
+                self.assertEqual(report['limits'], {'seconds': 900, 'requests': 80, 'output_tokens': 8192})
+                for criterion in ('task_content', 'skill_use', 'visible_preview'):
+                    self.assertEqual(report['criteria'][criterion]['status'], 'not_run')
+
+    @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
+    def test_protected_settings_drift_is_hash_audited_and_never_restored(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            result = desktop_handoff(root, 'uri', settings_drift=True)
+            self.assertEqual(result.returncode, 1, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertFalse(report['settings_preserved'])
+            self.assertIn('protected_settings_changed', report['blockers'])
+            audit = report['protected_settings_hashes']
+            self.assertEqual(audit['changed'], ['codex_config'])
+            self.assertEqual(set(audit['before']), {'codex_config', 'launcher_config'})
+            self.assertEqual(set(audit['after']), {'codex_config', 'launcher_config'})
+            self.assertNotEqual(audit['before']['codex_config'], audit['after']['codex_config'])
+            self.assertEqual((root / 'home/config.toml').read_text(), '# synthetic concurrent edit\n')
+            self.assertNotIn('synthetic concurrent edit', json.dumps(report))
+
+    @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
+    def test_heldout_preflight_has_its_own_contract_and_frozen_incident_input(self):
+        with tempfile.TemporaryDirectory(prefix='capability heldout ') as directory:
+            root = Path(directory)
+            result = desktop_handoff(root, 'angle', command='preflight', case='18')
+            self.assertEqual(result.returncode, 0, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertEqual(report['cell']['corpus'], 'incident-handover-v1')
+            self.assertEqual(report['limits'], {'seconds': 900, 'requests': 80, 'output_tokens': 8192})
+            self.assertEqual(report['provenance']['fixture_hashes'], {
+                'fixtures/incident.csv': '7455fdd0980e532817241cfe455da739729647edb8d16f52b405c3be40ad35d6'})
+            run = root / 'runs' / report['run_id']
+            self.assertIn('12 synthetic users affected', (run / 'workspace/fixtures/incident.csv').read_text())
+            self.assertIn('handover outputs/incident brief.docx', (run / 'prompt.txt').read_text())
+            self.assertFalse((run / 'workspace/fixtures/sample-deck.pptx').exists())
+            self.assertFalse((run / 'workspace/handover outputs').exists())
+            self.assertEqual(report['criteria']['visible_preview']['status'], 'not_run')
+
+    @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
+    def test_heldout_requires_desktop_and_an_installed_document_skill(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            ready = desktop_handoff(root, 'angle', command='preflight', case='18')
+            self.assertEqual(ready.returncode, 0, ready.stderr)
+            executable = root / 'FixtureDesktop.app/Contents/Resources/codex'
+            (root / 'skills/documents/SKILL.md').unlink()
+            result = subprocess.run([sys.executable, str(SCRIPT), 'run', '--live',
+                '--private-root', str(root / 'runs'), '--case', '18', '--client', 'cli',
+                '--model', 'moonshotai/Kimi-K3', '--launcher', str(executable), '--codex', str(executable),
+                '--codex-home', str(root / 'home'), '--skill-root', str(root / 'skills')],
+                capture_output=True, text=True, timeout=15)
+            self.assertEqual(result.returncode, 1, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertIn('workflow_client_mismatch', report['blockers'])
+            self.assertIn('document_skill_missing', report['blockers'])
+            self.assertEqual(report['requests'], [])
+
+    @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
+    def test_heldout_space_paths_require_valid_markdown_destinations(self):
+        for encoding, status in (('raw', 'failed'), ('uri', 'passed'), ('uri-other-workspace', 'failed')):
+            with self.subTest(encoding=encoding), tempfile.TemporaryDirectory(prefix='capability heldout ') as directory:
+                result = desktop_handoff(Path(directory), encoding, case='18')
+                self.assertEqual(result.returncode, 0, result.stderr)
+                report = json.loads(result.stdout)
+                self.assertEqual(report['criteria']['reference_syntax']['status'], status)
+                self.assertEqual(report['criteria']['file_integrity']['status'], 'inconclusive')
+                self.assertEqual(report['criteria']['visible_preview']['status'], 'not_run')
+
+    @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
+    def test_heldout_records_generated_hashes_and_leaves_document_checks_pending(self):
+        with tempfile.TemporaryDirectory(prefix='capability heldout ') as directory:
+            root = Path(directory)
+            result = desktop_handoff(root, 'angle', case='18')
+            self.assertEqual(result.returncode, 0, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertEqual(report['status'], 'completed')
+            self.assertEqual(report['criteria']['reference_syntax']['status'], 'passed')
+            self.assertEqual(report['input_integrity']['status'], 'passed')
+            self.assertEqual(set(report['artifacts']), {
+                'handover outputs/incident brief.docx', 'handover outputs/incident brief.pdf'})
+            for artifact in report['artifacts'].values():
+                self.assertEqual(artifact['status'], 'present')
+                self.assertEqual(len(artifact['sha256']), 64)
+                self.assertEqual(artifact['validation'], 'operator_check_pending')
+            self.assertEqual(report['criteria']['file_integrity'], {
+                'status': 'inconclusive', 'reason': 'document_validation_pending'})
+            for criterion in ('task_content', 'language', 'skill_use', 'visible_preview'):
+                self.assertEqual(report['criteria'][criterion]['status'], 'not_run')
+
+    @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
+    def test_heldout_does_not_credit_missing_or_symlinked_generated_outputs(self):
+        for mode, status in (('missing', 'missing'), ('symlink', 'unsafe_path')):
+            with self.subTest(mode=mode), tempfile.TemporaryDirectory(prefix='capability heldout ') as directory:
+                result = desktop_handoff(Path(directory), 'angle', case='18', artifacts=mode)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                report = json.loads(result.stdout)
+                self.assertEqual(report['criteria']['reference_syntax']['status'], 'passed')
+                self.assertEqual(report['criteria']['file_integrity']['status'], 'failed')
+                self.assertEqual(report['artifacts']['handover outputs/incident brief.pdf']['status'], status)
+                self.assertNotIn('sha256', report['artifacts']['handover outputs/incident brief.pdf'])
+                self.assertEqual(report['criteria']['visible_preview']['status'], 'not_run')
+
+    @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
+    def test_symlinked_workspace_cannot_supply_input_or_generated_artifact_hashes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            result = desktop_handoff(Path(directory), 'angle', case='18', artifacts='workspace-symlink')
+            self.assertEqual(result.returncode, 0, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertEqual(report['input_integrity']['status'], 'failed')
+            for artifact in report['artifacts'].values():
+                self.assertEqual(artifact, {'status': 'unsafe_path'})
+
+
+    @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
+    def test_desktop_handoff_scores_percent_encoded_absolute_fixture_links(self):
+        with tempfile.TemporaryDirectory(prefix='capability handoff ') as directory:
+            root = Path(directory)
+            result = desktop_handoff(root, 'uri')
+            self.assertEqual(result.returncode, 0, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertEqual(report['criteria']['reference_syntax'], {
+                'status': 'passed', 'reason': 'absolute_markdown_links'})
+            self.assertEqual(report['criteria']['file_integrity']['status'], 'passed')
+            self.assertEqual(report['criteria']['visible_preview']['status'], 'not_run')
+
+    @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
+    def test_desktop_handoff_does_not_credit_links_to_another_workspace(self):
+        with tempfile.TemporaryDirectory(prefix='capability handoff ') as directory:
+            result = desktop_handoff(Path(directory), 'uri-other-workspace')
+            self.assertEqual(result.returncode, 0, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertEqual(report['criteria']['reference_syntax']['status'], 'failed')
+            self.assertEqual(report['criteria']['file_integrity']['status'], 'passed')
+            self.assertEqual(report['criteria']['visible_preview']['status'], 'not_run')
+
+    @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
+    def test_desktop_reference_forms_keep_pending_ui_independent(self):
+        for encoding, status in (('raw', 'passed'), ('angle', 'passed'), ('uri-malformed', 'failed')):
+            with self.subTest(encoding=encoding), tempfile.TemporaryDirectory(prefix='capability handoff ') as directory:
+                result = desktop_handoff(Path(directory), encoding)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                report = json.loads(result.stdout)
+                self.assertEqual(report['criteria']['reference_syntax']['status'], status)
+                self.assertEqual(report['criteria']['file_integrity']['status'], 'passed')
+                self.assertEqual(report['criteria']['visible_preview']['status'], 'not_run')
+
     def test_unavailable_comparison_retains_a_blocked_attempt(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -32,6 +32,24 @@ func TestDesktopEvaluationPreflightDoesNotLaunchOrWriteConfiguration(t *testing.
 	}
 }
 
+func TestDesktopEvaluationCannotSubstituteTheCLIRuntimeProvider(t *testing.T) {
+	bundle, capture := desktopFixture(t, "ignore")
+	config := filepath.Join(t.TempDir(), "observer.json")
+	data, _ := json.Marshal(map[string]any{"version": 1, "endpoint": "http://127.0.0.1:1",
+		"secret": "synthetic-control-secret", "seconds": 180,
+		"presentation_runtime": map[string]string{"root": t.TempDir(), "script": "/not-used/presentation_runtime.py"}})
+	os.WriteFile(config, data, 0600)
+	app := &tofa.App{Dir: t.TempDir(), Out: io.Discard}
+	err := app.RunContext(context.Background(), []string{"launch", "codex-desktop", "--model", "zai-org/GLM-5.3",
+		"--app-bundle", bundle, "--evaluation-observer", config})
+	if err == nil || !strings.Contains(err.Error(), "CLI-only") {
+		t.Fatalf("unexpected refusal: %v", err)
+	}
+	if _, err := os.Stat(capture); !os.IsNotExist(err) {
+		t.Fatal("invalid provider launched Desktop")
+	}
+}
+
 func TestDesktopEvaluationRetainsNamingAndOwnershipChecks(t *testing.T) {
 	bundle, capture := desktopFixture(t, "ignore")
 	var lock sync.Mutex

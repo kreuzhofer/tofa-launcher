@@ -1,0 +1,71 @@
+{
+  "schema": "tofa-native-manual-assessment-v1",
+  "date": "2026-10-13",
+  "private_attempt_id": "6a3b9b1c9d284370af27ab8337b87f4e",
+  "status": "infra_blocked",
+  "failure": "required_actual_client_loader_missing",
+  "termination": "deadline",
+  "paid_inference": false,
+  "client_identity": {
+    "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+    "version": "codex-cli 0.162.0-alpha.17.2"
+  },
+  "native": {
+    "version": "26.1007.30912",
+    "build": "20156",
+    "application_sha256": "75e397e2280dde93b70a85aa926f4282c728eacc84dfeb15ba7fb6ddd84628af",
+    "executable_sha256": "2053a78d225a1492d0cb6896cfd83254af06c3277547e83d4d23fef88f00426e",
+    "native_transport_sha256": "ae60fd7129a8eafea42dc41e8692e95dda624d4406826edd74010148371113db"
+  },
+  "limits": {
+    "seconds": 180,
+    "requests": 8,
+    "output_tokens": 4096
+  },
+  "model_request_count": 2,
+  "main_request_number": 2,
+  "catalogs": {
+    "request-2.json": {
+      "tool_count": 238,
+      "native_loader_present": false
+    },
+    "model-request-2.json": {
+      "tool_count": 238,
+      "native_loader_present": false
+    }
+  },
+  "artifacts": {},
+  "loader_call_observed": false,
+  "native_previews": "not_available",
+  "user_report": "Runtime loader unavailable. No artifact was created.",
+  "native_startup": {
+    "peer_rejection": "missing-code-signing-identity",
+    "mcp_error": "Codex app tools pipe closed",
+    "provider": "codex_app",
+    "exact_rejected_peer_executable": "not established; process had exited"
+  },
+  "signature_checks": {
+    "method": "codesign --verify --strict --verbose=2, read-only, outside agent sandbox",
+    "bundled_cua_node": "valid on disk; satisfies its Designated Requirement",
+    "primary_runtime_node": "valid on disk; satisfies its Designated Requirement",
+    "limitation": "Initial sandboxed verification failed for both; outside-sandbox verification passed. No damaged-installation conclusion is supported."
+  },
+  "protected_state": {
+    "preserved": false,
+    "separate_baseline_utc": "2026-10-13T07:14:15Z",
+    "baseline_existing_files_changed": [
+      "config.toml",
+      "openai-bundled/unified-computer-use/26.1007.30912/.mcp.json"
+    ],
+    "baseline_missing_files": 0,
+    "limitation": "Per-file hash comparison against earlier manual baseline; no content snapshot or causal attribution. Separate comparison did not enumerate newly added files.",
+    "shared_snapshot_restored": false
+  },
+  "source_sha256": {
+    "qualification.json": "33940007ed7b445e1e9d068b320dec7c408ce2d21c6295d0d08dcc26db816b47",
+    "request-2.json": "ee107a67ef4ac7e4c3f0763b2049b2705b96cef3e01a4a5288b0e755d88ee934",
+    "model-request-2.json": "1b06aa9184cad143e4305edb89315ea2d08d95f902193ff41fdfcfa0a514ff0a",
+    "native-desktop.log": "9e0f3cd0ad85c5641b93c16ebaf052ce8e829b093c0c1aa8d72db5bc100ab4a7"
+  },
+  "next_diagnostic": "Capture native helper executable and parent provenance during a controlled startup, then compare native startup with and without launcher. Preserve native peer authorization and installed settings."
+}

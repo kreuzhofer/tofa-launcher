@@ -1,0 +1,46 @@
+{
+  "schema": "tofa-native-startup-comparison-v1",
+  "date": "2026-10-13",
+  "prompt_submitted": false,
+  "native_authorization_modified": false,
+  "comparison": {
+    "ordinary": {
+      "private_run": "startup-ordinary-20261013T082740Z",
+      "settings_preserved": false,
+      "native_ready_events": 3,
+      "native_failed_events": 0,
+      "peer_rejections": 0,
+      "observed_node_ancestries": [
+        [
+          "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node",
+          "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex",
+          "/Applications/ChatGPT.app/Contents/MacOS/ChatGPT"
+        ]
+      ],
+      "trace_sha256": "c105cb38aacfb6cb404f26b6051b02c0f5678ba9c4aac9f4c77e57ce2dbb0dd1",
+      "native_log_sha256": "999bfee29b355998de5291d0ee5f5dcba83288c5367d3a685c5734dae840d6e4",
+      "fixture_stores_removed": true
+    },
+    "launcher": {
+      "private_run": "startup-launcher-20261013T082855Z",
+      "settings_preserved": false,
+      "native_ready_events": 0,
+      "native_failed_events": 1,
+      "peer_rejections": 7,
+      "observed_node_ancestries": [
+        [
+          "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node",
+          "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex",
+          "tofa-desktop-engine",
+          "/Applications/ChatGPT.app/Contents/MacOS/ChatGPT"
+        ]
+      ],
+      "trace_sha256": "a759f9480a5a8ceedeafa147fd5ae1e6c83fc1169b6f5fa8b352ae0089bfd149",
+      "native_log_sha256": "d2fe12243cdf588a7c7a3df652ac44983d1933cb2e57ef334588239a0f961006",
+      "fixture_stores_removed": true
+    }
+  },
+  "finding": "Ordinary native startup reaches ready; launcher startup inserts an ad-hoc-signed Go bridge above the bundled engine and native peer authorization rejects the connection. The installed authorization component examines peer, parent and grandparent code-signing identities.",
+  "proposed_fix": "Execute the bundled engine in the original Desktop child PID; retain model-default interception in a separate relay connected through inherited pipes. Preserve native authorization and existing settings-isolation semantics.",
+  "remaining": "Regression and real Desktop startup validation required; no deck qualification or native preview pass."
+}

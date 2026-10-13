@@ -11,15 +11,67 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"runtime"
+	"strconv"
+	"strings"
 	"time"
 )
 
 type evaluationObserver struct {
-	Version  int    `json:"version"`
-	Endpoint string `json:"endpoint"`
-	Secret   string `json:"secret"`
-	Seconds  int    `json:"seconds"`
+	Version             int                `json:"version"`
+	Endpoint            string             `json:"endpoint"`
+	Secret              string             `json:"secret"`
+	Seconds             int                `json:"seconds"`
+	PresentationRuntime *evaluationRuntime `json:"presentation_runtime,omitempty"`
+}
+
+type evaluationRuntime struct {
+	Root   string `json:"root"`
+	Script string `json:"script"`
+}
+
+func (e *evaluationRuntime) arguments(ctx context.Context) ([]string, error) {
+	if !filepath.IsAbs(e.Root) || !filepath.IsAbs(e.Script) || filepath.Base(e.Script) != "presentation_runtime.py" {
+		return nil, errors.New("invalid supplied presentation runtime configuration")
+	}
+	python := filepath.Join(e.Root, "dependencies/python/bin/python3")
+	rootInfo, rootErr := os.Lstat(e.Root)
+	pythonInfo, pythonErr := os.Stat(python)
+	scriptInfo, scriptErr := os.Lstat(e.Script)
+	if rootErr != nil || !rootInfo.IsDir() || pythonErr != nil || !pythonInfo.Mode().IsRegular() ||
+		pythonInfo.Mode().Perm()&0111 == 0 || scriptErr != nil || !scriptInfo.Mode().IsRegular() {
+		return nil, errors.New("supplied presentation runtime executable or loader unavailable")
+	}
+	resolvedRoot, rootErr := filepath.EvalSymlinks(e.Root)
+	resolvedPython, pythonErr := filepath.EvalSymlinks(python)
+	relative, relativeErr := filepath.Rel(resolvedRoot, resolvedPython)
+	if rootErr != nil || pythonErr != nil || relativeErr != nil || relative == ".." || strings.HasPrefix(relative, ".."+string(os.PathSeparator)) {
+		return nil, errors.New("Python executable is outside supplied runtime; launch refused")
+	}
+	probe, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+	command := exec.CommandContext(probe, "codex", "mcp", "list", "--json")
+	command.Env = childEnv("")
+	data, err := command.Output()
+	var servers []struct {
+		Name string `json:"name"`
+	}
+	if err != nil || len(data) > 1024*1024 || string(bytes.TrimSpace(data)) == "null" || json.Unmarshal(data, &servers) != nil {
+		return nil, errors.New("could not inspect existing MCP configuration; presentation launch refused")
+	}
+	for _, server := range servers {
+		if server.Name == "" {
+			return nil, errors.New("could not inspect existing MCP configuration; presentation launch refused")
+		}
+		if server.Name == "tofa_presentation_runtime" {
+			return nil, errors.New("presentation MCP provider conflicts with existing configuration; launch refused")
+		}
+	}
+	value := `{command=` + strconv.Quote(python) + `,args=["-I","-B",` + strconv.Quote(e.Script) +
+		`,"mcp","--runtime-root",` + strconv.Quote(e.Root) + `],enabled=true,enabled_tools=["load_workspace_dependencies"]}`
+	return []string{"-c", "mcp_servers.tofa_presentation_runtime=" + value}, nil
 }
 
 func (a *App) evaluationContext(ctx context.Context, path string) (*App, context.Context, context.CancelFunc, error) {

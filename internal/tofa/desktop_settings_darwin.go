@@ -5,11 +5,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
+	"syscall"
+	"time"
 )
 
 // The desktop's default picker writes model/effort into the ordinary user
@@ -24,21 +28,97 @@ func runDesktopSettingsBridge(engine string, args, env []string, home string) er
 	if err != nil {
 		return errors.New("desktop model isolation could not resolve the ordinary configuration file")
 	}
-	command := exec.Command(engine, args...)
-	command.Env, command.Stderr = env, os.Stderr
-	input, err := command.StdinPipe()
+	// Keep the signed engine in Desktop's original child PID. Native app tools
+	// authenticate Node -> engine -> Desktop; a supervising bridge breaks that
+	// ancestry. A separate child relays the same protocol over inherited pipes.
+	executable, err := os.Executable()
 	if err != nil {
 		return err
 	}
-	output, err := command.StdoutPipe()
+	engineInput, relayInput, err := os.Pipe()
 	if err != nil {
-		input.Close()
 		return err
 	}
+	defer engineInput.Close()
+	defer relayInput.Close()
+	relayOutput, engineOutput, err := os.Pipe()
+	if err != nil {
+		return err
+	}
+	defer relayOutput.Close()
+	defer engineOutput.Close()
+	ready, readyWriter, err := os.Pipe()
+	if err != nil {
+		return err
+	}
+	defer ready.Close()
+	defer readyWriter.Close()
+	command := exec.Command(executable, "--tofa-desktop-settings-relay", configFile, strconv.Itoa(os.Getpid()), strconv.Itoa(os.Getppid()))
+	command.Env, command.Stdin, command.Stdout, command.Stderr = env, os.Stdin, os.Stdout, os.Stderr
+	command.ExtraFiles = []*os.File{relayInput, relayOutput, readyWriter}
 	if err := command.Start(); err != nil {
 		return err
 	}
 	defer func() { command.Process.Kill(); command.Wait() }()
+	relayInput.Close()
+	relayOutput.Close()
+	readyWriter.Close()
+	if err := ready.SetReadDeadline(time.Now().Add(10 * time.Second)); err != nil {
+		return err
+	}
+	var handshake [1]byte
+	if _, err := io.ReadFull(ready, handshake[:]); err != nil || handshake[0] != 'R' {
+		return errors.New("desktop settings relay failed to initialize")
+	}
+	if err := syscall.Dup2(int(engineInput.Fd()), int(os.Stdin.Fd())); err != nil {
+		return err
+	}
+	if err := syscall.Dup2(int(engineOutput.Fd()), int(os.Stdout.Fd())); err != nil {
+		return err
+	}
+	engineInput.Close()
+	engineOutput.Close()
+	return syscall.Exec(engine, append([]string{engine}, args...), env)
+}
+
+func runDesktopSettingsRelay(args []string) (result error) {
+	if len(args) != 3 {
+		return errors.New("invalid desktop settings relay arguments")
+	}
+	configFile := args[0]
+	enginePID, err := strconv.Atoi(args[1])
+	if err != nil || enginePID <= 1 || enginePID != os.Getppid() {
+		return errors.New("desktop settings relay parent changed")
+	}
+	desktopPID, err := strconv.Atoi(args[2])
+	if err != nil || desktopPID <= 1 || !filepath.IsAbs(configFile) {
+		return errors.New("invalid desktop settings relay ownership")
+	}
+	input := os.NewFile(3, "engine-input")
+	output := os.NewFile(4, "engine-output")
+	ready := os.NewFile(5, "relay-ready")
+	for _, file := range []*os.File{input, output, ready} {
+		info, err := file.Stat()
+		if err != nil || info.Mode()&os.ModeNamedPipe == 0 {
+			return errors.New("desktop settings relay requires inherited pipes")
+		}
+		defer file.Close()
+	}
+	killEngine := func() {
+		// A relay must never signal a recycled PID after its engine parent exits.
+		if os.Getppid() == enginePID {
+			syscall.Kill(enginePID, syscall.SIGKILL)
+		}
+	}
+	defer func() {
+		if result != nil {
+			killEngine()
+		}
+	}()
+	if _, err := ready.Write([]byte{'R'}); err != nil {
+		return err
+	}
+	ready.Close()
 	var writesMu, pendingMu sync.Mutex
 	pending := map[string]json.RawMessage{}
 	mainInitialize := false
@@ -63,7 +143,7 @@ func runDesktopSettingsBridge(engine string, args, env []string, home string) er
 			}
 			if json.Unmarshal(line, &request) != nil {
 				inputDone <- errors.New("invalid desktop protocol request")
-				command.Process.Kill()
+				killEngine()
 				return
 			}
 			// This named initialization identifies the conversation connection on
@@ -79,7 +159,7 @@ func runDesktopSettingsBridge(engine string, args, env []string, home string) er
 				if !valid || len(request.ID) == 0 || string(request.ID) == "null" {
 					if err := failure(request.ID, "tofa: unsupported desktop model-default write; use the model picker for this session; unrelated settings were not changed"); err != nil {
 						inputDone <- err
-						command.Process.Kill()
+						killEngine()
 						return
 					}
 					continue
@@ -97,7 +177,7 @@ func runDesktopSettingsBridge(engine string, args, env []string, home string) er
 		input.Close()
 		inputDone <- scanner.Err()
 		if scanner.Err() != nil {
-			command.Process.Kill()
+			killEngine()
 		}
 	}()
 	scanner := bufio.NewScanner(output)
@@ -129,7 +209,7 @@ func runDesktopSettingsBridge(engine string, args, env []string, home string) er
 			pendingMu.Unlock()
 		}
 		if mainReady && len(response.Result) != 0 && (len(response.Error) == 0 || string(response.Error) == "null") {
-			if _, err := fetchDesktopRoute(os.Getenv("TOFA_DESKTOP_CONTEXT"), os.Getenv("TOFA_API_KEY"), command.Process.Pid); err != nil {
+			if _, err := fetchDesktopRouteForParent(os.Getenv("TOFA_DESKTOP_CONTEXT"), os.Getenv("TOFA_API_KEY"), enginePID, desktopPID); err != nil {
 				return fmt.Errorf("desktop main engine acknowledgement failed: %w", err)
 			}
 		}
@@ -172,9 +252,6 @@ func runDesktopSettingsBridge(engine string, args, env []string, home string) er
 	}
 	if err := scanner.Err(); err != nil {
 		return fmt.Errorf("desktop engine protocol: %w", err)
-	}
-	if err := command.Wait(); err != nil {
-		return err
 	}
 	select {
 	case err := <-inputDone:

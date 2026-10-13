@@ -20,16 +20,74 @@ import time
 from urllib.parse import urlsplit
 
 from capability_actions import Actions, polling
+from capability_runtime import loader_tools, loader_call, qualify, catalog_tools
+from presentation_runtime import from_loader_output
 
 BODY_LIMIT = 16 * 1024 * 1024
 EVENT_LIMIT = 32 * 1024 * 1024
 RESPONSE_LIMIT = 64 * 1024 * 1024
+UNAVAILABLE = object()
 NAMING_MODEL = 'nvidia/Nemotron-3_5-Lightning'
 GUARDIAN_SCHEMA = {'type': 'object', 'additionalProperties': False,
     'properties': {'risk_level': {'type': 'string', 'enum': ['low', 'medium', 'high', 'critical']},
         'user_authorization': {'type': 'string', 'enum': ['unknown', 'low', 'medium', 'high']},
         'outcome': {'type': 'string', 'enum': ['allow', 'deny']}, 'rationale': {'type': 'string'}},
     'required': ['outcome']}
+
+
+class ContractError(ValueError):
+    def __init__(self, category):
+        super().__init__('unsupported_request_contract')
+        self.category = category
+
+
+def request_shape(body, main, guardian):
+    """Bounded, value-free diagnostics; unknown names can contain private data."""
+    def value_type(value):
+        if value is None: return 'null'
+        if isinstance(value, bool): return 'boolean'
+        if isinstance(value, str): return 'string'
+        if isinstance(value, list): return 'array'
+        if isinstance(value, dict): return 'object'
+        return 'number'
+
+    def known(value, choices):
+        return value if isinstance(value, str) and value in choices else 'unknown'
+
+    if not isinstance(body, dict): return {'body': value_type(body)}
+    fields = {'model', 'stream', 'input', 'tools', 'instructions', 'reasoning', 'text',
+              'tool_choice', 'max_output_tokens', 'parallel_tool_calls', 'client_metadata',
+              'previous_response_id', 'conversation', 'prompt', 'store', 'include'}
+    shape = {'fields': {key: value_type(value) for key, value in body.items() if key in fields},
+             'unknown_fields': len(body.keys() - fields),
+             'model_matches': [name for name, matched in (
+                 ('main', body.get('model') == main), ('guardian', body.get('model') == guardian),
+                 ('title', body.get('model') in ('gpt-5.6-luna', 'gpt-6-luna'))) if matched]}
+    text = body.get('text')
+    format_spec = text.get('format') if isinstance(text, dict) else None
+    if isinstance(format_spec, dict):
+        shape['format'] = dict(type=known(format_spec.get('type'), ('json_schema', 'text')),
+                              strict_is_false=format_spec.get('strict') is False,
+                              guardian_schema_matches=format_spec.get('schema') == GUARDIAN_SCHEMA)
+    items = body.get('input')
+    if isinstance(items, list):
+        shape['input_count'] = len(items)
+        shape['input'] = []
+        for item in items[:64]:
+            if not isinstance(item, dict):
+                shape['input'].append({'type': value_type(item)}); continue
+            entry = {'type': known(item.get('type', 'message'), ('message', 'function_call',
+                'function_call_output', 'custom_tool_call', 'custom_tool_call_output',
+                'reasoning', 'additional_tools')),
+                'role': known(item.get('role'), ('user', 'assistant', 'system', 'developer'))}
+            if 'content' in item: entry['content'] = value_type(item['content'])
+            shape['input'].append(entry)
+    tools = body.get('tools')
+    if isinstance(tools, list):
+        shape['tool_count'] = len(tools)
+        shape['tools'] = [{'type': known(tool.get('type'), ('function', 'custom', 'namespace'))}
+                          if isinstance(tool, dict) else {'type': value_type(tool)} for tool in tools[:64]]
+    return shape
 
 
 class LoopbackServer(http.server.ThreadingHTTPServer):
@@ -55,35 +113,35 @@ def tool_contract(tools):
 def role(body, main, guardian):
     """Classify the client's captured contracts; the launcher still validates them."""
     if body.get('stream') is not True or not isinstance(body.get('input'), list):
-        raise ValueError('unsupported_request_contract')
+        raise ContractError('stream_or_input')
     if any(body.get(key) is not None for key in ('previous_response_id', 'conversation', 'prompt')):
-        raise ValueError('unsupported_request_contract')
-    if not tool_contract(body.get('tools', [])): raise ValueError('unsupported_request_contract')
+        raise ContractError('prior_context')
+    if not tool_contract(body.get('tools', [])): raise ContractError('tools')
     for item in body['input']:
         if not isinstance(item, dict) or item.get('type', 'message') not in (
                 'message', 'function_call', 'function_call_output', 'custom_tool_call',
                 'custom_tool_call_output', 'reasoning', 'additional_tools'):
-            raise ValueError('unsupported_request_contract')
+            raise ContractError('input_item')
         if item.get('role') not in (None, 'user', 'assistant', 'system', 'developer'):
-            raise ValueError('unsupported_request_contract')
-        if 'tools' in item and not tool_contract(item['tools']): raise ValueError('unsupported_request_contract')
+            raise ContractError('input_role')
+        if 'tools' in item and not tool_contract(item['tools']): raise ContractError('embedded_tools')
         if item.get('type', 'message') == 'message':
             content = item.get('content', [])
-            if not isinstance(content, (str, list)): raise ValueError('unsupported_request_contract')
+            if not isinstance(content, (str, list)): raise ContractError('message_content')
             if isinstance(content, list):
                 for part in content:
                     if not isinstance(part, dict) or part.get('type') not in ('input_text', 'output_text', 'input_image'):
-                        raise ValueError('unsupported_request_contract')
+                        raise ContractError('message_part')
     metadata = json.loads(body.get('client_metadata', {}).get('x-codex-turn-metadata', '{}'))
-    if metadata.get('request_kind') == 'compaction': raise ValueError('unsupported_request_contract')
+    if metadata.get('request_kind') == 'compaction': raise ContractError('compaction')
     title = metadata.get('thread_source') == metadata.get('turn_trigger') == 'thread_title'
     schema = body.get('text', {}).get('format', {})
     if title:
         if body.get('model') not in ('gpt-5.6-luna', 'gpt-6-luna') or schema.get('type') != 'json_schema':
-            raise ValueError('unsupported_request_contract')
+            raise ContractError('title')
         return 'auxiliary_title'
     if metadata.get('thread_source') in ('thread_summary', 'thread_title'):
-        raise ValueError('unsupported_request_contract')
+        raise ContractError('auxiliary')
     review = schema.get('schema') == GUARDIAN_SCHEMA
     if review:
         names = {tool.get('name') for tool in body.get('tools', [])}
@@ -91,16 +149,26 @@ def role(body, main, guardian):
                 schema.get('type') != 'json_schema' or body.get('tool_choice') != 'auto' or
                 not isinstance(body.get('instructions'), str) or
                 names != {'exec_command', 'write_stdin', 'view_image'}):
-            raise ValueError('unsupported_request_contract')
+            raise ContractError('guardian')
         return 'guardian'
     if ('outcome' in schema.get('schema', {}).get('properties', {}) or body.get('model') != main):
-        raise ValueError('unsupported_request_contract')
+        raise ContractError('model_or_schema')
     return 'main'
 
 
 def hashed(value):
     raw = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode()
     return {'sha256': hashlib.sha256(raw).hexdigest(), 'bytes': len(raw)}
+
+
+def presentation_tool_advertised(body):
+    for namespace, tool in catalog_tools(body):
+        if ((namespace in ('mcp__codex_app', 'mcp__tofa_presentation_runtime') and
+               tool.get('name') == 'load_workspace_dependencies') or
+              (namespace is None and tool.get('name') in ('mcp__codex_app__load_workspace_dependencies',
+               'mcp__tofa_presentation_runtime__load_workspace_dependencies'))):
+            return True
+    return False
 
 
 def audit(body):
@@ -124,7 +192,16 @@ def audit(body):
 
 
 class Observer:
-    def __init__(self, run, *, model, guardian, limits, case='05'):
+    def __init__(self, run, *, model, guardian, limits, case='05', runtime_qualification=None):
+        self.runtime_qualification = None
+        if runtime_qualification is not None:
+            evidence = runtime_qualification
+            verified = qualify(evidence['proof_path'], client=evidence['client'],
+                client_identity=evidence['client_identity'], home=Path(evidence['home']),
+                skill=Path(evidence['skill']), application_identity=evidence['application_identity'],
+                client_executable=evidence['client_executable'])
+            if verified != evidence: raise ValueError('presentation_qualification_drift')
+            self.runtime_qualification = verified
         self.run = Path(run)
         self.model, self.guardian, self.limits = model, guardian, limits
         self.secret = secrets.token_hex(32)
@@ -168,6 +245,8 @@ class Observer:
 
             def handle_request(self):
                 control = self.path == '/register'
+                body = UNAVAILABLE
+                self.raw_request = None
                 expected = owner.secret if control else owner.token
                 if not expected or not hmac.compare_digest(self.headers.get('Authorization', ''), 'Bearer ' + expected):
                     self.reply(401, {'error': 'unauthorized'}); return
@@ -184,10 +263,13 @@ class Observer:
                         owner.reject(self, 'unsupported_encoding', 400); return
                     body = self.read_json()
                     if not isinstance(body, dict):
-                        owner.reject(self, 'unsupported_request_contract', 400); return
+                        owner.reject(self, 'unsupported_request_contract', 400, body,
+                                     category='body_type'); return
                     owner.request(self, body)
-                except (ValueError, TypeError, KeyError, UnicodeError):
-                    owner.reject(self, 'unsupported_request_contract', 400)
+                except (ValueError, TypeError, KeyError, UnicodeError) as error:
+                    owner.reject(self, 'unsupported_request_contract', 400,
+                                 UNAVAILABLE if control else body,
+                                 category=getattr(error, 'category', 'malformed_contract'))
                 except (OSError, http.client.HTTPException):
                     # A disconnected client does not authorize another inference.
                     owner.stop('client_disconnected')
@@ -198,9 +280,11 @@ class Observer:
             def read_json(self):
                 length = int(self.headers.get('Content-Length', '0'))
                 if not 0 < length <= BODY_LIMIT:
-                    raise ValueError('request_body_limit')
+                    raise ContractError('body_limit')
                 self.connection.settimeout(max(.01, owner.deadline - time.monotonic()))
-                return json.loads(self.rfile.read(length))
+                raw = self.rfile.read(length)
+                if self.path == '/responses': self.raw_request = raw
+                return json.loads(raw)
 
             def register(self):
                 body = self.read_json()
@@ -225,20 +309,48 @@ class Observer:
         temporary.chmod(0o600)
         temporary.replace(self.run / 'requests.json')
 
-    def reject(self, handler, reason, status):
+    def reject(self, handler, reason, status, body=UNAVAILABLE, *, category=None,
+               known_role=None, presentation_runtime=None):
         with self.lock:
-            self.records.append({'role': 'unknown', 'forwarded': False, 'failure': reason})
-            self.persist()
-        handler.reply(status, {'error': reason})
-        self.stop(reason)
+            record = {'role': 'unknown', 'forwarded': False, 'failure': reason,
+                      'rejection_category': category or reason}
+            if body is not UNAVAILABLE:
+                record['shape'] = request_shape(body, self.model, self.guardian)
+            else:
+                record['shape'] = {'body': 'unavailable'}
+            if known_role:
+                record.update(role=known_role, audit=audit(body))
+            if presentation_runtime is not None:
+                record['presentation_runtime'] = presentation_runtime
+            raw_bytes = getattr(handler, 'raw_request', None)
+            record['raw_body_retained'] = False
+            if raw_bytes is not None:
+                raw = self.run / ('rejected-request-' + str(len(self.records) + 1) + '.json')
+                try:
+                    with open(raw, 'xb', opener=lambda path, flags: os.open(path, flags, 0o600)) as output:
+                        output.write(raw_bytes)
+                    record['raw_body_retained'] = True
+                except OSError:
+                    record.update(failure='diagnostic_capture_failure', original_rejection=reason)
+                    status = 500
+            self.records.append(record)
+            try:
+                self.persist()
+            except OSError:
+                record['failure'] = 'diagnostic_capture_failure'
+                self.stop('diagnostic_capture_failure')
+                raise
+        handler.reply(status, {'error': record['failure']})
+        self.stop(record['failure'])
 
     def request(self, handler, body):
         try:
             kind = role(body, self.model, self.guardian)
             cap = body.get('max_output_tokens', self.limits['output_tokens'])
-            if type(cap) is not int or cap <= 0: raise ValueError('unsupported_request_contract')
-        except (ValueError, TypeError, AttributeError):
-            self.reject(handler, 'unsupported_request_contract', 400); return
+            if type(cap) is not int or cap <= 0: raise ContractError('output_token_cap')
+        except (ValueError, TypeError, AttributeError) as error:
+            self.reject(handler, 'unsupported_request_contract', 400, body,
+                        category=getattr(error, 'category', 'malformed_contract')); return
         with self.lock:
             if self.expected_prompt:
                 encoded_input = json.dumps(body['input'], ensure_ascii=False)
@@ -255,26 +367,59 @@ class Observer:
                     if (self.expected_prompt not in text or str(self.run / 'workspace') not in text or
                             not self.main_started and old_history or
                             self.main_started and user_messages != self.initial_user_messages):
-                        self.reject(handler, 'scope_mismatch', 403); return
+                        self.reject(handler, 'scope_mismatch', 403, body); return
                     self.initial_user_messages = user_messages
                     self.main_started = True
                 elif kind == 'guardian' and not self.main_started:
-                    self.reject(handler, 'scope_mismatch', 403); return
+                    self.reject(handler, 'scope_mismatch', 403, body); return
                 elif kind == 'auxiliary_title' and self.expected_prompt not in encoded_input:
-                    self.reject(handler, 'scope_mismatch', 403); return
+                    self.reject(handler, 'scope_mismatch', 403, body); return
             if kind == 'main' and self.expected_instructions:
                 # The client chooses the instruction role; verify delivery at
                 # this boundary instead of assuming the file was discovered.
                 if json.dumps(self.expected_instructions, ensure_ascii=False)[1:-1] not in json.dumps(body, ensure_ascii=False):
-                    self.reject(handler, 'instruction_variant_missing', 400); return
+                    self.reject(handler, 'instruction_variant_missing', 400, body); return
+            if self.case in ('03', '04'):
+                try: advertised = ('present' if presentation_tool_advertised(body) else 'absent') if kind == 'main' else 'not_observed'
+                except ValueError:
+                    self.reject(handler, 'presentation_runtime_tool_invalid', 400, body, known_role=kind); return
+                evidence = self.runtime_qualification
+                try:
+                    current = qualify(evidence['proof_path'], client=evidence['client'],
+                        client_identity=evidence['client_identity'], home=Path(evidence['home']),
+                        skill=Path(evidence['skill']), application_identity=evidence['application_identity'],
+                        client_executable=evidence['client_executable']) if evidence else None
+                    qualified = evidence is not None and current == evidence
+                except (OSError, ValueError, TypeError):
+                    self.reject(handler, 'presentation_runtime_environment_drift', 400, body, known_role=kind,
+                        presentation_runtime={'advertised': advertised, 'qualified': False}); return
+                try: callable_loader = bool(loader_tools(body, evidence['provider'])) if qualified and kind == 'main' else True
+                except ValueError: callable_loader = False
+                if not qualified or not callable_loader:
+                    reason = 'presentation_runtime_tool_missing' if advertised == 'absent' else 'presentation_runtime_unqualified'
+                    self.reject(handler, reason, 400, body, known_role=kind,
+                        presentation_runtime={'required_tool': 'load_workspace_dependencies',
+                                              'advertised': advertised, 'qualified': False}); return
+                if kind == 'main':
+                    try:
+                        for call in body['input']:
+                            if not loader_call(call, evidence['provider']): continue
+                            outputs = [item.get('output') for item in body['input'] if
+                                item.get('type') == 'function_call_output' and item.get('call_id') == call.get('call_id')]
+                            if json.loads(call.get('arguments', 'null')) != {} or len(outputs) != 1 or (
+                                    from_loader_output(outputs[0], evidence['provider']) != evidence['runtime']):
+                                raise ValueError('live_loader_result_invalid')
+                    except (OSError, ValueError, TypeError):
+                        self.reject(handler, 'presentation_runtime_result_invalid', 400, body, known_role=kind,
+                            presentation_runtime={'advertised': advertised, 'qualified': False}); return
             if kind == 'main':
                 failure = self.action_watch.observe(body)
                 if failure:
-                    self.reject(handler, failure, 429); return
+                    self.reject(handler, failure, 429, body); return
             if self.reason or self.used >= self.limits['requests']:
-                self.reject(handler, self.reason or 'request_budget_limit', 429); return
+                self.reject(handler, self.reason or 'request_budget_limit', 429, body); return
             if time.monotonic() >= self.deadline:
-                self.reject(handler, 'deadline', 429); return
+                self.reject(handler, 'deadline', 429, body); return
             self.used += 1
             record = dict(number=self.used, role=kind, model=body['model'], forwarded=True,
                           routed_model=NAMING_MODEL if kind == 'auxiliary_title' else body['model'],

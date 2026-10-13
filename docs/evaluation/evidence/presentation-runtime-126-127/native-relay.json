@@ -1,0 +1,67 @@
+{
+  "schema": "tofa-native-relay-verification-v1",
+  "revision": "3cc3487",
+  "private_run": "startup-launcher-20261013T091008Z",
+  "prompt_submitted": false,
+  "native_authorization_modified": false,
+  "native_ready_events": 1,
+  "native_failed_events": 0,
+  "peer_rejections": 0,
+  "observed_node_ancestries": [
+    [
+      "/Applications/ChatGPT.app/Contents/Resources/cua_node/bin/node",
+      "/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex",
+      "/Applications/ChatGPT.app/Contents/MacOS/ChatGPT"
+    ]
+  ],
+  "settings_preserved": false,
+  "remaining_fixture_stores": 0,
+  "proven_settings_drift_fields": [
+    "config.toml: mcp_servers.node_repl.env.CODEX_CLI_PATH",
+    "unified-computer-use/.mcp.json: mcpServers.cua_repl.env.CODEX_CLI_PATH"
+  ],
+  "preservation_limit": "Semantic field comparison from first post-change startup; not a claim that no other protected file can change. Drift remains a hard qualification block.",
+  "retained_failed_repeat": {
+    "private_run": "startup-launcher-20261013T090707Z",
+    "failure": "ordinary engine configuration check failed",
+    "observation": "engine exited at existing 15-second preflight deadline before Desktop launch; cause not established",
+    "settings_preserved": true,
+    "remaining_fixture_stores": 0
+  },
+  "validation": {
+    "ancestry_regression": "red before fix, green after",
+    "calibration_temp_containment": "red before fix, green after",
+    "fixture_store_cleanup": "red before fix, green after",
+    "targeted_race_with_installed_engine": "passed, 26.104 seconds",
+    "full_go_race": "passed, internal/tofa 346.390 seconds; GORACE=atexit_sleep_ms=0",
+    "go_vet": "passed",
+    "affected_python_with_actual_cli": "16 tests passed, 62.219 seconds",
+    "actual_cli_run": "518f04195746440e9aee8e5f01965f06",
+    "actual_cli_preservation": "passed at capture; subsequent Desktop drift invalidates reuse"
+  },
+  "reviews": {
+    "standards_findings": 0,
+    "spec_implementation_findings": 0,
+    "spec_qualification": "incomplete"
+  },
+  "qualification": "Native startup verified only; no successful native loader call, deck, previews or model calibrations. Do not merge or close.",
+  "source_sha256": {
+    "trace.json": "a6386ad381225cc37096b6263f769b651db973cd4bb08ea5c4ac8bcd2913863a",
+    "native-desktop.log": "139f61fc87e7339462e438250f6560565878d3d1d95aa44d7ebfc4e48b94df0d",
+    "relay-full-race.log": "a34aa5bbca268b3f23819e7256f4cb70f26b046191696a812677b6def3f3a70c",
+    "relay-targeted.log": "904b257e91241dad74e416bf6cb55831af92be447bd2dc151e04db149496605c",
+    "runtime-after-relay.log": "854a386313d478047f29dd4a8e321a9ec80a697ae49119cda27d42dd19ecddf8",
+    "relay-vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "ancestry-red.log": "f97150cd649c14a0ceda77d6fa8d71cac0c36f511aeef6213885a3180f32a70f",
+    "temp-root-red.log": "9ab8ab6139d2a9dbb5f2feee2ba9168cab34bebef0d9bf560be0d483c6bb18b4",
+    "fixture-store-red.log": "8892d6d99bebcf2b71845d7551f9a531c97459e638b48418eed9e5921b34fbf1",
+    "native-reference-cleanup.json": "d1ae13fef28cd1a8c3da16b1ff3e894f36a26f8cd3dfc0358f9d9b6b9b4477c1"
+  },
+  "reference_cleanup": {
+    "method": "ordinary native startup reconciliation; no shared snapshot restored",
+    "references_equal_bundled_engine": true,
+    "references_exist": true,
+    "qualified": false,
+    "private_run": "startup-ordinary-20261013T091207Z"
+  }
+}

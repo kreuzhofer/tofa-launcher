@@ -1,0 +1,109 @@
+{
+  "status": "qualified",
+  "paid_inference": false,
+  "native": {
+    "version": "26.1007.30912",
+    "build": "20156",
+    "application_sha256": "75e397e2280dde93b70a85aa926f4282c728eacc84dfeb15ba7fb6ddd84628af",
+    "executable_sha256": "2053a78d225a1492d0cb6896cfd83254af06c3277547e83d4d23fef88f00426e",
+    "native_transport_sha256": "ae60fd7129a8eafea42dc41e8692e95dda624d4406826edd74010148371113db"
+  },
+  "client_identity": {
+    "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+    "version": "codex-cli 0.162.0-alpha.17.2"
+  },
+  "launcher_identity": {
+    "sha256": "1f2b7a7b61c7214ceb46f0f0bb0c4952760875ceaee35838706837c4db76d519",
+    "version": "tofa dev-prototype"
+  },
+  "host": {
+    "system": "Darwin",
+    "arch": "arm64",
+    "platform": "macOS-26.7-arm64-arm-64bit"
+  },
+  "loader_name": "mcp__codex_app__load_workspace_dependencies",
+  "loader_result_sha256": "2e206b23a6507775ecc9cdf9a19a01b230376fca5d3f75a9d544ec054084ec72",
+  "observed_versions": {
+    "node": {
+      "sha256": "743cbaf12bd9323937b85f6297d8182b086526510c9f9c5875fa74d2aad9072d",
+      "version": "v24.19.0"
+    },
+    "python": {
+      "sha256": "39bf33dd80ffd5e8c087cbd52164cbe0d8485f73b44687d0d466b0f49e197129",
+      "version": "Python 3.12.14"
+    },
+    "soffice": {
+      "sha256": "81c7db1c6dbcdd606d95abef337b4529aeda6a4fa1cf23a5a567f9c5655c8b66",
+      "version": "LibreOfficeDev 26.8.0.0.alpha0 2c87e51eeaa2b413ff4ae097b2705eea1995d8e5"
+    },
+    "pdfinfo": {
+      "sha256": "fee70ade670fb025343aca2b5c3a2aacacb8ed9edce1b716b233b5de924b6bf5",
+      "version": "pdfinfo version 26.05.0\nCopyright 2005-2026 The Poppler Developers - http://poppler.freedesktop.org\nCopyright 1996-2011, 2022 Glyph & Cog, LLC"
+    },
+    "pdftoppm": {
+      "sha256": "de772e88ab9977ccde25def9b403bf42675d75f5dd82b19fbd7d8123ad183159",
+      "version": "pdftoppm version 26.05.0\nCopyright 2005-2026 The Poppler Developers - http://poppler.freedesktop.org\nCopyright 1996-2011, 2022 Glyph & Cog, LLC"
+    }
+  },
+  "artifacts": {
+    "deck.pptx": "018abdb392912544018c66a83076ab50fb16e1ed2fa11d5616dd7e72924d29cd",
+    "deck.pdf": "d7ca43b35a18489b1ae959e1a4119bcc132bab93bbc0857dba79e74fd5b66d26",
+    "slide.png": "109e0b9a0bdb2aa9ea2bd0ab7f8108fba2104b2ee6eb46076bee1418d27190e4"
+  },
+  "termination": "operator_finished",
+  "exit_code": 1,
+  "model_capability": "not_measured",
+  "synthetic_transport": "observer",
+  "schema": "tofa-native-presentation-success-v1",
+  "implementation": "630f523",
+  "private_run": "manual.CUrdM0/runs/bce0db55e3ef4bb8966d30d31cef8959",
+  "independent_revalidation": "passed",
+  "qualification_sha256": "c7a3fce33ad34b91284dbd38a499b1896db81b25fd71af3625ab7ba991752e8b",
+  "request_count": 4,
+  "runtime": {
+    "provider": "codex_app",
+    "bundle_version": "26.1011.11113",
+    "artifact_tool_version": "2.8.93",
+    "declared_versions": {
+      "node": "v24.19.0",
+      "python": "3.12.14"
+    },
+    "hashes": {
+      "manifest": "950908d9c4e5dd4b079b3201366eda2ab780e7423b71b7f8e0488c19e6831f4d",
+      "node": "743cbaf12bd9323937b85f6297d8182b086526510c9f9c5875fa74d2aad9072d",
+      "python": "39bf33dd80ffd5e8c087cbd52164cbe0d8485f73b44687d0d466b0f49e197129",
+      "artifact_package": "4c6ba2c3f71d8d8b8b24c3aca3627b860de5a3d95da3824191d93fed7f447a86",
+      "artifact_module": "0900e6e29e518a03fa1a49008257ddf525b0557ad3c4a38be60bfa9085bb85d7",
+      "soffice": "81c7db1c6dbcdd606d95abef337b4529aeda6a4fa1cf23a5a567f9c5655c8b66",
+      "pdfinfo": "fee70ade670fb025343aca2b5c3a2aacacb8ed9edce1b716b233b5de924b6bf5",
+      "pdftoppm": "de772e88ab9977ccde25def9b403bf42675d75f5dd82b19fbd7d8123ad183159",
+      "native_soffice": "bcf6686445e511336eef012ffcba63af7a2459299c32907244737b9d7d1ff0eb",
+      "native_pdfinfo": "45fa717fb4aaec4bfbefc3a07612ff2539dbfcce30fb30e976aa5d4a35bef802",
+      "native_pdftoppm": "d9d81b176e8fd38d07f2fbf4f84c17dc991c6bac3730ff3cad3239c4fcbed892"
+    }
+  },
+  "preservation": {
+    "raw_equal": false,
+    "normalized_equal": true,
+    "settings_preserved": true,
+    "policy_schema": "tofa-retained-mcp-policy-v1",
+    "bridge_sha256": "1f2b7a7b61c7214ceb46f0f0bb0c4952760875ceaee35838706837c4db76d519",
+    "lifecycle_evidence_sha256": "0066afedd316a6947f136bfa98e9fcbe5ceb3fbdb9bf0d66117170e1b08340b1"
+  },
+  "preview": {
+    "status": "passed",
+    "operator": "maintainer",
+    "observation_method": "human",
+    "utc": "2026-10-13T12:54:55Z",
+    "artifacts": {
+      "deck.pptx": "018abdb392912544018c66a83076ab50fb16e1ed2fa11d5616dd7e72924d29cd",
+      "deck.pdf": "d7ca43b35a18489b1ae959e1a4119bcc132bab93bbc0857dba79e74fd5b66d26"
+    },
+    "record_sha256": "7c0dbb43884c9a4f68d0d2602141a1013d206dbcffb22cc39d1c406f9cf65438"
+  },
+  "remaining": [
+    "native implicit-discovery model calibration",
+    "native explicit-skill model calibration",
+    "final review and merge/closure"
+  ]
+}

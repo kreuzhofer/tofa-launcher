@@ -1,0 +1,151 @@
+{
+  "schema": "tofa-capability-method-qualification-v1",
+  "method": "capability-evaluation-v2",
+  "source_base": "a33358c",
+  "review_baseline": "7a04fc2640cb58c6e7ca19d9e6d75b19972f94b0",
+  "date_utc": "2026-10-12T15:23:01.835080+00:00",
+  "clients": {
+    "cli": {
+      "version": "0.162.1",
+      "sha256": "74c6a6d263f40d65f99c27a815275f5b4ed0bcc2baecc396b4cf3255498bdfc0"
+    },
+    "desktop": {
+      "version": "26.1007.30912",
+      "build": "20156",
+      "executable_sha256": "2053a78d225a1492d0cb6896cfd83254af06c3277547e83d4d23fef88f00426e",
+      "application_sha256": "75e397e2280dde93b70a85aa926f4282c728eacc84dfeb15ba7fb6ddd84628af",
+      "engine": {
+        "version": "0.162.0-alpha.17.2",
+        "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28"
+      }
+    }
+  },
+  "checks": [
+    {
+      "name": "evaluator command and request boundary after review fix",
+      "outcome": "passed",
+      "tests": 41,
+      "log_sha256": "27dcec59b7ab610ce18ec7124ba59fd3ec6018267c8b94163a5aa72b9d924352"
+    },
+    {
+      "name": "go test -race ./...",
+      "outcome": "passed",
+      "log_sha256": "81a5b5bdf6169aba97483c3393ed64793d1ca6149eebae0811883972b886334f"
+    },
+    {
+      "name": "go vet ./...",
+      "outcome": "passed",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "Python compilation of changed scripts",
+      "outcome": "passed"
+    },
+    {
+      "name": "initial full Python discovery",
+      "outcome": "invocation_errors",
+      "tests": 451,
+      "errors": 6,
+      "skipped": 82,
+      "log_sha256": "5ea8705e47ab01509d19a50f5be38b0d52634bb31b527e56f08506593726b7a3",
+      "classification": "four lifecycle tests require distribution/version globals; two terminal tests require an explicit binary; no behavioral test failures"
+    },
+    {
+      "name": "lifecycle with documented distribution/version inputs",
+      "outcome": "passed",
+      "tests": 4,
+      "log_sha256": "f868eb3beb048d942a7a9ba77df184096a4dfd39a15936eb40d2ea13fd706647"
+    },
+    {
+      "name": "terminal with documented binary input",
+      "outcome": "passed",
+      "tests": 2,
+      "log_sha256": "2299f925b2232b1d9da20a2055935443b1a7f5a595474eddaed7160d6678b077"
+    },
+    {
+      "name": "full Python suite with explicit inputs",
+      "outcome": "passed",
+      "tests": 453,
+      "skipped": 82,
+      "seconds": 575.842,
+      "log_sha256": "b9a3fd4d45b842176fb0575cca751e2f1bd568bcaa15808c0586f5932656c109",
+      "inputs": "all discovered modules; documented lifecycle distribution/version and terminal binary supplied; real-client opt-ins disabled"
+    },
+    {
+      "name": "installed CLI tool execution and continuation",
+      "outcome": "passed",
+      "version": "0.162.1",
+      "log_sha256": "7cde8a824da381626888530df48a9d1c636c1180bd095fee09ca6656c7d05e20"
+    },
+    {
+      "name": "installed bundled-engine independent title aliases",
+      "outcome": "passed",
+      "native_aliases": [
+        "gpt-5.6-luna",
+        "gpt-6-luna"
+      ],
+      "naming_model": "nvidia/Nemotron-3_5-Lightning",
+      "log_sha256": "f10e251f15e99d4ab98a9e849e6da138ec3c4c0b9363885323cd7a2bc7a20547",
+      "ui_observed": false
+    },
+    {
+      "name": "installed bundled-engine automatic approval allow/default-Kimi/deny",
+      "outcome": "contract_blocked",
+      "review_requests_forwarded": 0,
+      "expected_review_requests_per_case": 1,
+      "cases": 3,
+      "category": "policy_in_developer_messages_top_level_instructions_null",
+      "log_sha256": "388c44ee7652871675d5702825bed72e9ca82bc287f68fd08cad351bd1e2dea2",
+      "policy_outcomes_qualified": false
+    },
+    {
+      "name": "installed bundled-engine launch-Guardian resume regression",
+      "outcome": "contract_blocked",
+      "reached_second_launch_resume": false,
+      "review_requests_forwarded": 0,
+      "category": "initial_turn_policy_in_developer_messages_top_level_instructions_null",
+      "log_sha256": "52cb3d94ad4ae82d19a4ce6cb25b6bbe4553dcd96225c6e47c790b524cfb70e5",
+      "raw_private_request_sha256": "1e52634a24a481c109a1fb53ede011973f7617464101ca38f21fb3eb3e435156"
+    },
+    {
+      "name": "asynchronous operator bash syntax",
+      "outcome": "passed",
+      "shellcheck": "unavailable",
+      "end_to_end_run": false
+    }
+  ],
+  "historical_limits": {
+    "old_config_changes": "unknown; private before/after content lost after reboot; blocks retained",
+    "old_kimi_deck_rejection": "unknown actual contract; no raw request retained; no retrospective attribution"
+  },
+  "calibrations": "calibrations.json",
+  "heldout_contract": "incident-handover-v1; separate case18; 900s/80requests/8192tokens; no heldout model attempt performed",
+  "reviews": {
+    "standards": {
+      "initial_findings": 1,
+      "resolved": 1,
+      "remaining": 0,
+      "regression": "symlinked workspace cannot supply input or generated artifact hashes"
+    },
+    "spec": {
+      "remaining_implementation_findings": 0,
+      "retained_real_client_calibration": "fulfilled; synthetic loopback provider"
+    }
+  },
+  "desktop_operator": {
+    "status": "completed_negative_calibration",
+    "scope": "one fresh GLM baseline handoff with method-v2 scoring; separate title visibility and both previews",
+    "automatic_launch": false,
+    "assessment": "desktop-assessment.json",
+    "report": "desktop-calibration-05.json",
+    "preview_status": "failed",
+    "automatic_title_visible": true,
+    "method_completion": "synthetic positives/negatives, retained CLI calibrations, and operator-started Desktop negative calibration; no model handoff pass"
+  },
+  "gates": {
+    "campaign_complete": false,
+    "native_approval_or_resume_qualified": false,
+    "guidance_adopted": false,
+    "supported_or_release_promoted": false
+  }
+}

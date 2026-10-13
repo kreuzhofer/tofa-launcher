@@ -1,0 +1,24 @@
+{
+  "version": "incident-handover-v1",
+  "fixtures": {
+    "fixtures/incident.csv": "7455fdd0980e532817241cfe455da739729647edb8d16f52b405c3be40ad35d6"
+  },
+  "cases": {
+    "18": {
+      "prompt": "Create an English incident handover from fixtures/incident.csv. Summarize the timeline, impact, root cause, recovery and two follow-up actions. Use the installed document skill and read its instructions before creating the document. Save a two-page document as handover outputs/incident brief.docx and its PDF as handover outputs/incident brief.pdf. Give me both files so I can open them. Do not upload anything or use the network.",
+      "limits": {"seconds": 900, "requests": 80, "output_tokens": 8192},
+      "files": ["fixtures/incident.csv"],
+      "outputs": ["handover outputs/incident brief.docx", "handover outputs/incident brief.pdf"],
+      "client": "desktop",
+      "skill": "document",
+      "criteria": {
+        "task_content": "accurate timeline, 12 affected synthetic users, omitted expiry root cause, recovery and two concrete follow-up actions",
+        "language": "all user-visible prose in English",
+        "skill_use": "read applicable document skill before document creation",
+        "file_integrity": "valid DOCX and PDF with two pages; retain generated hashes separately",
+        "reference_syntax": "exact absolute Markdown targets, spaces enclosed by angle brackets",
+        "visible_preview": "operator opens both intended files and confirms previews and obvious layout issues"
+      }
+    }
+  }
+}

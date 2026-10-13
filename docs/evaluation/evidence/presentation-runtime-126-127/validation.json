@@ -1,0 +1,128 @@
+{
+  "schema": "tofa-presentation-runtime-verification-v1",
+  "go_full_race": {
+    "status": "passed",
+    "command": "GORACE=atexit_sleep_ms=0 go test -race ./... -count=1",
+    "seconds": 332.308,
+    "instrumentation_note": "Default race exit delay also reproduced a shutdown failure on unchanged #122; original failure logs retained. Race detection and production deadlines unchanged."
+  },
+  "python_full": {
+    "status": "passed",
+    "tests": 469,
+    "skipped": 84,
+    "seconds": 745.374,
+    "opt_ins": "real client, native Desktop GUI and native Windows disabled",
+    "ordering": "Full run preceded final Python native-path/cancellation/shape/binary hardening; changed boundaries checked separately afterward."
+  },
+  "actual_cli_runtime_tests": {
+    "status": "passed",
+    "tests": 7,
+    "seconds": 41.571,
+    "paid_inference": false,
+    "scope": "Actual CLI completion/delivery, HTTP pre-forward policy drift, copied-evidence tampering, cancellation and loader boundaries"
+  },
+  "go_vet": "passed",
+  "python_compilation": "passed: 72 Python files; output explicitly placed in owned checks/compiled directory",
+  "bash_syntax": "passed",
+  "shellcheck": "unavailable",
+  "logs_sha256": {
+    "go-full-race.log": "207abb5066fd2c20bf2bf1bae20ad2598910a49b1284c3d3f7c16023616924db",
+    "go-baseline-shutdown.log": "0c50c72346ccf6cba0404d6b82eb734f88b030e4ccbc150b9f0f7ad3b762e5ab",
+    "go-failed-targeted.log": "91ebf8df01b76eaecb021ca6d5b2b7e10b5637579ade48818261a59b33766e8a",
+    "go-race-shutdown-controlled.log": "740a474526c1d85ef64cd89d20d74a08930afd5c3afd2a6cc9b6e508012b854f",
+    "go-full-race-controlled.log": "c20ed51f7860a1581fc488228ffadc825576c9f9ec89e96f70ef4d40ac98f770",
+    "go-vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "python-full.log": "908625db0ec07cd09f31cf3aae77f81f953fd10f3ddbdcebe2cf5d2aacb65e5b",
+    "runtime-final.log": "153faefc4a02a9aaa17bfcdee0a45f4365a3264069ba3c5a40f7759bee7bb860",
+    "cancellation-native-path-red.log": "bc073ef1d984bf4019fe5e5e683fbc01ff5a31f46009dc05e9dd526af95a5c62",
+    "native-binaries-red.log": "0b38fac997b0f94ffec79f480ae707c010043ab3c270e54b4c59bad2360a8c6a",
+    "qualification-shape-red.log": "381da75f84e9a01b6a5bce556d8649ca8bfb4b8b3357366aacdcf9796362ab93",
+    "live-loader-red.log": "3f2c699482b83048f4fc8f685d138e475d69dc6cfe73286ce6e325f67366a456",
+    "live-loader-green.log": "c7d26f598c5c106319a0a8451e7a03fa74ba0916c9aef4779feab20ab1049f3e",
+    "runtime-review-complete.log": "ab60f182cff030d8a9611026478ff8c0ff70d8c6c103f45c76533ef4bc3c307c",
+    "observer-reviewed.log": "2f47b6e948bb7a2260caf5b5068d8b185650b77a2f59bf22ed5d9c0a1dccdb56",
+    "evaluator-reviewed.log": "c483b290586b0122c87aeed540d371589739d306d8aa3228ffda0b065d916d13",
+    "review-boundaries-red.log": "e4fe4bd5d53743a0c6ab70894614a785ec3333b8059d94a034ba0fa84529e9f0",
+    "review-boundaries-green.log": "feb69581c520060771035141719b390143e2ce5194031d94427e953041f05ec3",
+    "contradictory-loader-red.log": "7262287c25c7c4d1719d488aec170f34d7801cec21ac8b85d321e33a7338f116",
+    "runtime-final-review.log": "5569269ca51995dd875e805ea9a7bee1775b9d8982ee2c4c9c2c8ad8ca473f69",
+    "structured-contract-red.log": "7ade25e2a01c2820c36f5c5c6da1aedc0060799ca636a5fe4b5f98dc84530b09",
+    "evidence-final-review.log": "f9b551dccf9a096b490b33f8eefc71e7332b796b9ed7e5ff16c9161be20c46a8",
+    "python-full-reviewed.log": "96db649fc49aca919456f01a0fc67819107136e92df4dd6c942045d311bb107e",
+    "runtime-metadata-reviewed.log": "6df7deeac85dde422666c8a6219eaf683cf5b969c7c33f1cb6a91eb098c27f5e",
+    "native-metadata-red.log": "dd51f4edb21cd5973556e0be4cf86f73559a69bcc27a66956ca7d6510b13285d",
+    "native-metadata-green.log": "425a07d9a724ce4c3929828612b3375b172d9e5d0d5ab1411579cddb4a4bfea2",
+    "desktop-assets-final.json": "8548e8cd8487fe7ebc6e1937b1ba47d81b7e0a89a2e9e0104eb3ed6c4a7c46ea",
+    "computer-use-preview-red.log": "a4f5b06b85d8b88dc3f066a1dbf8eaf1a829bbb2ce9561549396b48fc0fc3695",
+    "computer-use-preview-green.log": "a4d96865771157106886bc09fd1f3e2e4a46552d591f7f77f803d364c3f815b3",
+    "computer-use-evidence-green.log": "42a36a4a6528d3eae851ad6df6feb4bf4c288fb64333acd62ad370c915efe638",
+    "runtime-computer-use-reviewed.log": "b8c197c6cff07d55dbeb8c58bce7b34a8274c1084f12e62fcf3af1d6f082de07",
+    "native-computer-use-01.launch.txt": "cbd0016f7a24b354b05e493c6808a063aa594f5bf106f0ba66eab49a9a33f21e",
+    "native-computer-use-01.result.json": "6d383c40e9354653f146f49a027ba83017d2a564e2fa64e96288d2e4981e21c1"
+  },
+  "review": {
+    "standards_remaining_findings": 0,
+    "spec_remaining_implementation_defects": 0,
+    "spec_deferred_qualification_gates": 1,
+    "record": "review.md",
+    "computer_use_followup_revision": "7366ad7",
+    "computer_use_followup": "Both independent axes found no new defects or misclaims. Native app restriction and preservation drift remain explicit qualification blockers."
+  },
+  "desktop": "Native codex_app startup reaches ready after ancestry fix, with zero peer rejections. Native loader call/deck/previews remain unobserved; host CODEX_CLI_PATH persistence remains a preservation blocker.",
+  "completion": "Not complete; native Desktop remains blocked. Integration branch local, no merge or ticket closure. Public publication awaits explicit approval requested after auto-review rejection.",
+  "python_full_reviewed": {
+    "status": "passed",
+    "tests": 473,
+    "skipped": 85,
+    "seconds": 702.506,
+    "opt_ins": "real client, native Desktop GUI and native Windows disabled",
+    "ordering": "Started at 002720e. Final selected-client/structured-content/metadata fixes checked afterward with focused boundary tests and refreshed actual CLI qualification."
+  },
+  "native_metadata_boundary": {
+    "status": "passed",
+    "tests": 4,
+    "red_then_green": true,
+    "scope": "owned local plist files only; no native UI or spoofed native thread"
+  },
+  "desktop_asset_check": {
+    "status": "assets_ready",
+    "native_workflow_qualified": false,
+    "client_identity": {
+      "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+      "version": "codex-cli 0.162.0-alpha.17.2"
+    },
+    "native": {
+      "version": "26.1007.30912",
+      "build": "20156",
+      "application_sha256": "75e397e2280dde93b70a85aa926f4282c728eacc84dfeb15ba7fb6ddd84628af",
+      "executable_sha256": "2053a78d225a1492d0cb6896cfd83254af06c3277547e83d4d23fef88f00426e",
+      "native_transport_sha256": "ae60fd7129a8eafea42dc41e8692e95dda624d4406826edd74010148371113db"
+    }
+  },
+  "computer_use_preview_attribution": {
+    "status": "passed",
+    "tests": 4,
+    "red_then_green": true,
+    "default_human_workflow": "preserved"
+  },
+  "computer_use_evidence_boundaries": {
+    "status": "passed",
+    "tests": 4
+  },
+  "post_full_suite_ordering": "The four preview-attribution tests, four evidence tests and seven actual CLI/runtime tests passed after the computer-use observation-method change; full Python suite result predates this small change.",
+  "native_relay_followup": {
+    "revision": "3cc3487",
+    "record": "native-relay.json",
+    "ancestry_regression": "red before fix, green after",
+    "calibration_temp_containment": "red before fix, green after",
+    "fixture_store_cleanup": "red before fix, green after",
+    "targeted_race_with_installed_engine": "passed, 26.104 seconds",
+    "full_go_race": "passed, internal/tofa 346.390 seconds; GORACE=atexit_sleep_ms=0",
+    "go_vet": "passed",
+    "affected_python_with_actual_cli": "16 tests passed, 62.219 seconds",
+    "actual_cli_run": "518f04195746440e9aee8e5f01965f06",
+    "actual_cli_preservation": "passed at capture; subsequent Desktop drift invalidates reuse",
+    "standards_findings": 0,
+    "spec_implementation_findings": 0
+  }
+}

@@ -1,0 +1,331 @@
+# Presentation runtime integration (#126 / #127)
+
+The implementation remains on `feat/126-127-presentation-runtime`, based on
+`2c8df02`. The maintainer chose to retain an integration branch until qualification
+is complete. Neither ticket is closed or merged into the main branch.
+
+## Current acceptance status
+
+Both client runtime lanes have successful actual-client loader/deck qualification;
+the production native lane also has human-confirmed PPTX/PDF previews. Both native
+model calibrations are now complete with negative outcomes, recorded separately
+in [the assessment](evidence/presentation-runtime-126-127/native-model-calibrations.json).
+Case 03 produced a five-slide German PPTX but no PDF and never invoked the loader;
+case 04 reached its request limit without artifacts or a loader call. Both read the
+installed skill. Independent naming failed in both; protected state was preserved.
+The maintainer recorded failed/missing preview outcomes for both attempts.
+
+The runtime tickets require retaining these calibrations, not successful model
+capability. Merge/closure depends on final Standards/Spec acceptance; runtime
+success does not promote these model combinations. Follow
+[the release plan](presentation-release-plan.md) for diagnosis, fresh model
+comparisons and existing campaign/release gates. Later sections retain the
+chronology; statements about pending gates describe their recorded checkpoint.
+
+## Implemented CLI lane
+
+The optional evaluation observer configuration can register the launcher-owned
+`tofa_presentation_runtime` STDIO MCP server for one CLI process. Its only tool,
+`load_workspace_dependencies`, takes an empty object and reads the existing
+format-2 Darwin/arm64 bundle. It does not install, update, fetch or execute commands.
+The launcher checks existing MCP registrations and refuses a provider-name
+conflict before credentials or inference. Its public routing-override filter is
+unchanged. Ordinary Codex home, skills and plugins remain in use.
+
+The actual CLI advertises a namespace named `mcp__tofa_presentation_runtime`,
+containing the function `load_workspace_dependencies`. Its qualified name is
+`mcp__tofa_presentation_runtime__load_workspace_dependencies`. Current CLI wraps
+the successful structured MCP output in a textual executor envelope. The private
+archive retains that unedited output and the subsequent actual request pairing
+the loader call with its result; qualification parses and verifies the contents.
+
+`--presentation-qualification` accepts retained actual-client evidence rather
+than a tool-presence switch. The evaluator and observer independently validate
+the client identity, owning provider/schema/call, bundle metadata, returned paths,
+executable/package hashes, observed executable versions, harness identity,
+protected-file preservation, artifacts and finalization receipt. A changed
+environment or invalid live loader result remains infrastructure-blocked.
+Unqualified CLI and Desktop combinations retain #122's original gate.
+
+The [sanitized CLI evidence](evidence/presentation-runtime-126-127/cli-synthetic.json)
+records the exact client and dependency versions, hashes and artifact checks.
+The current combination is CLI 0.162.1 on macOS arm64, Presentations and dependency
+bundle 26.1011.11113, Node v24.19.0, Python 3.12.14 and artifact-tool 2.8.93.
+This is an added runtime-provider treatment, distinct from stock CLI behavior.
+
+A real CLI call created an editable one-slide PPTX, passed the installed
+finalizer's package/import/font checks, rendered a PNG and delivered PPTX/PDF
+references. Artifact-tool's PDF export failed to resolve
+`#standard-fonts/Helvetica`; that attempt remains retained. The declared PDF route
+uses the bundle's `soffice` wrapper and its native LibreOffice executable, with
+an owned `UserInstallation` profile. No package was installed or changed.
+The wrapper reports LibreOfficeDev 26.8.0.0.alpha0; the manifest separately
+declares `25.2-headless-codex.1`. These observations are recorded separately.
+The Poppler wrappers and their native executables also stay inside the bundle.
+
+## Separate model calibrations
+
+One implicit-discovery case 03 and one explicit-skill case 04 were declared before
+execution, with unchanged v3 prompts, fresh workspaces/conversations, Kimi K3 main,
+GLM 5.3 Flash Guardian and 900-second/80-request/8192-output-token ceilings.
+They are excluded from the original #119 matrix and repeated comparisons.
+The [independent assessment](evidence/presentation-runtime-126-127/cli-model-calibrations.json)
+preserves their outcomes and source identities; later harness checks do not
+rewrite them or make their older qualification files reusable after drift.
+
+Case 03 stopped at `unsupported_request_contract / guardian` after 38 forwarded
+main requests; no Guardian inference was forwarded. This is the existing native
+review contract block documented in #123. Case 04 exhausted its 80 main requests.
+Both read installed presentation instructions, but neither invoked the advertised
+loader or delivered a deck. Settings stayed preserved, and neither reported
+environment drift. These runs do not establish reliable model skill use,
+presentation quality, language reliability or supported-model status.
+
+## Desktop qualification history
+
+The calibration command has a separate native Desktop path. It launches the actual
+ChatGPT application with its bundled engine and normal local host. It supplies
+no CLI MCP override, pipe identity or fabricated thread metadata. The native
+provider must advertise and successfully handle
+`mcp__codex_app__load_workspace_dependencies`; effective readiness is observed
+through that call. Local asset checks alone do not qualify the host.
+
+The prepared [operator handoff](../../scripts/presentation_operator.sh) checks
+assets, waits for human readiness, starts one bounded synthetic attempt, prints
+its fresh workspace/prompt and records a separately attributed native preview
+observation. It requires both exact delivered files and hashes. Missing or
+unobserved previews cannot produce a pass.
+
+The maintainer subsequently authorized Codex computer use while away. A bounded
+native attempt launched the actual application, but the computer-use tool refused
+access to `com.openai.codex` for safety reasons. The
+[retained attempt](evidence/presentation-runtime-126-127/native-computer-use.json)
+made zero model requests, produced no artifacts and observed no previews. The
+owned evaluator was cancelled and the application inventory confirmed it stopped.
+The observation recorder now attributes `computer_use` separately from human
+review; this attempt contains no preview pass.
+
+The attempt also detected protected-state drift: the before/after file counts
+were both 27,451, but content fingerprints differed. Modification-time candidates
+include `config.toml`, the computer-use plugin's `.mcp.json`, and twelve remote
+plugin installation metadata files. These candidates do not establish an exact
+content diff. No shared snapshot was restored. Earlier qualification files fail
+the current gate after this drift. At that checkpoint there was no successful native Desktop
+loader/artifact/preview qualification; its model calibrations remained blocked.
+
+The 2026-10-13 [manual attempt](evidence/presentation-runtime-126-127/native-manual.json)
+reached the actual Desktop conversation but failed with
+`required_actual_client_loader_missing`. Both the raw and adapted main-request
+catalogs contained 238 tools and no native loader. No artifact or preview existed;
+the synthetic attempt used no paid inference. The native host log records
+`missing-code-signing-identity` peer rejections followed by
+`Codex app tools pipe closed` during `codex_app` startup. This localizes the failure
+to native tool startup; the exact rejected peer executable is not established.
+Both installed Node candidates pass read-only signature verification outside the
+agent sandbox. Initial sandboxed failures do not establish damaged installations.
+
+This attempt also failed protected-state preservation. A separate per-file hash
+comparison against the earlier manual baseline found changes to `config.toml` and
+the unified-computer-use plugin's `.mcp.json`, with no baseline files missing.
+That comparison does not establish changed content or causation and does not
+check added files. No shared snapshot was restored. Next diagnosis needs helper
+executable/parent provenance during startup and a controlled ordinary-versus-launcher
+comparison, retaining native peer authorization. Repeating the same deck prompt
+cannot qualify this combination while native tool startup remains blocked.
+
+A subsequent [startup comparison](evidence/presentation-runtime-126-127/native-startup-comparison.json)
+localized the incompatibility to launcher process ancestry. In ordinary startup,
+bundled Node runs under the bundled engine directly under Desktop: three native
+`codex_app` ready events, no startup failure or peer rejection. Under the launcher,
+the ad-hoc-signed settings bridge remains between Desktop and the engine: seven
+peer rejections, one native startup failure, no ready event. Both attempts used
+30-second startup traces without submitting a prompt. The installed native
+component examines peer, parent and grandparent signing identities. No native
+authorization behavior was modified.
+
+The correction in `3cc3487` replaces the original Desktop child process with
+the bundled engine. A separate child relay retains the existing model-default
+filter, protocol forwarding and main-engine acknowledgement. The signed native
+ancestry is now Desktop → bundled engine → bundled Node. Native authorization
+is unchanged. The [post-change verification](evidence/presentation-runtime-126-127/native-relay.json)
+records native `codex_app` readiness, zero peer rejections and no leftover fixture
+credential stores with the final build. A separate repeat failed the existing
+15-second ordinary-engine preflight before Desktop launched; that failed attempt
+remains retained and its cause is not established.
+
+Regression tests failed before the fixes for engine ancestry, inherited temporary
+directories and fixture credential stores orphaned by `exec`; all passed afterward.
+The installed-engine settings and lifecycle checks passed with race detection,
+as did the full Go race suite, `go vet`, and 16 affected Python tests including a
+fresh actual CLI deck run. Independent standards and spec reviews found no new
+implementation defects. These checks establish the process-layout fix, not full
+native presentation qualification.
+
+The maintainer authorized a narrow retained-bridge preservation exception after
+the [lifecycle checks](retained-mcp-bridge-verification.md). It is now implemented
+as an explicit Desktop calibration option, with bridge ownership, binary/engine
+identity and lifecycle-evidence checks. Only the two exact MCP executable fields
+can switch between the bundled engine and the verified retained bridge; all
+other settings and protected files stay checked. Raw and normalized fingerprints
+are retained, and qualification reuse revalidates the same policy.
+
+The earlier [settings diagnosis](presentation-native-settings-diagnosis.md)
+remains evidence for Desktop's writes and the unavailable zero-change upstream
+solution. The retained approach needs no shared snapshot restoration. Fresh
+runtime regressions and an actual CLI loader/deck run pass, and installed Desktop
+assets pass preflight. Native loader/deck/preview qualification and its separate
+model calibrations remain pending; startup and preflight alone cannot satisfy
+them. Keep the integration branch unmerged until those gates are complete.
+
+The calibration harness now scopes `TMPDIR`, `TMP`, and `TEMP` to a private `tmp`
+directory inside its run. The fixture dispatches saved engine references directly,
+avoiding a new synthetic credential store whose deferred cleanup would be lost
+on `exec`. Three leftover stores from the initial relay prototype were removed;
+all final-build fixture stores were cleaned up normally. Historical run evidence
+was retained. A final ordinary Desktop startup reconciled both stored MCP executable
+references back to the existing bundled engine. Both paths were verified afterward;
+this cleanup does not retroactively satisfy the failed preservation gate.
+
+All new presentation validation material uses the fixed root
+`/tmp/tofa-presentation-validation`. The manual wizard creates a fresh owned
+subdirectory under `runs/` for each attempt and ignores the inherited `TMPDIR`.
+Launcher shortcuts, baseline snapshots and the legacy-location inventory belong
+under this root too. On macOS, `/tmp` and `/private/tmp` name the same directory.
+Historical evidence remains at its recorded locations until an explicit retention
+decision; moving those files would invalidate qualification records bound to their
+original absolute paths.
+
+Run from an interactive Terminal when ready, using already-built local assets:
+
+```sh
+bash scripts/presentation_operator.sh \
+  --launcher /absolute/path/to/evaluation-fixture-launcher \
+  --codex /Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex \
+  --app-bundle /Applications/ChatGPT.app \
+  --runtime-root "$HOME/.cache/codex-runtimes/codex-primary-runtime" \
+  --skill "$HOME/.codex/plugins/cache/openai-primary-runtime/presentations/26.1011.11113/skills/presentations"
+```
+
+The fixture launcher is built from `scripts/fixtures/evaluation_launcher` and uses
+synthetic credentials and loopback inference. It is separate from the production
+launcher used for the declared model calibrations. Raw requests, client logs,
+responses, credential comparisons and native operator records stay outside Git.
+Only owned processes/resources are stopped; shared snapshots are never restored.
+
+## Verification and completion gate
+
+Behavioral tests cover the launch overlay, provider conflicts, malformed/missing
+metadata, wrong-host/outside paths, native-result completeness, package identity,
+tool identity, failed live results, malformed evidence and cancellation preservation.
+The [verification record](evidence/presentation-runtime-126-127/validation.json)
+records actual commands and limitations.
+
+The full Go race suite passed with the repository's documented
+`GORACE=atexit_sleep_ms=0` setting. The earlier default-delay run and baseline
+shutdown reproduction remain retained. Race detection and production ownership
+deadlines are unchanged. The full Python suite passed, with real-client/UI opt-ins
+disabled; the opt-in actual CLI checks ran separately.
+
+The [two-axis review](evidence/presentation-runtime-126-127/review.md) found no
+remaining implementation defects after the fixes. The final metadata boundary
+tests and refreshed actual CLI proof passed after the full suite.
+
+Remaining gates are the actual native Desktop call/workflow and human previews,
+its two fresh model calibrations and final qualification. The
+broader #119 matrix, approval/resume qualification, guidance adoption, releases,
+Windows and supported-model promotion remain outside these runtime tickets.
+
+## Native runtime and preview qualification passed
+
+The maintainer completed the fresh Desktop run on 2026-10-13 at 12:18 UTC.
+Independent `qualify()` revalidation passed against the current application,
+engine, runtime, harness, bridge and protected settings. The genuine
+`mcp__codex_app__load_workspace_dependencies` call returned the supplied runtime;
+the actual Desktop session authored, finalized, rendered and delivered PPTX/PDF,
+and the maintainer recorded both native previews against the exact file hashes.
+See [sanitized native evidence](evidence/presentation-runtime-126-127/native-success.json).
+
+Raw settings fingerprints differ; the scoped normalized fingerprints match.
+Only the two authorized MCP executable references changed. All other protected
+settings, skills, plugins and runtime files passed preservation. The run ended
+with `operator_finished`; launcher exit 1 is the bounded observer shutdown,
+accepted by the existing native qualification contract alongside passed previews.
+No paid inference was used and this result does not score model capability.
+
+This qualifies ChatGPT 26.1007.30912 (20156), bundled engine
+0.162.0-alpha.17.2, supplied bundle 26.1011.11113 and the exact retained synthetic
+fixture bridge. The two independently declared native model calibrations remain.
+The production launcher uses a different bridge path/binary than the qualified
+fixture; its bridge must have matching lifecycle/runtime qualification before
+paid model inference. The existing production bridge hash differs from the
+qualified hash. Do not transplant the synthetic proof or silently widen its
+allowed references. No shared setting or production installation was changed
+while recording this result. Keep the integration branch and tickets open.
+
+## Production launcher qualification preparation
+
+The production bridge has now passed its own clean exit, forced launcher crash,
+clean repeat, owned temporary uninstall and ordinary Desktop restart checks.
+The [production lifecycle record](evidence/presentation-runtime-126-127/production-mcp-lifecycle.json)
+binds the exact production binary, bundled engine and native application hashes.
+Ordinary startup recorded three `codex_app` ready events, no failed startup events
+and no signature rejections. Both saved MCP tools remained callable after clean
+exit and crash; the detached temporary bridge remained callable after uninstall.
+The normal installation was preserved. Real launcher settings and credentials
+were unchanged in every phase, and protected settings matched after normalization
+of only the two authorized executable references.
+
+`presentation_calibration.py --production-launcher` uses a calibration-only
+synthetic observer at the existing authenticated evaluation boundary. It forwards
+native launch control to the actual production adapter, supplies synthetic model
+Responses locally, and explicitly rejects Guardian requests. The normal launcher
+reads its ordinary credentials/catalog; no endpoint override or credential copy
+is needed. The live model evaluator still uses the ordinary observer. This
+synthetic route cannot qualify paid inference, adapter inference or model behavior.
+
+The real CLI loader/deck workflow passed through the production launcher with this
+observer. Desktop assets and the exact production retained-bridge policy passed
+preflight. The fixed local handoff remains:
+
+```sh
+bash /tmp/tofa-presentation-validation/run-manual.sh
+```
+
+It now selects the production binary and production lifecycle record explicitly.
+All new run files remain under the agreed `/tmp/tofa-presentation-validation` root.
+The previous native fixture success remains historical evidence; the added harness
+module changes the qualification identity, so the old proof is not reused.
+A fresh production native loader/deck/preview run and the two separately declared
+native model calibrations remain required before merging or closing the tickets.
+
+Validation: 71 affected Python tests passed with two installed-client opt-ins
+skipped. After review exposed concurrent audit writes, a regression reproduced
+the failure; locking the final audit update made all three synthetic observer tests
+pass. A fresh actual CLI run passed after that fix. The production Go binary built
+successfully; no Go implementation changed in this follow-up. Both review axes
+report zero remaining implementation findings, with native acceptance still open.
+
+## Production native runtime and previews passed
+
+The fresh production run completed on 2026-10-13 at 12:54 UTC. Independent
+`qualify()` revalidation passed against the current native application, bundled
+engine, runtime, harness, production bridge and protected settings. The genuine
+`mcp__codex_app__load_workspace_dependencies` call and the complete
+create/finalize/render/deliver workflow passed. The maintainer recorded successful
+native PPTX and PDF previews against the exact delivered artifact hashes.
+See [production native evidence](evidence/presentation-runtime-126-127/production-native-success.json).
+
+The four synthetic requests used the calibration observer; no paid inference was
+performed. Raw preservation fingerprints differed only in the authorized MCP executable
+references; normalized fingerprints matched. The production launcher/bridge hash is
+`1f2b7a7b61c7214ceb46f0f0bb0c4952760875ceaee35838706837c4db76d519`.
+This closes the production runtime/preview gate without transferring the earlier
+fixture proof. It does not establish model capability.
+
+Both native model cases passed preflight using this production qualification:
+case 03 (implicit discovery) and case 04 (explicit installed-skill instruction),
+main `moonshotai/Kimi-K3`, Guardian `zai-org/GLM-5.3-Flash`, original prompts and
+baseline instructions. Each is a separate fresh declared calibration, bounded to
+900 seconds, 80 requests and 8192 output tokens per request. They remain outside
+the broader baseline matrix and supported-model promotion. The two live outcomes,
+final review and merge/closure remain pending; keep the integration branch.

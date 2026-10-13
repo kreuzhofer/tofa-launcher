@@ -1,0 +1,108 @@
+{
+  "schema": "tofa-capability-desktop-calibration-v1",
+  "method": "capability-evaluation-v2",
+  "source_revision": "e01b7e28b640b75fc536f1762501f947483c4eac",
+  "run_id": "e4cd69b82c2b4f708ec71959a8638446",
+  "report": "desktop-calibration-05.json",
+  "cohort": "one operator-started baseline method calibration; excluded from #119 original matrix/repeated comparison",
+  "executed_utc": "2026-10-12T16:22:17Z",
+  "status": "completed",
+  "stop_reason": "operator_finished",
+  "blockers": [],
+  "client": {
+    "version": "26.1007.30912",
+    "build": "20156",
+    "executable_sha256": "2053a78d225a1492d0cb6896cfd83254af06c3277547e83d4d23fef88f00426e",
+    "application_sha256": "75e397e2280dde93b70a85aa926f4282c728eacc84dfeb15ba7fb6ddd84628af",
+    "engine": {
+      "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+      "version": "codex-cli 0.162.0-alpha.17.2"
+    }
+  },
+  "main_model": "zai-org/GLM-5.3",
+  "variant": "baseline",
+  "counts": {
+    "main": 1,
+    "guardian": 0,
+    "auxiliary_title": 1
+  },
+  "elapsed_ms": 84169.921,
+  "usage": {
+    "input_tokens": 21002,
+    "output_tokens": 498,
+    "complete": true
+  },
+  "request_outcomes": [
+    {
+      "role": "auxiliary_title",
+      "model": "gpt-6-luna",
+      "routed_model": "nvidia/Nemotron-3_5-Lightning",
+      "status": 200,
+      "completed": true,
+      "usage": {
+        "input_tokens": 6247,
+        "output_tokens": 96,
+        "total_tokens": 6343
+      },
+      "output_token_cap": 4096
+    },
+    {
+      "role": "main",
+      "model": "zai-org/GLM-5.3",
+      "routed_model": "zai-org/GLM-5.3",
+      "status": 200,
+      "completed": true,
+      "usage": {
+        "input_tokens": 14755,
+        "output_tokens": 402,
+        "total_tokens": 15157
+      },
+      "output_token_cap": 4096
+    }
+  ],
+  "reference_assessment": {
+    "status": "failed",
+    "reason": "absolute_paths_in_inline_code_without_markdown_destinations",
+    "syntax_redacted": [
+      "`<workspace>/fixtures/sample-deck.pptx`",
+      "`<workspace>/fixtures/sample-deck.pdf`"
+    ],
+    "markdown_destinations": 0,
+    "raw_final_sha256": "8d84c22c061d2f25040e56129f30acbecb7ca778b1cad8802a2e33fd5fcc0553",
+    "raw_final_bytes": 384,
+    "automated_result": {
+      "status": "failed",
+      "reason": "terminal_paths"
+    },
+    "original_result_modified": false
+  },
+  "operator_preview": {
+    "status": "failed",
+    "reason": "previews_not_delivered",
+    "operator": "maintainer"
+  },
+  "operator_title": {
+    "operator": "maintainer",
+    "automatic_title_visible": true,
+    "scope": "human UI observation; does not certify independent model routing"
+  },
+  "file_integrity": {
+    "status": "passed",
+    "reason": "fixtures_unchanged"
+  },
+  "fixture_hashes": {
+    "sample-deck.pptx": "5893e7a4d4bcdb815cb896351d3db2cf992983cc9c5f83d362e7b9ef9527fcaa",
+    "sample-deck.pdf": "e6bc39cc3f08781460116bc28f9522c4b0ffdc9feb2102c1bfc908dd513f47b8"
+  },
+  "settings_preserved": true,
+  "environment_drift": [],
+  "conclusion": "Completed negative Desktop method calibration. Correct failure scoring agrees with operator preview failure. Independent naming completed and title was visible; handoff and native approval/resume are not qualified.",
+  "gates": {
+    "method_calibration_complete": true,
+    "file_handoff_passed": false,
+    "guardian_evaluated": false,
+    "heldout_executed": false,
+    "campaign_complete": false,
+    "adoption_qualified": false
+  }
+}
