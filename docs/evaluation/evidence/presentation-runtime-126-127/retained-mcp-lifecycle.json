@@ -119,5 +119,20 @@
     "verify-cli-mcp.py": "724c0d6ff4a283bed6fb5609e455ebd2ecae5a6cf414405589e0e6e6801993c6",
     "compare-ordinary-engine.py": "15533c81a17c9275a06dcf38495ff4cfda6530e13486cd6032b070334d9754be"
   },
-  "fixture_main_sha256": "d3fb6d7b8e6acd1a08a9ed9074871e4ee79f482874a01baa7120df3049dfcee4"
+  "fixture_main_sha256": "d3fb6d7b8e6acd1a08a9ed9074871e4ee79f482874a01baa7120df3049dfcee4",
+  "tested_identity": {
+    "engine_sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+    "native": {
+      "version": "26.1007.30912",
+      "build": "20156",
+      "application_sha256": "75e397e2280dde93b70a85aa926f4282c728eacc84dfeb15ba7fb6ddd84628af",
+      "executable_sha256": "2053a78d225a1492d0cb6896cfd83254af06c3277547e83d4d23fef88f00426e",
+      "native_transport_sha256": "ae60fd7129a8eafea42dc41e8692e95dda624d4406826edd74010148371113db"
+    }
+  },
+  "tested_identity_sources": {
+    "retained-launcher-clean-20261013T105657Z/calibration/eaf996383e4f4c41bd28405ab0eccd9f/qualification.json": "4552a52dce001d0fcab36a1cc1e556a2fbdb40bd0e624305a244b634e5035780",
+    "retained-launcher-crash-20261013T105859Z/calibration/05d24be5b375407cb77facb972aed429/qualification.json": "8969cbd4ae732ce5cdd267be642297fc26ec3db1312b054c445bcd3e0753247b",
+    "retained-launcher-clean-20261013T110335Z/calibration/35a53fe8aa4a46f1a5c088a98a10efa3/qualification.json": "cc0bf572a40c179660873937281f4aeeb01ed223960b871b36617682a6cef0d9"
+  }
 }

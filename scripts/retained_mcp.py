@@ -41,6 +41,7 @@ def retained_policy(home, engine, bridge, native, evidence=LIFECYCLE):
         valid = (record['schema'] == 'tofa-retained-mcp-lifecycle-v1' and
             record['app_version'] == native['version'] and record['app_build'] == native['build'] and
             record['source_sha256']['launcher-retained'] == bridge_hash and
+            record['tested_identity'] == {'engine_sha256': sha256(engine), 'native': native} and
             phases['crash']['crash'] is True and phases['crash']['protected_raw_equal'] is True and
             phases['clean_repeat']['protected_raw_equal'] is True and
             phases['ordinary_restart']['protected_normalized_equal'] is True and
@@ -81,6 +82,14 @@ def unique_object(pairs):
     return result
 
 
+def typed_value(value):
+    if isinstance(value, dict):
+        return ['object', [[key, typed_value(item)] for key, item in sorted(value.items())]]
+    if isinstance(value, list): return ['array', [typed_value(item) for item in value]]
+    if hasattr(value, 'isoformat'): return [type(value).__name__, value.isoformat()]
+    return [type(value).__name__, value]
+
+
 def normalized_digest(path, policy):
     path = Path(path)
     if str(path) == str(Path(policy['home']) / 'config.toml'):
@@ -100,8 +109,7 @@ def normalized_digest(path, policy):
             raise ValueError('retained_mcp_unverified_reference')
         parent[route[-1]] = policy['engine']
         # TOML date/time values retain their type, not just their printed value.
-        encoded = json.dumps(document, sort_keys=True, default=lambda value:
-            {'toml_type': type(value).__name__, 'value': value.isoformat()})
+        encoded = json.dumps(typed_value(document))
     except (KeyError, TypeError) as error:
         raise ValueError('retained_mcp_reference_missing') from error
     return hashlib.sha256(encoded.encode()).hexdigest()

@@ -23,7 +23,7 @@ class RetainedMCPTests(unittest.TestCase):
         self.bundle = self.root / 'Owned.app'
         self.engine = self.bundle / 'Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex'
         self.engine.parent.mkdir(parents=True)
-        self.engine.write_text('owned engine')
+        self.engine.write_text('#!' + sys.executable + '\nprint("codex-cli fixture")\n')
         metadata = self.bundle / 'Contents/Info.plist'
         metadata.write_bytes(plistlib.dumps({'CFBundleShortVersionString': 'fixture', 'CFBundleVersion': '1'}))
         for name in ('Contents/Resources/app.asar', 'Contents/MacOS/ChatGPT',
@@ -43,6 +43,9 @@ class RetainedMCPTests(unittest.TestCase):
         self.evidence = self.root / 'lifecycle.json'
         source = Path(__file__).parents[1] / 'docs/evaluation/evidence/presentation-runtime-126-127/retained-mcp-lifecycle.json'
         record = json.loads(source.read_text())
+        from capability_runtime import desktop_identity
+        self.native = desktop_identity(self.bundle, self.engine)
+        record['tested_identity'] = {'engine_sha256': hashlib.sha256(self.engine.read_bytes()).hexdigest(), 'native': self.native}
         record['app_version'] = 'fixture'; record['app_build'] = '1'
         record['source_sha256']['launcher-retained'] = hashlib.sha256(self.bridge.read_bytes()).hexdigest()
         self.evidence.write_text(json.dumps(record))
@@ -55,7 +58,7 @@ class RetainedMCPTests(unittest.TestCase):
     def policy(self):
         from retained_mcp import retained_policy
         return retained_policy(self.home, self.engine, self.bridge,
-            {'version': 'fixture', 'build': '1'}, self.evidence)
+            self.native, self.evidence)
 
     def snapshot(self, policy):
         return protected(self.home, self.skill, self.runtime, retained_mcp=policy)
@@ -166,6 +169,24 @@ class RetainedMCPTests(unittest.TestCase):
         record = json.loads(self.evidence.read_text())
         record['phases']['crash']['protected_raw_equal'] = False
         self.evidence.write_text(json.dumps(record))
+        with self.assertRaises(ValueError): self.policy()
+
+    def test_unrelated_toml_date_cannot_alias_a_literal_table(self):
+        policy = self.policy()
+        path = self.home / 'config.toml'; original = path.read_text()
+        path.write_text('cutoff = 1979-05-27\n' + original)
+        before = self.snapshot(policy)
+        path.write_text('cutoff = {toml_type="date",value="1979-05-27"}\n' + original)
+        self.assertNotEqual(before, self.snapshot(policy))
+
+    def test_fresh_policy_cannot_reuse_lifecycle_evidence_after_engine_or_native_change(self):
+        from capability_runtime import desktop_identity
+        original = self.engine.read_bytes()
+        self.engine.write_text('changed unverified engine')
+        with self.assertRaises(ValueError): self.policy()
+        self.engine.write_bytes(original)
+        (self.bundle / 'Contents/Resources/app.asar').write_text('changed native code, same version')
+        self.native = desktop_identity(self.bundle, self.engine)
         with self.assertRaises(ValueError): self.policy()
 
 

@@ -80,7 +80,7 @@ now opts the Desktop lane into a narrowly bound preservation policy. The bridge
 must already exist, be private and executable, match its versioned owner record,
 and match the binary hash in the completed lifecycle evidence. The record must
 include clean exit, crash, uninstall, ordinary restart, real CLI and ordinary
-engine checks for the same Desktop version/build. The policy binds the engine
+engine checks for the same Desktop version/build and tested engine/native hashes. The policy binds the engine
 hash, native application identity, exact bridge path/hash and evidence hash.
 A changed or missing bridge, engine, owner or evidence fails revalidation. The
 policy never installs a bridge or repairs settings.
@@ -115,3 +115,20 @@ the exact verified bridge. Its installed Desktop asset preflight passes. The
 native loader, deck, two previews and separate model calibrations still need to
 pass before merge or issue closure. Computer use's prior refusal to control
 ChatGPT Desktop remains respected; the wrapper requests a human observation.
+
+Independent review found two preservation defects in the initial exception:
+a TOML date could alias a literal table, and new policy creation did not compare
+the engine/native hashes with historical lifecycle evidence. Both received
+failing regressions and fixes. Canonical settings now tag every value type; the
+lifecycle record includes identical engine/native identities extracted from all
+three retained launcher captures (clean, crash, clean repeat), with source hashes.
+Those captures remain startup-only, unqualified presentation attempts. Ten scoped
+policy tests pass after the fixes. Native acceptance remains pending.
+
+The final affected suite ran 69 tests (two installed-client opt-ins skipped),
+and both installed CLI opt-ins passed separately against the corrected harness.
+The fresh CLI evidence is qualified with settings preserved and PPTX/PDF/PNG
+artifacts. Final Desktop asset preflight passes. Independent re-review reports
+zero remaining Standards findings and zero remaining Spec implementation findings.
+See the [sanitized follow-up record](evidence/presentation-runtime-126-127/retained-mcp-evaluator.json).
+Native acceptance is still pending, so neither ticket is closed or merged.
