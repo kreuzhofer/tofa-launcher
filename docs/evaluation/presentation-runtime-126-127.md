@@ -143,7 +143,12 @@ fresh actual CLI deck run. Independent standards and spec reviews found no new
 implementation defects. These checks establish the process-layout fix, not full
 native presentation qualification.
 
-Native preservation remains blocked. A semantic before/after comparison identified
+Native preservation remains blocked. The subsequent
+[settings diagnosis](presentation-native-settings-diagnosis.md) reproduces the
+two writes with exact installed functions and identifies the Desktop command
+selection/reconciliation boundary required for a fix. No supported launcher-only
+separation was found in the inspected build; the preservation repro remains red.
+A semantic before/after comparison identified
 two host-written fields: `mcp_servers.node_repl.env.CODEX_CLI_PATH` in `config.toml`
 and `mcpServers.cua_repl.env.CODEX_CLI_PATH` in the unified-computer-use plugin's
 `.mcp.json`. Desktop persists the temporary evaluation bridge into both. Ordinary

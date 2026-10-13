@@ -1,0 +1,28 @@
+{
+  "schema": "tofa-native-settings-diagnosis-v1",
+  "baseline": "4b01ca1",
+  "status": "cause reproduced; fix unavailable at established launcher boundary",
+  "installed_app_asar_sha256": "75e397e2280dde93b70a85aa926f4282c728eacc84dfeb15ba7fb6ddd84628af",
+  "installed_source_matches_extraction": true,
+  "installed_source_sha256": {
+    "main-CqEoQDOU.js": "09d19386e1f23cf4ccbc950fc40d85a1e8a064a08be588b2a4be6a89f6ada9e6",
+    "src-CP7XXlpZ.js": "79623d50989f9efbcb8e5752c56b3cc608a0f5993c05112e03e11b718ac7a586",
+    "application-network-startup-CfAQmSYg.js": "cd6e8a8fbc4354a6e6ff19c6e4bf6fc1fb3960c63708c83871357c6238f516a8"
+  },
+  "replayed_function_sha256": {
+    "selection": "c2af5866a062be21d44c6e18b3e76420990b08b659a0b7bb0dbd37e9dadcd03e",
+    "configuration": "e1cd40674e97e8ae04d98addc77985aa4dea418a73115947118a161b6780c700",
+    "edits": "5ebe923124ff88188f71a9301b013ccbe007d73e451833eeb2dac4e68c40749b",
+    "pluginPersistence": "d4499a7e1073656eccaf5cd8376eff0151ed5fd5a8e44cfbab5814897f182e02"
+  },
+  "only_input_changed": "CODEX_CLI_PATH",
+  "ordinary_control_passed": true,
+  "bridge_case_persistent_references_preserved": false,
+  "reproductions": 2,
+  "expected_exit_status": 1,
+  "production_changes": false,
+  "shared_state_modified_during_diagnosis": false,
+  "current_references_equal_existing_bundled_engine": true,
+  "qualification": "blocked",
+  "diagnostic_script_sha256": "105f44e3067a784f2ff7a124b302946be7bf9240b1ef8c24dd5e553fe3e54aef"
+}
