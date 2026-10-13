@@ -85,15 +85,11 @@ runtime tickets is not a waiver of #119/#120/#106 or native-platform release gat
 
 ## Current next action
 
-The runtime branch is reviewed and ready at the recorded integration checkpoint.
-Automatic approval review rejected publishing the full branch to the public GitHub
-repository because merge/closure authorization did not explicitly authorize that
-public egress. The maintainer subsequently explicitly approved publishing this branch to the
-public repository, opening/merging its PR and closing #126/#127. That approval
-resolves the publication blocker; raw private runs and credentials stay local.
-The local PR body is prepared under the fixed validation root. #128 and #129 can
-proceed with local diagnosis while integration completes. #130 retains
-its native blockers. No raw private run data is part of the proposed push.
+PR #131 merged as `de74659b4f0b458236fc0e4ffc6b59db65029645` after all
+macOS/Linux/Windows and artifact checks passed. The maintainer explicitly approved
+public branch publication, merge and closure; #126/#127 are closed. The integration
+branch is retained. No release was published. #128/#129 remain diagnosis work;
+#130 retains its remaining native blockers.
 
 The first #129 feedback check has run against the retained captures: the qualified
 synthetic native run passes with one valid loader call/result; both live Kimi runs
@@ -101,5 +97,31 @@ fail with an advertised loader and zero invocations. The read-only check and its
 three-control result are retained beneath the fixed root in
 `checks/release-planning/check-loader-call.py` and `loader-feedback-loop.json`.
 This establishes a fast observable signal; it does not yet locate a provider-side
-or model-selection cause. Next: replay request adaptation locally, then use the
-separately declared actual-native diagnostic contract in #129.
+or model-selection cause. Controlled replay subsequently preserved the advertised
+loader through the real adapter for all captured main inputs; naming remains
+independent and unresolved.
+
+The focused native diagnostic now has a maintainer-requested 600-second observer
+deadline, including workspace setup (10 requests, 4096 output tokens). The
+synthetic qualification also allows 600 seconds (8 requests, 4096 output tokens).
+The unchanged, lifecycle-qualified production launcher accepts only 180/900-second
+outer guards, so 600-second runs explicitly use its 900-second guard while the
+observer enforces the declared 600-second deadline. Both values are recorded.
+The production launcher and retained MCP bridge have not been replaced.
+
+An initial native requalification failed before launch because its control file
+sent 600 directly to the launcher. Its unedited evidence remains at private run
+`manual.1eergT/runs/6c1981469984486cb18961814fd7aa84`. The wizard now surfaces
+the launch error and stops before requesting previews. Regression tests first
+reproduced both the rejected contract and the misleading handoff, then passed.
+The affected suite ran 59 tests: 57 passed, 2 installed-CLI opt-ins skipped.
+A separate real bundled-CLI synthetic calibration using the unchanged production
+launcher passed with the corrected contract, observed the loader, delivered all
+three artifacts and preserved settings; no paid inference was used. Private run:
+`timeout-compatibility-cli/f5bde76a4cc14c0ead521df52bcf9cbb`.
+
+Next: capture a fresh native qualification against the current installed Pages
+plugin version and updated harness using `run-manual.sh` under the fixed root.
+Human preview confirmation is still required. Preserve old proofs; do not edit
+their hashes or restore installed settings. After validating the new proof, update
+the focused diagnostic's proof reference before the Kimi/GLM attempts.

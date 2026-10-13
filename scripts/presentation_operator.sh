@@ -218,8 +218,19 @@ cancel_owned() {
 trap cancel_owned EXIT
 trap 'exit 130' INT
 trap 'exit 143' TERM
+require_live_run() {
+  if kill -0 "$TASK_PID" 2>/dev/null; then return; fi
+  wait "$TASK_PID" || true
+  TASK_PID=""
+  say "The run stopped. No preview result requested. Evidence: $TASK_RUN"
+  for TASK_LOG in "$TASK_PRIVATE/launch.txt" "$TASK_RUN/client.log" "$TASK_PRIVATE/result.json"; do
+    if [[ -f "$TASK_LOG" ]]; then cat "$TASK_LOG"; fi
+  done
+  exit 1
+}
 stage "Prepare Desktop"
-say "A synthetic runtime check: no paid model inference. Deadline: 180 seconds."
+say "A synthetic runtime check: no paid model inference. Deadline: 10 minutes from launch, including workspace setup."
+say "The observer enforces 10 minutes; the launcher's outer shutdown guard is 15 minutes."
 step "Save current work and quit ChatGPT Desktop manually."
 say "Keep the ordinary profile and settings. No credential or installation changes."
 if ! confirm "Are you ready at the computer to start this run?"; then
@@ -238,6 +249,7 @@ if len(runs)!=1: raise SystemExit('Expected one attempt. Inspect the private lau
 print(runs[0].parent)
 LOCATE
 )
+require_live_run
 stage "Submit the prompt"
 say "Use Codex mode in the actual ChatGPT Desktop application."
 step "Select/add this entire fresh workspace path, then start a NEW conversation:"
@@ -250,6 +262,7 @@ say "Press Enter after checking. If the deadline ends first, evidence stays unqu
 while kill -0 "$TASK_PID" 2>/dev/null; do
   if read -r -t 1 _; then break; fi
 done
+require_live_run
 stage "Record native previews"
 say "Enter p only if you personally opened BOTH correct native previews in this run."
 say "Enter f for failed/wrong previews, or u if you did not check."

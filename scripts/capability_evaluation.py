@@ -47,6 +47,14 @@ def save(path, value):
     temporary.replace(path)
 
 
+def launcher_seconds(seconds):
+    # The qualified launcher accepts 180/900-second outer guards. The observer
+    # independently enforces the declared 600-second diagnostic deadline.
+    if seconds not in (180, 600, 900):
+        raise ValueError('unsupported_evaluation_deadline')
+    return 900 if seconds == 600 else seconds
+
+
 def version(path):
     result = subprocess.run([str(path), '--version'], capture_output=True, timeout=10)
     if result.returncode or not result.stdout.strip():
@@ -420,7 +428,8 @@ def execute(options, run, report):
         report['status'] = 'infra_blocked'; save(run / 'result.json', report); return
     with observer:
         config = run / 'observer.json'
-        control = dict(version=1, endpoint=observer.url, secret=observer.secret, seconds=report['limits']['seconds'])
+        report['launcher_seconds'] = launcher_seconds(report['limits']['seconds'])
+        control = dict(version=1, endpoint=observer.url, secret=observer.secret, seconds=report['launcher_seconds'])
         if proof and options.client == 'cli':
             control['presentation_runtime'] = {'root': proof['runtime']['root'],
                 'script': str(Path(__file__).with_name('presentation_runtime.py').resolve())}
