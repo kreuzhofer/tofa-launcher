@@ -500,7 +500,7 @@ class Observer:
                 if record['completed']: break
             if record is not None and not record['completed']:
                 record['failure'] = 'upstream_http_error' if response.status != 200 else 'response_incomplete'
-                category = ('http_status' if response.status != 200 else
+                category = ('http_status' if response.status != 200 else 'provider_error' if record.get('provider_failure') else
                     self.reason if self.reason in ('client_disconnected', 'deadline', 'operator_finished', 'operator_cancelled')
                     else 'incomplete_response')
                 record['transport_failure'] = {'stage': 'upstream_read', 'category': category,
@@ -538,16 +538,22 @@ class Observer:
                 category, kind = label, cls.__name__
                 break
         record['transport_failure'] = {'stage': stage, 'category': category, 'exception_type': kind}
-        path = self.run / ('transport-error-' + str(record['number']) + '.json')
+        self.retain_failure(record, 'transport', {'stage': stage, 'traceback': traceback.format_exc()[-65536:]})
+
+    def retain_failure(self, record, kind, detail):
+        path = self.run / (kind + '-error-' + str(record['number']) + '.json')
         try:
             descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
             with os.fdopen(descriptor, 'w') as stream:
-                json.dump({'stage': stage, 'traceback': traceback.format_exc()[-65536:]}, stream)
+                json.dump(detail, stream)
         except OSError:
-            record['private_transport_error_retention_failed'] = True
+            record['private_' + kind + '_error_retention_failed'] = True
 
     def event(self, record, event):
         if not isinstance(event, dict): raise ValueError('unsupported_response_contract')
+        if event.get('type') in ('response.failed', 'response.incomplete', 'error') and not record.get('provider_failure'):
+            record['provider_failure'] = {'event_type': event['type']}
+            self.retain_failure(record, 'provider', {'event_text': json.dumps(event)[:65536]})
         if event.get('type') in ('response.output_text.delta', 'response.function_call_arguments.delta'):
             record.setdefault('first_delta_ms', self.elapsed())
         items = ([event.get('item', {})] if event.get('type') == 'response.output_item.done' else

@@ -16,6 +16,23 @@ SCRIPT_ROOT = Path(__file__).resolve().parent.parent
 
 
 class BoundaryTests(unittest.TestCase):
+    def test_provider_terminal_errors_are_private_and_distinct_from_truncation(self):
+        for kind in ('response.failed', 'response.incomplete', 'error'):
+            event = {'type': kind, 'response': {'error': {'message': 'private-provider-error'}}}
+            raw = ('data: ' + json.dumps(event) + '\n\n').encode()
+            def failed(handler, body):
+                handler.send_response(200); handler.end_headers(); handler.wfile.write(raw)
+            with self.subTest(kind=kind), self.boundary(response=failed) as (observer, _):
+                self.assertEqual(self.post(observer, '/responses', self.body(), 'client-token', 200), raw)
+                record = observer.records[0]
+                self.assertEqual(record.get('provider_failure'), {'event_type': kind})
+                self.assertEqual(record['transport_failure']['category'], 'provider_error')
+                self.assertFalse(record['completed'])
+                self.assertNotIn('private-provider-error', json.dumps(observer.records))
+                private = observer.run / 'provider-error-1.json'
+                self.assertEqual(private.stat().st_mode & 0o777, 0o600)
+                self.assertIn('private-provider-error', private.read_text())
+
     def test_http_rejection_and_incomplete_stream_have_distinct_diagnostics(self):
         for status, category in ((400, 'http_status'), (200, 'incomplete_response')):
             def rejected(handler, body):

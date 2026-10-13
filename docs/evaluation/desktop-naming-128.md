@@ -23,8 +23,10 @@ python3 -m unittest capability_observer_test.BoundaryTests.test_naming_disconnec
 
 The observer now exports only fixed stage/category/exception-type values. Original
 exception tracebacks are retained in private `transport-error-N.json` files, mode
-0600, bounded to the final 65,536 characters. HTTP rejection and incomplete streams
-remain separate. Existing aggregate verdicts and routing are preserved. Tests also
+0600, bounded to the final 65,536 characters. Explicit provider error events are
+retained separately in private `provider-error-N.json`, bounded to the first 65,536
+characters. HTTP rejection, provider terminal errors and incomplete streams remain
+separate. Existing aggregate verdicts and routing are preserved. Tests also
 verify that private malformed-header text stays out of exported records.
 
 One explicitly approved replay of the exact native Kimi naming request through the
@@ -35,6 +37,15 @@ produced the same provider request and preserved that response, with race detect
 This excludes deterministic rejection of this captured shape and a deterministic
 namespace-change regression at this boundary. It does not establish reliability,
 exclude an intermittent provider/lifecycle fault, or qualify native title visibility.
+
+Initial hypothesis order after the red diagnostic was: (1) adapter/connection loss
+before headers, (2) provider rejection/interruption, (3) native client cancellation.
+The missing header status motivated that order; it did not identify the cause.
+After successful live/local replay, intermittent adapter/connection, provider and
+native lifecycle causes are tied at rank 1 because the old exceptions cannot
+distinguish them. Deterministic rejection of this captured shape is contradicted
+by the replay. A fresh native failure's stage/category or explicit provider event
+will distinguish these predictions; a successful run only delimits intermittency.
 
 See [sanitized evidence](evidence/presentation-runtime-126-127/naming-128-diagnostic.json).
 Private files and scripts are under `/tmp/tofa-presentation-validation/checks/naming-128`.
@@ -49,7 +60,9 @@ corpus, not a presentation case or a replacement of historical outcomes.
 
 Bounds: 600 seconds including manual setup, six requests, 4096 output tokens per
 request, no automatic retries; launcher outer guard 900 seconds. Preflight passed.
-The observer will record any transport exception privately. The operator records
+The observer will record any transport exception privately. After the main answer,
+the wizard waits only for pending naming to reach a terminal state within the same
+deadline; it does not retry or wait on an already failed title. The operator records
 visible generated title separately as passed/failed/not observed, including whether
 the run had already ended. Main completion does not wait for a failed title.
 
