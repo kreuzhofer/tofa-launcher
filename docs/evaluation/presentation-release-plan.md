@@ -218,8 +218,18 @@ transport stages and categories and retains original exceptions/provider errors
 privately. Operator instructions distinguish completed main work from failed or
 pending naming. One explicitly approved headless replay of the captured naming
 request completed successfully; both local baseline/current adapter replays passed.
-This does not explain the intermittent native failure. The next required action
-is one instrumented native naming attempt, with separately recorded title visibility,
-using `/tmp/tofa-presentation-validation/run-naming-diagnostic.sh`. Its preflight
-passes and it retains the existing launcher binary and ten-minute observer limit.
-See [the #128 handoff](desktop-naming-128.md). #128 and #130 remain open/gated.
+This does not explain the intermittent native failure. The predeclared instrumented
+native attempt now passes both provider completion and maintainer-observed title
+visibility: run `32dee8c7142b41ef968da5677a04af5e`, 69.031 seconds including setup,
+unchanged launcher, protected settings preserved and no environment drift. Main
+and naming each completed one HTTP 200 response; no tools or Guardian requests ran.
+See [the #128 handoff](desktop-naming-128.md) and
+`evidence/presentation-runtime-126-127/naming-128-native.json`.
+
+The evaluation disposition is to retain instrumentation and independent naming
+outcomes in #130 without automatic retries or waiting on failed titles. The
+original intermittent cause and native runtime-regression status remain unknown;
+this success is not a naming fix or repeated-reliability claim. #128 and #129
+remain open pending integration publication/merge disposition. Resolve prerequisite
+tickets, freeze identities and requalify the changed harness before predeclaring
+#130's four fresh deck attempts. Retain the integration branch and historical proofs.

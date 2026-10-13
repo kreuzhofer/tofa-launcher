@@ -1,0 +1,143 @@
+{
+  "schema": "tofa-native-naming-assessment-v1",
+  "run_id": "32dee8c7142b41ef968da5677a04af5e",
+  "private_run": "runs/naming-manual.Z04gTi/runs/32dee8c7142b41ef968da5677a04af5e",
+  "started_utc": "2026-10-13T19:28:29Z",
+  "source_revision_at_attempt": "79a3e65",
+  "implementation_revision": "cf6cbec",
+  "review_baseline": "29e2983",
+  "corpus": "native-naming-diagnostic-v1",
+  "scope": "One predeclared synthetic naming-only native attempt; no deck or loader execution; not a matched native baseline/candidate comparison.",
+  "native_provider_naming": "passed",
+  "human_visible_title": {
+    "schema": "tofa-native-title-observation-v1",
+    "operator": "maintainer",
+    "method": "human",
+    "status": "passed",
+    "utc": "2026-10-13T19:29:39.012401+00:00",
+    "run_already_ended": false,
+    "scope": "Human visible title only; provider completion is scored independently."
+  },
+  "main_answer": "passed",
+  "main_answer_rule": "One sentence describing a lighthouse helping ships navigate; no tool actions observed.",
+  "guardian": {
+    "configured": "zai-org/GLM-5.3-Flash",
+    "requests": 0,
+    "assessment": "not_exercised"
+  },
+  "requests": [
+    {
+      "number": 1,
+      "role": "auxiliary_title",
+      "routed_model": "nvidia/Nemotron-3_5-Lightning",
+      "status": 200,
+      "completed": true,
+      "started_ms": 52934.742,
+      "ended_ms": 59820.565,
+      "usage": {
+        "input_tokens": 6220,
+        "output_tokens": 1617,
+        "total_tokens": 7837
+      },
+      "duration_ms": 6885.823,
+      "failure": null
+    },
+    {
+      "number": 2,
+      "role": "main",
+      "routed_model": "moonshotai/Kimi-K3",
+      "status": 200,
+      "completed": true,
+      "started_ms": 53006.351,
+      "ended_ms": 54976.496,
+      "usage": {
+        "input_tokens": 116555,
+        "output_tokens": 24,
+        "total_tokens": 116579
+      },
+      "duration_ms": 1970.145,
+      "failure": null
+    }
+  ],
+  "limits": {
+    "seconds": 600,
+    "requests": 6,
+    "output_tokens": 4096
+  },
+  "launcher_guard_seconds": 900,
+  "elapsed_ms": 69030.682,
+  "stop_reason": "operator_finished",
+  "raw_status": "completed",
+  "raw_launcher_exit_code": 1,
+  "exit_interpretation": "Operator finish occurred after both responses completed. The existing evaluator explicitly accepts a nonzero child exit for operator_finished; raw exit code remains retained.",
+  "settings_preserved": true,
+  "protected_settings_hashes": {
+    "before": {
+      "codex_config": "759efbf30840b864a35fe8ee012edf44db7a851593ff51422dc6ad30590d551b",
+      "launcher_config": "78ca78911b10b18bd927d3566b0082b6961533dca6a8de939621299a11384f16"
+    },
+    "after": {
+      "codex_config": "759efbf30840b864a35fe8ee012edf44db7a851593ff51422dc6ad30590d551b",
+      "launcher_config": "78ca78911b10b18bd927d3566b0082b6961533dca6a8de939621299a11384f16"
+    },
+    "changed": []
+  },
+  "environment_drift_during_run": [],
+  "usage": {
+    "input_tokens": 122775,
+    "output_tokens": 1641,
+    "complete": true
+  },
+  "identity": {
+    "harness_sha256": {
+      "capability_evaluation.py": "6e68fbcb1aa1eb37e7ab51bc5d4af40dce9ef39c796ddf5d28c385e77462edb3",
+      "capability_observer.py": "2822da255c68908c1c5f54374694f3cfbd4578ac0ca8e72121b037bd335e77bc",
+      "capability_actions.py": "cada1c6b10fae235c28cd958c39b595b6260f94279ee226b5ef266f7a0e2efd7"
+    },
+    "launcher": {
+      "sha256": "11d28bf933f5230bc9c06744d98726b51d096504e9e683471f21b9c369fbea1e",
+      "version": "tofa dev-prototype"
+    },
+    "codex": {
+      "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+      "version": "codex-cli 0.162.0-alpha.17.2"
+    },
+    "desktop": {
+      "version": "26.1007.30912",
+      "build": "20156",
+      "executable_sha256": "2053a78d225a1492d0cb6896cfd83254af06c3277547e83d4d23fef88f00426e",
+      "application_sha256": "75e397e2280dde93b70a85aa926f4282c728eacc84dfeb15ba7fb6ddd84628af",
+      "engine": {
+        "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+        "version": "codex-cli 0.162.0-alpha.17.2"
+      }
+    },
+    "diagnostic_driver_sha256": "0f0cb15e61e6d8a546e431bc65af5fb93a1ed038cae777c730c199b8ac118d18",
+    "corpus_sha256": "17cc0b7f61c8f11d094dd44d587da7aace1e7271258241ed377114df57287eda",
+    "prompt_sha256": "4e8420c1fc87e0ba5d0a53539876ea10ee27ce08e63702ef11e02ac22dabb9f8"
+  },
+  "identity_validation": "Run harness hashes match committed cf6cbec; launcher/driver/wizard match the predeclared verification record. No binary rebuild or settings changes.",
+  "raw_criteria_limit": "Generic case-05 reference_syntax remains failed/missing_references in the original report. The distinct naming-only corpus requires no artifact references; no presentation or reference-syntax pass is inferred, and the raw report is unchanged.",
+  "private_evidence_sha256": {
+    "result.json": "4a68022f787d27a5e2c0d931c65c5cc7fe38d53496a51df1cae12ca68a6ac125",
+    "requests.json": "6c913b2c3d0ad476c84abc99ea0122a9b2e40c2f0bbbacf4d23778035c603853",
+    "title-observation.json": "d5916322edc302ec2b052de6e902e4c81a4a44a13cd742f016bc860f0c322c69",
+    "preflight.json": "3b9419c3c1b580003cf2d941bd927b9cca571bcf7b7b4d85a3e23cf597bcc3a7",
+    "diagnostic-contract.json": "5b70975d4c1c81a305373db74e460bc2960678fae940f92846c7ffa85a635198",
+    "final.txt": "da60b6b6f32c982e171e0a381b68fa21a1e9ca8b3666ca5b5f633bbe48354f6d",
+    "stop-reason.txt": "640f748775d6aef1f8178307152eb1b8c8e66cc4d634471e33eb0f5d849d4b96"
+  },
+  "disposition": {
+    "diagnosis": "The original intermittent native stream failure was not reproduced in the approved replay or this bounded native attempt. Old exceptions were discarded. The responsible layer and runtime-regression status remain unestablished; local adapter comparison only delimits deterministic differences for the captured input.",
+    "evaluation": "Retain the diagnostic instrumentation and score naming independently in the next predeclared #130 comparison. A failed title does not require another attempt or prevent operator finish; preserve any aggregate infrastructure failure and private exception.",
+    "next": "Resolve #128/#129 integration publication/merge disposition and #130 prerequisite tickets, freeze identities and requalify changed harness bytes before predeclaring the four deck attempts.",
+    "not_claimed": [
+      "root_cause_identified",
+      "naming_bug_fixed",
+      "repeated_native_reliability",
+      "presentation_qualification",
+      "supported_model_promotion",
+      "release_readiness"
+    ]
+  }
+}
