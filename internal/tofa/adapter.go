@@ -283,6 +283,9 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 					fmt.Fprintln(a.Out, "Request adapter: Kimi-K3 desktop title schema moved to final-answer instructions; tools retained, desktop still validates the title.")
 				})
 			}
+			var approvalPayload map[string]json.RawMessage
+			json.Unmarshal(body, &approvalPayload)
+			_, _, _, approvalRequest := approvalReviewFormat(approvalPayload)
 			body, adapted, err := adaptApprovalReview(body)
 			if err != nil {
 				notice(err.Error())
@@ -312,7 +315,10 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 					fmt.Fprintln(a.Out, "DeepSeek image output: using a 32768-token limit for reasoning and answer combined when no output limit is supplied; workaround for the provider's image-request default failure. Explicit limits are preserved.")
 				})
 			}
-			body, namespaces, err := adaptNamespaces(body)
+			var namespaces *namespaceTranslation
+			if !titleAdapted && !titleRouted && !approvalRequest {
+				body, namespaces, err = adaptNamespaces(body)
+			}
 			if err != nil {
 				http.Error(writer, "request adapter: "+err.Error(), http.StatusBadRequest)
 				return

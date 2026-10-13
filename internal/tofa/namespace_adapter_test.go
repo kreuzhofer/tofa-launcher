@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -197,4 +198,33 @@ func TestNamespaceAdapterStreamsBeforeCompletionAndCancels(t *testing.T) {
 		return nil
 	})
 	runAdapted(t, app)
+}
+
+func TestNamespaceAdapterPreservesGuardianCatalogAndResponse(t *testing.T) {
+	for _, model := range []string{"moonshotai/Kimi-K3", "zai-org/GLM-5.3"} {
+		t.Run(model, func(t *testing.T) {
+			payload := jsonValue(t, []byte(guardianRequestFixture())).(map[string]any)
+			payload["model"] = model
+			catalog := jsonValue(t, []byte(namespaceCatalog))
+			payload["tools"] = catalog
+			body, _ := json.Marshal(payload)
+			const decision = `{"outcome":"deny","rationale":"native review remains independent"}`
+			app, _ := adapterFixture(t, func(w http.ResponseWriter, r *http.Request) {
+				raw, _ := io.ReadAll(r.Body)
+				got := jsonValue(t, raw).(map[string]any)
+				if !reflect.DeepEqual(got["tools"], catalog) {
+					t.Error("Guardian catalog was translated")
+				}
+				io.WriteString(w, decision)
+			}, func(endpoint, token string) error {
+				response := adapterRequest(t, endpoint, token, string(body))
+				raw, err := io.ReadAll(response.Body)
+				if err != nil || response.StatusCode != 200 || string(raw) != decision {
+					t.Fatal("Guardian response changed")
+				}
+				return nil
+			})
+			runAdapted(t, app)
+		})
+	}
 }
