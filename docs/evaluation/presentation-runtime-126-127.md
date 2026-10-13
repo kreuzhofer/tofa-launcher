@@ -95,6 +95,15 @@ content diff. No shared snapshot was restored. Earlier qualification files fail
 the current gate after this drift. There is still no successful native Desktop
 loader/artifact/preview qualification; its model calibrations remain blocked.
 
+All new presentation validation material uses the fixed root
+`/tmp/tofa-presentation-validation`. The manual wizard creates a fresh owned
+subdirectory under `runs/` for each attempt and ignores the inherited `TMPDIR`.
+Launcher shortcuts, baseline snapshots and the legacy-location inventory belong
+under this root too. On macOS, `/tmp` and `/private/tmp` name the same directory.
+Historical evidence remains at its recorded locations until an explicit retention
+decision; moving those files would invalidate qualification records bound to their
+original absolute paths.
+
 Run from an interactive Terminal when ready, using already-built local assets:
 
 ```sh

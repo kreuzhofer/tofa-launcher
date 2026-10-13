@@ -187,10 +187,22 @@ finish() {
 TOTAL_STAGES=3
 TASK_SCRIPTS=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 TASK_PYTHON=${TOFA_PRESENTATION_PYTHON:-python3}
-TASK_PRIVATE=$(mktemp -d "${TMPDIR:-/private/tmp}/tofa-presentation-operator.XXXXXX")
+TASK_ROOT=/tmp/tofa-presentation-validation
+umask 077
+"$TASK_PYTHON" - "$TASK_ROOT" <<'PRIVATE_ROOT'
+import os
+from pathlib import Path
+import sys
+root = Path(sys.argv[1])
+for path in (root, root / 'runs'):
+    if path.is_symlink(): raise SystemExit('Validation directory must not be a symlink: ' + str(path))
+    path.mkdir(mode=0o700, exist_ok=True)
+    if path.stat().st_uid != os.getuid() or path.stat().st_mode & 0o077:
+        raise SystemExit('Validation directory must be owned by you with mode 0700: ' + str(path))
+PRIVATE_ROOT
+TASK_PRIVATE=$(mktemp -d "$TASK_ROOT/runs/manual.XXXXXX")
 TASK_PID=""
 TASK_RUN=""
-umask 077
 TASK_ARGS=("$@" --client desktop --private-root "$TASK_PRIVATE/runs")
 "$TASK_PYTHON" "$TASK_SCRIPTS/presentation_calibration.py" "${TASK_ARGS[@]}" --check > "$TASK_PRIVATE/assets.json"
 if [[ ! -t 0 ]]; then
