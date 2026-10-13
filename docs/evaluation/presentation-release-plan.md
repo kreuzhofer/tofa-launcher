@@ -1,8 +1,9 @@
 # Presentation evaluation to release
 
-Status: runtime qualification and final integration review are complete. Public
-branch publication needs explicit approval following automatic approval review;
-merge/closure is pending. Model capability and release readiness remain unqualified.
+Status: runtime qualification and final integration review are complete. The
+maintainer explicitly approved public branch publication, PR merge and closure of
+#126/#127 on 2026-10-13; integration is proceeding. Model capability and release
+readiness remain unqualified.
 The maintainer approved the three phases below on 2026-10-13. Cost is not a
 constraint; experimental bounds and separate outcomes remain part of the method.
 
@@ -87,10 +88,11 @@ runtime tickets is not a waiver of #119/#120/#106 or native-platform release gat
 The runtime branch is reviewed and ready at the recorded integration checkpoint.
 Automatic approval review rejected publishing the full branch to the public GitHub
 repository because merge/closure authorization did not explicitly authorize that
-public egress. Obtain explicit permission for this branch publication before push,
-PR creation and merge/closure; do not bypass the rejection with another upload path.
+public egress. The maintainer subsequently explicitly approved publishing this branch to the
+public repository, opening/merging its PR and closing #126/#127. That approval
+resolves the publication blocker; raw private runs and credentials stay local.
 The local PR body is prepared under the fixed validation root. #128 and #129 can
-proceed with local diagnosis while publication approval is pending. #130 retains
+proceed with local diagnosis while integration completes. #130 retains
 its native blockers. No raw private run data is part of the proposed push.
 
 The first #129 feedback check has run against the retained captures: the qualified
