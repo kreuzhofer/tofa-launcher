@@ -97,3 +97,38 @@ No production code changed, so the full Go/Python suites were not repeated for
 this documentation-only diagnosis. The previously recorded passing suites remain
 valid for their original revision and scope; the new preservation repro remains
 red. No merge, issue closure, or public publication was performed.
+
+## Implementation follow-up
+
+The [implementation ticket draft](presentation-desktop-override-ticket.md) records
+the required client change and launcher follow-through. It remains local.
+
+The complete, non-truncated public `openai/codex` tree at
+`f5297229c18a63d6788c3933c49162b77d7b67ec` contains 10,137 entries. It includes
+the Rust app server and CLI Desktop launch/diagnostic code; the inspected tree
+does not contain the installed Electron selection/reconciliation implementation.
+See the [official source repository](https://github.com/openai/codex/tree/f5297229c18a63d6788c3933c49162b77d7b67ec).
+
+The existing WebSocket override was also investigated without opening a network
+connection or launching Desktop. Replaying installed `j5` with inert transport
+constructors confirms that WebSocket selection bypasses the stdio transport and
+its `getConfigOverrides` callback. The native plugin definition inherits
+`CODEX_APP_TOOLS_PIPE_PATH` through `env_vars`; it does not provide a pipe value
+in its configuration. Executing the installed `getHostClient` function with no
+inherited pipe returns the explicit `ConnectionClosed` error, before opening a
+connection. The probe lives at
+`/tmp/tofa-presentation-validation/checks/probe-native-transport.cjs` and passes
+its assertions; results are in `native-transport-probe.json` beside it.
+
+These checks establish that switching the transport alone does not supply the
+native host inheritance needed by an independently launched app server. They do
+not prove all possible future transport integrations impossible. No private pipe
+was copied, reused, or synthesized, and no native authorization was weakened.
+The [official app-server documentation](https://learn.chatgpt.com/docs/app-server)
+also describes WebSocket transport as experimental and unsupported; its generic
+availability does not qualify this Desktop native-tool route.
+
+The settings-drift replay was rerun and remains red. The integration branch has
+no production fix for this blocker. Source access or a client build exposing the
+required separation is still the implementation dependency, rather than a
+location the maintainer is expected to supply from this launcher repository.
