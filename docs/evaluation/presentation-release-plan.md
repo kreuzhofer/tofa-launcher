@@ -211,3 +211,15 @@ internals and reliability across repeated tasks remain unestablished.
 publication/merge disposition. Retain the integration branch. Next is #128's
 captured-request naming diagnosis before fresh #130 deck comparisons; this result
 does not promote support or release status, or change historical deck outcomes.
+
+#128 diagnostic implementation is now committed at `cf6cbec`, reviewed against
+`29e2983` with zero remaining Standards/Spec findings. The observer exports safe
+transport stages and categories and retains original exceptions/provider errors
+privately. Operator instructions distinguish completed main work from failed or
+pending naming. One explicitly approved headless replay of the captured naming
+request completed successfully; both local baseline/current adapter replays passed.
+This does not explain the intermittent native failure. The next required action
+is one instrumented native naming attempt, with separately recorded title visibility,
+using `/tmp/tofa-presentation-validation/run-naming-diagnostic.sh`. Its preflight
+passes and it retains the existing launcher binary and ten-minute observer limit.
+See [the #128 handoff](desktop-naming-128.md). #128 and #130 remain open/gated.

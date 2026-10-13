@@ -78,3 +78,15 @@ remaining hypotheses: adapter/connection failure, provider failure, and native
 client cancellation. If it succeeds, record that success alongside the earlier
 failures and delimit the unresolved intermittent condition. Record human-visible
 title outcome independently of provider completion. #130 stays gated on disposition.
+
+## Verification checkpoint
+
+Implementation `cf6cbec` passed Standards and Spec review (zero remaining findings),
+the full Go race suite and `go vet`. Python discovery with the pinned Go toolchain
+ran 495 tests: 85 skipped and six argument-related errors in lifecycle/terminal
+tests. All six passed through their documented standalone entry points, yielding
+410 passed and 85 skipped across the combined checks. Generic discovery itself
+exited nonzero; its original log is retained. An earlier unrelated Windows lease
+timing failure passed both an isolated check and the later full run; it remains
+recorded. See [verification evidence](evidence/presentation-runtime-126-127/naming-128-verification.json)
+for invocation limitations, log hashes and the exact native handoff hashes.
