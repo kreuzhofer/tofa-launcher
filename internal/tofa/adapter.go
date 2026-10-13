@@ -99,6 +99,9 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 			if response.StatusCode >= 300 && response.StatusCode < 400 {
 				return errors.New("upstream redirect rejected")
 			}
+			if mapping, ok := response.Request.Context().Value(namespaceContextKey{}).(*namespaceTranslation); ok {
+				return mapping.restoreResponse(response)
+			}
 			return nil
 		},
 	}
@@ -106,6 +109,7 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 	var titleNotice sync.Once
 	var reasoningNotice sync.Once
 	var imageLimitNotice sync.Once
+	var namespaceNotice sync.Once
 	imageNotices := map[string]bool{}
 	adapter.server = &http.Server{
 		ReadHeaderTimeout: 5 * time.Second,
@@ -306,6 +310,19 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 					noticeMu.Lock()
 					defer noticeMu.Unlock()
 					fmt.Fprintln(a.Out, "DeepSeek image output: using a 32768-token limit for reasoning and answer combined when no output limit is supplied; workaround for the provider's image-request default failure. Explicit limits are preserved.")
+				})
+			}
+			body, namespaces, err := adaptNamespaces(body)
+			if err != nil {
+				http.Error(writer, "request adapter: "+err.Error(), http.StatusBadRequest)
+				return
+			}
+			if namespaces != nil {
+				request = request.WithContext(context.WithValue(request.Context(), namespaceContextKey{}, namespaces))
+				namespaceNotice.Do(func() {
+					noticeMu.Lock()
+					defer noticeMu.Unlock()
+					fmt.Fprintln(a.Out, "Request adapter: translating native namespace functions to provider flat tools; native call identities and approval enforcement retained.")
 				})
 			}
 			request.Body = io.NopCloser(bytes.NewReader(body))
