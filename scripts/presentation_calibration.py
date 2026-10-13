@@ -148,8 +148,10 @@ def main():
             shim = run / 'bin'; shim.mkdir()
             (shim / 'codex').write_text('#!/bin/sh\nexec ' + shlex.quote(str(client_path)) + ' "$@"\n')
             (shim / 'codex').chmod(0o700)
+            temporary = run / 'tmp'; temporary.mkdir(mode=0o700)
             env = dict(os.environ, CODEX_HOME=str(options.codex_home.resolve()), FIXTURE_ENDPOINT='http://127.0.0.1:' + str(provider.server_port),
-                       PATH=str(shim) + os.pathsep + os.environ.get('PATH', ''), OTEL_SDK_DISABLED='true')
+                       PATH=str(shim) + os.pathsep + os.environ.get('PATH', ''), OTEL_SDK_DISABLED='true',
+                       TMPDIR=str(temporary), TMP=str(temporary), TEMP=str(temporary))
             command = [str(options.launcher.resolve()), 'launch', 'codex' if options.client == 'cli' else 'codex-desktop',
                 '--model', 'moonshotai/Kimi-K3', '--guardian-model', 'zai-org/GLM-5.3-Flash',
                 '--allow-unverified', '--evaluation-observer', str(run / 'observer.json')]

@@ -128,6 +128,9 @@ func runDesktopBridge(args []string) error {
 	if err != nil {
 		return err
 	}
+	if len(args) > 0 && args[0] == "--tofa-desktop-settings-relay" {
+		return runDesktopSettingsRelay(args[1:])
+	}
 	// A retained, verified bridge also supplies the standalone uninstaller's
 	// recovery coordinator after the main launcher executable has been removed.
 	if len(args) > 0 && args[0] == "--tofa-installed-lifecycle" {
@@ -210,6 +213,10 @@ func desktopAppServerIndex(args []string) int {
 }
 
 func fetchDesktopRoute(endpoint, token string, mainPID int) (desktopRoute, error) {
+	return fetchDesktopRouteForParent(endpoint, token, mainPID, os.Getppid())
+}
+
+func fetchDesktopRouteForParent(endpoint, token string, mainPID, parentPID int) (desktopRoute, error) {
 	var route desktopRoute
 	invalid := errors.New("desktop launch context is invalid or expired; relaunch through tofa")
 	u, err := url.Parse(endpoint)
@@ -229,7 +236,7 @@ func fetchDesktopRoute(endpoint, token string, mainPID int) (desktopRoute, error
 		return route, invalid
 	}
 	request.Header.Set("Authorization", "Bearer "+token)
-	request.Header.Set("X-Tofa-Parent-Pid", strconv.Itoa(os.Getppid()))
+	request.Header.Set("X-Tofa-Parent-Pid", strconv.Itoa(parentPID))
 	if mainPID != 0 {
 		request.Header.Set("X-Tofa-Main-Engine-Pid", strconv.Itoa(mainPID))
 	}

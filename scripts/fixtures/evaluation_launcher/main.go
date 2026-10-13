@@ -7,11 +7,22 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 
 	"github.com/kreuzhofer/tofa-launcher/internal/tofa"
 )
 
 func main() {
+	// Saved engine references exec the bundled engine. They must not allocate
+	// another credential store whose deferred cleanup exec would discard.
+	if executable, err := os.Executable(); err == nil && filepath.Base(executable) == "tofa-desktop-engine" {
+		app := tofa.App{}
+		if err := app.Run(os.Args[1:]); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		return
+	}
 	if len(os.Args) == 2 && os.Args[1] == "--version" {
 		fmt.Println("tofa evaluation-fixture")
 		return

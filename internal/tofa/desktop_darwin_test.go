@@ -104,6 +104,7 @@ if '--ordinary-probe' in sys.argv:
     print(json.dumps({'args':sys.argv[1:], 'home':os.environ.get('CODEX_HOME'), 'native_key':os.environ.get('OPENAI_API_KEY'), 'tofa_key':os.environ.get('TOFA_API_KEY')}))
     sys.exit(23)
 if '--owned-worker' in sys.argv:
+    pathlib.Path(CAPTURE+'.ancestry').write_text(json.dumps({'pid':os.getpid(), 'parent':os.getppid()}))
     initialize = json.loads(sys.stdin.readline())
     print(json.dumps({'id': initialize['id'], 'result': {'userAgent': 'fixture'}}), flush=True)
     pathlib.Path(CAPTURE+'.worker-ready').touch()

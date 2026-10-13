@@ -34,6 +34,38 @@ def supplied_runtime(root):
 
 
 class LoaderTests(unittest.TestCase):
+    def test_calibration_scopes_child_temporary_files_to_the_owned_run(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory).resolve()
+            runtime = root / 'runtime'; supplied_runtime(runtime)
+            home = root / 'home'; home.mkdir()
+            skill = root / 'skill'; skill.mkdir()
+            inherited = root / 'inherited-tmp'; inherited.mkdir()
+            executable = root / 'client'
+            executable.write_text('#!' + sys.executable + '\n' + """
+import json, os, pathlib, sys, tempfile
+if '--version' in sys.argv:
+    print('fixture 1')
+else:
+    fd, name = tempfile.mkstemp(); os.close(fd)
+    pathlib.Path('child-temp.json').write_text(json.dumps({
+        'path': name, 'environment': {k: os.environ.get(k) for k in ('TMPDIR', 'TMP', 'TEMP')}}))
+""")
+            executable.chmod(0o700)
+            result = subprocess.run([sys.executable, '-B', str(SCRIPT.with_name('presentation_calibration.py')),
+                '--client', 'cli', '--codex', str(executable), '--launcher', str(executable),
+                '--runtime-root', str(runtime), '--skill', str(skill), '--codex-home', str(home),
+                '--private-root', str(root / 'runs')], capture_output=True, text=True, timeout=15,
+                env=dict(os.environ, TMPDIR=str(inherited), TMP=str(inherited), TEMP=str(inherited)))
+            self.assertEqual(result.returncode, 1, result.stderr)
+            attempts = list((root / 'runs').iterdir())
+            self.assertEqual(len(attempts), 1)
+            observed = json.loads((attempts[0] / 'workspace/child-temp.json').read_text())
+            temporary = Path(observed['path']).parent
+            self.assertEqual(temporary.parent, attempts[0])
+            self.assertTrue(all(Path(value) == temporary for value in observed['environment'].values()))
+            self.assertEqual(list(inherited.iterdir()), [])
+
     def exchange(self, root, arguments=None):
         requests = [
             {'jsonrpc': '2.0', 'id': 1, 'method': 'initialize', 'params': {
