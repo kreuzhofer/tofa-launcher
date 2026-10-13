@@ -53,6 +53,13 @@ def desktop_handoff(root, encoding, *, command='run', case='05', artifacts='pres
 
 class CommandTests(unittest.TestCase):
     @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
+    def test_desktop_handoff_does_not_require_waiting_for_failed_naming(self):
+        with tempfile.TemporaryDirectory() as directory:
+            result = desktop_handoff(Path(directory), 'raw')
+            self.assertIn('After the main turn finishes', result.stderr)
+            self.assertIn('Do not wait for a failed title', result.stderr)
+
+    @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
     def test_self_declared_presentation_proof_cannot_unlock_paid_deck_inference(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

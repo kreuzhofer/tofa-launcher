@@ -443,7 +443,8 @@ def execute(options, run, report):
             command += ['--app-bundle', str(Path(options.app_bundle).resolve())]
             print('Create a NEW conversation in workspace: ' + str(workspace) +
                   '\nUse the exact prompt in: ' + str(run / 'prompt.txt') +
-                  '\nAfter the turn and naming finish, use the evaluator finish command for this run.', file=sys.stderr)
+                  '\nAfter the main turn finishes, record any requested UI observations and use the evaluator finish command for this run.'
+                  '\nDo not wait for a failed title; naming is scored independently.', file=sys.stderr)
         process = None
         log_path = run / 'client.log'
         try:

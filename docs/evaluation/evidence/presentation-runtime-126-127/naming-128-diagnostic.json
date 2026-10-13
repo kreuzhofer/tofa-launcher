@@ -1,0 +1,37 @@
+{
+  "schema": "tofa-naming-diagnostic-v1",
+  "baseline": "29e2983",
+  "status": "native_diagnostic_pending",
+  "live_replay": {
+    "explicit_user_authorization": true,
+    "requests": 1,
+    "seconds_limit": 600,
+    "output_tokens_limit": 4096,
+    "tool_execution": false,
+    "desktop_launch": false,
+    "captured_source_sha256": "b72fa75ec55cbd9fc63ce5a85e01e16323e024bb0fb86f2f123ce9767d85a078",
+    "http_status": 200,
+    "completed": true,
+    "routed_model": "nvidia/Nemotron-3_5-Lightning",
+    "elapsed_ms": 1513.051,
+    "usage": {
+      "input_tokens": 6273,
+      "output_tokens": 150,
+      "total_tokens": 6423
+    },
+    "provider_request_sha256": "c778eec3b835a75ec8ff5a0b492eb9fea345084be2d5974f5c2de0215e98b2df",
+    "provider_response_sha256": "a061a34f462f0a9316a99c638db5bcf8033cae505ab411c4c8b7de3920c6a830",
+    "private_run": "checks/naming-128/current-live-1"
+  },
+  "local_adapter_comparison": {
+    "baseline_adapter_revision": "c6e508f",
+    "candidate_adapter_revision": "29e2983",
+    "both": "passed_with_race_detector",
+    "scope": "same captured title input produces the same adapted provider contract and preserves the recorded successful response; not a live baseline comparison",
+    "logs": {
+      "local-current-replay.log": "9f5cb832dcd94753b14340ec1994333e4bc2ac7f1f3a6cfa3c79728ce91eff3b",
+      "local-baseline-replay.log": "168fb8747756a44c846a1ce0864189794f4ebf60eb7edd727ec67ec45506484e"
+    }
+  },
+  "remaining": "Original native stream failures did not retain exceptions. One approved live replay passed. Native failure mechanism and human title visibility remain unresolved; do not claim a naming fix or release qualification."
+}
