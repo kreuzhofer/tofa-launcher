@@ -1,7 +1,11 @@
 # Separate Desktop app-server selection from persistent MCP executable settings
 
 Local implementation-ticket draft. Not published, assigned, or implemented.
-Blocks the preservation requirement of #127 (parent #119).
+Required for zero persistent executable-reference changes in #127 (parent #119).
+The maintainer has since authorized verification of a narrower retained-bridge
+exception; see [the results](retained-mcp-bridge-verification.md). This upstream
+change is not required by that alternative, whose evaluator integration and
+presentation qualification remain incomplete.
 
 ## Problem
 

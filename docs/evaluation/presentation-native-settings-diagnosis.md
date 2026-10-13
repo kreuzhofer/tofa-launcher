@@ -1,7 +1,10 @@
 # Native Desktop settings drift diagnosis
 
-Status: cause reproduced; no production fix applied. #126/#127 remain on the
-integration branch and unqualified. Investigation baseline: `4b01ca1`.
+Status: cause reproduced. The original zero-change requirement needs a client
+change. The maintainer subsequently authorized verification of retained bridge
+references; [lifecycle verification](retained-mcp-bridge-verification.md) now
+supports that narrower alternative. #126/#127 remain on the integration branch
+and unqualified. Investigation baseline: `4b01ca1`.
 
 ## Cause and boundary
 

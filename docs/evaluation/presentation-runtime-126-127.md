@@ -143,7 +143,11 @@ fresh actual CLI deck run. Independent standards and spec reviews found no new
 implementation defects. These checks establish the process-layout fix, not full
 native presentation qualification.
 
-Native preservation remains blocked. The subsequent
+The strict native preservation gate remains blocked. The maintainer subsequently
+authorized a two-reference retained-bridge exception for verification. The
+[lifecycle checks](retained-mcp-bridge-verification.md) passed their scoped checks;
+the exception is not yet encoded in the qualification validator and no native
+presentation workflow is claimed. The earlier
 [settings diagnosis](presentation-native-settings-diagnosis.md) reproduces the
 two writes with exact installed functions and identifies the Desktop command
 selection/reconciliation boundary required for a fix. No supported launcher-only
