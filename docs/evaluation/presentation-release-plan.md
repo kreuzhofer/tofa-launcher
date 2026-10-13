@@ -1,7 +1,8 @@
 # Presentation evaluation to release
 
-Status: runtime qualification is complete; final integration review and follow-up
-tracking are in progress. Model capability and release readiness remain unqualified.
+Status: runtime qualification and final integration review are complete. Public
+branch publication needs explicit approval following automatic approval review;
+merge/closure is pending. Model capability and release readiness remain unqualified.
 The maintainer approved the three phases below on 2026-10-13. Cost is not a
 constraint; experimental bounds and separate outcomes remain part of the method.
 
@@ -80,3 +81,23 @@ not substitute for them.
 Merge, evidence publication, experimental candidate publication, qualification and
 stable release are distinct actions. User authorization to implement/merge these
 runtime tickets is not a waiver of #119/#120/#106 or native-platform release gates.
+
+## Current next action
+
+The runtime branch is reviewed and ready at the recorded integration checkpoint.
+Automatic approval review rejected publishing the full branch to the public GitHub
+repository because merge/closure authorization did not explicitly authorize that
+public egress. Obtain explicit permission for this branch publication before push,
+PR creation and merge/closure; do not bypass the rejection with another upload path.
+The local PR body is prepared under the fixed validation root. #128 and #129 can
+proceed with local diagnosis while publication approval is pending. #130 retains
+its native blockers. No raw private run data is part of the proposed push.
+
+The first #129 feedback check has run against the retained captures: the qualified
+synthetic native run passes with one valid loader call/result; both live Kimi runs
+fail with an advertised loader and zero invocations. The read-only check and its
+three-control result are retained beneath the fixed root in
+`checks/release-planning/check-loader-call.py` and `loader-feedback-loop.json`.
+This establishes a fast observable signal; it does not yet locate a provider-side
+or model-selection cause. Next: replay request adaptation locally, then use the
+separately declared actual-native diagnostic contract in #129.
