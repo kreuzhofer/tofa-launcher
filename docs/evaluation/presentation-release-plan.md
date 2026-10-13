@@ -120,8 +120,13 @@ launcher passed with the corrected contract, observed the loader, delivered all
 three artifacts and preserved settings; no paid inference was used. Private run:
 `timeout-compatibility-cli/f5bde76a4cc14c0ead521df52bcf9cbb`.
 
-Next: capture a fresh native qualification against the current installed Pages
-plugin version and updated harness using `run-manual.sh` under the fixed root.
-Human preview confirmation is still required. Preserve old proofs; do not edit
-their hashes or restore installed settings. After validating the new proof, update
-the focused diagnostic's proof reference before the Kimi/GLM attempts.
+Fresh native qualification now passes against the current installed Pages plugin
+and harness revision `afbf6e0`, including maintainer-observed native PPTX/PDF
+previews and independent proof validation. The sanitized checkpoint is
+`evidence/presentation-runtime-126-127/native-requalification-after-update.json`.
+Historical proofs and failed attempts remain unchanged. Both focused model
+preflights pass and `run-loader-diagnostic.sh` now references the new proof.
+
+Next: one fresh native Kimi loader/version diagnostic, followed by the GLM control,
+using that wizard under the fixed root. These live-model outcomes remain pending;
+qualification alone does not close #129 or establish deck quality.

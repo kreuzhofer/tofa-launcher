@@ -1,0 +1,70 @@
+{
+  "schema": "tofa-native-requalification-checkpoint-v1",
+  "reason": "Installed Pages plugin update and ten-minute evaluation harness change",
+  "source_revision": "afbf6e0",
+  "private_run": "runs/manual.9FvxoK/runs/c334f855279e4916961941fc0bde0941",
+  "proof_sha256": "3b3a377ebf2ea29d9a8884a6647568c3f1482cd5f06db135c784c2afb89c4d5f",
+  "status": "qualified",
+  "failure": null,
+  "independent_current_environment_validation": "passed",
+  "loader_name": "mcp__codex_app__load_workspace_dependencies",
+  "limits": {
+    "seconds": 600,
+    "requests": 8,
+    "output_tokens": 4096
+  },
+  "launcher_seconds": 900,
+  "paid_inference": false,
+  "settings_preserved": true,
+  "termination": "operator_finished",
+  "exit_code": 1,
+  "native": {
+    "version": "26.1007.30912",
+    "build": "20156",
+    "application_sha256": "75e397e2280dde93b70a85aa926f4282c728eacc84dfeb15ba7fb6ddd84628af",
+    "executable_sha256": "2053a78d225a1492d0cb6896cfd83254af06c3277547e83d4d23fef88f00426e",
+    "native_transport_sha256": "ae60fd7129a8eafea42dc41e8692e95dda624d4406826edd74010148371113db"
+  },
+  "launcher_identity": {
+    "sha256": "1f2b7a7b61c7214ceb46f0f0bb0c4952760875ceaee35838706837c4db76d519",
+    "version": "tofa dev-prototype"
+  },
+  "artifacts": {
+    "deck.pptx": "8f3d262222b73a670d5a472f289329622a0130f931e5d3fa05422aac5e688f7f",
+    "deck.pdf": "45b274908b07d35aa3b2cc28983c19f458284403642e3cc7acf9459d2c2e3a0e",
+    "slide.png": "109e0b9a0bdb2aa9ea2bd0ab7f8108fba2104b2ee6eb46076bee1418d27190e4"
+  },
+  "preview": {
+    "status": "passed",
+    "operator": "maintainer",
+    "method": "human",
+    "utc": "2026-10-13T16:31:38Z",
+    "source_sha256": "af61eaff473a062dc3f43f3502ddc9404376220307f23912ad6aef73af6a5234"
+  },
+  "focused_preflights": [
+    {
+      "model": "moonshotai/Kimi-K3",
+      "status": "ready",
+      "limits": {
+        "seconds": 600,
+        "requests": 10,
+        "output_tokens": 4096
+      },
+      "run_id": "88de0224b8d84a188e7e4a90cde548b1",
+      "source_sha256": "a5efeea3e3bf0c1cb2df18e4f2cb80ef919c6a1d75bc0a82e145df97904eb454"
+    },
+    {
+      "model": "zai-org/GLM-5.3",
+      "status": "ready",
+      "limits": {
+        "seconds": 600,
+        "requests": 10,
+        "output_tokens": 4096
+      },
+      "run_id": "7fbfbff8751f41569155d00d60d772e7",
+      "source_sha256": "9ce18d97bfa5b6e8b58d1c82d1a72c5adf7564e1ff67c84536baaa13cd432a5d"
+    }
+  ],
+  "diagnostic_wizard_sha256": "7d0e0b198582cfd4495fb1d4de7b6a0c3faee87c0c072b4bc31ac7732ad15561",
+  "scope": "Runtime and human preview qualification only; focused live-model diagnostics have not yet run with this proof."
+}
