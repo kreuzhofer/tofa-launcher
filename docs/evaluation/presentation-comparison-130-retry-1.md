@@ -53,6 +53,7 @@ A second invocation refuses an already-started retry campaign.
 
 The gate logic is unchanged and its four tests pass; Bash syntax and declaration
 hash checks pass. The wizard library is unchanged. No human workflow was run
-end-to-end by the agent. Prelaunch review results are recorded in the evidence.
+end-to-end by the agent. Prelaunch Standards and Spec reviews against `25aa775` each found zero issues;
+results are recorded in the evidence.
 After the live attempts, independent scoring and outcome review remain required.
 #130/#119 remain open; no model-support or release promotion follows from this check.
