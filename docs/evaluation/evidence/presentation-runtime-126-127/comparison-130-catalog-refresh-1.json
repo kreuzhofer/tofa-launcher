@@ -256,8 +256,11 @@
   "live_attempts_started": 0,
   "scope": "Amended predeclaration for one explicitly authorized retry plus three pending attempts. Original infra-blocked attempt retained; no live retry outcome or release claim.",
   "prelaunch_reviews": {
-    "status": "pending",
-    "baseline": "cb69e5b"
+    "baseline": "cb69e5b",
+    "head": "fbc0c36",
+    "standards_findings": 0,
+    "spec_findings": 0,
+    "scope": "Catalog-only refresh and two private directory bindings; live outcomes remain pending."
   },
   "amendment": {
     "reason": "Runtime and installed skill update invalidated original proof. User explicitly requested retry.",
