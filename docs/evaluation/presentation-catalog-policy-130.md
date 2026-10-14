@@ -48,6 +48,10 @@ retain exact-catalog rejection. Malformed comparison controls are rejected
 explicitly. All 25 evaluator tests pass. The 86 related observer, runtime, preview,
 synthetic transport, operator, preservation and adapter tests also pass, with two
 installed-runtime tests skipped because their explicit opt-in variables were unset.
+Standards and Spec reviews of `4e406b3...32b31e8` each reported zero findings.
+The final evaluator rerun also passed all 25 tests. Current native assets pass
+read-only validation; the old comparison command now stops with concise
+qualification instructions, and its previous bytes remain archived privately.
 
 Changing the evaluator changes its recorded harness hash. Existing runtime proofs
 are preserved as historical and must not be rewritten or silently rebound. The
