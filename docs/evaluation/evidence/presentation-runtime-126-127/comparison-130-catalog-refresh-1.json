@@ -1,0 +1,285 @@
+{
+  "schema": "tofa-post-diagnosis-comparison-v1",
+  "status": "predeclared",
+  "created_utc": "2026-10-14T09:15:54.641948+00:00",
+  "source_revision": "2fd66e422e03d81a88166f219ae94ef7bc59190c",
+  "reviewed_source": "8ff0cd3",
+  "source_tree": "b990cc82aceadd5c7b7ac9ad676b75abce3bfa81",
+  "models_order_method": "One SystemRandom shuffle per case, drawn once and retained; no redraw based on outcomes.",
+  "guardian": "zai-org/GLM-5.3-Flash",
+  "naming_model": "nvidia/Nemotron-3_5-Lightning",
+  "corpus": "capability-corpus-v3",
+  "corpus_sha256": "34d0789b23fa0e6b4fe545af4b2a16e7f9270254e3fa0cb08824b428a046a2ac",
+  "automatic_retries": 0,
+  "guidance_treatment": null,
+  "scoring": [
+    "task_content",
+    "language",
+    "skill_discovery_and_use",
+    "loader_execution",
+    "artifact_integrity_and_finalization",
+    "reference_syntax",
+    "human_preview",
+    "repetition",
+    "provider_naming",
+    "human_visible_title"
+  ],
+  "unexpected_outcome": "Stop the batch for agent inspection on failed/cancelled/infra-blocked runs, unfinished requests, changed state, or an unexpected stopping condition. No automatic retry or substitution; remaining predeclared attempts stay pending.",
+  "qualification_sha256": "cc77eb541dc47a2ed8d5661654557c79e1caba9930df8ce6799726aa65334aed",
+  "harness_identity": {
+    "presentation_calibration.py": "1328aa1c68936457a296c7c3d20efab95de8e985e9614be1bac1bebf1b92ed08",
+    "presentation_runtime.py": "5e3cf36fd16f0b2037dd0df6a090360d8fc897551bd1b26f3325792f0264d075",
+    "presentation_smoke.py": "028bb6f44676c53a2f345f379cef78b9eb78a8cd52012ac5ab37c63bfbf95b87",
+    "capability_runtime.py": "49b74d6517491e96af775c66b64928968920b28441084725f453b4147cce748f",
+    "presentation_preview.py": "7787c5fe45901bd318360c9ddb22d8840f61fc6c1a62210a7a394147601a171b",
+    "capability_observer.py": "2822da255c68908c1c5f54374694f3cfbd4578ac0ca8e72121b037bd335e77bc",
+    "capability_actions.py": "cada1c6b10fae235c28cd958c39b595b6260f94279ee226b5ef266f7a0e2efd7",
+    "capability_evaluation.py": "6e68fbcb1aa1eb37e7ab51bc5d4af40dce9ef39c796ddf5d28c385e77462edb3",
+    "evaluation_proxy.py": "6b9cc7d9953ee62fc07a90b827d1052dbff33b54dd8155d52a7ae340480fd771",
+    "retained_mcp.py": "b60430a6596979624ac1a35923bc7d85a7e40aa0de55eb025d2b55a3f914bb53",
+    "presentation_synthetic.py": "b94a36c241a0e540bef4b8880e68c143bc7572490c7d6964d80969235642b22a",
+    "presentation-smoke.mjs": "79bebf394dd730baf6123b963396f24031f78c6952d7884cfd9bd33f71e57be2",
+    "retained-mcp-lifecycle.json": "3fc8492491d0fef7ec75d88b9197d13365b20216190b35980abed32384e1255e"
+  },
+  "skill_identity": [
+    {
+      "location_sha256": "8a19ef5fb6b5491fba1ab3007447a8273b136fb29af0fc2084f67bd548f7e35f",
+      "sha256": "bb3726eff35cb82241fd2c3b09fcdb18cc3bf3daefddf8df929d2e0bd4d2af2f",
+      "resources_sha256": "49b788f881cf8daeadf9341a5547e8caae495266946d3457f2a5835436267562",
+      "presentation": true,
+      "document": false,
+      "implementation_sha256": "45a8c01663a4b1dad6e80e1112223b8a19529b32be5f46a47a2dbc058806f55d",
+      "requirement_observed": true
+    }
+  ],
+  "attempts": [
+    {
+      "order": 1,
+      "case": "03",
+      "model": "moonshotai/Kimi-K3",
+      "prompt": "Build me a 5-slide pitch deck for an app that texts you one genuine compliment every morning. Make the design go hard. No corporate stock-photo energy.",
+      "prompt_sha256": "c8768c28dd04f6414a2a00ee8d8e7db7b4c8f276e2319629632f763d30a6c4c1",
+      "limits": {
+        "seconds": 900,
+        "requests": 80,
+        "output_tokens": 8192
+      },
+      "variant": "baseline",
+      "fresh_workspace": true,
+      "fresh_conversation": true,
+      "preflight_sha256": "fdb9bcac4ab188bd7100dbe6578f47542fac407ddd36966006ad62c2b7324321",
+      "catalog_checked_utc": "2026-10-14T09:14:46Z",
+      "catalog_sha256": "807ac0c4ae71a6187832423bc2ca4b975a40b8f4b5ec661da6a3bee728bbfc4f",
+      "preflight_prompt_fingerprint": "e127ba077c20c4734483075f6cc0d947283c0b9a6a83ddf9def4b191344f7317"
+    },
+    {
+      "order": 2,
+      "case": "03",
+      "model": "zai-org/GLM-5.3",
+      "prompt": "Build me a 5-slide pitch deck for an app that texts you one genuine compliment every morning. Make the design go hard. No corporate stock-photo energy.",
+      "prompt_sha256": "c8768c28dd04f6414a2a00ee8d8e7db7b4c8f276e2319629632f763d30a6c4c1",
+      "limits": {
+        "seconds": 900,
+        "requests": 80,
+        "output_tokens": 8192
+      },
+      "variant": "baseline",
+      "fresh_workspace": true,
+      "fresh_conversation": true,
+      "preflight_sha256": "16dd219ce6618bcabefa9102c4aceda1b3545b9f9db1453552e3155130808e31",
+      "catalog_checked_utc": "2026-10-14T09:14:46Z",
+      "catalog_sha256": "807ac0c4ae71a6187832423bc2ca4b975a40b8f4b5ec661da6a3bee728bbfc4f",
+      "preflight_prompt_fingerprint": "e127ba077c20c4734483075f6cc0d947283c0b9a6a83ddf9def4b191344f7317"
+    },
+    {
+      "order": 3,
+      "case": "04",
+      "model": "moonshotai/Kimi-K3",
+      "prompt": "Use the installed presentation skill; read its instructions before creating the deck. Build me a 5-slide pitch deck for an app that texts you one genuine compliment every morning. Make the design go hard. No corporate stock-photo energy.",
+      "prompt_sha256": "d48f987ba5612e5763de68422f60dc0846427dd92d44a72b586369dab9d97995",
+      "limits": {
+        "seconds": 900,
+        "requests": 80,
+        "output_tokens": 8192
+      },
+      "variant": "baseline",
+      "fresh_workspace": true,
+      "fresh_conversation": true,
+      "preflight_sha256": "cf3dc4bfda2a04a18816d40d6cb502051dccbd1e34f4af46f81f7f8ffc2d50c5",
+      "catalog_checked_utc": "2026-10-14T09:14:46Z",
+      "catalog_sha256": "807ac0c4ae71a6187832423bc2ca4b975a40b8f4b5ec661da6a3bee728bbfc4f",
+      "preflight_prompt_fingerprint": "9ec1a9cbc135a8abe658b10d80ea0a5310098d5ef4b9dfdcf2ea5b5ff121db08"
+    },
+    {
+      "order": 4,
+      "case": "04",
+      "model": "zai-org/GLM-5.3",
+      "prompt": "Use the installed presentation skill; read its instructions before creating the deck. Build me a 5-slide pitch deck for an app that texts you one genuine compliment every morning. Make the design go hard. No corporate stock-photo energy.",
+      "prompt_sha256": "d48f987ba5612e5763de68422f60dc0846427dd92d44a72b586369dab9d97995",
+      "limits": {
+        "seconds": 900,
+        "requests": 80,
+        "output_tokens": 8192
+      },
+      "variant": "baseline",
+      "fresh_workspace": true,
+      "fresh_conversation": true,
+      "preflight_sha256": "11a292d1e2baf2957d76c24727c45df782a0bab972155eaa12791718ebaa750d",
+      "catalog_checked_utc": "2026-10-14T09:14:46Z",
+      "catalog_sha256": "807ac0c4ae71a6187832423bc2ca4b975a40b8f4b5ec661da6a3bee728bbfc4f",
+      "preflight_prompt_fingerprint": "9ec1a9cbc135a8abe658b10d80ea0a5310098d5ef4b9dfdcf2ea5b5ff121db08"
+    }
+  ],
+  "identities": {
+    "client_identity": {
+      "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+      "version": "codex-cli 0.162.0-alpha.17.2"
+    },
+    "launcher_identity": {
+      "sha256": "11d28bf933f5230bc9c06744d98726b51d096504e9e683471f21b9c369fbea1e",
+      "version": "tofa dev-prototype"
+    },
+    "native": {
+      "version": "26.1007.30912",
+      "build": "20156",
+      "application_sha256": "75e397e2280dde93b70a85aa926f4282c728eacc84dfeb15ba7fb6ddd84628af",
+      "executable_sha256": "2053a78d225a1492d0cb6896cfd83254af06c3277547e83d4d23fef88f00426e",
+      "native_transport_sha256": "ae60fd7129a8eafea42dc41e8692e95dda624d4406826edd74010148371113db"
+    }
+  },
+  "supplied_runtime": {
+    "contract": "supplied-presentation-runtime-v1",
+    "provider": "codex_app",
+    "bundle_version": "26.1013.11914",
+    "artifact_tool_version": "2.8.94",
+    "declared_versions": {
+      "node": "v24.19.0",
+      "python": "3.12.14"
+    },
+    "hashes": {
+      "manifest": "14662ce4059077e840e0ac67d92a0cb06f34c7b63657aed53b0a440af9725733",
+      "node": "3c9448363b9976bf3d9e8f4d320397975800131b42c7b1be342dadc05871dd25",
+      "python": "7a314947596fc484d4ec36ffc28e843b78d6d749c68736f8b5c24e7333f418eb",
+      "artifact_package": "5b549ead54539418d7d4e6233a4e8a9ba312a87d71302826d8620f6f2b5ed0e5",
+      "artifact_module": "1123ceddb6a4b863fe1402193b5c0260a964e7f60561ddbdaca043312c836be7",
+      "soffice": "81c7db1c6dbcdd606d95abef337b4529aeda6a4fa1cf23a5a567f9c5655c8b66",
+      "pdfinfo": "fee70ade670fb025343aca2b5c3a2aacacb8ed9edce1b716b233b5de924b6bf5",
+      "pdftoppm": "de772e88ab9977ccde25def9b403bf42675d75f5dd82b19fbd7d8123ad183159",
+      "native_soffice": "8a6aed9dc38f4d4cce377a0f719314979fb12bb1e67f33998425332c20cbc556",
+      "native_pdfinfo": "45fa717fb4aaec4bfbefc3a07612ff2539dbfcce30fb30e976aa5d4a35bef802",
+      "native_pdftoppm": "d9d81b176e8fd38d07f2fbf4f84c17dc991c6bac3730ff3cad3239c4fcbed892"
+    },
+    "native_executables_relative_to_bundle": {
+      "soffice": "dependencies/native/libreoffice-headless/libreoffice/LibreOfficeDev.app/Contents/MacOS/soffice",
+      "pdfinfo": "dependencies/native/poppler/bin/pdfinfo",
+      "pdftoppm": "dependencies/native/poppler/bin/pdftoppm"
+    }
+  },
+  "native_qualification": {
+    "status": "qualified",
+    "failure": null,
+    "settings_preserved": true,
+    "native_preview": "passed",
+    "artifacts": {
+      "deck.pptx": "7e2a397a0bda26b984da29e3edd224a0702387656a26b41d1f3e881386227699",
+      "deck.pdf": "68c9952355aa0f19193828e74257803682b5b37786f8937cbf8f1123e696e2f1",
+      "slide.png": "109e0b9a0bdb2aa9ea2bd0ab7f8108fba2104b2ee6eb46076bee1418d27190e4"
+    },
+    "limits": {
+      "seconds": 600,
+      "requests": 8,
+      "output_tokens": 4096
+    },
+    "launcher_seconds": 900,
+    "termination": "operator_finished",
+    "exit_code": 1,
+    "operator_sha256": "216afa5b81b22810fda2755e02514028ba9e6a8091666dfd4e9aebc88b4d3bce",
+    "independent_validation": "passed",
+    "private_run": "runs/manual.bFPaYH/runs/9be2064b304c472cb2f5f7882753c105",
+    "proof_sha256": "cc77eb541dc47a2ed8d5661654557c79e1caba9930df8ce6799726aa65334aed"
+  },
+  "preview_observation": {
+    "schema": "tofa-native-presentation-preview-v1",
+    "operator": "maintainer",
+    "observation_method": "human",
+    "status": "passed",
+    "utc": "2026-10-14T09:02:52Z",
+    "artifacts": {
+      "deck.pptx": "7e2a397a0bda26b984da29e3edd224a0702387656a26b41d1f3e881386227699",
+      "deck.pdf": "68c9952355aa0f19193828e74257803682b5b37786f8937cbf8f1123e696e2f1"
+    },
+    "scope": "human native PPTX and PDF preview observation; no other criterion is scored"
+  },
+  "preflight_results": [
+    {
+      "order": 1,
+      "status": "ready",
+      "blockers": [],
+      "private_run": "runs/comparison-130-retry-1/catalog-preflight-01/4485b08906834e0b9d9153117b0dbc96"
+    },
+    {
+      "order": 2,
+      "status": "ready",
+      "blockers": [],
+      "private_run": "runs/comparison-130-retry-1/catalog-preflight-02/5730d160b61b45548b022413866b236b"
+    },
+    {
+      "order": 3,
+      "status": "ready",
+      "blockers": [],
+      "private_run": "runs/comparison-130-retry-1/catalog-preflight-03/5a1b9f427389434eb17732b1fa7e8e2e"
+    },
+    {
+      "order": 4,
+      "status": "ready",
+      "blockers": [],
+      "private_run": "runs/comparison-130-retry-1/catalog-preflight-04/0dc7ead48e1940bcb583db254c6fa55e"
+    }
+  ],
+  "private_control_sha256": {
+    "checks/comparison-130-retry-1/catalog-refresh-1/declaration.json": "6366e5df2de76de15acb149cc43a9e025a8f62e5fd0a0f830e58d8940d8f6f52",
+    "run-comparison-130-retry-1.sh": "35c9f464ece73fc620665bf33cd289ad3bf2d83d1811b2e96c3d5db553297bdd",
+    "checks/comparison-130-retry-1/catalog-refresh-1/gate.py": "31a0620946cfd001cd12ff5e92004f11d32434a9180d0dd5b197dcda951d6ad2",
+    "checks/comparison-130-retry-1/catalog-refresh-1/gate_test.py": "ba76685d69856cb2ea24b2e8a92bc43c9490da84c393e956a863cc4f0b8ce9fd",
+    "checks/comparison-130-retry-1/catalog-refresh-1/verify-declaration.py": "d2b4d89b3d5dca1a4462a00ed2410d8b19cd3e83f3299a1a9f734e723f9f6b51",
+    "checks/naming-128/naming-status.py": "b2bbb61f2bb23bf0f64ffd5e9d06f8cf075053e338c95d23bdc4b6be6ef9ba7e"
+  },
+  "operator_checks": {
+    "gate_tests": 4,
+    "gate_tests_result": "passed_after_red",
+    "bash_syntax": "passed",
+    "template_library": "byte_identical_to_wizard_skill_template",
+    "shellcheck": "unavailable",
+    "end_to_end_wizard": "not_run; native UI steps require maintainer",
+    "trace": "Every attempt has a fresh workspace; preview and title observations persist separately; unexpected outcomes halt without retry."
+  },
+  "live_attempts_started": 0,
+  "scope": "Amended predeclaration for one explicitly authorized retry plus three pending attempts. Original infra-blocked attempt retained; no live retry outcome or release claim.",
+  "prelaunch_reviews": {
+    "status": "pending",
+    "baseline": "cb69e5b"
+  },
+  "amendment": {
+    "reason": "Runtime and installed skill update invalidated original proof. User explicitly requested retry.",
+    "original_declaration_sha256": "d1da992dbbeb54e5e44ab8d78e652232c62768655c049909a94cd4409b597a2d",
+    "original_failed_run": "64e1f32f1e1245e0857a755f93fca9b5",
+    "retry_authorization": "User explicitly requested retry twice on 2026-10-14.",
+    "attempts": "One retry of original attempt 1, then original pending attempts 2\u20134. No new randomization or automatic retries."
+  },
+  "catalog_refresh": {
+    "stopped_run": "57a57646fd1a41059d0f8261743310ae",
+    "forwarded_requests": 0,
+    "desktop_launched": false,
+    "changed_provenance": [
+      "catalog_sha256"
+    ],
+    "removed_model": "Qwen/Qwen3.5-397B-A17B",
+    "selected_models_still_available": true,
+    "prior_declaration_sha256": "86072e46a1ddbf51b439d67d398bce63c67fba34e366b6c234099953c4cbfc52",
+    "scope": "Refresh only catalog anchors after inspection; original authorized model retry has not executed. No automatic retry."
+  },
+  "prior_control_archive": {
+    "path": "checks/comparison-130-retry-1/run-comparison-before-catalog-refresh.sh",
+    "sha256": "b8721235fc2c332e2ac7bdbae7b8e288ab1ee4a81f78bb123badf7aed7877181"
+  }
+}

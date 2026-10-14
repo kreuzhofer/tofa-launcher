@@ -5,6 +5,27 @@ This amendment retains that result and declares one retry of case 03 Kimi,
 followed by the three original pending attempts: case 03 GLM, case 04 Kimi,
 case 04 GLM. The recorded order is unchanged. No live retry has started.
 
+## Catalog-only prelaunch stop and refresh
+
+Launch preparation `57a57646fd1a41059d0f8261743310ae` stopped before Desktop
+launch or inference: zero requests, `environment_drift`, with only
+`catalog_sha256` different. The provider catalog removed
+`Qwen/Qwen3.5-397B-A17B`. Adding that single ID to the current sorted catalog
+reproduces the old fingerprint exactly. Both main models, Guardian and naming
+remain available; all other recorded provenance fields are identical.
+
+Four refreshed preflights pass. The existing native qualification remains valid;
+no new manual runtime check is required. The
+[catalog refresh evidence](evidence/presentation-runtime-126-127/comparison-130-catalog-refresh-1.json)
+is now authoritative for preflight and control hashes. Prior declaration evidence
+is historical and unchanged. Whole-catalog drift checks remain enabled, with no
+allowlist, substitution, automatic refresh or automatic retry at launch.
+
+The operator command below is unchanged. Its new evidence subdirectory is
+`runs/comparison-130-retry-1/catalog-refresh-1`, beneath the same fixed root.
+The stopped preparation and former script bytes are retained. The four declared
+model attempts are still pending; this refresh does not add a paid model attempt.
+
 ## Why the declaration changed
 
 Original run `64e1f32f1e1245e0857a755f93fca9b5` stopped after 107.7 seconds with
@@ -45,7 +66,7 @@ independent Lightning naming. Each attempt uses a fresh workspace/conversation a
 900 seconds including setup, 80 requests, 8192 output tokens per request.
 
 Run `bash /tmp/tofa-presentation-validation/run-comparison-130-retry-1.sh`.
-Evidence stays under the fixed root, in `runs/comparison-130-retry-1`; the original
+Evidence stays under the fixed root, within `runs/comparison-130-retry-1`; the original
 `runs/comparison-130` is retained. Preview/title observations remain separate.
 The existing gate stops on infrastructure or state drift, incomplete requests,
 failed naming or unexpected termination. No automatic retries or substitutions.
