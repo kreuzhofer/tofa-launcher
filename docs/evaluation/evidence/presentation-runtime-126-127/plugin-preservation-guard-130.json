@@ -1,0 +1,58 @@
+{
+  "schema": "tofa-plugin-preservation-guard-v1",
+  "baseline": "42fe936",
+  "scope": "Protective refusal before an affected adapted launch; native plugin reconciliation and model comparison remain blocked.",
+  "installed_profile": {
+    "status": "passed",
+    "exit_code": 1,
+    "native_processes_observed": 0,
+    "protected_state_preserved": true,
+    "launcher_settings_credentials_bridge_preserved": true,
+    "plugin_still_installed": true,
+    "candidate_sha256": "79a80110ceee275f4c5c159f3c225d2a899f137fb4aaa979a07975a152868bfb",
+    "paid_inference": false,
+    "duration_seconds": 6.938
+  },
+  "regression_red": {
+    "installed_cache": "unguarded launch returned success, removed fixture plugin, changed configuration, started Desktop and installed bridge",
+    "configuration_only": "enabled and disabled entries with absent cache were unprotected before native config inspection"
+  },
+  "regression_green": {
+    "public_interface": "launch codex-desktop with owned executable app/engine fixtures",
+    "cases": [
+      "installed cache and enabled setting",
+      "installed cache without setting",
+      "enabled setting without cache",
+      "disabled setting without cache"
+    ],
+    "unaffected_launch_checks": "ordinary shared-state launch and inactive-provider integration passed"
+  },
+  "reviews": {
+    "baseline": "42fe936",
+    "standards_findings": 0,
+    "spec_findings": 0
+  },
+  "implementation_sha256": {
+    "internal/tofa/desktop_darwin.go": "53a4754565aaed6a22b2dd64f3a4052208dba92cd36e133b1f4aecda7d64bae6",
+    "internal/tofa/desktop_profile_darwin.go": "9588c09e6bf1cf55d645af2df5d352390f43155fd33a40b468c3b2cfb1e4a676",
+    "internal/tofa/desktop_plugins_darwin_test.go": "6c2d009a362febfce0e0d92e7a30631eb62280e5de5f587694e3eb23e6fc4a43",
+    "internal/tofa/desktop_darwin_test.go": "98104821d8f86c6e16fbd521b43bf535df2e6e22e1871dcd3229a25e0800f697"
+  },
+  "limitations": [
+    "No native app modification or authentication/eligibility override.",
+    "No replacement of the normally installed launcher or retained bridge. The tested candidate remains isolated under the fixed temporary root.",
+    "No new presentation qualification, paid comparison, or release promotion.",
+    "Startup state checks do not lock out arbitrary concurrent plugin edits."
+  ],
+  "validation": {
+    "command": "go test -race ./...",
+    "status": "passed",
+    "exit_code": 0,
+    "scripts": "passed (cached)",
+    "evaluation_launcher_fixture": "passed (cached)",
+    "log_sha256": "4c1644860e831113b1423fb9954c179ad9b67ccb5f5fca8417fadc62b41d20f7",
+    "initial_suite": "One existing file-size-limit fixture failed because it did not serve the newly earlier config preflight. Updated only its shell fixture to serve read-only RPCs; focused regression and full rerun passed.",
+    "initial_log_sha256": "fa2833683a94d122613284a305b41a332cb75ca187fbcf8e75205107243164d5",
+    "internal_tofa_seconds": 323.402
+  }
+}

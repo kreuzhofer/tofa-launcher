@@ -271,12 +271,11 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 		return err
 	}
 	defer lease.Close()
-	bridge, err := installDesktopBridge(a.Dir, bundle.engine)
+	home, err := desktopHome(ctx)
 	if err != nil {
 		return err
 	}
-	home, err := desktopHome(ctx)
-	if err != nil {
+	if err := refuseDesktopPluginRemoval(home); err != nil {
 		return err
 	}
 	if err := os.MkdirAll(home, 0700); err != nil {
@@ -294,6 +293,10 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 	// remain at the client's ordinary locations and are never cleanup targets.
 	defer func() { result = errors.Join(result, os.RemoveAll(root)) }()
 	if err := integrateDesktopProvider(ctx, bundle.engine, home, profile, workspace, root, 0); err != nil {
+		return err
+	}
+	bridge, err := installDesktopBridge(a.Dir, bundle.engine)
+	if err != nil {
 		return err
 	}
 	adapter, err := a.startAdapter(ctx, c.ProjectID, key, *model, *guardian)

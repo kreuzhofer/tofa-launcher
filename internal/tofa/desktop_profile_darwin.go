@@ -146,6 +146,15 @@ func (client *desktopConfigClient) inspect(workspace string) (string, bool, erro
 		return "", false, err
 	}
 	config, _ := result["config"].(map[string]any)
+	if raw := config["plugins"]; raw != nil {
+		plugins, ok := raw.(map[string]any)
+		if !ok {
+			return "", false, errors.New("could not inspect native plugin configuration; Desktop launch cancelled")
+		}
+		if _, configured := plugins["code-review@openai-bundled"]; configured {
+			return "", false, errDesktopPluginRemoval
+		}
+	}
 	providers, _ := config["model_providers"].(map[string]any)
 	provider, present := providers["nebius-tofa"]
 	if present {
@@ -183,6 +192,9 @@ func (client *desktopConfigClient) inspect(workspace string) (string, bool, erro
 }
 
 func integrateDesktopProvider(ctx context.Context, engine, home, profile, workspace, runtimeDir string, ownerPID int) error {
+	if err := refuseDesktopPluginRemoval(home); err != nil {
+		return err
+	}
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 	client, err := openDesktopConfig(ctx, engine, home, profile, workspace, runtimeDir)
@@ -199,6 +211,23 @@ func integrateDesktopProvider(ctx context.Context, engine, home, profile, worksp
 	}
 	_, err = client.call("config/batchWrite", map[string]any{"filePath": nil, "expectedVersion": version, "reloadUserConfig": true, "edits": []any{map[string]any{"keyPath": "model_providers.nebius-tofa", "value": inactiveDesktopProvider, "mergeStrategy": "replace"}}})
 	return err
+}
+
+// Native bundled-plugin reconciliation removes code-review when adapted routing
+// makes ChatGPT authentication unavailable. It deletes cached files before its
+// engine uninstall request, so the settings relay cannot preserve them. Refuse
+// that transition without changing eligibility or restoring shared snapshots.
+var errDesktopPluginRemoval = errors.New("code-review@openai-bundled is installed or configured; adapted routing can make Desktop remove it. Adapted Desktop startup blocked to preserve ordinary settings; ordinary Desktop remains available. A native plugin-preservation fix is required")
+
+func refuseDesktopPluginRemoval(home string) error {
+	_, err := os.Lstat(filepath.Join(home, "plugins", "cache", "openai-bundled", "code-review"))
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return errors.New("could not inspect bundled code-review plugin state; Desktop launch cancelled")
+	}
+	return errDesktopPluginRemoval
 }
 
 func desktopOwnsNativeProfile(profile string, pid int) bool {

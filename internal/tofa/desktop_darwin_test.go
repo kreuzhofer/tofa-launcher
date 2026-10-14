@@ -1292,9 +1292,30 @@ func TestDesktopBridgePartialInstallationCleansUp(t *testing.T) {
 	}
 	dir := app.Dir
 	// This test must reach bridge copying, not Python/Xcode startup writes under
-	// the tiny file-size limit. Only the version probe can precede that copy.
+	// the tiny file-size limit. Serve the read-only preservation preflight using
+	// shell builtins so the actual bridge copy remains the failing filesystem IO.
 	engine := filepath.Join(bundle, "Contents/Resources/codex")
-	if err := os.WriteFile(engine, []byte("#!/bin/sh\n[ \"$1\" = --version ] || exit 97\nprintf 'codex-cli 0.155.0-alpha.16.4\\n'\n"), 0700); err != nil {
+	probe := `#!/bin/sh
+if [ "$1" = --version ]; then
+    printf 'codex-cli 0.155.0-alpha.16.4\n'
+    exit 0
+fi
+[ "$1" = app-server ] || exit 97
+while IFS= read -r line; do
+    case "$line" in
+        *'"id":'*) id=${line#*\"id\":}; id=${id%%,*} ;;
+        *) continue ;;
+    esac
+    case "$line" in
+        *'"method":"initialize"'*) result='{}' ;;
+        *'"method":"configRequirements/read"'*) result='{"requirements":null}' ;;
+        *'"method":"config/read"'*) result='{"config":{},"layers":[{"name":{"type":"user"},"version":"fixture"}]}' ;;
+        *) exit 98 ;;
+    esac
+    printf '{"id":%s,"result":%s}\n' "$id" "$result"
+done
+`
+	if err := os.WriteFile(engine, []byte(probe), 0700); err != nil {
 		t.Fatal(err)
 	}
 	// A real filesystem write failure while copying the bridge. The limit is
