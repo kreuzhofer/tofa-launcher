@@ -34,10 +34,14 @@
     },
     "red": "title cancellation stopped entire run",
     "reporting_red": "completed main incorrectly masked cancelled title",
-    "native_requalification": "pending"
+    "native_requalification": "pending",
+    "original_reproduction": "passed unchanged against corrected harness"
   },
   "review": {
-    "status": "pending"
+    "baseline": "d4e5d08",
+    "head": "472bba0",
+    "standards_findings": 0,
+    "spec_findings": 0
   },
   "historical_wrapper": {
     "path": "checks/disconnect-130/run-comparison-before-disconnect-fix.sh",

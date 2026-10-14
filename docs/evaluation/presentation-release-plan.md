@@ -89,7 +89,8 @@ runtime tickets is not a waiver of #119/#120/#106 or native-platform release gat
 
 ## Current next action
 
-Review the title-cancellation correction, then qualify the changed native harness.
+The title-cancellation correction has zero Standards/Spec findings at `472bba0`.
+Qualify the changed native harness before another model comparison.
 The comparison command is paused; preserve the interrupted attempt and all prior
 outcomes. Any further model retry needs its own explicit declaration. The original
 three remaining cells stay pending. No release is published.

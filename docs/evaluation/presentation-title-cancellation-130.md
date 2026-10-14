@@ -1,6 +1,6 @@
 # Title cancellation and evaluator-owned Desktop shutdown
 
-Status: evaluator correction passes local regressions; review, native requalification and any new
+Status: evaluator correction passes local regressions and both reviews; native requalification and any new
 model attempt remain pending. No release or model-support claim.
 
 ## Retained native outcome
@@ -60,3 +60,6 @@ Validation: all 57 observer/evaluator tests pass. Related runtime, operator,
 preservation and proxy suites ran 56 tests: 54 passed, two explicit installed-runtime
 opt-ins skipped. No native launch or provider request was made for this diagnosis.
 See [the sanitized evidence](evidence/presentation-runtime-126-127/title-cancellation-130.json).
+
+The original reproduction also passes unchanged against the corrected harness.
+Standards and Spec reviews of `d4e5d08...472bba0` each reported zero findings.
