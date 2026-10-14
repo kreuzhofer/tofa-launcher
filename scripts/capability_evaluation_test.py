@@ -15,7 +15,7 @@ import time
 SCRIPT = Path(__file__).with_name('capability_evaluation.py')
 
 
-def desktop_handoff(root, encoding, *, command='run', case='05', artifacts='present', settings_drift=False, client='desktop'):
+def desktop_handoff(root, encoding, *, command='run', case='05', artifacts='present', settings_drift=False, client='desktop', extra=()):
     bundle = root / 'FixtureDesktop.app'
     contents = bundle / 'Contents'
     (contents / 'Resources').mkdir(parents=True)
@@ -44,7 +44,7 @@ def desktop_handoff(root, encoding, *, command='run', case='05', artifacts='pres
         '--private-root', str(root / 'runs'), '--case', case, '--client', client,
         '--model', 'moonshotai/Kimi-K3', '--launcher', str(executable),
         '--codex', str(executable), '--app-bundle', str(bundle),
-        '--codex-home', str(root / 'home'), '--skill-root', str(root / 'skills')],
+        '--codex-home', str(root / 'home'), '--skill-root', str(root / 'skills'), *extra],
         env=dict(os.environ, CAPABILITY_FIXTURE_REFERENCE_ENCODING=encoding,
                  CAPABILITY_FIXTURE_ARTIFACTS=artifacts,
                  CAPABILITY_FIXTURE_SETTING_DRIFT='1' if settings_drift else ''),
@@ -52,6 +52,105 @@ def desktop_handoff(root, encoding, *, command='run', case='05', artifacts='pres
 
 
 class CommandTests(unittest.TestCase):
+    @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
+    def test_selected_catalog_policy_records_unrelated_change_without_blocking(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            first = desktop_handoff(root, 'raw', command='preflight',
+                                    extra=('--catalog-policy', 'selected-models'))
+            self.assertEqual(first.returncode, 0, first.stderr)
+            previous = json.loads(first.stdout)
+            executable = root / 'FixtureDesktop.app/Contents/Resources/codex'
+            command = [sys.executable, str(SCRIPT), 'preflight', '--private-root', str(root / 'runs'),
+                '--case', '05', '--client', 'desktop', '--model', 'moonshotai/Kimi-K3',
+                '--launcher', str(executable), '--codex', str(executable),
+                '--app-bundle', str(root / 'FixtureDesktop.app'), '--codex-home', str(root / 'home'),
+                '--skill-root', str(root / 'skills'), '--catalog-policy', 'selected-models',
+                '--compare-with', str(root / 'runs' / previous['run_id'])]
+            second = subprocess.run(command, capture_output=True, text=True, env=dict(os.environ,
+                CAPABILITY_FIXTURE_MODELS='moonshotai/Kimi-K3\nzai-org/GLM-5.3-Flash\nnvidia/Nemotron-3_5-Lightning\nQwen/Qwen3.5-397B-A17B'))
+            self.assertEqual(second.returncode, 0, second.stderr)
+            report = json.loads(second.stdout)
+            self.assertEqual(report['status'], 'ready')
+            self.assertEqual(report['drift'], [])
+            self.assertEqual(report['controls']['catalog_policy'], 'selected-models')
+            self.assertEqual(report['catalog_change'], {'policy': 'selected-models',
+                'before': previous['provenance']['catalog_sha256'],
+                'after': report['provenance']['catalog_sha256']})
+            self.assertNotEqual(report['catalog_change']['before'], report['catalog_change']['after'])
+            self.assertEqual(report['requests'], [])
+            command[2] = 'run'
+            live = subprocess.run(command + ['--live'], capture_output=True, text=True, env=dict(os.environ,
+                CAPABILITY_FIXTURE_MODELS='moonshotai/Kimi-K3\nzai-org/GLM-5.3-Flash\nnvidia/Nemotron-3_5-Lightning\nQwen/Qwen3.5-397B-A17B'))
+            self.assertEqual(live.returncode, 0, live.stderr)
+            delivered = json.loads(live.stdout)
+            self.assertEqual(delivered['status'], 'completed')
+            self.assertTrue(delivered['settings_preserved'])
+            self.assertEqual(delivered['catalog_change'], report['catalog_change'])
+
+    @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
+    def test_catalog_policy_keeps_missing_roles_and_local_drift_blocked(self):
+        roles = ['moonshotai/Kimi-K3', 'zai-org/GLM-5.3-Flash', 'nvidia/Nemotron-3_5-Lightning']
+        cases = [(role, 'independent_naming_unavailable' if role == roles[2] else
+                  'model_or_guardian_unavailable') for role in roles]
+        cases += [('settings', 'environment_drift'), ('policy', 'environment_drift')]
+        for change, blocker in cases:
+            with self.subTest(change=change), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                first = desktop_handoff(root, 'raw', command='preflight',
+                                        extra=('--catalog-policy', 'selected-models'))
+                self.assertEqual(first.returncode, 0, first.stderr)
+                previous = json.loads(first.stdout)
+                executable = root / 'FixtureDesktop.app/Contents/Resources/codex'
+                if change == 'settings': (root / 'home/config.toml').write_text('# concurrent edit\n')
+                command = [sys.executable, str(SCRIPT), 'run', '--live', '--private-root', str(root / 'runs'),
+                    '--case', '05', '--client', 'desktop', '--model', roles[0],
+                    '--launcher', str(executable), '--codex', str(executable),
+                    '--app-bundle', str(root / 'FixtureDesktop.app'), '--codex-home', str(root / 'home'),
+                    '--skill-root', str(root / 'skills'), '--catalog-policy',
+                    'exact' if change == 'policy' else 'selected-models',
+                    '--compare-with', str(root / 'runs' / previous['run_id'])]
+                result = subprocess.run(command, capture_output=True, text=True, env=dict(os.environ,
+                    CAPABILITY_FIXTURE_MODELS='\n'.join(role for role in roles if role != change)))
+                self.assertEqual(result.returncode, 1, result.stderr)
+                report = json.loads(result.stdout)
+                self.assertIn(blocker, report['blockers'])
+                self.assertEqual(report['requests'], [])
+                self.assertNotIn('Create a NEW conversation', result.stderr)
+                if change in ('settings', 'policy'):
+                    self.assertIn('catalog_policy' if change == 'policy' else 'settings', report['drift'])
+
+    @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
+    def test_catalog_default_remains_strict_with_legacy_anchor(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            first = desktop_handoff(root, 'raw', command='preflight')
+            self.assertEqual(first.returncode, 0, first.stderr)
+            previous = json.loads(first.stdout)
+            anchor = root / 'runs' / previous['run_id']
+            previous['controls'].pop('catalog_policy')
+            (anchor / 'result.json').write_text(json.dumps(previous))
+            executable = root / 'FixtureDesktop.app/Contents/Resources/codex'
+            command = [sys.executable, str(SCRIPT), 'preflight', '--private-root', str(root / 'runs'),
+                '--case', '05', '--client', 'desktop', '--model', 'moonshotai/Kimi-K3',
+                '--launcher', str(executable), '--codex', str(executable),
+                '--app-bundle', str(root / 'FixtureDesktop.app'), '--codex-home', str(root / 'home'),
+                '--skill-root', str(root / 'skills'), '--compare-with', str(anchor)]
+            result = subprocess.run(command, capture_output=True, text=True, env=dict(os.environ,
+                CAPABILITY_FIXTURE_MODELS='moonshotai/Kimi-K3\nzai-org/GLM-5.3-Flash\nnvidia/Nemotron-3_5-Lightning\nQwen/Qwen3.5-397B-A17B'))
+            self.assertEqual(result.returncode, 1, result.stderr)
+            report = json.loads(result.stdout)
+            self.assertEqual(report['controls']['catalog_policy'], 'exact')
+            self.assertEqual(report['drift'], ['catalog_sha256'])
+            self.assertIn('environment_drift', report['blockers'])
+            self.assertEqual(report['catalog_change']['policy'], 'exact')
+            self.assertEqual(report['requests'], [])
+            previous['controls'] = []
+            (anchor / 'result.json').write_text(json.dumps(previous))
+            malformed = subprocess.run(command, capture_output=True, text=True)
+            self.assertEqual(malformed.returncode, 1, malformed.stderr)
+            self.assertIn('comparison_unavailable', json.loads(malformed.stdout)['blockers'])
+
     @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
     def test_desktop_handoff_does_not_require_waiting_for_failed_naming(self):
         with tempfile.TemporaryDirectory() as directory:

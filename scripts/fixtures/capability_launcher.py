@@ -29,7 +29,8 @@ if sys.argv[1] == '--version':
 elif sys.argv[1] == 'evaluation-protocol':
     print('{"version":1}')
 elif sys.argv[1] == 'models':
-    print('moonshotai/Kimi-K3\nzai-org/GLM-5.3-Flash\nnvidia/Nemotron-3_5-Lightning')
+    print(os.environ.get('CAPABILITY_FIXTURE_MODELS',
+        'moonshotai/Kimi-K3\nzai-org/GLM-5.3-Flash\nnvidia/Nemotron-3_5-Lightning'))
 elif sys.argv[1] == 'launch':
     config = json.loads(Path(sys.argv[sys.argv.index('--evaluation-observer') + 1]).read_text())
     class Upstream(http.server.BaseHTTPRequestHandler):

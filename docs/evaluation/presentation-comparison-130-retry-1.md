@@ -1,5 +1,10 @@
 # Desktop comparison retry amendment (#130)
 
+Current status: a second catalog-only preparation stopped before launch. The
+[selected-model policy correction](presentation-catalog-policy-130.md) supersedes
+the handoff below and awaits fresh native qualification. Do not rerun these
+historical strict-catalog anchors.
+
 The maintainer explicitly requested a retry after original attempt 1 stopped.
 This amendment retains that result and declares one retry of case 03 Kimi,
 followed by the three original pending attempts: case 03 GLM, case 04 Kimi,
