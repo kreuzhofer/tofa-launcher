@@ -1,0 +1,74 @@
+{
+  "schema": "tofa-native-update-assessment-v1",
+  "run_id": "5ed46b9a46c54449be418077461a592a",
+  "qualification_sha256": "67153d72b2bfd2cdb58b05c17ba3ab4fc4cb3e9a58f148bc0bfa7f3631c35daa",
+  "status": "infra_blocked",
+  "failure": "native_application_drift",
+  "native_preview": "passed",
+  "settings_preserved": true,
+  "paid_inference": false,
+  "before": {
+    "version": "26.1007.30912",
+    "build": "20156",
+    "application_sha256": "75e397e2280dde93b70a85aa926f4282c728eacc84dfeb15ba7fb6ddd84628af",
+    "executable_sha256": "2053a78d225a1492d0cb6896cfd83254af06c3277547e83d4d23fef88f00426e",
+    "native_transport_sha256": "ae60fd7129a8eafea42dc41e8692e95dda624d4406826edd74010148371113db"
+  },
+  "current": {
+    "version": "26.1007.71326",
+    "build": "20398",
+    "application_sha256": "2f231a64e6dd30111bcd09e03c149cd06c8679b25914842772423251c4608ded",
+    "executable_sha256": "239db1b91fbac28c04c96f19ec9ccfda4fb3c9912a2607b50ffc4591233b552a",
+    "native_transport_sha256": "ae60fd7129a8eafea42dc41e8692e95dda624d4406826edd74010148371113db"
+  },
+  "changed_identity_fields": [
+    "version",
+    "build",
+    "application_sha256",
+    "executable_sha256"
+  ],
+  "engine_sha256_unchanged": true,
+  "artifacts": {
+    "deck.pptx": "f7fe230dd35b5a891467738e3bdfac2e62d12d95e373032e2b8498d548fc0903",
+    "deck.pdf": "232697eae07cf85c3ee6d35285cb62e70a34f6c390d93c7f7326845a47f10568",
+    "slide.png": "109e0b9a0bdb2aa9ea2bd0ab7f8108fba2104b2ee6eb46076bee1418d27190e4"
+  },
+  "limitation": "Preview pass retained; native qualification cannot pass because installed app identity changed during the run. No proof rebinding.",
+  "startup_check": {
+    "private_run": "runs/desktop20398-launcher-clean-20261014T110655Z",
+    "protected_raw_equal": false,
+    "protected_normalized_equal": false,
+    "launcher_credentials_and_settings_preserved": true,
+    "code_review_enabled_before": true,
+    "code_review_enabled_after": "absent",
+    "native_log_events": [
+      {
+        "utc": "2026-10-14T11:07:20.235Z",
+        "event": "bundled_plugin_uninstall_requested",
+        "plugin": "code-review@openai-bundled",
+        "reason": "not_in_bundled_marketplace_plugin_names"
+      },
+      {
+        "utc": "2026-10-14T11:07:20.241Z",
+        "event": "plugin_uninstall_succeeded",
+        "plugin": "code-review@openai-bundled"
+      }
+    ],
+    "protected_file_count_before": 27451,
+    "protected_file_count_after": 27442,
+    "other_observed_activity": "Several remote-plugin installation records were refreshed; no runtime dependency or user-skill file mtime changes observed during the launch.",
+    "disposition": "Stop further lifecycle checks; do not normalize away the plugin removal or restore a settings snapshot."
+  },
+  "bootstrap_check": {
+    "private_run": "runs/desktop20398-ordinary-clean-20261014T110537Z",
+    "status": "diagnostic_incomplete",
+    "reason": "New build replaced bundled plugin cache; archived post-startup snapshot helper still referenced removed old version. Helper was corrected to discover current version before clean-launch check.",
+    "qualification_credit": false
+  },
+  "next_action": "Await maintainer decision: accept installed build and its new plugin set as new qualification baseline, or leave verification paused. Full lifecycle and native qualification remain pending.",
+  "title_cancellation_fix": {
+    "revision": "472bba0",
+    "reviewed_at": "e1d6eae",
+    "status": "local tests and reviews passed; no regression established by this update failure"
+  }
+}

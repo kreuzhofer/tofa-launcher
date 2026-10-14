@@ -90,7 +90,10 @@ runtime tickets is not a waiver of #119/#120/#106 or native-platform release gat
 ## Current next action
 
 The title-cancellation correction has zero Standards/Spec findings at `472bba0`.
-Qualify the changed native harness before another model comparison.
+The latest smoke run passed previews but failed identity preservation because the
+Desktop app updated mid-run. Startup of build20398 then explicitly removed the
+old bundled code-review plugin. Await the maintainer’s baseline decision before
+continuing lifecycle/native qualification or another model comparison.
 The comparison command is paused; preserve the interrupted attempt and all prior
 outcomes. Any further model retry needs its own explicit declaration. The original
 three remaining cells stay pending. No release is published.

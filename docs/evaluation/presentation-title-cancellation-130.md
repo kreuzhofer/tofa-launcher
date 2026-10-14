@@ -63,3 +63,29 @@ See [the sanitized evidence](evidence/presentation-runtime-126-127/title-cancell
 
 The original reproduction also passes unchanged against the corrected harness.
 Standards and Spec reviews of `d4e5d08...472bba0` each reported zero findings.
+
+## Installed Desktop update interrupted requalification
+
+Fresh synthetic run `5ed46b9a46c54449be418077461a592a` recorded passed human
+PPTX/PDF previews and preserved protected settings, but failed qualification with
+`native_application_drift`. The installed app changed during the run from build
+20156 / version26.1007.30912 to build20398 / version26.1007.71326. The bundled
+engine and native tool transport hashes were unchanged; the app executable and
+resources changed. The original proof remains unqualified and unmodified.
+
+An ordinary startup initialized the new bundled-plugin cache. Its archived
+snapshot helper referenced the removed old plugin path, so that bootstrap
+diagnostic is incomplete and receives no qualification credit. The helper was
+corrected to discover the current version. A subsequent clean-launch check found
+a protected-state change beyond the two permitted MCP references: the enabled
+`code-review@openai-bundled` entry disappeared and the plugin cache changed.
+The native startup log explicitly records the app requesting and completing its
+uninstall because it is no longer in the bundled marketplace. Launcher settings
+and credentials remained unchanged. Remaining lifecycle checks were stopped.
+
+See [the retained update assessment](evidence/presentation-runtime-126-127/desktop-update-20398.json).
+The maintainer must decide whether to accept the updated app/plugin set as a new
+qualification baseline. No settings snapshot is restored, installed plugin
+recreated or preservation exception widened. Lifecycle, native qualification and
+any later comparison remain pending; the title-cancellation fix is not invalidated
+by an unrelated application update.
