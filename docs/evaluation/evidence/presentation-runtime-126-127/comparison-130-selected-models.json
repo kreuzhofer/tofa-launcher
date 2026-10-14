@@ -261,8 +261,11 @@
   "live_attempts_started": 0,
   "scope": "Selected-model policy amendment with fresh native proof; original authorized retry plus three pending cells, unchanged order/prompts/budgets. All historical failures retained; no live outcome or release claim.",
   "prelaunch_reviews": {
-    "status": "pending",
-    "baseline": "8dfb45e"
+    "baseline": "8dfb45e",
+    "head": "491a643",
+    "standards_findings": 0,
+    "spec_findings": 0,
+    "scope": "Fresh native proof, selected-model preflight anchors and amended private operator handoff. Live outcomes remain pending."
   },
   "amendment": {
     "reason": "Runtime and installed skill update invalidated original proof. User explicitly requested retry.",
