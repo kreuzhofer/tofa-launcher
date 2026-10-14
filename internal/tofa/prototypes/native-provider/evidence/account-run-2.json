@@ -1,0 +1,31 @@
+{
+  "schema": "tofa-native-provider-account-prototype-v1",
+  "cases": {},
+  "method": [
+    "initialize",
+    "account/read",
+    "config/read"
+  ],
+  "refresh_token": false,
+  "network_policy": "deny network*",
+  "write_policy": "only owned experiment directory and /dev/null",
+  "desktop_started": false,
+  "inference_rpc_count": 0,
+  "source_sha256": "681005794dd8574467b8e1f2dc035cf25a316f10f552813acf84059934e60265",
+  "status": "failed",
+  "client": {
+    "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+    "version": "codex-cli 0.162.0-alpha.17.2"
+  },
+  "desktop_identity": {
+    "version": "26.1007.71326",
+    "build": "20398",
+    "application_sha256": "2f231a64e6dd30111bcd09e03c149cd06c8679b25914842772423251c4608ded",
+    "executable_sha256": "239db1b91fbac28c04c96f19ec9ccfda4fb3c9912a2607b50ffc4591233b552a",
+    "native_transport_sha256": "ae60fd7129a8eafea42dc41e8692e95dda624d4406826edd74010148371113db"
+  },
+  "error_type": "RuntimeError",
+  "failed_case": "ordinary",
+  "probe_failure": "engine RPC timeout: initialize",
+  "protected_state_preserved": true
+}

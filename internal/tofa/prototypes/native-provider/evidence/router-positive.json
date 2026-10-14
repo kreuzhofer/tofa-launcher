@@ -1,0 +1,20 @@
+{
+  "schema": "tofa-native-provider-router-prototype-v1",
+  "status": "passed",
+  "deliberate_negative_control": false,
+  "checks": {
+    "alternate_route_selected": true,
+    "independent_factory_credential": true,
+    "native_credentials_stripped": true,
+    "signed_in_native_route": true,
+    "native_api_route": true,
+    "unknown_model_no_upstream": true,
+    "error_body_redacted_no_fallback": true,
+    "unavailable_no_fallback": true
+  },
+  "upstream_requests": 4,
+  "real_credentials_used": false,
+  "external_network_requests": 0,
+  "production_adapter_tested": false,
+  "source_sha256": "041cf4fb69f08eb742cb1ddd5520c12895644885b400f31c223f12c9fb12e045"
+}
