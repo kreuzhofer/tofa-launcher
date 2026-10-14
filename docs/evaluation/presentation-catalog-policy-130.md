@@ -1,8 +1,8 @@
 # Selected-model catalog policy for #130
 
-Status: evaluator correction reviewed; fresh native qualification and all four
-selected-model preflights passed. The amended handoff is predeclared; live model
-outcomes remain pending.
+Status: historical qualified handoff. Its first live attempt stopped after a title
+timeout; see [the current cancellation diagnosis](presentation-title-cancellation-130.md).
+The selected-model catalog policy remains unchanged.
 
 ## Reproduced failure
 

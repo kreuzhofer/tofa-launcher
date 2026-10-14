@@ -15,7 +15,7 @@ import time
 SCRIPT = Path(__file__).with_name('capability_evaluation.py')
 
 
-def desktop_handoff(root, encoding, *, command='run', case='05', artifacts='present', settings_drift=False, client='desktop', extra=()):
+def desktop_handoff(root, encoding, *, command='run', case='05', artifacts='present', settings_drift=False, client='desktop', extra=(), title_cancelled=False):
     bundle = root / 'FixtureDesktop.app'
     contents = bundle / 'Contents'
     (contents / 'Resources').mkdir(parents=True)
@@ -47,11 +47,27 @@ def desktop_handoff(root, encoding, *, command='run', case='05', artifacts='pres
         '--codex-home', str(root / 'home'), '--skill-root', str(root / 'skills'), *extra],
         env=dict(os.environ, CAPABILITY_FIXTURE_REFERENCE_ENCODING=encoding,
                  CAPABILITY_FIXTURE_ARTIFACTS=artifacts,
+                 CAPABILITY_FIXTURE_TITLE_CANCEL='1' if title_cancelled else '',
                  CAPABILITY_FIXTURE_SETTING_DRIFT='1' if settings_drift else ''),
         capture_output=True, text=True, timeout=15)
 
 
 class CommandTests(unittest.TestCase):
+    @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
+    def test_cancelled_title_retains_failure_after_main_completes(self):
+        with tempfile.TemporaryDirectory() as directory:
+            result = desktop_handoff(Path(directory), 'raw', title_cancelled=True)
+            report = json.loads(result.stdout)
+            self.assertEqual(report['status'], 'infra_blocked')
+            self.assertEqual(result.returncode, 1, result.stderr)
+            title = next(r for r in report['requests'] if r['role'] == 'auxiliary_title')
+            main = next(r for r in report['requests'] if r['role'] == 'main')
+            self.assertEqual(title['failure'], 'client_disconnected')
+            self.assertTrue(main['completed'])
+            self.assertTrue(main['final_answer'])
+            self.assertNotEqual(report['stop_reason'], 'client_disconnected')
+            self.assertTrue(report['settings_preserved'])
+
     @unittest.skipUnless((sys.platform, platform.machine()) == ('darwin', 'arm64'), 'macOS pilot')
     def test_selected_catalog_policy_records_unrelated_change_without_blocking(self):
         with tempfile.TemporaryDirectory() as directory:

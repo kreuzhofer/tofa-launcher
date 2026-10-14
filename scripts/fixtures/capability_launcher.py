@@ -33,11 +33,16 @@ elif sys.argv[1] == 'models':
         'moonshotai/Kimi-K3\nzai-org/GLM-5.3-Flash\nnvidia/Nemotron-3_5-Lightning'))
 elif sys.argv[1] == 'launch':
     config = json.loads(Path(sys.argv[sys.argv.index('--evaluation-observer') + 1]).read_text())
+    title_closed = threading.Event()
     class Upstream(http.server.BaseHTTPRequestHandler):
         def log_message(self, *args): pass
         def do_POST(self):
-            self.rfile.read(int(self.headers.get('Content-Length', 0)))
+            body = json.loads(self.rfile.read(int(self.headers.get('Content-Length', 0))) or '{}')
             self.send_response(200); self.send_header('Content-Type', 'text/event-stream'); self.end_headers()
+            if body.get('model') == 'gpt-6-luna':
+                self.wfile.flush(); self.connection.settimeout(3)
+                if not self.connection.recv(1): title_closed.set()
+                return
             workspace = Path.cwd()
             heldout = (workspace / 'fixtures/incident.csv').exists()
             names = ('handover outputs/incident brief.docx', 'handover outputs/incident brief.pdf') if heldout else (
@@ -80,6 +85,16 @@ elif sys.argv[1] == 'launch':
         post(config['endpoint'], '/register', config['secret'],
              {'endpoint': 'http://127.0.0.1:' + str(server.server_port), 'token': 'synthetic-token'})
         prompt = (Path(sys.argv[sys.argv.index('--evaluation-observer') + 1]).parent / 'prompt.txt').read_text() if sys.argv[2] == 'codex-desktop' else sys.stdin.read()
+        if os.environ.get('CAPABILITY_FIXTURE_TITLE_CANCEL'):
+            title = {'model': 'gpt-6-luna', 'stream': True, 'input': [{'role': 'user', 'content': prompt}], 'tools': [],
+                'client_metadata': {'x-codex-turn-metadata': json.dumps({
+                    'thread_source': 'thread_title', 'turn_trigger': 'thread_title'})},
+                'text': {'format': {'type': 'json_schema'}}}
+            target = urlsplit(config['endpoint'])
+            client = http.client.HTTPConnection(target.hostname, target.port, timeout=3)
+            client.request('POST', '/responses', json.dumps(title), {'Authorization': 'Bearer synthetic-token'})
+            response = client.getresponse(); response.close(); client.close()
+            assert title_closed.wait(1), 'title cancellation left upstream inference alive'
         post(config['endpoint'], '/responses', 'synthetic-token', {'model': 'moonshotai/Kimi-K3', 'stream': True,
              'input': [{'role': 'user', 'content': '<cwd>' + str(Path.cwd()) + '</cwd>\n' + prompt}], 'tools': []})
         if os.environ.get('CAPABILITY_FIXTURE_SETTING_DRIFT'):

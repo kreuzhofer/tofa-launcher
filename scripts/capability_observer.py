@@ -444,15 +444,31 @@ class Observer:
         connection = http.client.HTTPConnection(target.hostname, target.port,
             timeout=max(.01, self.deadline - time.monotonic()))
         finished = threading.Event()
+        title_cancelled = threading.Event()
+        upstream_socket = None
+        def client_disconnected(source):
+            with self.lock:
+                if record is None or record.get('completed') or self.reason: return
+                record.setdefault('client_disconnect', {'source': source, 'elapsed_ms': self.elapsed()})
+                if record['role'] != 'auxiliary_title':
+                    self.stop('client_disconnected')
+                    return
+                # Native title timeouts cancel one request, not the main turn.
+                title_cancelled.set()
+                record['failure'] = 'client_disconnected'
+                self.persist()
+                if upstream_socket is not None:
+                    try: upstream_socket.shutdown(socket.SHUT_RDWR)
+                    except OSError: pass
         def disconnect():
             while not finished.wait(.02):
                 try:
                     ready, _, _ = select.select([handler.connection], [], [], 0)
                     if ready and not handler.connection.recv(1, socket.MSG_PEEK):
-                        if record is not None and not record.get('completed'):
-                            self.stop('client_disconnected')
+                        client_disconnected('socket_eof')
                         return
                 except OSError:
+                    if not finished.is_set(): client_disconnected('socket_error')
                     return
         watcher = threading.Thread(target=disconnect, daemon=True)
         watcher.start()
@@ -461,6 +477,7 @@ class Observer:
             connection.connect()
             with self.lock: self.active.add(connection.sock)
             upstream_socket = connection.sock
+            if title_cancelled.is_set(): raise ConnectionAbortedError()
             headers = {'Authorization': 'Bearer ' + self.token, 'Content-Type': 'application/json'}
             if record is None:
                 for key in ('X-Tofa-Parent-Pid', 'X-Tofa-Main-Engine-Pid'):
@@ -499,25 +516,27 @@ class Observer:
                     handler.wfile.write(framed); handler.wfile.flush()
                 if record['completed']: break
             if record is not None and not record['completed']:
-                record['failure'] = 'upstream_http_error' if response.status != 200 else 'response_incomplete'
+                record['failure'] = record.get('failure') or ('upstream_http_error' if response.status != 200 else 'response_incomplete')
                 category = ('http_status' if response.status != 200 else 'provider_error' if record.get('provider_failure') else
                     self.reason if self.reason in ('client_disconnected', 'deadline', 'operator_finished', 'operator_cancelled')
                     else 'incomplete_response')
                 record['transport_failure'] = {'stage': 'upstream_read', 'category': category,
                     'exception_type': None}
         except (OSError, http.client.HTTPException, ValueError, TypeError, AttributeError, KeyError) as error:
+            if stage == 'client_write' and isinstance(error, OSError):
+                client_disconnected('client_write')
             if isinstance(error, TimeoutError) or time.monotonic() >= self.deadline:
                 self.stop('deadline')
             elif str(error) == 'diagnostic_call_limit':
                 self.stop('diagnostic_call_limit')
             if record is not None:
-                record['failure'] = self.reason or ('deadline' if isinstance(error, TimeoutError) else 'stream_failure')
+                record['failure'] = record.get('failure') or self.reason or ('deadline' if isinstance(error, TimeoutError) else 'stream_failure')
                 self.transport_failure(record, stage, error)
         finally:
             finished.set()
             watcher.join(timeout=2)
             with self.lock:
-                if 'upstream_socket' in locals(): self.active.discard(upstream_socket)
+                if upstream_socket is not None: self.active.discard(upstream_socket)
                 if record is not None:
                     record['ended_ms'] = self.elapsed()
                     self.persist()

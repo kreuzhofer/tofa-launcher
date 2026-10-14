@@ -1,15 +1,12 @@
 # Presentation evaluation to release
 
-Status: runtime implementation merged in #131; the scoped loader correction and
-naming diagnostics merged in #132. #126–#129 are closed. Fresh current-harness
-native qualification passed after a runtime update stopped the first comparison.
-Two later preparations stopped on unrelated catalog changes before inference.
-The explicit selected-model catalog correction now has fresh native
-qualification and four ready preflights for the authorized retry and three pending
-attempts. Model
-capability and release readiness remain unqualified. See
-[the current #130 correction](presentation-catalog-policy-130.md);
-the checkpoints below retain the diagnostic chronology and its limitations.
+Status: runtime and namespace implementations merged; #126–#129 are closed.
+The latest #130 attempt stopped when a title timeout was followed by a client
+disconnect. A local reproduction exposes an evaluator bug: title cancellation
+stopped concurrent main work and closed the owned Desktop. The scoped correction
+passes local regressions; native requalification and remaining comparison work
+are pending. See [the current diagnosis](presentation-title-cancellation-130.md).
+Model capability and release readiness remain unqualified.
 The maintainer approved the three phases below on 2026-10-13. Cost is not a
 constraint; experimental bounds and separate outcomes remain part of the method.
 
@@ -92,12 +89,10 @@ runtime tickets is not a waiver of #119/#120/#106 or native-platform release gat
 
 ## Current next action
 
-The corrected evaluator has passed fresh native qualification and four
-selected-model catalog preflights. Execute the amended #130 comparison through
-`run-comparison-130-retry-1.sh`, then independently assess the outcomes. The
-original runtime-drift attempt and both zero-request catalog stops remain retained.
-See [the current declaration](evidence/presentation-runtime-126-127/comparison-130-selected-models.json).
-No new live comparison has started at this checkpoint. No release is published.
+Review the title-cancellation correction, then qualify the changed native harness.
+The comparison command is paused; preserve the interrupted attempt and all prior
+outcomes. Any further model retry needs its own explicit declaration. The original
+three remaining cells stay pending. No release is published.
 
 ## Earlier checkpoints
 

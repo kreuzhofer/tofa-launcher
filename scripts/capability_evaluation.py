@@ -361,6 +361,8 @@ def finish_report(run, report, observer, code, preserved):
     infra = any(value.startswith(('unsupported_', 'unmatched_', 'workspace_', 'scope_', 'presentation_runtime_')) or
                 value in ('stream_failure', 'upstream_http_error', 'response_incomplete',
                           'instruction_variant_missing', 'diagnostic_capture_failure') for value in failures)
+    infra = infra or any(r.get('role') == 'auxiliary_title' and r.get('failure') == 'client_disconnected'
+                         for r in observer.records)
     completed = any(r.get('completed') and r.get('final_answer') and r.get('role') == 'main' for r in observer.records)
     if not preserved:
         report['blockers'].append('protected_settings_changed')

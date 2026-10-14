@@ -1,0 +1,46 @@
+{
+  "run_id": "393df9ac3043419da1ac5142a437f19b",
+  "desktop_title_timeout_utc": "2026-10-14T10:32:55.887Z",
+  "desktop_error": "Timed out waiting for structured result.",
+  "native_log_sha256": "0e509bba963c0a0df84d752ecf2deee7d42c01d0726b47cdde96adf39faef448",
+  "stop_reason": "client_disconnected",
+  "stop_record_mtime_utc": "2026-10-14T10:32:55.901649Z",
+  "desktop_exit_utc": "2026-10-14T10:32:55.907Z",
+  "local_reproduction": "Cancelling only the title HTTP connection aborts concurrent main work on d4e5d08; regression failed at observer.reason assertion.",
+  "causal_limit": "Native capture does not identify the first disconnected request. Title timeout timing plus isolated reproduction strongly supports title cancellation triggering evaluator shutdown; no matching native crash report found.",
+  "provider_naming_timeout_cause": "unknown; this fix isolates cancellation and does not make title generation faster or reliable.",
+  "schema": "tofa-title-cancellation-diagnosis-v1",
+  "baseline": "d4e5d08",
+  "native_result": {
+    "status": "cancelled",
+    "stop_reason": "client_disconnected",
+    "settings_preserved": true,
+    "environment_drift_during_run": [],
+    "main_completed": 4,
+    "main_interrupted": 1,
+    "title_interrupted": 1,
+    "workspace_files": 0
+  },
+  "tests": {
+    "observer_and_evaluator": {
+      "run": 57,
+      "failed": 0
+    },
+    "related_runtime_operator_proxy": {
+      "run": 56,
+      "failed": 0,
+      "skipped": 2,
+      "skip_reason": "installed-runtime opt-ins unset"
+    },
+    "red": "title cancellation stopped entire run",
+    "reporting_red": "completed main incorrectly masked cancelled title",
+    "native_requalification": "pending"
+  },
+  "review": {
+    "status": "pending"
+  },
+  "historical_wrapper": {
+    "path": "checks/disconnect-130/run-comparison-before-disconnect-fix.sh",
+    "sha256": "0a1c1b9b0e430163a677f2abd384ae3a41689264d65de698e423d9e4589ab634"
+  }
+}

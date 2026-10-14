@@ -315,6 +315,54 @@ class BoundaryTests(unittest.TestCase):
             self.assertTrue(observer.records[0]['completed'])
             self.assertEqual(observer.records[0]['usage']['output_tokens'], 2)
 
+    def test_title_disconnect_does_not_stop_main(self):
+        for send_headers in (False, True):
+            title_started = threading.Event()
+            title_closed = threading.Event()
+            release_main = threading.Event()
+            def upstream(handler, body):
+                if body['model'].startswith('gpt-'):
+                    if send_headers:
+                        handler.send_response(200); handler.end_headers(); handler.wfile.flush()
+                    title_started.set()
+                    handler.connection.settimeout(3)
+                    try:
+                        if not handler.connection.recv(1): title_closed.set()
+                    except OSError: pass
+                else:
+                    handler.send_response(200); handler.end_headers(); handler.wfile.flush()
+                    release_main.wait(3)
+                    event = {'type': 'response.completed', 'response': {'model': body['model'], 'output': []}}
+                    try: handler.wfile.write(('data: ' + json.dumps(event) + '\n\n').encode())
+                    except OSError: pass
+            with self.subTest(send_headers=send_headers), self.boundary(response=upstream) as (observer, seen):
+                title = json.loads((SCRIPT_ROOT / 'internal/tofa/testdata/desktop-luna6-title-request.json').read_text())
+                clients, responses = [], []
+                try:
+                    for body in (title, self.body()):
+                        client = http.client.HTTPConnection('127.0.0.1', observer.port, timeout=3)
+                        clients.append(client)
+                        client.request('POST', '/responses', json.dumps(body), {'Authorization': 'Bearer client-token'})
+                        if body is title:
+                            self.assertTrue(title_started.wait(1))
+                            responses.append(client.getresponse() if send_headers else None)
+                        else: responses.append(client.getresponse())
+                    if responses[0] is not None: responses[0].close()
+                    clients[0].close()
+                    self.assertTrue(title_closed.wait(1), 'cancelled title left its upstream request alive')
+                    self.assertIsNone(observer.reason, 'title cancellation stopped the entire run')
+                    release_main.set(); responses[1].read()
+                    self.assertTrue(observer.records[1]['completed'])
+                    self.assertEqual(observer.records[0]['failure'], 'client_disconnected')
+                    self.assertEqual(observer.records[0]['client_disconnect']['source'], 'socket_eof')
+                    self.assertEqual(len(seen), 2, 'cancellation must not retry either request')
+                    self.assertEqual(observer.used, 2, 'cancelled naming still consumes its request budget')
+                finally:
+                    release_main.set()
+                    for response in responses:
+                        if response is not None: response.close()
+                    for client in clients: client.close()
+
     def test_native_client_disconnect_cancels_a_stalled_upstream(self):
         closed = threading.Event()
         def stalled(handler, body):
