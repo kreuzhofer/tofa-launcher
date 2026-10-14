@@ -1,7 +1,8 @@
 # Selected-model catalog policy for #130
 
-Status: evaluator correction implemented; fresh native qualification and amended
-live predeclaration remain required before another comparison launch.
+Status: evaluator correction reviewed; fresh native qualification and all four
+selected-model preflights passed. The amended handoff is predeclared; live model
+outcomes remain pending.
 
 ## Reproduced failure
 
@@ -59,3 +60,27 @@ next native synthetic qualification must use the corrected harness, record human
 PPTX/PDF previews and demonstrate protected-state preservation. Only then can the
 selected-model preflights and comparison handoff be published. No release or
 model-support promotion follows from the correction.
+
+## Fresh qualification and amended handoff
+
+Native synthetic run `23f05e423df947979218d92a49d96352` passed independent
+qualification against the corrected harness. The actual loader call/result,
+executable identities, generated artifacts and maintainer-observed PPTX/PDF native
+previews validated; protected settings were preserved. No paid inference was used.
+The proof and original operator record remain at their original private location.
+
+The [amended declaration](evidence/presentation-runtime-126-127/comparison-130-selected-models.json)
+binds this fresh proof and four ready preflights to `selected-models` on both
+preflight and live commands. It retains the original order: implicit Kimi,
+implicit GLM, explicit Kimi, explicit GLM; original prompts, baseline instructions,
+Guardian, naming model and 900-second/80-request/8192-token ceilings are unchanged.
+This is the already authorized retry of original attempt 1 plus the three pending
+cells. The two zero-request catalog stops remain retained.
+
+The stable operator command remains
+`bash /tmp/tofa-presentation-validation/run-comparison-130-retry-1.sh`.
+Its new private run directory stays below the agreed temporary root. Declaration
+and anchor verification, four unchanged campaign gate tests, bash syntax and a
+byte-identical wizard library check pass. Shellcheck is unavailable. The wizard
+has not been run end-to-end because its native UI steps require the maintainer.
+No live model outcome or release qualification is claimed.

@@ -4,8 +4,9 @@ Status: runtime implementation merged in #131; the scoped loader correction and
 naming diagnostics merged in #132. #126–#129 are closed. Fresh current-harness
 native qualification passed after a runtime update stopped the first comparison.
 Two later preparations stopped on unrelated catalog changes before inference.
-The explicit selected-model catalog correction now awaits fresh native
-qualification before the authorized retry and three pending attempts. Model
+The explicit selected-model catalog correction now has fresh native
+qualification and four ready preflights for the authorized retry and three pending
+attempts. Model
 capability and release readiness remain unqualified. See
 [the current #130 correction](presentation-catalog-policy-130.md);
 the checkpoints below retain the diagnostic chronology and its limitations.
@@ -91,13 +92,12 @@ runtime tickets is not a waiver of #119/#120/#106 or native-platform release gat
 
 ## Current next action
 
-PR #132 merged as `2fd66e422e03d81a88166f219ae94ef7bc59190c` with all four
-required CI jobs green and zero Standards/Spec findings. #128/#129 are closed;
-the original intermittent naming cause remains unknown. Fresh native proof
-`manual.cMfarK/runs/b73cce4e34cb46e9b37eab82a127a913` passed independent validation
-and maintainer previews. Four preflights pass. Execute the predeclared #130
-comparison through `run-comparison-130.sh`, then independently assess its outcomes.
-No live model attempt has started at this checkpoint. No release is published.
+The corrected evaluator has passed fresh native qualification and four
+selected-model catalog preflights. Execute the amended #130 comparison through
+`run-comparison-130-retry-1.sh`, then independently assess the outcomes. The
+original runtime-drift attempt and both zero-request catalog stops remain retained.
+See [the current declaration](evidence/presentation-runtime-126-127/comparison-130-selected-models.json).
+No new live comparison has started at this checkpoint. No release is published.
 
 ## Earlier checkpoints
 
