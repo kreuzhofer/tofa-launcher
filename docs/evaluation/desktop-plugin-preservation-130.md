@@ -5,6 +5,19 @@ installed or configured `code-review@openai-bundled` plugin to the observed nati
 removal path. This protects ordinary state; it does not unblock #130's model
 comparison or establish a new native presentation qualification.
 
+Source research on 2026-10-14 identified an additional launcher-side approach:
+Ollama retains the built-in provider/account context and routes inference through
+`openai_base_url`. The [pinned comparison](../research/ollama-desktop-provider-routing-2026-10-14.md)
+corrects the earlier assumption that native reconciliation changes or profile
+isolation were the only options. Plugin preservation with this different routing
+design is unverified; the existing guard and paused evaluation stay in place.
+The [#133 prototype result](https://github.com/kreuzhofer/tofa-launcher/blob/b0d9fd7/internal/tofa/prototypes/native-provider/RESULT.md)
+now confirms account-context preservation in the actual bundled engine and
+credential separation in a synthetic router. Desktop plugin lifecycle and
+production routing remain unqualified. The next implementation boundary is a
+launcher-side design preserving native account context and existing conversation
+provider identities, followed by actual-client lifecycle qualification.
+
 ## Observed boundary
 
 The [build-20398 diagnosis](evidence/presentation-runtime-126-127/desktop-plugin-preservation-20398.json)
@@ -42,7 +55,11 @@ and unchanged protected state, launcher settings, credentials and bridge bytes.
 The [sanitized guard evidence](evidence/presentation-runtime-126-127/plugin-preservation-guard-130.json)
 records the tested candidate, source hashes, regression outcomes and review.
 
-## Remaining native implementation ticket
+## Native correction option for the current provider design
+
+The following scope applies if the current custom-provider authentication
+transition is retained. It is not the only possible integration architecture;
+the Ollama-derived native-provider routing option above should be evaluated first.
 
 **Problem:** native bundled-plugin reconciliation interprets a provider-dependent
 eligibility change as permission to uninstall a previously installed plugin from

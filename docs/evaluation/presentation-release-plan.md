@@ -15,6 +15,10 @@ The integration branch now refuses affected launches before native startup or
 bridge installation. Its [guard and remaining native implementation scope](desktop-plugin-preservation-130.md)
 protect the profile; they do not unblock the comparison. The installed launcher
 and retained bridge have not been replaced.
+The [2026-10-14 Ollama source comparison](../research/ollama-desktop-provider-routing-2026-10-14.md)
+identifies native-provider routing as an alternative to investigate before
+requiring a native app correction or changing the shared-profile requirement.
+This research has not qualified that alternative or lifted the guard.
 Model capability and release readiness remain unqualified.
 The maintainer approved the three phases below on 2026-10-13. Cost is not a
 constraint; experimental bounds and separate outcomes remain part of the method.
