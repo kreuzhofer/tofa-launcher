@@ -1,7 +1,9 @@
 # Post-diagnosis Desktop comparison (#130)
 
-Status: all prerequisites and four preflights pass; four live attempts are
-predeclared and have not started. #126/#127 merged in #131; #128/#129 merged in
+Status: the original first attempt stopped on runtime drift; the maintainer
+authorized a retry. Fresh native qualification and four refreshed preflights pass.
+The [retry amendment](presentation-comparison-130-retry-1.md) is the current handoff;
+the original declaration below remains historical. #126/#127 merged in #131; #128/#129 merged in
 #132 as `2fd66e4`. Keep naming independent: its original intermittent cause remains
 unknown, with diagnostic instrumentation and a bounded successful native check.
 

@@ -2,9 +2,10 @@
 
 Status: runtime implementation merged in #131; the scoped loader correction and
 naming diagnostics merged in #132. #126–#129 are closed. Fresh current-harness
-native qualification and all four #130 preflights pass. The four model comparisons
-are predeclared and await the human operator. Model capability and release readiness
-remain unqualified. See [the current #130 handoff](presentation-comparison-130.md);
+native qualification and four refreshed #130 preflights pass after a runtime update
+stopped the first comparison. One explicitly authorized retry and three pending
+attempts await the human operator. Model capability and release readiness remain
+unqualified. See [the current #130 handoff](presentation-comparison-130-retry-1.md);
 the checkpoints below retain the diagnostic chronology and its limitations.
 The maintainer approved the three phases below on 2026-10-13. Cost is not a
 constraint; experimental bounds and separate outcomes remain part of the method.
