@@ -84,8 +84,44 @@ uninstall because it is no longer in the bundled marketplace. Launcher settings
 and credentials remained unchanged. Remaining lifecycle checks were stopped.
 
 See [the retained update assessment](evidence/presentation-runtime-126-127/desktop-update-20398.json).
-The maintainer must decide whether to accept the updated app/plugin set as a new
-qualification baseline. No settings snapshot is restored, installed plugin
-recreated or preservation exception widened. Lifecycle, native qualification and
-any later comparison remain pending; the title-cancellation fix is not invalidated
-by an unrelated application update.
+The maintainer accepted the updated app/plugin set as a new qualification baseline.
+Fresh clean exit, forced launcher crash and repeat launch preserved protected files
+byte-for-byte. Node and CUA MCP arithmetic passed after clean exit and crash.
+All 11 preservation/operator regression tests passed.
+
+Ordinary Desktop restart then restored `code-review@openai-bundled` and its enabled
+setting. Protected file count rose from 27,442 to 27,451. The two permitted MCP
+references also changed back to the bundled engine, but plugin restoration is
+outside that exception. Launcher settings and credentials remained unchanged.
+Remaining lifecycle checks stopped; no new qualification was issued.
+
+This is a recurring launch-path difference, not just a one-time app migration.
+Native logs advertise nine bundled plugins during adapted startup and ten,
+including `code-review`, during ordinary startup. A read-only bundled-engine
+`account/read` check reports a ChatGPT account for ordinary routing and no account
+for an otherwise identical provider configuration with `requires_openai_auth=false`.
+Refresh was disabled and no provider request was made. Replaying the exact installed
+eligibility and uninstall functions with mock IO reproduces the mechanism: with
+other eligibility inputs allowed, non-ChatGPT authentication excludes the plugin,
+and reconciliation requests its uninstall. Native renderer feature values were
+not directly intercepted, so the causal account-state link combines logs, engine
+observations and the isolated replay.
+
+See [the new preservation diagnosis](evidence/presentation-runtime-126-127/desktop-plugin-preservation-20398.json).
+The manual smoke wrapper now exits before launch with this explanation; its prior
+bytes and all historical results remain retained. No app modification, settings
+snapshot restore, credential change or eligibility override was made. The native
+restart left the plugin installed. Reaccepting another baseline would conceal
+the alternating behavior rather than qualify preservation.
+
+The next implementation needs to preserve installed bundled plugins when provider
+authentication changes, while leaving their native authentication/eligibility
+checks intact. First establish a supported launcher-side preservation boundary or
+an editable native reconciliation implementation. Add a failing test for the
+ordinary → adapted → ordinary transition, then a minimal correction and complete
+lifecycle/native qualification. If no preservation boundary is available, fail
+before launching a session that would remove the installed plugin. Do not widen
+the two-reference exception or silently isolate/restore the user's profile.
+
+Native qualification and subsequent comparison remain blocked on that correction;
+the title-cancellation fix and its regression evidence remain intact.

@@ -1,0 +1,172 @@
+{
+  "schema": "tofa-desktop-plugin-preservation-diagnosis-v1",
+  "baseline": "f1bd98d",
+  "maintainer_accepted_updated_baseline": true,
+  "app_version": "26.1007.71326",
+  "app_build": "20398",
+  "status": "infra_blocked",
+  "failure": "native_plugin_reconciliation_differs_by_auth_mode",
+  "phases": {
+    "clean_exit": {
+      "settings_preserved": true,
+      "normalized_preservation": true,
+      "launcher_settings_preserved": true,
+      "normalized_before": {
+        "files": 27442,
+        "sha256": "fb3953016017bcd7fca2f835ff7f8a4da38e5946b2eeed5cf91b36b04de3f115"
+      },
+      "normalized_after": {
+        "files": 27442,
+        "sha256": "fb3953016017bcd7fca2f835ff7f8a4da38e5946b2eeed5cf91b36b04de3f115"
+      },
+      "exit_code": 1,
+      "crash": false,
+      "private_run": "desktop20398-launcher-clean-20261014T133114Z",
+      "node_mcp": "arithmetic_passed",
+      "cua_mcp": "arithmetic_passed"
+    },
+    "crash": {
+      "settings_preserved": true,
+      "normalized_preservation": true,
+      "launcher_settings_preserved": true,
+      "normalized_before": {
+        "files": 27442,
+        "sha256": "fb3953016017bcd7fca2f835ff7f8a4da38e5946b2eeed5cf91b36b04de3f115"
+      },
+      "normalized_after": {
+        "files": 27442,
+        "sha256": "fb3953016017bcd7fca2f835ff7f8a4da38e5946b2eeed5cf91b36b04de3f115"
+      },
+      "exit_code": 1,
+      "crash": true,
+      "private_run": "desktop20398-launcher-crash-20261014T133250Z",
+      "node_mcp": "arithmetic_passed",
+      "cua_mcp": "arithmetic_passed"
+    },
+    "clean_repeat": {
+      "settings_preserved": true,
+      "normalized_preservation": true,
+      "launcher_settings_preserved": true,
+      "normalized_before": {
+        "files": 27442,
+        "sha256": "fb3953016017bcd7fca2f835ff7f8a4da38e5946b2eeed5cf91b36b04de3f115"
+      },
+      "normalized_after": {
+        "files": 27442,
+        "sha256": "fb3953016017bcd7fca2f835ff7f8a4da38e5946b2eeed5cf91b36b04de3f115"
+      },
+      "exit_code": 1,
+      "crash": false,
+      "private_run": "desktop20398-launcher-clean-20261014T133423Z"
+    },
+    "ordinary_restart": {
+      "settings_preserved": false,
+      "normalized_preservation": false,
+      "launcher_settings_preserved": true,
+      "normalized_before": {
+        "files": 27442,
+        "sha256": "fb3953016017bcd7fca2f835ff7f8a4da38e5946b2eeed5cf91b36b04de3f115"
+      },
+      "normalized_after": {
+        "files": 27451,
+        "sha256": "f472fc57d5de3ef78963569d6be402e77accf1bc05c84974a1bea636375144e7"
+      },
+      "exit_code": -15,
+      "crash": false,
+      "private_run": "desktop20398-ordinary-clean-20261014T133540Z"
+    }
+  },
+  "ordinary_changed_fields": [
+    "config.toml: mcp_servers.node_repl.env.CODEX_CLI_PATH",
+    "config.toml: plugins.code-review@openai-bundled.enabled (absent to true)",
+    "current CUA .mcp.json: mcpServers.cua_repl.env.CODEX_CLI_PATH"
+  ],
+  "native_logs": {
+    "launcher_marketplace_plugin_count": 9,
+    "ordinary_marketplace_plugin_count": 10,
+    "ordinary_added_plugin": "code-review",
+    "ordinary_install_reason": "missing",
+    "ordinary_install_requested_utc": "2026-10-14T13:35:52.395Z",
+    "earlier_launcher_uninstall_reason": "not_in_bundled_marketplace_plugin_names"
+  },
+  "engine_auth_diagnostic": {
+    "ordinary": {
+      "account_type": "chatgpt",
+      "requires_openai_auth": true
+    },
+    "adapted": {
+      "account_type": null,
+      "requires_openai_auth": false
+    },
+    "method": "account/read",
+    "refresh_token": false,
+    "provider_requests": 0
+  },
+  "installed_function_replay": {
+    "status": "reproduced",
+    "method": "exact installed eligibility and uninstall functions with owned mock IO; all other eligibility inputs allowed",
+    "ordinary": {
+      "authMethod": "chatgpt",
+      "access": {
+        "status": "allowed"
+      },
+      "available": true,
+      "uninstallCalls": []
+    },
+    "adapted": {
+      "authMethod": null,
+      "access": {
+        "status": "denied",
+        "reason": "unsupported-auth"
+      },
+      "available": false,
+      "uninstallCalls": [
+        "code-review@openai-bundled"
+      ]
+    },
+    "source_hashes": {
+      "access": "df34b72ddf0d5239e58e755e8b031c1f2b67f0ff2596a175670d400a29d1bf2e",
+      "eligibility": "f6012c05e80b3678c2578d009ab173d685872cb5197173aab8f1e96dee14c236",
+      "uninstall": "8dea87f960c37483ee694ca70407da092b23da4bcf594f0b2ce56ee7696a103a"
+    },
+    "shared_writes": 0
+  },
+  "regressions": {
+    "command": "PYTHONPATH=scripts python3 -B -m unittest scripts/retained_mcp_test.py scripts/presentation_operator_test.py",
+    "passed": 11,
+    "failed": 0,
+    "invocation_notes": "Initial missing PYTHONPATH and sandbox localhost restriction corrected before successful run."
+  },
+  "evidence_sha256": {
+    "runs/desktop20398-launcher-clean-20261014T133114Z/trace.json": "50220ec7cca8b92623ae151e47a00d03c6a2b260e9ba9eb57ed36a6fb50b73d3",
+    "runs/desktop20398-launcher-crash-20261014T133250Z/trace.json": "90d564054d2890e1d128895321c4759a79fdd8478806e47b925944b7ead077d1",
+    "runs/desktop20398-launcher-clean-20261014T133423Z/trace.json": "092c15d760673daf7b6a7a162df6b668774dc77a3dfbfa9135dfb5ee7eb14683",
+    "runs/desktop20398-ordinary-clean-20261014T133540Z/trace.json": "724e9e1540306615d14e1546d45bec9677364ae693537beba3869e7304c303eb"
+  },
+  "limitations": [
+    "Native startup logs plus read-only engine and exact-function replay establish the mechanism; renderer feature-state values were not intercepted in the native runs.",
+    "No new native presentation preview qualification or paid comparison completed.",
+    "Remaining CLI, effective-config and temporary-uninstall checks stopped after ordinary restart failed preservation.",
+    "Installed app is unchanged. No credentials, settings snapshot restoration or eligibility bypass was used."
+  ],
+  "next_action": "Fix provider-dependent native bundled-plugin preservation before lifecycle and native preview requalification. Do not rebaseline away recurring drift.",
+  "tested_identity": {
+    "engine": {
+      "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+      "version": "codex-cli 0.162.0-alpha.17.2"
+    },
+    "native": {
+      "version": "26.1007.71326",
+      "build": "20398",
+      "application_sha256": "2f231a64e6dd30111bcd09e03c149cd06c8679b25914842772423251c4608ded",
+      "executable_sha256": "239db1b91fbac28c04c96f19ec9ccfda4fb3c9912a2607b50ffc4591233b552a",
+      "native_transport_sha256": "ae60fd7129a8eafea42dc41e8692e95dda624d4406826edd74010148371113db"
+    }
+  },
+  "review": {
+    "baseline": "f1bd98d",
+    "standards_findings": 0,
+    "spec_findings": 0,
+    "scope": "documentation and sanitized evidence; retained traces and replay cross-checked"
+  }
+}

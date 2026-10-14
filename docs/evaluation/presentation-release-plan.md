@@ -6,6 +6,11 @@ disconnect. A local reproduction exposes an evaluator bug: title cancellation
 stopped concurrent main work and closed the owned Desktop. The scoped correction
 passes local regressions; native requalification and remaining comparison work
 are pending. See [the current diagnosis](presentation-title-cancellation-130.md).
+The accepted build-20398 baseline passed clean/crash/repeat-launch checks, but
+ordinary restart restored a plugin excluded during adapted startup. Native
+provider-dependent plugin reconciliation now blocks protected-state preservation;
+the manual smoke and comparison wrappers remain stopped. See the
+[preservation evidence](evidence/presentation-runtime-126-127/desktop-plugin-preservation-20398.json).
 Model capability and release readiness remain unqualified.
 The maintainer approved the three phases below on 2026-10-13. Cost is not a
 constraint; experimental bounds and separate outcomes remain part of the method.
