@@ -1,0 +1,25 @@
+{
+  "schema": "tofa-engine-thread-prototype-v1",
+  "status": "failed",
+  "checks": {
+    "missing_wrong_secret_and_control_path_denied": true
+  },
+  "authorization_mode": "header",
+  "real_credentials_used": false,
+  "desktop_started": false,
+  "external_network": "denied in engine sandbox; fixture upstreams are loopback only",
+  "source_sha256": "36884f959e5572123146c891a5a2bd640cdbfa087c52d9e2ce997076504f67b3",
+  "phases": [],
+  "limits": {
+    "requests": 30,
+    "rpc_seconds": 30
+  },
+  "client": {
+    "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+    "version": "codex-cli 0.162.0-alpha.17.2"
+  },
+  "failure": "Engine rejected model_providers.openai: reserved built-in provider IDs cannot be overridden. No inference request reached a fixture upstream.",
+  "request_count": 0,
+  "upstream_count": 0,
+  "title_provenance": "not established; helper fixture contains no parent identity"
+}

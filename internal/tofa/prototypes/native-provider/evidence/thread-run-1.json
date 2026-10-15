@@ -1,0 +1,22 @@
+{
+  "schema": "tofa-engine-thread-prototype-v1",
+  "status": "failed",
+  "checks": {},
+  "real_credentials_used": false,
+  "desktop_started": false,
+  "external_network": "denied in engine sandbox; fixture upstreams are loopback only",
+  "source_sha256": "bf1a9978950a74ff8e8f83d01c52544021842adb2acd808127a4797baa8d7258",
+  "phases": [],
+  "limits": {
+    "requests": 30,
+    "rpc_seconds": 30
+  },
+  "client": {
+    "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+    "version": "codex-cli 0.162.0-alpha.17.2"
+  },
+  "failure": "Fixture sandbox syntax rejected before engine startup; corrected localhost syntax in later runs.",
+  "request_count": 0,
+  "upstream_count": 0,
+  "title_provenance": "not established; helper fixture contains no parent identity"
+}

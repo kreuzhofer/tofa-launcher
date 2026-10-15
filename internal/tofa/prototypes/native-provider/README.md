@@ -9,6 +9,23 @@ not imported by the launcher. The existing launch guard is unchanged. Related:
 [#133](https://github.com/kreuzhofer/tofa-launcher/issues/133), #130 and #119.
 See the [pinned Ollama research](../../../../docs/research/ollama-desktop-provider-routing-2026-10-14.md).
 
+Follow-up: [conversation-routing results](THREAD-RESULT.md) and
+[switching walkthrough](thread-walkthrough.html) capture the 2026-10-15 local
+engine experiment. Its synthetic transport checks do not extend the supported
+product account scope beyond the agreed existing ChatGPT sign-in prerequisite.
+
+```sh
+python3 -B internal/tofa/prototypes/native-provider/thread_probe.py \
+  --engine /Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex \
+  --out /tmp/tofa-presentation-validation/checks/prototype-133/thread-new
+```
+
+This creates disposable state and fake credentials; external engine network access
+is denied and upstreams are owned loopback fixtures. The path-mode final probe
+passes its scoped checks. `--auth-mode header` demonstrates the installed engine's
+reserved-provider rejection and is expected to fail before inference. It is not
+an automatic fallback or retry. See the result's authorization/naming limitations.
+
 ## Open the walkthrough
 
 Double-click `walkthrough.html`. It is a single self-contained HTML file with

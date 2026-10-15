@@ -1,0 +1,70 @@
+{
+  "schema": "tofa-engine-thread-prototype-v1",
+  "status": "failed",
+  "checks": {
+    "missing_wrong_secret_and_control_path_denied": true,
+    "new_thread_native_provider": true,
+    "same_thread_three_completed_turns": true,
+    "switch_sequence": true,
+    "new_and_legacy_resume_preserve_provider": true,
+    "launch_secret_delivered_by_engine": true,
+    "upstream_credentials_separated": true,
+    "review_follows_model": false,
+    "denied_commands_not_executed": true
+  },
+  "real_credentials_used": false,
+  "desktop_started": false,
+  "external_network": "denied in engine sandbox; fixture upstreams are loopback only",
+  "source_sha256": "b558116cfed82bd84acbe02763637ee4128ea595ba413211a51836aeec22530d",
+  "phases": [
+    {
+      "name": "switch",
+      "provider": "openai",
+      "turns": 3
+    },
+    {
+      "name": "resume",
+      "new_provider": "openai",
+      "legacy_provider": "nebius-tofa"
+    },
+    {
+      "name": "review",
+      "main": "moonshotai/Kimi-K3",
+      "reviewers": [
+        "zai-org/GLM-5.3-Flash"
+      ],
+      "command_executed": false
+    },
+    {
+      "name": "review",
+      "main": "gpt-6-astra",
+      "reviewers": [],
+      "command_executed": false
+    },
+    {
+      "name": "review",
+      "main": "moonshotai/Kimi-K3",
+      "reviewers": [
+        "zai-org/GLM-5.3-Flash"
+      ],
+      "command_executed": false
+    },
+    {
+      "name": "title",
+      "provider": "openai",
+      "request_count": 1
+    }
+  ],
+  "limits": {
+    "requests": 30,
+    "rpc_seconds": 30
+  },
+  "client": {
+    "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+    "version": "codex-cli 0.162.0-alpha.17.2"
+  },
+  "request_count": 18,
+  "upstream_count": 18,
+  "title_provenance": "not established; helper fixture contains no parent identity",
+  "interpretation": "Switch/resume/auth checks passed. Fixture incorrectly assumed the native reviewer must be codex-auto-review; observed native metadata instead selects the main model. Native review fixture returned malformed assessments; engine denied execution. Corrected in run 3."
+}

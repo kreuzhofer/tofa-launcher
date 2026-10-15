@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>One conversation, explicit service choices — TOFA prototype</title>
+<style>
+:root{font:16px/1.5 system-ui,sans-serif;color:#243640;background:#f1f5f6}body{max-width:960px;margin:auto;padding:32px 20px}h1{font-size:32px;line-height:1.2}h2{font-size:21px}section{background:white;border:1px solid #d3dfe3;border-radius:10px;padding:22px;margin:22px 0}button{font:inherit;background:#fff;color:#174d60;border:1px solid #7f9aa5;border-radius:6px;padding:9px 12px;margin:4px;cursor:pointer}button.active{background:#174d60;color:white}button:disabled{opacity:.5;cursor:default}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}dt{color:#5d7079;font-size:13px}dd{margin:0;font-weight:600}.note{border-left:4px solid #266b82;padding-left:14px}#change{min-height:48px}.step{display:block}small{color:#5d7079}a{color:#174d60}@media(max-width:600px){.grid{grid-template-columns:1fr}}
+</style>
+<h1>One conversation, explicit service choices</h1>
+<p>Explore the agreed design: choosing Kimi or GPT changes where the next turn goes, while existing work keeps its original service. This is a throwaway, in-memory simulation. It does not launch Desktop, send requests or save settings.</p>
+<p class="note">The local engine proved switching, context continuity and review selection between completed turns. In-flight behavior below is the intended design, not a measured result. Automatic title routing remains an open product choice because the current helper omits its parent conversation.</p>
+<section><h2>Current simulated state</h2><dl class="grid" id="state"></dl><p id="change" aria-live="polite"></p></section>
+<section><h2>Try the actions</h2><div id="actions"></div></section>
+<section><h2>Guided walkthroughs</h2><div id="tabs" role="tablist" aria-label="Walkthroughs"></div><p id="scenario"></p><div id="steps"></div></section>
+<section><h2>Measured results</h2><p>Final local engine run: 12 scoped checks passed with 16 synthetic inference requests. Kimi → GPT → Kimi retained one thread and carried context to the newly selected service. Legacy thread resumption and reviewer selection also passed.</p><p>A URL path carried the launch secret, but can expose it in engine diagnostics. An additional header override for the built-in provider was rejected. Production authorization remains unqualified.</p><p>Native reviews included parent-thread and parent-turn metadata. The separate title request did not. The walkthrough refuses to invent that missing connection.</p><a href="THREAD-RESULT.md">Exact results, retained failures and limitations</a></section>
+<small>Prototype #133. No production code or launch guard is changed. <a href="https://github.com/kreuzhofer/tofa-launcher/issues/133">Issue</a>.</small>
+<script>
+// Pure state module; no DOM, network or persistent storage dependencies.
+const initial=()=>({thread:'Same conversation',selected:'Token Factory / Kimi',history:0,work:null,review:'None pending',title:'Policy unresolved',message:'Choose a model and start a simulated turn.'});
+function transition(s,action){
+ if(action==='reset')return initial();
+ if(action==='kimi'||action==='gpt')return {...s,selected:action==='kimi'?'Token Factory / Kimi':'Native / GPT',message:'Explicit selection changes the next turn. Prior work retains its originating service.'};
+ if(action==='start')return s.work?{...s,message:'Finish the current simulated turn first.'}:{...s,work:s.selected,review:s.selected.startsWith('Token')?'TOFA Guardian / Token Factory':'Native review / OpenAI',message:'The turn and its review retain this service, even if the next model choice changes.'};
+ if(action==='finish')return s.work?{...s,history:s.history+1,work:null,review:'None pending',message:'Turn completed; its history remains available to the next explicitly selected service.'}:{...s,message:'There is no active turn.'};
+ if(action==='title')return {...s,title:'Cannot identify originating service',message:'The observed title helper omits its parent conversation. Do not guess using timing or the latest model selection.'};
+ if(action==='failure')return {...s,work:null,review:'Stopped',message:'The selected service failed. Surface the failure; do not switch services automatically.'};
+ return s;
+}
+const labels={reset:'Reset',kimi:'Select Kimi · Token Factory',gpt:'Select GPT · OpenAI',start:'Start turn and review',finish:'Finish turn',title:'Receive an unlinked title request',failure:'Fail selected service'};
+const scenarios=[
+ {name:'Switch services',description:'One conversation carries its context through explicit model choices. This sequence was exercised with the actual engine and synthetic upstreams.',steps:['start','finish','gpt','start','finish','kimi']},
+ {name:'Review already running',description:'Intended rule: a selection for the next turn must not reroute work already underway. The pending-review timing case has not yet been qualified.',steps:['start','gpt','finish','start']},
+ {name:'Missing title origin',description:'A title request arrives while the current model is GPT. That does not prove the title belongs to a GPT turn.',steps:['start','finish','gpt','title']},
+ {name:'No silent fallback',description:'A service failure must remain visible. Switching services is a separate explicit action.',steps:['start','failure','gpt','start']}
+];
+let state=initial(),scenario=0,step=0;
+const fields={thread:'Conversation identity',selected:'Next turn model and service',history:'Completed turns retained',work:'Active turn service',review:'Review routing',title:'Automatic title routing'};
+function render(){const panel=document.querySelector('#state');panel.replaceChildren();for(const [key,label] of Object.entries(fields)){const group=document.createElement('div'),dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=state[key]===null?'None':String(state[key]);group.append(dt,dd);panel.append(group)}document.querySelector('#change').textContent=state.message;document.querySelector('#scenario').textContent=scenarios[scenario].description;const steps=document.querySelector('#steps');steps.replaceChildren();scenarios[scenario].steps.forEach((action,index)=>{const b=document.createElement('button');b.className='step';b.textContent=(index+1)+'. '+labels[action];b.disabled=index!==step;b.onclick=()=>{state=transition(state,action);step++;render()};steps.append(b)});document.querySelectorAll('#tabs button').forEach((b,i)=>{b.className=i===scenario?'active':'';b.setAttribute('aria-selected',String(i===scenario))})}
+for(const [action,label] of Object.entries(labels)){const b=document.createElement('button');b.textContent=label;b.onclick=()=>{state=transition(state,action);render()};document.querySelector('#actions').append(b)}
+scenarios.forEach((s,i)=>{const b=document.createElement('button');b.textContent=s.name;b.setAttribute('role','tab');b.onclick=()=>{scenario=i;step=0;state=initial();render()};document.querySelector('#tabs').append(b)});
+render();
+</script></html>
