@@ -13,11 +13,19 @@ selection is sufficient to request a switch; a separate confirmation dialog for
 each switch is not required. The supported way to communicate that destination
 through Desktop's existing interface still needs verification.
 
-Review and title requests follow the service of the work that triggered them:
-Token Factory work uses the configured TOFA Guardian and naming model, while
-native work retains native handling. A subsequent model selection must not
-reroute already-running requests. This requires reliable request provenance;
-the most recently selected model or request timing alone is not sufficient.
+Review requests follow the service of the work that triggered them: Token Factory
+work uses the configured TOFA Guardian, while native work retains native review
+handling. A subsequent model selection must not reroute already-running reviews.
+This requires reliable request provenance; the most recently selected model or
+request timing alone is not sufficient.
+
+Automatic titles use the configured TOFA naming model for all conversations during
+a TOFA launch, including native GPT conversations. The maintainer explicitly
+accepted this policy on 2026-10-16, including sending GPT title-generation context
+to Token Factory. This supersedes the initially proposed service-specific title
+policy: the observed native title helper omits its parent conversation identity,
+so that policy cannot be reliably enforced at the observed boundary. Naming stays
+independent of main-model selection, with no silent model or service fallback.
 
 This deliberately revises ADR 0003's restriction on cross-service selection for
 that future route. Its history-preservation, session-scoped settings and

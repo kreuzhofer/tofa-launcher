@@ -46,13 +46,14 @@ lifecycle, or presentation previews.
      without a repeated confirmation; supporting requests follow the originating
      work's service and are unaffected by later selections.
 3. Native/Token Factory request separation — engine main switching and review
-   selection/provenance passed a synthetic fixture. Native automatic title
-   requests omit the parent conversation; service-specific naming remains blocked
-   at that boundary. Unsupported auxiliaries cannot silently change service.
-4. Local request authorization — delivery of a secret URL path passed, but its
-   diagnostic exposure leaves production authorization unresolved. Retain a proven
-   launch-specific access boundary and isolate launch/evaluation control endpoints.
-   Loopback binding or an arbitrary bearer header alone is insufficient.
+   selection/provenance passed a synthetic fixture. Titles omit parent identity;
+   the maintainer resolved that limitation by choosing launch-wide TOFA naming.
+   Unsupported auxiliaries cannot silently change service.
+4. Local request authorization — diagnosed on 2026-10-16. A named provider
+   requiring native authentication supports an environment-backed launch header;
+   its error-path regressions, original scenario and account preservation passed.
+   Production validation and independent control-endpoint authorization still need
+   implementation. Loopback binding or arbitrary bearer presence is insufficient.
 5. Qualification and release — guard stays active until separately qualified;
    detailed lifecycle and release criteria remain to be specified after routing
    contracts and technical prerequisites are settled.
@@ -112,18 +113,55 @@ though the generic helper supports it. The replay's metadata likewise lacks it.
 Catalog display names/descriptions provide an existing service-label mechanism;
 actual rendered labels still require qualification.
 
-## Reopened decision and remaining evidence
+## Resolved naming decision and remaining evidence
 
-The maintainer was asked whether to choose a launch-wide TOFA naming model, native
-naming for all titles, or retain service-specific naming pending another supported
-boundary. That answer is pending; the agreed service-specific policy has not been
-silently replaced. Each launch-wide option changes where some title-generation
-context goes and therefore requires an explicit choice.
+On 2026-10-16 the maintainer explicitly accepted one configured TOFA naming model
+for all automatic titles during a TOFA launch, including GPT conversations and
+their title-generation context. This replaces the earlier service-specific naming
+target, not the service-specific review policy. ADR 0006 records the decision.
+Earlier rounds above retain their historical rationale; this decision takes
+precedence for title routing. No automatic naming fallback is introduced.
 
 Still needed: production launch authorization and diagnostic treatment, pending
 review switch behavior, ordinary-launch behavior of new mixed-service histories,
 actual signed-in inference transport and native Desktop lifecycle/preview
 qualification. Keep these as explicit acceptance work in the implementation spec.
+
+## Authorization diagnosis — 2026-10-16
+
+The [retained diagnosis and candidate fix](https://github.com/kreuzhofer/tofa-launcher/blob/5ffdd12/internal/tofa/prototypes/native-provider/AUTHORIZATION-RESULT.md)
+establish a minimal native-engine regression: one failed WebSocket handshake logs
+the complete endpoint URL, including a launch secret placed in its path. The same
+leak occurs on socket disconnect; correcting HTTP version alone does not fix it.
+
+The tested replacement is a separately named routing provider with
+`requires_openai_auth=true` and a process-environment-backed `X-TOFA-Launch`
+header. The engine accepts this configuration, unlike an override of reserved
+`model_providers.openai`. The native auth credential remains independent; the
+launch secret is excluded from the URL and removed before either upstream.
+The prototype name `tofa-authenticated-router` is not a finalized production
+provider identifier or permission to migrate stored conversations.
+
+Both error-path regressions passed without suppressing diagnostics. The original
+switching/resume/review fixture passed 16 scoped checks, including wrong/missing
+launch credentials, no launch header upstream, and no launch secret in retained
+engine artifacts. Existing native-provider conversations retained their direct
+native route and resumed unchanged; do not globally redirect those histories to
+an endpoint requiring a header the built-in provider cannot supply.
+
+A separate real-home account/config probe returned `chatgpt` with native auth
+required under the candidate provider. Ordinary before/after matched and all
+protected hashes passed. Native account discovery connectivity was allowed, but
+token refresh was disabled and no inference or Desktop launch ran. This corrects
+the earlier assumption that account preservation required the built-in provider
+identity: the native-auth requirement also works for a named provider in this
+engine. Actual Desktop behavior under that configuration remains unqualified.
+
+The URL-secret blocker now has a reproducible fix at the engine/prototype seam.
+Carry its mechanism and fault cases into production tests; do not claim the
+production Go adapter or Desktop lifecycle is already fixed. Security acceptance
+must cover control isolation, constant-time capability validation, bounded input,
+diagnostics/export redaction and child environment inheritance.
 
 If a mechanism cannot meet the agreed behavior, return with the concrete evidence
 and the affected product choice. Do not silently narrow the behavior or claim
