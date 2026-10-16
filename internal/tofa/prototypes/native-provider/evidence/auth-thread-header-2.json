@@ -1,0 +1,89 @@
+{
+  "schema": "tofa-engine-thread-prototype-v1",
+  "status": "passed",
+  "checks": {
+    "missing_wrong_secret_and_control_path_denied": true,
+    "native_auth_still_required": true,
+    "new_thread_expected_provider": true,
+    "same_thread_three_completed_turns": true,
+    "switch_sequence": true,
+    "context_reaches_next_selected_service": true,
+    "new_and_legacy_resume_preserve_provider": true,
+    "launch_secret_delivered_by_engine": true,
+    "upstream_credentials_separated": true,
+    "launch_header_not_forwarded_upstream": true,
+    "review_follows_model": true,
+    "review_parent_link_observed": true,
+    "denied_commands_not_executed": true,
+    "launch_secret_absent_from_engine_artifacts": true
+  },
+  "authorization_mode": "authenticated-header",
+  "real_credentials_used": false,
+  "desktop_started": false,
+  "external_network": "denied in engine sandbox; fixture upstreams are loopback only",
+  "source_sha256": "e4f68dd7d770bece1fd7203eaf42ee75e33e82e8b796b7f6f9473452e3585814",
+  "phases": [
+    {
+      "name": "switch",
+      "provider": "tofa-authenticated-router",
+      "turns": 3
+    },
+    {
+      "name": "resume",
+      "new_provider": "tofa-authenticated-router",
+      "legacy_provider": "nebius-tofa"
+    },
+    {
+      "name": "review",
+      "main": "moonshotai/Kimi-K3",
+      "reviewers": [
+        "zai-org/GLM-5.3-Flash"
+      ],
+      "command_executed": false
+    },
+    {
+      "name": "review",
+      "main": "gpt-6-astra",
+      "reviewers": [
+        "gpt-6-astra"
+      ],
+      "command_executed": false
+    },
+    {
+      "name": "review",
+      "main": "moonshotai/Kimi-K3",
+      "reviewers": [
+        "zai-org/GLM-5.3-Flash"
+      ],
+      "command_executed": false
+    },
+    {
+      "name": "title",
+      "provider": "tofa-authenticated-router",
+      "request_count": 1
+    }
+  ],
+  "limits": {
+    "requests": 30,
+    "rpc_seconds": 30
+  },
+  "client": {
+    "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+    "version": "codex-cli 0.162.0-alpha.17.2"
+  },
+  "account_fixture": {
+    "type": "apiKey",
+    "requires_openai_auth": true
+  },
+  "artifact_leaks": [],
+  "request_count": 16,
+  "upstream_count": 16,
+  "title_provenance": "not established; helper fixture contains no parent identity",
+  "qualification_limits": [
+    "Synthetic API-key transport fixture, not a real ChatGPT account or Desktop lifecycle test.",
+    "Secret URL path delivery is proven only for path mode; engine diagnostics can contain URLs.",
+    "Production inbound authorization remains unqualified; this is a throwaway carrier fixture.",
+    "Review switches were between completed turns, not while a review was pending.",
+    "The simulated router is not the production Go adapter."
+  ]
+}

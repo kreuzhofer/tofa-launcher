@@ -6,21 +6,21 @@
 </style>
 <h1>One conversation, explicit service choices</h1>
 <p>Explore the agreed design: choosing Kimi or GPT changes where the next turn goes, while existing work keeps its original service. This is a throwaway, in-memory simulation. It does not launch Desktop, send requests or save settings.</p>
-<p class="note">The local engine proved switching, context continuity and review selection between completed turns. In-flight behavior below is the intended design, not a measured result. Automatic title routing remains an open product choice because the current helper omits its parent conversation.</p>
+<p class="note">The local engine proved switching, context continuity and review selection between completed turns. In-flight behavior below is the intended design, not a measured result. On October 16 the maintainer accepted one TOFA naming model for all automatic titles during a TOFA launch, including GPT conversations.</p>
 <section><h2>Current simulated state</h2><dl class="grid" id="state"></dl><p id="change" aria-live="polite"></p></section>
 <section><h2>Try the actions</h2><div id="actions"></div></section>
 <section><h2>Guided walkthroughs</h2><div id="tabs" role="tablist" aria-label="Walkthroughs"></div><p id="scenario"></p><div id="steps"></div></section>
-<section><h2>Measured results</h2><p>Final local engine run: 12 scoped checks passed with 16 synthetic inference requests. Kimi → GPT → Kimi retained one thread and carried context to the newly selected service. Legacy thread resumption and reviewer selection also passed.</p><p>A URL path carried the launch secret, but can expose it in engine diagnostics. An additional header override for the built-in provider was rejected. Production authorization remains unqualified.</p><p>Native reviews included parent-thread and parent-turn metadata. The separate title request did not. The walkthrough refuses to invent that missing connection.</p><a href="THREAD-RESULT.md">Exact results, retained failures and limitations</a></section>
+<section><h2>Measured results</h2><p>The October 16 header candidate passed 16 scoped checks: 16 routed requests and two existing-native turns that bypassed the router. Switching, context continuity, legacy/native resumption, reviewer selection and credential separation passed.</p><p>Putting the launch secret in the URL failed the diagnostic regression. An environment-backed header on a separately named provider requiring native authentication passed both error cases; the real signed-in account was preserved in a separate read-only probe. Production authorization and Desktop remain unqualified.</p><p>Reviews included parent metadata; automatic titles did not. The accepted naming policy sends all title-generation context to the configured TOFA naming model. That policy is simulated below, not implemented by the engine fixture.</p><a href="AUTHORIZATION-RESULT.md">Diagnosis and limitations</a></section>
 <small>Prototype #133. No production code or launch guard is changed. <a href="https://github.com/kreuzhofer/tofa-launcher/issues/133">Issue</a>.</small>
 <script>
 // Pure state module; no DOM, network or persistent storage dependencies.
-const initial=()=>({thread:'Same conversation',selected:'Token Factory / Kimi',history:0,work:null,review:'None pending',title:'Policy unresolved',message:'Choose a model and start a simulated turn.'});
+const initial=()=>({thread:'Same conversation',selected:'Token Factory / Kimi',history:0,work:null,review:'None pending',title:'Configured TOFA naming model',message:'Choose a model and start a simulated turn.'});
 function transition(s,action){
  if(action==='reset')return initial();
  if(action==='kimi'||action==='gpt')return {...s,selected:action==='kimi'?'Token Factory / Kimi':'Native / GPT',message:'Explicit selection changes the next turn. Prior work retains its originating service.'};
  if(action==='start')return s.work?{...s,message:'Finish the current simulated turn first.'}:{...s,work:s.selected,review:s.selected.startsWith('Token')?'TOFA Guardian / Token Factory':'Native review / OpenAI',message:'The turn and its review retain this service, even if the next model choice changes.'};
  if(action==='finish')return s.work?{...s,history:s.history+1,work:null,review:'None pending',message:'Turn completed; its history remains available to the next explicitly selected service.'}:{...s,message:'There is no active turn.'};
- if(action==='title')return {...s,title:'Cannot identify originating service',message:'The observed title helper omits its parent conversation. Do not guess using timing or the latest model selection.'};
+ if(action==='title')return {...s,title:'Configured TOFA naming model / Token Factory',message:'All automatic titles in this TOFA launch use its naming model, including GPT title-generation context. No parent-service guess is needed.'};
  if(action==='failure')return {...s,work:null,review:'Stopped',message:'The selected service failed. Surface the failure; do not switch services automatically.'};
  return s;
 }
@@ -28,7 +28,7 @@ const labels={reset:'Reset',kimi:'Select Kimi · Token Factory',gpt:'Select GPT 
 const scenarios=[
  {name:'Switch services',description:'One conversation carries its context through explicit model choices. This sequence was exercised with the actual engine and synthetic upstreams.',steps:['start','finish','gpt','start','finish','kimi']},
  {name:'Review already running',description:'Intended rule: a selection for the next turn must not reroute work already underway. The pending-review timing case has not yet been qualified.',steps:['start','gpt','finish','start']},
- {name:'Missing title origin',description:'A title request arrives while the current model is GPT. That does not prove the title belongs to a GPT turn.',steps:['start','finish','gpt','title']},
+ {name:'One naming policy',description:'The main changes to GPT; automatic naming still uses the configured TOFA naming model. This is the explicitly accepted policy for TOFA launches.',steps:['start','finish','gpt','title']},
  {name:'No silent fallback',description:'A service failure must remain visible. Switching services is a separate explicit action.',steps:['start','failure','gpt','start']}
 ];
 let state=initial(),scenario=0,step=0;

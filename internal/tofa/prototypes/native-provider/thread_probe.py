@@ -133,7 +133,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--engine', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
-    parser.add_argument('--auth-mode', choices=('path', 'header'), default='path')
+    parser.add_argument('--auth-mode', choices=('path', 'header', 'authenticated-header'), default='path')
     args = parser.parse_args()
     out = args.out.resolve()
     if Path('/tmp/tofa-presentation-validation').resolve() not in out.parents:
@@ -162,6 +162,7 @@ def main():
                TOFA_FIXTURE_KEY='synthetic-factory')
     secret = secrets.token_urlsafe(24)
     prefix = '/' + secret + '/v1' if args.auth_mode == 'path' else '/v1'
+    new_provider = 'tofa-authenticated-router' if args.auth_mode == 'authenticated-header' else 'openai'
     requests, upstreams, auth_rejections = [], [], []
     phase = {'name': 'switch', 'review_calls': 0}
     servers = []
@@ -193,7 +194,7 @@ def main():
             raw = self.rfile.read(int(self.headers.get('Content-Length', 0)))
             if self.server.role == 'router':
                 if (self.path != prefix + '/responses' or
-                        (args.auth_mode == 'header' and self.headers.get('X-TOFA-Launch') != secret)):
+                        (args.auth_mode != 'path' and self.headers.get('X-TOFA-Launch') != secret)):
                     auth_rejections.append(True)
                     self.send(401, b'{"error":"launch authorization required"}')
                     return
@@ -273,7 +274,7 @@ def main():
         catalog.write_text(json.dumps(dict(models=entries)))
         native, factory, router = serve('native'), serve('factory'), serve('router')
         base = 'http://127.0.0.1:' + str(router.server_port) + prefix
-        config = ['model_provider="openai"', 'model=' + json.dumps(KIMI),
+        config = ['model_provider=' + json.dumps(new_provider), 'model=' + json.dumps(KIMI),
                   'openai_base_url=' + json.dumps(base), 'model_catalog_json=' + json.dumps(str(catalog)),
                   'features.plugins=false', 'features.apps=false', 'features.shell_snapshot=false',
                   'features.enable_fanout=false', 'features.hooks=false', 'web_search="disabled"',
@@ -286,9 +287,29 @@ def main():
         if args.auth_mode == 'header':
             config += ['model_providers.openai.http_headers={ "X-TOFA-Launch" = ' + json.dumps(secret) + ' }',
                        'model_providers.nebius-tofa.http_headers={ "X-TOFA-Launch" = ' + json.dumps(secret) + ' }']
-        for invalid in ('/v1/responses', '/wrong/v1/responses', prefix + '/evaluation-stop'):
+        if args.auth_mode == 'authenticated-header':
+            env['TOFA_DIAGNOSTIC_LAUNCH_SECRET'] = secret
+            # Existing native-provider histories must retain their native route.
+            # Only new authenticated-router and legacy TOFA providers use the
+            # local adapter. Here the native route is also an owned fixture.
+            config = [('openai_base_url=' + json.dumps('http://127.0.0.1:' + str(native.server_port) + '/v1'))
+                      if setting.startswith('openai_base_url=') else setting for setting in config]
+            config += ['model_providers.tofa-authenticated-router.name="Authenticated fixture router"',
+                       'model_providers.tofa-authenticated-router.base_url=' + json.dumps(base),
+                       'model_providers.tofa-authenticated-router.wire_api="responses"',
+                       'model_providers.tofa-authenticated-router.requires_openai_auth=true',
+                       'model_providers.tofa-authenticated-router.supports_websockets=true',
+                       'model_providers.tofa-authenticated-router.env_http_headers={ "X-TOFA-Launch" = "TOFA_DIAGNOSTIC_LAUNCH_SECRET" }',
+                       'model_providers.nebius-tofa.env_http_headers={ "X-TOFA-Launch" = "TOFA_DIAGNOSTIC_LAUNCH_SECRET" }']
+        invalid_cases = [('/v1/responses', None), ('/wrong/v1/responses', None), (prefix + '/evaluation-stop', secret)]
+        if args.auth_mode != 'path':
+            invalid_cases[1] = ('/v1/responses', 'incorrect-fixture-capability')
+        for invalid, supplied_secret in invalid_cases:
             connection = http.client.HTTPConnection('127.0.0.1', router.server_port, timeout=5)
-            connection.request('POST', invalid, json.dumps(dict(model=KIMI)), {'Authorization': 'Bearer synthetic-native'})
+            headers = {'Authorization': 'Bearer synthetic-native'}
+            if supplied_secret is not None:
+                headers['X-TOFA-Launch'] = supplied_secret
+            connection.request('POST', invalid, json.dumps(dict(model=KIMI)), headers)
             response = connection.getresponse()
             if response.status != 401:
                 raise RuntimeError('negative launch-authorization control failed')
@@ -305,7 +326,7 @@ def main():
         thread = e.call('thread/start', dict(cwd=str(workspace), model=KIMI,
                         approvalPolicy='never', sandbox='read-only'))
         thread_id = thread['thread']['id']
-        result['checks']['new_thread_native_provider'] = thread['modelProvider'] == 'openai'
+        result['checks']['new_thread_expected_provider'] = thread['modelProvider'] == new_provider
         for model in (KIMI, GPT, KIMI):
             e.call('thread/settings/update', dict(threadId=thread_id, model=model))
             e.turn(thread_id, text='Synthetic local switching fixture ' + model)
@@ -321,16 +342,30 @@ def main():
         legacy_id = legacy['thread']['id']
         phase['name'] = 'legacy'
         e.turn(legacy_id)
+        native_id = None
+        if args.auth_mode == 'authenticated-header':
+            phase['name'] = 'existing-native'
+            original_native = e.call('thread/start', dict(cwd=str(workspace), model=GPT, modelProvider='openai',
+                                          approvalPolicy='never', sandbox='read-only'))
+            native_id = original_native['thread']['id']
+            previous = len(requests)
+            e.turn(native_id)
+            result['checks']['existing_native_bypasses_adapter'] = len(requests) == previous and upstreams[-1]['destination'] == 'native'
         e.close()
         engines.remove(e)
         e = start(config, 'engine-2')
-        for identifier, provider in ((thread_id, 'openai'), (legacy_id, 'nebius-tofa')):
+        resumes = [(thread_id, new_provider), (legacy_id, 'nebius-tofa')]
+        if native_id:
+            resumes.append((native_id, 'openai'))
+        for identifier, provider in resumes:
             resumed = e.call('thread/resume', dict(threadId=identifier, model=None, modelProvider=None))
             if resumed['modelProvider'] != provider or resumed['thread']['id'] != identifier:
                 raise RuntimeError('resume changed identity/provider')
             e.turn(identifier)
         result['checks']['new_and_legacy_resume_preserve_provider'] = True
-        note('resume', new_provider='openai', legacy_provider='nebius-tofa')
+        if native_id:
+            result['checks']['existing_native_resumes_without_migration'] = True
+        note('resume', new_provider=new_provider, legacy_provider='nebius-tofa')
         review = e.call('thread/start', dict(cwd=str(workspace), model=KIMI,
                        approvalPolicy='on-request', approvalsReviewer='auto_review', sandbox='read-only'))
         review_id = review['thread']['id']
@@ -354,6 +389,8 @@ def main():
         note('title', provider=title['modelProvider'], request_count=sum(r['phase'] == 'title' for r in requests))
         result['checks']['launch_secret_delivered_by_engine'] = bool(requests) and all(r['launch_secret_observed'] for r in requests)
         result['checks']['upstream_credentials_separated'] = all(r['authorization'] == 'Bearer synthetic-' + ('factory' if r['destination'] == 'factory' else 'native') for r in upstreams)
+        result['checks']['launch_header_not_forwarded_upstream'] = all(
+            'x-tofa-launch' not in [name.lower() for name in r['header_names']] for r in upstreams)
         reviews = [p for p in result['phases'] if p['name'] == 'review']
         expected_native_reviewer = native_entries[GPT].get('auto_review_model_override') or GPT
         result['checks']['review_follows_model'] = [p['reviewers'] for p in reviews] == [[GUARDIAN], [expected_native_reviewer], [GUARDIAN]]
@@ -364,15 +401,24 @@ def main():
         result['checks']['denied_commands_not_executed'] = not any(p['command_executed'] for p in reviews)
         result['status'] = 'passed' if all(result['checks'].values()) else 'failed'
     except Exception as error:
-        result['failure'] = str(error).replace(secret, '<launch-secret>')[:1000]
+        result['failure'] = str(error).replace(secret, '<REDACTED>')[:1000]
     finally:
         for e in engines:
             e.close()
         for server in servers:
             server.shutdown()
             server.server_close()
+        leaks = []
+        if args.auth_mode == 'authenticated-header':
+            for path in out.rglob('*'):
+                if path.is_file() and secret.encode() in path.read_bytes():
+                    leaks.append(str(path.relative_to(out)))
+            result['checks']['launch_secret_absent_from_engine_artifacts'] = not leaks
+            if leaks:
+                result['status'] = 'failed'
+            result['artifact_leaks'] = leaks
         # Private fixture trace has synthetic content only; never publish path secrets.
-        serialized = json.dumps(requests, indent=2).replace(secret, '<launch-secret>')
+        serialized = json.dumps(requests, indent=2).replace(secret, '<REDACTED>')
         (out / 'requests.json').write_text(serialized)
         (out / 'upstreams.json').write_text(json.dumps(upstreams, indent=2))
         result['request_count'] = len(requests)
@@ -381,7 +427,7 @@ def main():
         result['qualification_limits'] = [
             'Synthetic API-key transport fixture, not a real ChatGPT account or Desktop lifecycle test.',
             'Secret URL path delivery is proven only for path mode; engine diagnostics can contain URLs.',
-            'Launch secret redaction and production inbound authorization remain unqualified.',
+            'Production inbound authorization remains unqualified; this is a throwaway carrier fixture.',
             'Review switches were between completed turns, not while a review was pending.',
             'The simulated router is not the production Go adapter.']
         (out / 'result.json').write_text(json.dumps(result, indent=2) + '\n')

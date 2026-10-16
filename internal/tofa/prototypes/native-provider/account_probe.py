@@ -137,6 +137,13 @@ def main():
               '-c', 'model_providers.tofa-auth-prototype.base_url="http://127.0.0.1:1/v1"',
               '-c', 'model_providers.tofa-auth-prototype.wire_api="responses"',
               '-c', 'model_providers.tofa-auth-prototype.requires_openai_auth=false']
+    authenticated = ['-c', 'model_provider="tofa-authenticated-router"',
+                     '-c', 'model_providers.tofa-authenticated-router.name="Authenticated fixture router"',
+                     '-c', 'model_providers.tofa-authenticated-router.base_url="http://127.0.0.1:1/v1"',
+                     '-c', 'model_providers.tofa-authenticated-router.wire_api="responses"',
+                     '-c', 'model_providers.tofa-authenticated-router.requires_openai_auth=true',
+                     '-c', 'model_providers.tofa-authenticated-router.supports_websockets=true',
+                     '-c', 'model_providers.tofa-authenticated-router.env_http_headers={ "X-TOFA-Launch" = "TOFA_DIAGNOSTIC_LAUNCH_SECRET" }']
     try:
         result['client'] = {'sha256': digest(args.engine),
                             'version': subprocess.check_output([str(args.engine), '--version'], text=True, timeout=10).strip()}
@@ -144,6 +151,7 @@ def main():
         for name, extra in [('ordinary', []), ('custom_provider_control', custom),
                             ('native_provider_router', native),
                             ('native_provider_alternate_model', native + ['-c', 'model="moonshotai/Kimi-K3"']),
+                            ('authenticated_header_router', authenticated),
                             ('ordinary_after', [])]:
             folder = out / name
             folder.mkdir(mode=0o700)
@@ -157,6 +165,7 @@ def main():
             'custom_control_loses_account': cases['custom_provider_control']['account_type'] is None and cases['custom_provider_control']['requires_openai_auth'] is False,
             'native_route_retains_account': all(cases[n]['account_type'] == baseline['account_type'] and cases[n]['requires_openai_auth'] is True and cases[n]['effective_provider'] == 'openai' and cases[n]['loopback_override_observed'] for n in ('native_provider_router', 'native_provider_alternate_model')),
             'alternate_model_selected': cases['native_provider_alternate_model']['alternate_model_observed'],
+            'authenticated_router_retains_account': cases['authenticated_header_router']['account_type'] == baseline['account_type'] and cases['authenticated_header_router']['requires_openai_auth'] is True and cases['authenticated_header_router']['effective_provider'] == 'tofa-authenticated-router',
             'ordinary_after_identical': cases['ordinary_after'] == baseline,
         }
         result['checks'] = checks

@@ -1,0 +1,19 @@
+{
+  "schema": "tofa-launch-secret-regression-v1",
+  "status": "passed",
+  "engine_sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+  "source_sha256": "a2833df85c0d7105db485597c37c80f1b9790af377325a43d672a27d29713685",
+  "external_network": "denied",
+  "real_credentials_used": false,
+  "secret_location": "header",
+  "failure_mode": "handshake",
+  "requires_openai_auth": true,
+  "account_type": "apiKey",
+  "request_observed": true,
+  "header_secret_received": true,
+  "native_auth_received": true,
+  "secret_in_stderr": false,
+  "signal": "2026-10-16T09:21:02.846048Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: WebSocket protocol error: HTTP version must be 1.1 or higher, url: ws://127.0.0.1:49718/v1/responses",
+  "other_artifacts_containing_secret": [],
+  "seconds": 0.88
+}

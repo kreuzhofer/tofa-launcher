@@ -9,6 +9,14 @@ not imported by the launcher. The existing launch guard is unchanged. Related:
 [#133](https://github.com/kreuzhofer/tofa-launcher/issues/133), #130 and #119.
 See the [pinned Ollama research](../../../../docs/research/ollama-desktop-provider-routing-2026-10-14.md).
 
+Latest: [launch authorization diagnosis and validated header candidate](AUTHORIZATION-RESULT.md)
+records the 2026-10-16 red/green regression and actual signed-in account check.
+Use `thread_probe.py --auth-mode authenticated-header` for that candidate; the
+default path mode retains the original prototype for comparison and is not the
+recommended authorization design. `authorization_probe.py --secret-location path`
+is the expected-failing disclosure control; `--secret-location header` verifies
+the candidate fix against the same native error path.
+
 Follow-up: [conversation-routing results](THREAD-RESULT.md) and
 [switching walkthrough](thread-walkthrough.html) capture the 2026-10-15 local
 engine experiment. Its synthetic transport checks do not extend the supported

@@ -1,5 +1,11 @@
 # Native-provider conversation routing experiment — 2026-10-15
 
+Follow-up, 2026-10-16: the [authorization diagnosis](AUTHORIZATION-RESULT.md)
+validated an environment-backed header on a custom provider requiring native
+authentication. The maintainer also accepted one TOFA naming model for all titles
+during TOFA launches, including GPT title-generation context. The original findings
+below remain the historical record of the 2026-10-15 experiment.
+
 Question: can the actual bundled engine switch a new conversation between Token
 Factory and native models, preserve context and legacy histories, authenticate a
 launch-local route independently of native credentials, and select the correct

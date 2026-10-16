@@ -1,0 +1,15 @@
+{
+  "schema": "tofa-launch-secret-regression-v1",
+  "status": "failed",
+  "engine_sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+  "source_sha256": "1f74e7fd883a0440adf1ee92f5d39f10f1e5fab321d3a6d0afa8282c3924ada8",
+  "external_network": "denied",
+  "real_credentials_used": false,
+  "secret_location": "path",
+  "failure_mode": "disconnect",
+  "request_observed": true,
+  "secret_in_stderr": true,
+  "signal": "2026-10-16T09:12:00.804454Z ERROR codex_api::endpoint::responses_websocket: failed to connect to websocket: WebSocket protocol error: Handshake not finished, url: ws://127.0.0.1:49170/<REDACTED>/v1/responses",
+  "other_artifacts_containing_secret": [],
+  "seconds": 0.78
+}
