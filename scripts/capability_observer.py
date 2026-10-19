@@ -457,6 +457,7 @@ class Observer:
         elif scope_sha256 is not None or scope_attempt is not None:
             raise ValueError('incomplete_scope_declaration')
         self.review_origins = {}
+        self.origin_records = {}
         self.secret = secrets.token_hex(32)
         self.endpoint = self.token = self.inference_token = None
         self.authorization_version = 1
@@ -467,6 +468,7 @@ class Observer:
         self.active = set()
         self.done = threading.Event()
         self.reason = None
+        self.stop_acknowledged = False
         self.started = time.monotonic()
         self.deadline = self.started + limits['seconds']
         self.action_watch = Actions(self.run / 'workspace')
@@ -517,6 +519,20 @@ class Observer:
                         self.register(); return
                     if self.command == 'GET' and self.path == '/desktop-launch':
                         owner.forward(self, None, None); return
+                    if owner.authorization_version == 2 and self.path == '/desktop-review-cancel':
+                        try:
+                            if self.headers.get('Content-Encoding', 'identity') != 'identity': raise ContractError('unsupported_encoding')
+                            body = self.read_json()
+                            if (not isinstance(body,dict) or set(body) != {'thread_id','turn_id'} or
+                                any(not isinstance(value,str) or not 0<len(value.encode('utf-8'))<=256 or value.strip()!=value or any(char in value for char in '\r\n\t') for value in body.values())):
+                                raise ContractError('cancellation_contract')
+                        except (ValueError,TypeError,UnicodeError):
+                            self.reply(400,{'error':'invalid_bounded_cancellation'}); return
+                        with owner.lock:
+                            for record in owner.origin_records.get((body['thread_id'],body['turn_id']),[]):
+                                record['interruption_requested'] = True
+                            owner.persist()
+                        owner.forward(self,body,None); return
                     if self.command != 'POST' or self.path != '/responses':
                         owner.reject(self, 'unsupported_request_contract', 400); return
                     if self.headers.get('Content-Encoding', 'identity') != 'identity':
@@ -542,7 +558,7 @@ class Observer:
                 if len(self.headers.get_all('Content-Length', [])) != 1 or self.headers.get('Transfer-Encoding'):
                     raise ContractError('body_framing')
                 length = int(self.headers.get('Content-Length', '0'))
-                limit = 4096 if self.path == '/register' else BODY_LIMIT
+                limit = 1024 if self.path == '/desktop-review-cancel' else 4096 if self.path == '/register' else BODY_LIMIT
                 if not 0 < length <= limit:
                     raise ContractError('body_limit')
                 self.connection.settimeout(max(.01, owner.deadline - time.monotonic()))
@@ -610,6 +626,8 @@ class Observer:
         if self.reason: return False
         if handler.path == '/desktop-launch':
             return handler.command == 'GET' and launch is None and hmac.compare_digest(authorization, 'Bearer ' + self.token)
+        if handler.path == '/desktop-review-cancel':
+            return handler.command == 'POST' and launch is None and hmac.compare_digest(authorization, 'Bearer ' + self.token)
         if handler.path != '/responses' or handler.command != 'POST': return False
         if launch is None:
             return hmac.compare_digest(authorization, 'Bearer ' + self.inference_token)
@@ -798,6 +816,9 @@ class Observer:
             if scope_record is not None: record['scope'] = scope_record
             if kind == 'main': record['instruction_variant_observed'] = self.expected_instructions is not None
             self.records.append(record)
+            origin = (client.get('thread_id'),client.get('turn_id')) if kind=='main' else (client.get('x-codex-parent-thread-id'),client.get('parent_turn_id')) if kind=='guardian' else None
+            if origin is not None and all(isinstance(value,str) and value for value in origin):
+                self.origin_records.setdefault(origin,[]).append(record)
             self.persist()
         raw = self.run / ('request-' + str(record['number']) + '.json')
         raw.write_text(self.redact(json.dumps(body))); raw.chmod(0o600)
@@ -828,6 +849,13 @@ class Observer:
             with self.lock:
                 if record is None or record.get('completed') or self.reason: return
                 record.setdefault('client_disconnect', {'source': source, 'elapsed_ms': self.elapsed()})
+                if record.get('interruption_requested'):
+                    record['failure']='operator_interrupt'
+                    self.persist()
+                    if upstream_socket is not None:
+                        try: upstream_socket.shutdown(socket.SHUT_RDWR)
+                        except OSError: pass
+                    return
                 if record['role'] != 'auxiliary_title':
                     self.stop('client_disconnected')
                     return
@@ -899,7 +927,7 @@ class Observer:
                 chunk = response.read1(65536)
                 if not chunk: break
                 total += len(chunk)
-                if total > RESPONSE_LIMIT: raise ValueError('response_body_limit')
+                if total > (1024 if handler.path == '/desktop-review-cancel' else RESPONSE_LIMIT): raise ValueError('response_body_limit')
                 if record is None or response.status != 200:
                     stage = 'client_write'
                     handler.wfile.write(chunk); handler.wfile.flush(); continue
@@ -916,7 +944,7 @@ class Observer:
                     handler.wfile.write(framed); handler.wfile.flush()
                 if record['completed']: break
             if record is not None and not record['completed']:
-                record['failure'] = record.get('failure') or ('upstream_http_error' if response.status != 200 else 'response_incomplete')
+                record['failure'] = record.get('failure') or ('operator_interrupt' if record.get('interruption_requested') else None) or ('upstream_http_error' if response.status != 200 else 'response_incomplete')
                 category = ('http_status' if response.status != 200 else 'provider_error' if record.get('provider_failure') else
                     self.reason if self.reason in ('client_disconnected', 'deadline', 'operator_finished', 'operator_cancelled')
                     else 'incomplete_response')
@@ -930,7 +958,7 @@ class Observer:
             elif str(error) == 'diagnostic_call_limit':
                 self.stop('diagnostic_call_limit')
             if record is not None:
-                record['failure'] = record.get('failure') or self.reason or ('deadline' if isinstance(error, TimeoutError) else 'stream_failure')
+                record['failure'] = record.get('failure') or ('operator_interrupt' if record.get('interruption_requested') else None) or self.reason or ('deadline' if isinstance(error, TimeoutError) else 'stream_failure')
                 self.transport_failure(record, stage, error)
         finally:
             finished.set()
@@ -1028,7 +1056,8 @@ class Observer:
             connection = http.client.HTTPConnection(target.hostname, target.port, timeout=1)
             try:
                 connection.request('POST', '/evaluation-stop', b'', {'Authorization': 'Bearer ' + self.token})
-                connection.getresponse().read()
+                response=connection.getresponse(); response.read(1024)
+                self.stop_acknowledged=response.status==204
             except (OSError, http.client.HTTPException): pass
             finally: connection.close()
 

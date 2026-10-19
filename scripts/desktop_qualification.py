@@ -129,12 +129,29 @@ def calibration_process(run, launcher, process, profile):
              'started_utc':read(run/'declaration.json')['issued_utc']})
 
 
-def finish_calibration(run, plan, process, observer):
+def write_finish(run,plan,process,observer,requested_stop,exited_before_stop):
+    # Observer's first terminal outcome is authoritative; a later finish cannot
+    # turn scope/budget/disconnection failure into successful collection.
+    reason=observer.reason or requested_stop
     save(run/'after.json',snapshot(plan))
-    save(run/'finish.json',{'schema':'tofa-native-account-finish-v1','stop':observer.reason or 'process_exit',
+    save(run/'finish.json',{'schema':'tofa-native-account-finish-v1','stop':reason,
          'finished_utc':utc(stamp()),'exit_code':process.returncode if process else None,
          'observer_stop':observer.reason,'observer_requests':len(observer.records),
-         'scope':'Synthetic runtime transport; no model capability or paid inference.','qualified':False})
+         'stop_acknowledged':observer.stop_acknowledged,
+         'process_exited_before_stop':exited_before_stop,
+         'scope':plan.get('limits_note','Synthetic runtime transport; no model capability or paid inference.'),
+         'qualified':False})
+
+
+def finish_collection(run,plan,process,observer,requested_stop,exited_before_stop):
+    observer.__exit__(None,None,None)
+    probe_stopped_route(run,observer,process.pid)
+    write_finish(run,plan,process,observer,requested_stop,exited_before_stop)
+
+
+def finish_calibration(run,plan,process,observer,exited_before_stop):
+    # The calibration's with-block has drained every owned request handler.
+    write_finish(run,plan,process,observer,'process_exit',exited_before_stop)
 
 
 def prepare(options):
@@ -176,6 +193,7 @@ def launch(run):
     observer = Observer(run, model=plan['model'], guardian=plan['guardian'], limits=limits,
                         case='05', model_services=plan['model_services'], **kwargs)
     process = None
+    observer_drained = False
     try:
         observer.__enter__()
         save(run / 'observer.json', {'version': 2, 'endpoint': 'http://127.0.0.1:' + str(observer.port),
@@ -207,6 +225,7 @@ def launch(run):
                              'launcher_sha256':digest(plan['launcher']),'started_utc':utc(now)})
                         native_recorded = True
                 if process.poll() is not None and not (run / 'start.json').exists(): reason = 'launch_failed'; break
+                if observer.reason: reason=observer.reason; break
                 if (run / 'cancel.request').exists(): reason = 'operator_cancelled'; break
                 if (run / 'finish.request').exists():
                     reason = read(run/'external-action.json')['action'] if (run/'external-action.json').exists() else ('launcher_crash' if crashed else 'operator_finished')
@@ -217,25 +236,22 @@ def launch(run):
                     if not native_recorded: raise ValueError('owned_native_process_not_observed')
                     process.kill(); crashed = True
                 time.sleep(0.2)
+            exited_before_stop=process.poll() is not None
             observer.stop(reason)
             try: process.wait(timeout=20)
             except subprocess.TimeoutExpired:
                 process.terminate()
                 try: process.wait(timeout=15)
                 except subprocess.TimeoutExpired: process.kill(); process.wait(timeout=5)
-        probe_stopped_route(run,observer,process.pid)
-        save(run / 'after.json', snapshot(plan))
-        save(run / 'finish.json', {'schema': 'tofa-native-account-finish-v1', 'stop': reason,
-             'finished_utc': utc(stamp()), 'exit_code': process.returncode,
-             'observer_stop': observer.reason, 'observer_requests': len(observer.records),
-             'scope': plan['limits_note'], 'qualified': False})
-        print(json.dumps({'run': str(run), 'stop': reason, 'qualified': False}))
+        observer_drained=True
+        finish_collection(run,plan,process,observer,reason,exited_before_stop)
+        print(json.dumps({'run':str(run),'stop':observer.reason or reason,'qualified':False}))
     finally:
         if process is not None and process.poll() is None:
             process.terminate()
             try: process.wait(timeout=15)
             except subprocess.TimeoutExpired: process.kill(); process.wait(timeout=5)
-        observer.__exit__(None, None, None)
+        if not observer_drained: observer.__exit__(None, None, None)
 
 
 def owned_native_pid(profile, launcher_pid):

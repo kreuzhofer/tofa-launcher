@@ -835,7 +835,9 @@ func validateDesktopReceipts(base string, r desktopQualificationCase) error {
 		Schema           string    `json:"schema"`
 		Stop             string    `json:"stop"`
 		Finished         time.Time `json:"finished_utc"`
-		ExitCode         int       `json:"exit_code"`
+		ExitCode         *int      `json:"exit_code"`
+		StopAcknowledged bool      `json:"stop_acknowledged"`
+		ExitedBeforeStop *bool     `json:"process_exited_before_stop"`
 		ObserverStop     string    `json:"observer_stop"`
 		ObserverRequests int       `json:"observer_requests"`
 		Scope            string    `json:"scope"`
@@ -847,12 +849,64 @@ func validateDesktopReceipts(base string, r desktopQualificationCase) error {
 	if finish.Schema != "tofa-native-account-finish-v1" || finish.Stop != r.Stop || !finish.Finished.Equal(r.Finished) || finish.Qualified || finish.ObserverRequests < 0 {
 		return admissionError("finish receipt mismatch")
 	}
+	if finish.ObserverStop != r.Stop || finish.ExitCode == nil || finish.ExitedBeforeStop == nil {
+		return admissionError("terminal outcome incomplete or failed")
+	}
+	code := *finish.ExitCode
+	cleanExit := code == 0 || code == 1 && finish.StopAcknowledged && !*finish.ExitedBeforeStop
+	switch r.Case {
+	case "launcher-crash":
+		cleanExit = code == -9 && *finish.ExitedBeforeStop
+	case "native-crash", "bridge-update":
+		cleanExit = cleanExit || (code == 1 || code == -9 || code == -15) && *finish.ExitedBeforeStop
+	}
+	if !cleanExit {
+		return admissionError("unexpected launcher exit")
+	}
 	var requests []json.RawMessage
 	if e := readAdmissionReference(base, r.Requests, &requests); e != nil {
 		return e
 	}
 	if len(requests) != finish.ObserverRequests {
 		return admissionError("finish request count mismatch")
+	}
+	submitted := map[int]bool{}
+	for _, event := range r.Transport {
+		if event.Source == "owned_observer" {
+			if submitted[event.Number] {
+				return admissionError("duplicate transport outcome")
+			}
+			submitted[event.Number] = true
+		}
+	}
+	ledger := map[int]bool{}
+	syntheticFinal := false
+	for _, raw := range requests {
+		var entry struct {
+			Number    int    `json:"number"`
+			Role      string `json:"role"`
+			Status    int    `json:"status"`
+			Completed bool   `json:"completed"`
+			Forwarded bool   `json:"forwarded"`
+			Failure   string `json:"failure"`
+			Transport string `json:"transport"`
+			Final     bool   `json:"final_answer"`
+		}
+		if json.Unmarshal(raw, &entry) != nil || entry.Number <= 0 || ledger[entry.Number] {
+			return admissionError("request ledger contains rejection or duplicate")
+		}
+		ledger[entry.Number] = true
+		if r.Case == "runtime-preview" && entry.Transport == "synthetic_observer" {
+			if entry.Forwarded || !entry.Completed || entry.Status != 200 || entry.Failure != "" || entry.Role != "main" && entry.Role != "auxiliary_title" {
+				return admissionError("synthetic runtime request failed")
+			}
+			syntheticFinal = syntheticFinal || entry.Role == "main" && entry.Final
+		} else if !submitted[entry.Number] {
+			return admissionError("unreported request outcome")
+		}
+	}
+	if r.Case == "runtime-preview" && !syntheticFinal {
+		return admissionError("synthetic runtime delivery missing")
 	}
 	if r.Lifecycle != nil {
 		if r.RouteStop == nil {

@@ -621,6 +621,30 @@ class SplitAuthorizationTests(unittest.TestCase):
         status, data = self.request(observer, '/register', [('Authorization', 'Bearer ' + observer.secret)], registration)
         self.assertEqual(status, 200, data)
 
+    def test_review_cancel_forwards_only_exact_independent_control(self):
+        with self.boundary() as (observer,seen,registration):
+            self.register(observer,registration)
+            body={'thread_id':'thread','turn_id':'turn'}
+            for token in (self.inference,self.native,observer.secret):
+                status,_=self.request(observer,'/desktop-review-cancel',[('Authorization','Bearer '+token)],body)
+                self.assertEqual(status,401)
+            self.assertEqual(seen,[])
+            status,data=self.request(observer,'/desktop-review-cancel',[('Authorization','Bearer '+self.control)],body)
+            self.assertEqual(status,200,data)
+            self.assertEqual(seen[0][0],'/desktop-review-cancel')
+            self.assertEqual(seen[0][2],body)
+            self.assertEqual(seen[0][1]['Authorization'],'Bearer '+self.control)
+            for raw in ('{"thread_id":"thread","turn_id":"turn","extra":1}',
+                        '{"thread_id":"thread","thread_id":"other","turn_id":"turn"}',
+                        '{"thread_id":"'+('x'*1100)+'","turn_id":"turn"}'):
+                status,_=self.request(observer,'/desktop-review-cancel',[('Authorization','Bearer '+self.control)],raw=raw)
+                self.assertEqual(status,400)
+            for path,method in (('/desktop-review-cancel?x=1','POST'),('/desktop-review-cancel','GET')):
+                status,_=self.request(observer,path,[('Authorization','Bearer '+self.control)],body,method=method)
+                self.assertEqual(status,401)
+            self.assertEqual(len(seen),1)
+            self.assertEqual(observer.records,[])
+
     def test_native_and_legacy_inference_preserve_separate_control_authority(self):
         with self.boundary() as (observer, seen, registration):
             self.register(observer, registration)
