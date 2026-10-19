@@ -120,6 +120,9 @@ func ordinaryNativeDesktopOverrides(engine, home, workspace, runtimeDir string, 
 			overrides = append(overrides, args[i])
 		} else if strings.HasPrefix(args[i], "--config=") {
 			overrides = append(overrides, strings.TrimPrefix(args[i], "--config="))
+		} else if strings.HasPrefix(args[i], "-c") && len(args[i]) > 2 {
+			// The native CLI accepts both -ckey=value and -c=key=value.
+			overrides = append(overrides, strings.TrimPrefix(args[i][2:], "="))
 		}
 	}
 
