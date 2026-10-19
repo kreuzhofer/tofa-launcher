@@ -1,0 +1,50 @@
+{
+  "schema": "tofa-launch-naming-fixture-v1",
+  "issue": 139,
+  "baseline": "7c18615",
+  "status": "passed_fixture_only",
+  "engine": {
+    "version": "codex-cli 0.162.0-alpha.17.2",
+    "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28"
+  },
+  "boundary": "public launch -> real bundled engine -> Go adapter -> owned local upstreams; four-category matrix additionally uses actual Python Observer",
+  "credentials": "synthetic only",
+  "installed_desktop_launched": false,
+  "external_inference": false,
+  "production_guard_retained": true,
+  "title_helper": {
+    "model": "gpt-6-luna",
+    "provider_selection": null,
+    "resolved_provider": "tofa-native-router",
+    "source": "thread_title",
+    "trigger": "thread_title",
+    "parent_identity_supplied": false
+  },
+  "naming_model": "nvidia/Nemotron-3_5-Lightning",
+  "destination": "token_factory",
+  "categories": [
+    "new routed Token Factory",
+    "new routed native",
+    "saved native resumed in a new engine process",
+    "saved legacy resumed in a new engine process"
+  ],
+  "checks": [
+    "startup destination disclosure",
+    "existing native Main remains direct",
+    "Main identity/provider/history retained",
+    "native and launch credentials absent from naming upstream",
+    "simultaneous pending native Main and actual TF Guardian with naming success",
+    "simultaneous pending native Main and actual TF Guardian with naming HTTP503",
+    "denied command does not execute",
+    "both Main turns complete despite title failure",
+    "one naming request without retry/fallback",
+    "strict title role/schema/model/tool-inventory recognition"
+  ],
+  "not_established": [
+    "actual Desktop helper invocation",
+    "title visibility and manual-title protection",
+    "signed-in native inference",
+    "ordinary-profile/plugin lifecycle qualification",
+    "release eligibility"
+  ]
+}

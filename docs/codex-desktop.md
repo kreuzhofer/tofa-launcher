@@ -516,6 +516,12 @@ launcher announces this policy. Main, Guardian, native
 catalog descriptors and CLI title routing remain unchanged. There is no naming
 picker, configurable fallback, or automatic substitution.
 
+The guarded native-account candidate extends this policy to all automatic titles
+in the launch, including native GPT title context sent to Token Factory. Startup
+announces that destination. Saved native Main conversations remain direct; the
+separate title helper uses the launch default. The [#139 fixture evidence](evaluation/launch-wide-naming-139.md)
+does not replace actual Desktop title-visibility and preservation qualification.
+
 The naming model must appear in the project's launch-time catalog and have
 compatible dedicated provider metadata. If unavailable, naming fails explicitly
 while main conversations remain usable. Changed title contracts and upstream
