@@ -206,7 +206,9 @@ class Observer:
         self.run = Path(run)
         self.model, self.guardian, self.limits = model, guardian, limits
         self.secret = secrets.token_hex(32)
-        self.endpoint = self.token = None
+        self.endpoint = self.token = self.inference_token = None
+        self.authorization_version = 1
+        self.request_secrets = threading.local()
         self.records = []
         self.used = 0
         self.lock = threading.RLock()
@@ -248,9 +250,10 @@ class Observer:
                 control = self.path == '/register'
                 body = UNAVAILABLE
                 self.raw_request = None
-                expected = owner.secret if control else owner.token
-                if not expected or not hmac.compare_digest(self.headers.get('Authorization', ''), 'Bearer ' + expected):
+                if not owner.authorized(self):
                     self.reply(401, {'error': 'unauthorized'}); return
+                owner.request_secrets.values = (self.headers.get('Authorization', '').removeprefix('Bearer '),
+                                               self.headers.get('ChatGPT-Account-Id', ''))
                 with owner.lock:
                     owner.active.add(self.connection)
                 try:
@@ -277,32 +280,98 @@ class Observer:
                 finally:
                     with owner.lock:
                         owner.active.discard(self.connection)
+                    owner.request_secrets.values = ()
 
             def read_json(self):
+                if len(self.headers.get_all('Content-Length', [])) != 1 or self.headers.get('Transfer-Encoding'):
+                    raise ContractError('body_framing')
                 length = int(self.headers.get('Content-Length', '0'))
-                if not 0 < length <= BODY_LIMIT:
+                limit = 4096 if self.path == '/register' else BODY_LIMIT
+                if not 0 < length <= limit:
                     raise ContractError('body_limit')
                 self.connection.settimeout(max(.01, owner.deadline - time.monotonic()))
                 raw = self.rfile.read(length)
                 if self.path == '/responses': self.raw_request = raw
-                return json.loads(raw)
+                def unique(pairs):
+                    result = {}
+                    for key, value in pairs:
+                        if key in result: raise ContractError('duplicate_registration_field')
+                        result[key] = value
+                    return result
+                return json.loads(raw, object_pairs_hook=unique) if self.path == '/register' else json.loads(raw)
 
             def register(self):
                 body = self.read_json()
-                target = urlsplit(body['endpoint'])
+                if not isinstance(body, dict): raise ContractError('registration_contract')
+                version = body.get('version')
+                if version is None:
+                    if set(body) != {'endpoint', 'token'} or not isinstance(body['token'], str) or not 0 < len(body['token']) <= 4096:
+                        raise ContractError('registration_contract')
+                    token, inference = body['token'], None
+                    if not token.isascii() or any(ord(char) < 33 or ord(char) == 127 for char in token):
+                        raise ContractError('registration_contract')
+                else:
+                    if type(version) is not int or version != 2 or set(body) != {'version', 'endpoint', 'control_token', 'inference_token'}:
+                        raise ContractError('registration_contract')
+                    token, inference = body['control_token'], body['inference_token']
+                    if any(not isinstance(value, str) or not re.fullmatch(r'[0-9a-f]{64}', value) for value in (token, inference)):
+                        raise ContractError('registration_contract')
+                    if token == inference or owner.secret in (token, inference):
+                        raise ContractError('registration_contract')
+                endpoint = body['endpoint']
+                if not isinstance(endpoint, str) or any(char.isspace() for char in endpoint):
+                    raise ContractError('registration_contract')
+                target = urlsplit(endpoint)
                 if (target.scheme != 'http' or target.hostname != '127.0.0.1' or not target.port or
-                        target.path or target.query or target.fragment or target.username or not body['token']):
+                        target.path or target.query or target.fragment or target.username):
                     self.reply(400, {'error': 'loopback_adapter_required'}); return
                 with owner.lock:
                     if owner.endpoint is not None:
                         self.reply(409, {'error': 'already_registered'}); return
-                    owner.endpoint, owner.token = body['endpoint'], body['token']
+                    owner.token, owner.inference_token = token, inference
+                    owner.authorization_version = version or 1
+                    owner.endpoint = endpoint
                 self.reply(200, {'ready': True})
 
         self.server = LoopbackServer(('127.0.0.1', 0), Handler)
         self.server.daemon_threads = True
         self.port = self.server.server_port
         self.url = 'http://127.0.0.1:' + str(self.port)
+
+    def authorized(self, handler):
+        # Never collapse duplicate credentials or forward arbitrary local headers.
+        for name in ('Authorization', 'X-TOFA-Launch', 'ChatGPT-Account-Id'):
+            values = handler.headers.get_all(name, [])
+            if len(values) > 1 or any(len(value) > 8192 or not value.isascii() or
+                    any(ord(char) < 32 or ord(char) == 127 for char in value) for value in values):
+                return False
+        authorization = handler.headers.get('Authorization', '')
+        launch = handler.headers.get('X-TOFA-Launch')
+        if handler.path == '/register':
+            return handler.command == 'POST' and launch is None and hmac.compare_digest(authorization, 'Bearer ' + self.secret)
+        if self.authorization_version == 1:
+            return bool(self.token) and hmac.compare_digest(authorization, 'Bearer ' + self.token)
+        if self.reason: return False
+        if handler.path == '/desktop-launch':
+            return handler.command == 'GET' and launch is None and hmac.compare_digest(authorization, 'Bearer ' + self.token)
+        if handler.path != '/responses' or handler.command != 'POST': return False
+        if launch is None:
+            return hmac.compare_digest(authorization, 'Bearer ' + self.inference_token)
+        if not hmac.compare_digest(launch, self.inference_token): return False
+        if 'Authorization' not in handler.headers: return True
+        if not re.fullmatch(r'Bearer [A-Za-z0-9._~+/-]+=*', authorization): return False
+        return not any(hmac.compare_digest(authorization, 'Bearer ' + value)
+                       for value in (self.secret, self.token, self.inference_token))
+
+    def redact(self, text):
+        # Headers remain only in request-local memory. Even private diagnostics
+        # must not retain a credential reflected by an upstream error.
+        values = (self.secret, self.token, self.inference_token, *getattr(self.request_secrets, 'values', ()))
+        for value in values:
+            if value:
+                text = text.replace(value.encode() if isinstance(text, bytes) else value,
+                                    b'<REDACTED>' if isinstance(text, bytes) else '<REDACTED>')
+        return text
 
     def persist(self):
         temporary = self.run / 'requests.tmp'
@@ -329,7 +398,7 @@ class Observer:
                 raw = self.run / ('rejected-request-' + str(len(self.records) + 1) + '.json')
                 try:
                     with open(raw, 'xb', opener=lambda path, flags: os.open(path, flags, 0o600)) as output:
-                        output.write(raw_bytes)
+                        output.write(self.redact(raw_bytes))
                     record['raw_body_retained'] = True
                 except OSError:
                     record.update(failure='diagnostic_capture_failure', original_rejection=reason)
@@ -429,7 +498,7 @@ class Observer:
             self.records.append(record)
             self.persist()
         raw = self.run / ('request-' + str(record['number']) + '.json')
-        raw.write_text(json.dumps(body)); raw.chmod(0o600)
+        raw.write_text(self.redact(json.dumps(body))); raw.chmod(0o600)
         body['max_output_tokens'] = min(cap, self.limits['output_tokens'])
         body['parallel_tool_calls'] = False
         record['output_token_cap'] = body['max_output_tokens']
@@ -479,6 +548,12 @@ class Observer:
             upstream_socket = connection.sock
             if title_cancelled.is_set(): raise ConnectionAbortedError()
             headers = {'Authorization': 'Bearer ' + self.token, 'Content-Type': 'application/json'}
+            if record is not None and self.authorization_version == 2:
+                headers.pop('Authorization')
+                if 'Authorization' in handler.headers:
+                    headers['Authorization'] = handler.headers['Authorization']
+                for key in ('X-TOFA-Launch', 'ChatGPT-Account-Id'):
+                    if handler.headers.get(key): headers[key] = handler.headers[key]
             if record is None:
                 for key in ('X-Tofa-Parent-Pid', 'X-Tofa-Main-Engine-Pid'):
                     if handler.headers.get(key): headers[key] = handler.headers[key]
@@ -564,7 +639,7 @@ class Observer:
         try:
             descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
             with os.fdopen(descriptor, 'w') as stream:
-                json.dump(detail, stream)
+                stream.write(self.redact(json.dumps(detail)))
         except OSError:
             record['private_' + kind + '_error_retention_failed'] = True
 
@@ -606,7 +681,7 @@ class Observer:
                     for item in response.get('output', []))
                 if text:
                     path = self.run / 'final.txt'
-                    path.write_text(text); path.chmod(0o600)
+                    path.write_text(self.redact(text)); path.chmod(0o600)
 
     def stop(self, reason):
         with self.lock:
