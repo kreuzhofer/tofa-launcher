@@ -14,6 +14,7 @@ type launchOptions struct {
 	extra                            []string
 	evaluation                       string
 	nativeAccountCandidate           bool
+	nativeAccountProof               string
 }
 
 func parseLaunchOptions(target string, args []string) (launchOptions, error) {
@@ -30,6 +31,7 @@ func parseLaunchOptions(target string, args []string) (launchOptions, error) {
 	}
 	if target == "codex-desktop" {
 		fs.BoolVar(&o.nativeAccountCandidate, "native-account-candidate", false, "")
+		fs.StringVar(&o.nativeAccountProof, "native-account-proof", "", "")
 	}
 	if target != "codex" {
 		fs.StringVar(&o.bundle, "app-bundle", "", "")
@@ -38,6 +40,9 @@ func parseLaunchOptions(target string, args []string) (launchOptions, error) {
 		return o, err
 	}
 	o.extra = fs.Args()
+	if o.nativeAccountProof != "" && (o.nativeAccountCandidate || o.evaluation != "") {
+		return o, errors.New("choose either bounded native candidate evaluation or qualified native-account proof")
+	}
 	if o.nativeAccountCandidate && o.evaluation == "" {
 		return o, errors.New("native-account candidate requires a bounded evaluation observer; ordinary Desktop qualification remains pending")
 	}

@@ -62,7 +62,11 @@ def main():
     parser.add_argument('--retained-mcp-evidence', type=Path, default=LIFECYCLE)
     parser.add_argument('--production-launcher', action='store_true',
         help='serve synthetic Responses at the observer; use normal launcher/catalog credentials read-only')
+    parser.add_argument('--native-account-snapshot', type=Path,
+        help='frozen private snapshot for a bounded runtime-preview native-account candidate')
     options = parser.parse_args()
+    if options.native_account_snapshot and (options.client != 'desktop' or not options.production_launcher):
+        raise ValueError('native_account_calibration_requires_desktop_production_launcher')
     if options.retained_mcp_bridge and options.client != 'desktop':
         raise ValueError('retained_mcp_desktop_only')
     native = desktop_identity(options.app_bundle, options.codex) if options.client == 'desktop' else None
@@ -153,12 +157,17 @@ def main():
     process = None
     termination = None
     records = []
+    qualification_plan = None
     try:
         observer_type = SyntheticObserver if options.production_launcher else Observer
         observer_options = {'respond': synthetic_response} if options.production_launcher else {}
         with observer_type(run, model='moonshotai/Kimi-K3', guardian='zai-org/GLM-5.3-Flash', limits=limits, **observer_options) as observer:
             records = observer.records
             control = dict(version=1, endpoint=observer.url, secret=observer.secret, seconds=launcher_seconds(limits['seconds']))
+            if options.native_account_snapshot:
+                import desktop_qualification as qualification
+                qualification_plan = qualification.prepare_calibration(run, options, limits)
+                control.update(version=2, seconds=limits['seconds'], qualification_declaration=str(run/'declaration.json'))
             if options.client == 'cli':
                 control['presentation_runtime'] = {'root': str(options.runtime_root.resolve()),
                     'script': str(Path(__file__).with_name('presentation_runtime.py').resolve())}
@@ -176,6 +185,7 @@ def main():
             command = [str(options.launcher.resolve()), 'launch', 'codex' if options.client == 'cli' else 'codex-desktop',
                 '--model', 'moonshotai/Kimi-K3', '--guardian-model', 'zai-org/GLM-5.3-Flash',
                 '--allow-unverified', '--evaluation-observer', str(run / 'observer.json')]
+            if options.native_account_snapshot: command += ['--native-account-candidate']
             if options.client == 'cli':
                 command += ['--', '--sandbox', 'workspace-write', 'exec', '--ephemeral', '--skip-git-repo-check', '--json', '-']
             else:
@@ -190,6 +200,8 @@ def main():
                     if options.client == 'cli': process.communicate((prompt + '\n').encode(), timeout=limits['seconds'] - 10)
                     else:
                         while process.poll() is None and not observer.reason:
+                            if qualification_plan:
+                                qualification.calibration_process(run, options.launcher, process, qualification.read(run/'before.json')['identity']['profile'])
                             if (run / 'finish.request').exists(): observer.stop('operator_finished')
                             elif (run / 'cancel.request').exists(): observer.stop('operator_cancelled')
                             time.sleep(.1)
@@ -203,6 +215,7 @@ def main():
                         except subprocess.TimeoutExpired: os.killpg(process.pid, signal.SIGKILL); process.wait(timeout=5)
             records = observer.records
             termination = observer.reason
+            if qualification_plan: qualification.finish_calibration(run, qualification_plan, process, observer)
     except KeyboardInterrupt:
         state['failure'] = 'operator_cancelled'
         termination = 'operator_cancelled'

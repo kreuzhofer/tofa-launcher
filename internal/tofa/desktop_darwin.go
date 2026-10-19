@@ -183,11 +183,11 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 		return err
 	}
 	defer finishEvaluation()
-	a.nativeAccountCandidate = options.nativeAccountCandidate
-	if a.nativeAccountCandidate && (a.evaluation == nil || a.evaluation.Version != 2) {
+	a.nativeAccountRoute = options.nativeAccountCandidate || options.nativeAccountProof != ""
+	if options.nativeAccountCandidate && (a.evaluation == nil || a.evaluation.Version != 2) {
 		return errors.New("native-account candidate requires evaluation observer version 2 with isolated authorization")
 	}
-	if !a.nativeAccountCandidate && a.evaluation != nil && a.evaluation.Version == 2 {
+	if !options.nativeAccountCandidate && a.evaluation != nil && a.evaluation.Version == 2 {
 		return errors.New("evaluation observer version 2 requires the bounded native-account candidate")
 	}
 	if a.evaluation != nil && a.evaluation.PresentationRuntime != nil {
@@ -282,9 +282,7 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 	if err != nil {
 		return err
 	}
-	if err := refuseDesktopPluginRemoval(home); err != nil {
-		return err
-	}
+
 	if err := os.MkdirAll(home, 0700); err != nil {
 		return err
 	}
@@ -299,12 +297,25 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 	// Only preflight/control state lives here. History, profile and workspace
 	// remain at the client's ordinary locations and are never cleanup targets.
 	defer func() { result = errors.Join(result, os.RemoveAll(root)) }()
-	if options.nativeAccountCandidate {
+	if a.nativeAccountRoute {
 		if err := checkDesktopNativeAccount(ctx, bundle.engine, home, profile, workspace, root); err != nil {
 			return err
 		}
 	}
-	if err := integrateDesktopProvider(ctx, bundle.engine, home, profile, workspace, root, 0, options.nativeAccountCandidate); err != nil {
+	admission, err := resolveDesktopAdmission(ctx, options, a.evaluation, bundle, home, profile, desktopBridgePath(a.Dir, bundle.engine), models)
+	if err != nil {
+		return err
+	}
+	if admission != nil && admission.mode == "candidate" {
+		var endAttempt context.CancelFunc
+		ctx, endAttempt = context.WithDeadline(ctx, admission.declaration.Expires)
+		defer endAttempt()
+		a.qualificationRequests = admission.declaration.Requests
+	}
+	if err := checkDesktopPluginAdmission(home, admission); err != nil {
+		return err
+	}
+	if err := integrateDesktopProvider(ctx, bundle.engine, home, profile, workspace, root, 0, a.nativeAccountRoute, admission); err != nil {
 		return err
 	}
 	bridge, err := installDesktopBridge(a.Dir, bundle.engine)
@@ -338,11 +349,19 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 	}
 	env := append(desktopEnv(home, profile, adapter.token), "ZDOTDIR="+shellDir, "CODEX_CLI_PATH="+bridge, "TOFA_DESKTOP_CONTEXT="+adapter.endpoint)
 	owned := func(ownerContext context.Context, pid int) error {
+		if err := admission.recheck(bundle, home, profile, bridge, models); err != nil {
+			return err
+		}
+		if admission != nil {
+			if err := checkDesktopNativeAccount(ownerContext, bundle.engine, home, profile, workspace, root); err != nil {
+				return err
+			}
+		}
 		catalog, err := prepareDesktopCatalog(ownerContext, bundle, home, profile, workspace, mainModels, *guardian, root)
 		if err != nil {
 			return err
 		}
-		if options.nativeAccountCandidate {
+		if a.nativeAccountRoute {
 			route.services, err = prepareServiceCatalog(catalog, mainModels)
 			if err != nil {
 				return err
@@ -355,7 +374,7 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 			`model_providers.nebius-tofa.requires_openai_auth=false`, `model_providers.nebius-tofa.supports_websockets=false`,
 			`model_providers.nebius-tofa.request_max_retries=0`, `model_providers.nebius-tofa.stream_max_retries=0`,
 		}
-		if options.nativeAccountCandidate {
+		if a.nativeAccountRoute {
 			// Legacy histories use the inference capability, never the bridge control bearer.
 			route.Overrides = append(route.Overrides, `model_providers.nebius-tofa.env_key="TOFA_DESKTOP_INFERENCE"`)
 			route.Overrides = append(route.Overrides, nativeDesktopProviderOverrides(adapter.endpoint)...)
@@ -368,21 +387,27 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 		// Resolve live overrides through the actual engine before publishing them
 		// to the blocked desktop bridge or editing ordinary integration entries.
 		checkEnv := desktopEnv(home, profile, adapter.token)
-		if options.nativeAccountCandidate {
+		if a.nativeAccountRoute {
 			checkEnv = append(checkEnv, nativeDesktopInferenceEnv+"="+adapter.inferenceToken)
 		}
-		if err := checkDesktopRoutingOverrides(ownerContext, bundle.engine, workspace, checkEnv, *model, adapter.endpoint, catalog, route.Overrides, options.nativeAccountCandidate); err != nil {
+		if err := checkDesktopRoutingOverrides(ownerContext, bundle.engine, workspace, checkEnv, *model, adapter.endpoint, catalog, route.Overrides, a.nativeAccountRoute); err != nil {
 			return err
 		}
 		if !desktopOwnsNativeProfile(profile, pid) {
 			return errors.New("desktop native profile ownership lost before integration; owned launch cancelled")
 		}
-		if err := integrateDesktopProvider(ownerContext, bundle.engine, home, profile, workspace, root, pid, options.nativeAccountCandidate); err != nil {
+		if err := integrateDesktopProvider(ownerContext, bundle.engine, home, profile, workspace, root, pid, a.nativeAccountRoute, admission); err != nil {
+			return err
+		}
+		if err := admission.recheck(bundle, home, profile, bridge, models); err != nil {
 			return err
 		}
 		close(route.ready)
 		if options.nativeAccountCandidate {
 			fmt.Fprintln(a.Out, "Qualification candidate: native account retained; active tofa-native-router routing and defaults are session-scoped. Inactive provider metadata remains for recorded history. New routed conversations explicitly selecting ChatGPT or Token Factory models send subsequent context to that service. General Desktop rollout remains blocked pending qualification.")
+		}
+		if options.nativeAccountProof != "" {
+			fmt.Fprintln(a.Out, "Native-account route admitted against matching lifecycle, signed-in routing and runtime-preview evidence. Model capability and release readiness remain separate.")
 		}
 		fmt.Fprintln(a.Out, "Native model catalog resolved and merged for this launch. Relaunch after account or catalog changes; only the announced automatic-title contract has an auxiliary route through Token Factory.")
 		fmt.Fprintf(a.Out, "Automatic review for all eligible Token Factory conversations uses %s through Token Factory. The engine retains approval decisions, policy and execution gates; native reviewers are unchanged.\n", *guardian)

@@ -164,7 +164,7 @@ func (client *desktopConfigClient) call(method string, params any) (map[string]a
 	}
 }
 
-func (client *desktopConfigClient) inspect(workspace string, nativeCandidate bool) (string, []any, error) {
+func (client *desktopConfigClient) inspect(workspace string, nativeCandidate bool, admissions ...*desktopAdmission) (string, []any, error) {
 	result, err := client.call("configRequirements/read", map[string]any{})
 	if err != nil {
 		return "", nil, err
@@ -183,7 +183,7 @@ func (client *desktopConfigClient) inspect(workspace string, nativeCandidate boo
 		if !ok {
 			return "", nil, errors.New("could not inspect native plugin configuration; Desktop launch cancelled")
 		}
-		if _, configured := plugins["code-review@openai-bundled"]; configured {
+		if _, configured := plugins["code-review@openai-bundled"]; configured && !selectedDesktopAdmission(admissions).permitsPlugins() {
 			return "", nil, errDesktopPluginRemoval
 		}
 	}
@@ -222,8 +222,8 @@ func (client *desktopConfigClient) inspect(workspace string, nativeCandidate boo
 	return "", nil, errors.New("ordinary engine did not supply a user configuration version; launch cancelled")
 }
 
-func integrateDesktopProvider(ctx context.Context, engine, home, profile, workspace, runtimeDir string, ownerPID int, nativeCandidate bool) error {
-	if err := refuseDesktopPluginRemoval(home); err != nil {
+func integrateDesktopProvider(ctx context.Context, engine, home, profile, workspace, runtimeDir string, ownerPID int, nativeCandidate bool, admissions ...*desktopAdmission) error {
+	if err := checkDesktopPluginAdmission(home, selectedDesktopAdmission(admissions)); err != nil {
 		return err
 	}
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
@@ -233,7 +233,7 @@ func integrateDesktopProvider(ctx context.Context, engine, home, profile, worksp
 		return err
 	}
 	defer client.close()
-	version, edits, err := client.inspect(workspace, nativeCandidate)
+	version, edits, err := client.inspect(workspace, nativeCandidate, selectedDesktopAdmission(admissions))
 	if err != nil || len(edits) == 0 || ownerPID == 0 {
 		return err
 	}
