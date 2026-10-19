@@ -15,6 +15,7 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
+	"syscall"
 	"testing"
 	"time"
 )
@@ -34,11 +35,21 @@ func TestDesktopNativeCandidateRegistersInactiveHistory(t *testing.T) {
 }
 
 func TestDesktopNativeCandidateHistoryAcrossLaunches(t *testing.T) {
+	nativeHistoryAcrossLaunches(t, "clean")
+}
+
+func TestDesktopNativeCandidateHistoryLifecycle(t *testing.T) {
+	for _, fault := range []string{"launcher crash", "client crash", "client exit", "interrupted replacement", "uninstall and reinstall"} {
+		t.Run(fault, func(t *testing.T) { nativeHistoryAcrossLaunches(t, fault) })
+	}
+}
+
+func nativeHistoryAcrossLaunches(t *testing.T, fault string) {
 	installed := os.Getenv("TOFA_TEST_DESKTOP_ENGINE")
 	if installed == "" {
 		t.Skip("set TOFA_TEST_DESKTOP_ENGINE")
 	}
-	bundle, capture := nativeCandidateFixture(t)
+	bundle, capture := nativeCandidateFixture(t, "controlled")
 	enginePath := filepath.Join(bundle, "Contents/Resources/codex")
 	fake, err := os.ReadFile(enginePath)
 	if err != nil {
@@ -144,7 +155,100 @@ func TestDesktopNativeCandidateHistoryAcrossLaunches(t *testing.T) {
 	e.turnText(mixedID, "completed", "Mixed native second")
 	e.call("thread/name/set", map[string]string{"threadId": mixedID, "name": "Retained mixed history"})
 	e.close()
+	if fault == "launcher crash" {
+		// Create history under the in-process owned transport first. The crashing
+		// launcher subprocess then resumes the same profile without inference.
+		stop()
+		os.Remove(capture)
+		os.Remove(capture + ".pid")
+		if err := os.Remove(enginePath); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(enginePath, fake, 0700); err != nil {
+			t.Fatal(err)
+		}
+		child, stop = executableDesktopFixture(t, app, bundle, capture, "--native-account-candidate", "--evaluation-observer", candidateProxyObserver(t))
+		if err := os.Remove(enginePath); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Symlink(installed, enginePath); err != nil {
+			t.Fatal(err)
+		}
+	}
+	preserved := map[string][]byte{}
+	for _, path := range []string{filepath.Join(child.Env["CODEX_HOME"], "config.toml"), filepath.Join(child.Env["CODEX_HOME"], "auth.json")} {
+		data, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		preserved[path] = data
+	}
+	owner, err := os.Readlink(filepath.Join(child.Env["CODEX_ELECTRON_USER_DATA_PATH"], "SingletonLock"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	pid, err := strconv.Atoi(owner[strings.LastIndex(owner, "-")+1:])
+	if err != nil {
+		t.Fatal(err)
+	}
+	switch fault {
+	case "client crash":
+		if err := syscall.Kill(pid, syscall.SIGKILL); err != nil {
+			t.Fatal(err)
+		}
+		waitDesktopPIDStopped(t, pid)
+	case "client exit":
+		if err := os.WriteFile(capture+".exit", nil, 0600); err != nil {
+			t.Fatal(err)
+		}
+		waitDesktopPIDStopped(t, pid)
+	}
 	stop()
+	if fault == "launcher crash" {
+		assertExpiredDesktopContext(t, child)
+		// Only the fixture's known process group is terminated; recovery never
+		// assumes authority to stop a surviving native Desktop from a stale record.
+		syscall.Kill(-pid, syscall.SIGKILL)
+		waitDesktopPIDStopped(t, pid)
+	}
+	if fault == "client exit" {
+		if err := os.Remove(capture + ".exit"); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if fault == "interrupted replacement" {
+		record := filepath.Join(filepath.Dir(child.Env["CODEX_CLI_PATH"]), "owner.json")
+		data, err := os.ReadFile(record)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var owner map[string]any
+		if err := json.Unmarshal(data, &owner); err != nil {
+			t.Fatal(err)
+		}
+		owner["PendingSHA256"], owner["SHA256"] = owner["SHA256"], strings.Repeat("0", 64)
+		data, _ = json.Marshal(owner)
+		if err := os.WriteFile(record, data, 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if fault == "uninstall and reinstall" {
+		t.Setenv("TOFA_INSTALL_DIR", filepath.Join(t.TempDir(), "absent-install"))
+		if err := app.Run([]string{"desktop-lifecycle", "uninstall"}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for path, before := range preserved {
+		after, err := os.ReadFile(path)
+		if err != nil || string(after) != string(before) {
+			t.Fatalf("%s changed protected fixture state %s", fault, filepath.Base(path))
+		}
+	}
+	if fault == "uninstall and reinstall" {
+		assertExpiredDesktopContext(t, child, "uninstalled")
+	} else {
+		assertExpiredDesktopContext(t, child)
+	}
 	configPath := filepath.Join(child.Env["CODEX_HOME"], "config.toml")
 	config, err := os.ReadFile(configPath)
 	if err != nil {
@@ -234,6 +338,9 @@ func TestDesktopNativeCandidateHistoryAcrossLaunches(t *testing.T) {
 		if string(current) != string(config) {
 			t.Fatal("relaunch changed ordinary settings")
 		}
+	}
+	if fault != "clean" {
+		return
 	}
 	// Previously valid selected models remain recorded when the next catalog
 	// omits them. Neither launch defaults nor native service are a fallback.
