@@ -50,6 +50,38 @@ class SyntheticObserverTests(unittest.TestCase):
                 self.assertFalse(observer.records[0]['forwarded'])
                 self.assertEqual(observer.records[0]['transport'],'synthetic_observer')
 
+    def test_split_authorization_keeps_synthetic_responses_out_of_control_lane(self):
+        from presentation_synthetic import SyntheticObserver
+        helper = capability_observer_test.SplitAuthorizationTests()
+        synthetic = []
+        def respond(body):
+            synthetic.append(body)
+            return fixture_response(message('Synthetic runtime check'), body['model'])
+        with helper.boundary(observer_type=SyntheticObserver, respond=respond) as (observer, seen, registration):
+            helper.register(observer, registration)
+            body = {'model': 'moonshotai/Kimi-K3', 'stream': True, 'input': [], 'tools': []}
+            headers = [('Authorization', 'Bearer ' + helper.native), ('X-TOFA-Launch', helper.inference)]
+            status, _ = helper.request(observer, '/desktop-launch', headers, method='GET')
+            self.assertEqual(status, 401)
+            status, _ = helper.request(observer, '/responses', [('Authorization', 'Bearer ' + helper.control)], body)
+            self.assertEqual(status, 401)
+            status, data = helper.request(observer, '/responses', headers, body)
+            self.assertEqual(status, 200, data)
+            self.assertEqual(len(synthetic), 1)
+            self.assertEqual(seen, [])
+            self.assertFalse(observer.records[0]['forwarded'])
+            status, data = helper.request(observer, '/desktop-launch', [('Authorization', 'Bearer ' + helper.control)], method='GET')
+            self.assertEqual(status, 200, data)
+            self.assertEqual([item[0] for item in seen], ['/desktop-launch'])
+            observer.stop('operator_finished')
+            status, _ = helper.request(observer, '/responses', headers, body)
+            self.assertEqual(status, 401)
+            self.assertEqual(len(synthetic), 1)
+            self.assertEqual([item[0] for item in seen], ['/desktop-launch', '/evaluation-stop'])
+            retained = ''.join(p.read_text() for p in observer.run.iterdir() if p.is_file())
+            for secret in (helper.native, helper.control, helper.inference):
+                self.assertNotIn(secret, retained)
+
     def test_guardian_cannot_receive_a_synthetic_approval_or_forwarded_inference(self):
         from presentation_synthetic import SyntheticObserver
         from capability_observer import GUARDIAN_SCHEMA
