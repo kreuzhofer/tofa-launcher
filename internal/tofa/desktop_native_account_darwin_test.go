@@ -49,9 +49,13 @@ func TestDesktopNativeCandidateRequiresSignedInAccountBeforeStartup(t *testing.T
 	}
 }
 
-func nativeCandidateFixture(t *testing.T) (string, string) {
+func nativeCandidateFixture(t *testing.T, modes ...string) (string, string) {
 	t.Helper()
-	bundle, capture := desktopFixture(t, "ignore")
+	mode := "ignore"
+	if len(modes) != 0 {
+		mode = modes[0]
+	}
+	bundle, capture := desktopFixture(t, mode)
 	engine := filepath.Join(bundle, "Contents/Resources/codex")
 	raw, err := os.ReadFile(engine)
 	if err != nil {

@@ -78,9 +78,21 @@ func executableDesktopFixture(t *testing.T, app *tofa.App, bundle, capture strin
 }
 
 func TestDesktopCrashRecoveryPreservesStateAndExpiresRoute(t *testing.T) {
-	bundle, capture := desktopFixture(t, "ignore")
+	desktopLifecycleCrashRecoveryPreservesStateAndExpiresRoute(t, false)
+}
+
+func TestDesktopNativeCandidateCrashRecoveryPreservesStateAndExpiresRoute(t *testing.T) {
+	desktopLifecycleCrashRecoveryPreservesStateAndExpiresRoute(t, true)
+}
+
+func desktopLifecycleCrashRecoveryPreservesStateAndExpiresRoute(t *testing.T, native bool) {
+	bundle, capture := fixtureDesktopLifecycle(t, native, "ignore")
 	app, _ := adapterFixture(t, func(w http.ResponseWriter, r *http.Request) { fmt.Fprint(w, "fixture response") }, nil)
-	child, crash := executableDesktopFixture(t, app, bundle, capture)
+	child, crash := executableDesktopFixture(t, app, bundle, capture, desktopLifecycleSelection(t, native)...)
+	var oldInference string
+	if native {
+		oldInference = desktopLifecycleInference(t, child)
+	}
 	crash()
 
 	root := filepath.Dir(child.Env["ZDOTDIR"])
@@ -98,9 +110,16 @@ func TestDesktopCrashRecoveryPreservesStateAndExpiresRoute(t *testing.T) {
 	}
 	// The adapter is hosted by the killed launcher, not a surviving helper.
 	address := strings.TrimPrefix(child.Env["TOFA_DESKTOP_CONTEXT"], "http://")
-	if connection, err := net.DialTimeout("tcp", address, time.Second); err == nil {
-		connection.Close()
-		t.Fatal("adapter survived launcher death")
+	if !native {
+		if connection, err := net.DialTimeout("tcp", address, time.Second); err == nil {
+			connection.Close()
+			t.Fatal("adapter survived launcher death")
+		}
+	} else {
+		// The observer belongs to this test and outlives the killed launcher.
+		// Its live socket cannot revive either expired capability.
+		assertDesktopLifecycleCapabilityRejected(t, child.Env["TOFA_DESKTOP_CONTEXT"], oldInference, false)
+		assertDesktopLifecycleCapabilityRejected(t, child.Env["TOFA_DESKTOP_CONTEXT"], child.Env["TOFA_API_KEY"], true)
 	}
 	assertExpiredDesktopContext(t, child)
 	config := filepath.Join(child.Env["CODEX_HOME"], "config.toml")
@@ -125,7 +144,7 @@ func TestDesktopCrashRecoveryPreservesStateAndExpiresRoute(t *testing.T) {
 		t.Fatal(err)
 	}
 	preserved[auth] = []byte("synthetic ordinary credentials")
-	args := []string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}
+	args := append([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}, desktopLifecycleSelection(t, native)...)
 	if err := app.Run(args); err == nil || !strings.Contains(err.Error(), "Quit") {
 		t.Fatalf("surviving desktop was not refused: %v", err)
 	}
@@ -139,7 +158,7 @@ func TestDesktopCrashRecoveryPreservesStateAndExpiresRoute(t *testing.T) {
 	waitDesktopPIDStopped(t, pid)
 	for attempt := 0; attempt < 2; attempt++ {
 		os.Remove(capture)
-		next, stop := liveDesktopFixture(t, app, bundle, capture)
+		next, stop := liveDesktopFixture(t, app, bundle, capture, desktopLifecycleSelection(t, native)...)
 		if next.Env["TOFA_DESKTOP_CONTEXT"] == child.Env["TOFA_DESKTOP_CONTEXT"] || next.Env["TOFA_API_KEY"] == child.Env["TOFA_API_KEY"] {
 			t.Fatal("relaunch reused an expired route")
 		}
@@ -147,6 +166,13 @@ func TestDesktopCrashRecoveryPreservesStateAndExpiresRoute(t *testing.T) {
 			t.Fatal("old credential reached new adapter")
 		}
 		assertExpiredDesktopContext(t, child)
+		if native {
+			if desktopLifecycleInference(t, next) == oldInference {
+				t.Fatal("recovery reused inference capability")
+			}
+			assertDesktopLifecycleCapabilityRejected(t, next.Env["TOFA_DESKTOP_CONTEXT"], oldInference, false, http.StatusUnauthorized)
+			assertDesktopLifecycleCapabilityRejected(t, next.Env["TOFA_DESKTOP_CONTEXT"], child.Env["TOFA_API_KEY"], true, http.StatusUnauthorized)
+		}
 		stop()
 		if _, err := os.Stat(root); !os.IsNotExist(err) {
 			t.Fatal("abandoned launch resources survived recovery")
@@ -170,14 +196,18 @@ func TestDesktopCrashRecoveryPreservesStateAndExpiresRoute(t *testing.T) {
 	}
 }
 
-func assertExpiredDesktopContext(t *testing.T, child capturedDesktop) {
+func assertExpiredDesktopContext(t *testing.T, child capturedDesktop, explanations ...string) {
 	t.Helper()
 	command := exec.Command(child.Env["CODEX_CLI_PATH"], "--version")
 	for key, value := range child.Env {
 		command.Env = append(command.Env, key+"="+value)
 	}
 	output, err := command.CombinedOutput()
-	if err == nil || !strings.Contains(string(output), "context is invalid or expired") {
+	expected := "context is invalid or expired"
+	if len(explanations) != 0 {
+		expected = explanations[0]
+	}
+	if err == nil || !strings.Contains(string(output), expected) {
 		t.Fatal("stale launch context delegated to engine")
 	}
 }

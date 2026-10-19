@@ -15,9 +15,17 @@ import (
 )
 
 func TestDesktopLifecycleRefusesActiveOwner(t *testing.T) {
-	bundle, capture := desktopFixture(t, "ignore")
+	desktopLifecycleLifecycleRefusesActiveOwner(t, false)
+}
+
+func TestDesktopNativeCandidateLifecycleRefusesActiveOwner(t *testing.T) {
+	desktopLifecycleLifecycleRefusesActiveOwner(t, true)
+}
+
+func desktopLifecycleLifecycleRefusesActiveOwner(t *testing.T, native bool) {
+	bundle, capture := fixtureDesktopLifecycle(t, native, "ignore")
 	app, _ := adapterFixture(t, nil, nil)
-	child, stop := liveDesktopFixture(t, app, bundle, capture)
+	child, stop := liveDesktopFixture(t, app, bundle, capture, desktopLifecycleSelection(t, native)...)
 	defer stop()
 	before, err := os.ReadFile(child.Env["CODEX_CLI_PATH"])
 	if err != nil {
@@ -67,9 +75,17 @@ func TestDesktopLifecycleRefusesOtherRuntimeOwner(t *testing.T) {
 }
 
 func TestDesktopLifecycleInterruptedReplacementRemainsCallable(t *testing.T) {
-	bundle, capture := desktopFixture(t, "ignore")
+	desktopLifecycleLifecycleInterruptedReplacementRemainsCallable(t, false)
+}
+
+func TestDesktopNativeCandidateLifecycleInterruptedReplacementRemainsCallable(t *testing.T) {
+	desktopLifecycleLifecycleInterruptedReplacementRemainsCallable(t, true)
+}
+
+func desktopLifecycleLifecycleInterruptedReplacementRemainsCallable(t *testing.T, native bool) {
+	bundle, capture := fixtureDesktopLifecycle(t, native, "ignore")
 	app, _ := adapterFixture(t, nil, nil)
-	child, stop := liveDesktopFixture(t, app, bundle, capture)
+	child, stop := liveDesktopFixture(t, app, bundle, capture, desktopLifecycleSelection(t, native)...)
 	stop()
 	bridge := child.Env["CODEX_CLI_PATH"]
 	record := filepath.Join(filepath.Dir(bridge), "owner.json")
@@ -106,11 +122,19 @@ func TestDesktopLifecycleInterruptedReplacementRemainsCallable(t *testing.T) {
 }
 
 func TestDesktopLifecycleConflictsPreserveArtifacts(t *testing.T) {
+	desktopLifecycleLifecycleConflictsPreserveArtifacts(t, false)
+}
+
+func TestDesktopNativeCandidateLifecycleConflictsPreserveArtifacts(t *testing.T) {
+	desktopLifecycleLifecycleConflictsPreserveArtifacts(t, true)
+}
+
+func desktopLifecycleLifecycleConflictsPreserveArtifacts(t *testing.T, native bool) {
 	for _, kind := range []string{"edited executable", "missing record", "future record", "future lifecycle record", "partial installation", "symlink directory"} {
 		t.Run(kind, func(t *testing.T) {
-			bundle, capture := desktopFixture(t, "ignore")
+			bundle, capture := fixtureDesktopLifecycle(t, native, "ignore")
 			app, _ := adapterFixture(t, nil, nil)
-			child, stop := liveDesktopFixture(t, app, bundle, capture)
+			child, stop := liveDesktopFixture(t, app, bundle, capture, desktopLifecycleSelection(t, native)...)
 			stop()
 			bridge := child.Env["CODEX_CLI_PATH"]
 			record := filepath.Join(filepath.Dir(bridge), "owner.json")
@@ -168,6 +192,14 @@ func TestDesktopLifecycleConflictsPreserveArtifacts(t *testing.T) {
 }
 
 func TestDesktopInstalledUpgradeAndStandalonePurge(t *testing.T) {
+	desktopLifecycleInstalledUpgradeAndStandalonePurge(t, false)
+}
+
+func TestDesktopNativeCandidateInstalledUpgradeAndStandalonePurge(t *testing.T) {
+	desktopLifecycleInstalledUpgradeAndStandalonePurge(t, true)
+}
+
+func desktopLifecycleInstalledUpgradeAndStandalonePurge(t *testing.T, native bool) {
 	cache, err := exec.Command("go", "env", "-json", "GOPATH", "GOCACHE").Output()
 	if err != nil {
 		t.Fatal(err)
@@ -176,7 +208,7 @@ func TestDesktopInstalledUpgradeAndStandalonePurge(t *testing.T) {
 	if err := json.Unmarshal(cache, &buildEnv); err != nil {
 		t.Fatal(err)
 	}
-	bundle, capture := desktopFixture(t, "ignore")
+	bundle, capture := fixtureDesktopLifecycle(t, native, "ignore")
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(os.Getenv("HOME"), ".config"))
 	t.Setenv("TOFA_INSTALL_DIR", filepath.Join(os.Getenv("HOME"), "install"))
 	app, _ := adapterFixture(t, nil, nil)
@@ -185,7 +217,7 @@ func TestDesktopInstalledUpgradeAndStandalonePurge(t *testing.T) {
 	if err := store.Login("fixture-project", "fixture-secret", "file"); err != nil {
 		t.Fatal(err)
 	}
-	child, stop := liveDesktopFixture(t, app, bundle, capture, "--model", "deepseek-ai/DeepSeek-V4.1-Flash")
+	child, stop := liveDesktopFixture(t, app, bundle, capture, append([]string{"--model", "deepseek-ai/DeepSeek-V4.1-Flash"}, desktopLifecycleSelection(t, native)...)...)
 	stop()
 	bridge := child.Env["CODEX_CLI_PATH"]
 	preserved := map[string][]byte{}
@@ -365,9 +397,17 @@ func TestDesktopInstalledUpgradeAndStandalonePurge(t *testing.T) {
 }
 
 func TestDesktopUninstallDetachesSavedReference(t *testing.T) {
-	bundle, capture := desktopFixture(t, "ignore")
+	desktopLifecycleUninstallDetachesSavedReference(t, false)
+}
+
+func TestDesktopNativeCandidateUninstallDetachesSavedReference(t *testing.T) {
+	desktopLifecycleUninstallDetachesSavedReference(t, true)
+}
+
+func desktopLifecycleUninstallDetachesSavedReference(t *testing.T, native bool) {
+	bundle, capture := fixtureDesktopLifecycle(t, native, "ignore")
 	app, _ := adapterFixture(t, nil, nil)
-	child, stop := liveDesktopFixture(t, app, bundle, capture)
+	child, stop := liveDesktopFixture(t, app, bundle, capture, desktopLifecycleSelection(t, native)...)
 	stop()
 	root := filepath.Join(t.TempDir(), "install")
 	if err := os.MkdirAll(filepath.Join(root, "bin"), 0700); err != nil {
@@ -416,7 +456,7 @@ func TestDesktopUninstallDetachesSavedReference(t *testing.T) {
 	if err := os.Remove(capture); err != nil {
 		t.Fatal(err)
 	}
-	relaunched, finish := liveDesktopFixture(t, app, bundle, capture)
+	relaunched, finish := liveDesktopFixture(t, app, bundle, capture, desktopLifecycleSelection(t, native)...)
 	if relaunched.Env["CODEX_CLI_PATH"] != bridge || relaunched.Env["TOFA_API_KEY"] == child.Env["TOFA_API_KEY"] || relaunched.Env["TOFA_DESKTOP_CONTEXT"] == child.Env["TOFA_DESKTOP_CONTEXT"] {
 		t.Fatal("relaunch did not reattach the saved path with fresh routing")
 	}

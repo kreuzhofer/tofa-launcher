@@ -800,11 +800,19 @@ func TestDesktopOwnershipLossPreventsSharedConfigurationWrite(t *testing.T) {
 }
 
 func TestDesktopPreservesCompetingConfigurationEdits(t *testing.T) {
+	desktopLifecyclePreservesCompetingConfigurationEdits(t, false)
+}
+
+func TestDesktopNativeCandidatePreservesCompetingConfigurationEdits(t *testing.T) {
+	desktopLifecyclePreservesCompetingConfigurationEdits(t, true)
+}
+
+func desktopLifecyclePreservesCompetingConfigurationEdits(t *testing.T, native bool) {
 	for _, mode := range []string{"config-conflict", "edit-config"} {
 		t.Run(mode, func(t *testing.T) {
-			bundle, _ := desktopFixture(t, mode)
+			bundle, _ := fixtureDesktopLifecycle(t, native, mode)
 			app, _ := adapterFixture(t, nil, nil)
-			err := app.Run([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"})
+			err := app.Run(append([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}, desktopLifecycleSelection(t, native)...))
 			data, readErr := os.ReadFile(filepath.Join(os.Getenv("HOME"), ".codex/config.toml"))
 			if readErr != nil {
 				t.Fatal(readErr)
@@ -821,10 +829,18 @@ func TestDesktopPreservesCompetingConfigurationEdits(t *testing.T) {
 }
 
 func TestDesktopSerializesCompetingLaunchesBeforeNativeStartup(t *testing.T) {
-	bundle, capture := desktopFixture(t, "slow-preflight")
+	desktopLifecycleSerializesCompetingLaunchesBeforeNativeStartup(t, false)
+}
+
+func TestDesktopNativeCandidateSerializesCompetingLaunchesBeforeNativeStartup(t *testing.T) {
+	desktopLifecycleSerializesCompetingLaunchesBeforeNativeStartup(t, true)
+}
+
+func desktopLifecycleSerializesCompetingLaunchesBeforeNativeStartup(t *testing.T, native bool) {
+	bundle, capture := fixtureDesktopLifecycle(t, native, "slow-preflight")
 	first, _ := adapterFixture(t, nil, nil)
 	second, _ := adapterFixture(t, nil, nil)
-	args := []string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}
+	args := append([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}, desktopLifecycleSelection(t, native)...)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	done := make(chan error, 1)
@@ -1338,11 +1354,19 @@ done
 }
 
 func TestDesktopEngineExitStopsOwnedApp(t *testing.T) {
-	bundle, capture := desktopFixture(t, "engine-exit")
+	desktopLifecycleEngineExitStopsOwnedApp(t, false)
+}
+
+func TestDesktopNativeCandidateEngineExitStopsOwnedApp(t *testing.T) {
+	desktopLifecycleEngineExitStopsOwnedApp(t, true)
+}
+
+func desktopLifecycleEngineExitStopsOwnedApp(t *testing.T, native bool) {
+	bundle, capture := fixtureDesktopLifecycle(t, native, "engine-exit")
 	app, _ := adapterFixture(t, nil, nil)
 	ctx, cancel := context.WithTimeout(context.Background(), 6*time.Second)
 	defer cancel()
-	err := app.RunContext(ctx, []string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"})
+	err := app.RunContext(ctx, append([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}, desktopLifecycleSelection(t, native)...))
 	if err == nil || !strings.Contains(err.Error(), "app-server exited") {
 		t.Fatalf("engine loss not detected: %v", err)
 	}
@@ -1350,11 +1374,19 @@ func TestDesktopEngineExitStopsOwnedApp(t *testing.T) {
 }
 
 func TestDesktopAllowsEngineFirstGracefulShutdown(t *testing.T) {
-	bundle, capture := desktopFixture(t, "graceful-engine-first")
+	desktopLifecycleAllowsEngineFirstGracefulShutdown(t, false)
+}
+
+func TestDesktopNativeCandidateAllowsEngineFirstGracefulShutdown(t *testing.T) {
+	desktopLifecycleAllowsEngineFirstGracefulShutdown(t, true)
+}
+
+func desktopLifecycleAllowsEngineFirstGracefulShutdown(t *testing.T, native bool) {
+	bundle, capture := fixtureDesktopLifecycle(t, native, "graceful-engine-first")
 	app, _ := adapterFixture(t, nil, nil)
 	ctx, cancel := context.WithTimeout(context.Background(), 6*time.Second)
 	defer cancel()
-	if err := app.RunContext(ctx, []string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}); err != nil {
+	if err := app.RunContext(ctx, append([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}, desktopLifecycleSelection(t, native)...)); err != nil {
 		t.Fatalf("graceful desktop shutdown was interrupted: %v", err)
 	}
 	if _, err := os.Stat(capture + ".graceful-exit"); err != nil {
@@ -1399,9 +1431,17 @@ func assertDesktopWorkerStopped(t *testing.T, capture string) {
 }
 
 func TestDesktopCancellationClosesOwnedProcessesAndAdapter(t *testing.T) {
+	desktopLifecycleCancellationClosesOwnedProcessesAndAdapter(t, false)
+}
+
+func TestDesktopNativeCandidateCancellationClosesOwnedProcessesAndAdapter(t *testing.T) {
+	desktopLifecycleCancellationClosesOwnedProcessesAndAdapter(t, true)
+}
+
+func desktopLifecycleCancellationClosesOwnedProcessesAndAdapter(t *testing.T, native bool) {
 	for _, cause := range []string{"interrupt", "adapter failure"} {
 		t.Run(cause, func(t *testing.T) {
-			bundle, capture := desktopFixture(t, "ignore")
+			bundle, capture := fixtureDesktopLifecycle(t, native, "ignore")
 			app, _ := adapterFixture(t, nil, nil)
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
@@ -1415,7 +1455,7 @@ func TestDesktopCancellationClosesOwnedProcessesAndAdapter(t *testing.T) {
 			}
 			done := make(chan error, 1)
 			go func() {
-				done <- app.RunContext(ctx, []string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"})
+				done <- app.RunContext(ctx, append([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}, desktopLifecycleSelection(t, native)...))
 			}()
 			deadline := time.Now().Add(5 * time.Second)
 			for {
@@ -1579,15 +1619,29 @@ func TestDesktopPreservesFreshNativeCatalog(t *testing.T) {
 }
 
 func TestDesktopWithholdsInferenceUntilOwnershipQualified(t *testing.T) {
-	bundle, capture := desktopFixture(t, "before-ownership")
+	desktopLifecycleWithholdsInferenceUntilOwnershipQualified(t, false)
+}
+
+func TestDesktopNativeCandidateWithholdsInferenceUntilOwnershipQualified(t *testing.T) {
+	desktopLifecycleWithholdsInferenceUntilOwnershipQualified(t, true)
+}
+
+func desktopLifecycleWithholdsInferenceUntilOwnershipQualified(t *testing.T, native bool) {
+	bundle, capture := fixtureDesktopLifecycle(t, native, "before-ownership")
 	app, _ := adapterFixture(t, func(http.ResponseWriter, *http.Request) {
 		t.Error("inference reached upstream before ownership qualification")
 	}, nil)
-	if err := app.Run([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}); err != nil {
+	if err := app.Run(append([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}, desktopLifecycleSelection(t, native)...)); err != nil {
 		t.Fatal(err)
 	}
 	status, err := os.ReadFile(capture + ".pending")
-	if err != nil || string(status) != "503" {
+	want := "503"
+	// The candidate's control capability cannot authorize inference, even
+	// before the ready gate. It has not received an inference capability yet.
+	if native {
+		want = "401"
+	}
+	if err != nil || string(status) != want {
 		t.Fatalf("unqualified inference was not refused: %s %v", status, err)
 	}
 }
