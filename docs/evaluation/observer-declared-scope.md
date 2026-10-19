@@ -93,6 +93,10 @@ before final persistence returns. A regression holds a usage-failure handler in
 its owned stop request after the client has disconnected. Exit must wait for
 that handler's final diagnostic write, rather than race temporary-root cleanup.
 No cleanup errors are ignored and no arbitrary delay is used to hide writes.
+Socket registration and cancellation checks are atomic, but network writes run
+outside the Observer lock. Cancellation shuts down registered sockets before it
+acknowledges completion; a released stalled send cannot reconnect automatically.
+A separate owned send-barrier regression covers this upload cancellation case.
 
 The scope and shutdown tests use owned loopback HTTP upstreams and synthetic
 credentials. They do not launch Desktop, contact a provider, or prove account,
