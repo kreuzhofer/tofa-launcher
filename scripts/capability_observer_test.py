@@ -10,7 +10,7 @@ import unittest
 from contextlib import contextmanager
 from unittest.mock import patch
 
-from capability_observer import LoopbackServer, Observer
+from capability_observer import LoopbackServer, Observer, GUARDIAN_SCHEMA
 
 SCRIPT_ROOT = Path(__file__).resolve().parent.parent
 
@@ -194,6 +194,36 @@ class BoundaryTests(unittest.TestCase):
             self.assertEqual(seen[1]['text'], guardian['text'])
             self.assertEqual(observer.records[2]['routed_model'], 'nvidia/Nemotron-3_5-Lightning')
 
+    @staticmethod
+    def developer_review(model='zai-org/GLM-5.3-Flash'):
+        return dict(model=model, stream=True, input=[{'type': 'message', 'role': 'developer',
+            'content': [{'type': 'input_text', 'text': 'Retain native approval policy.'}]}],
+            tools=[{'type': 'function', 'name': name, 'parameters': {'type': 'object'}}
+                   for name in ('exec_command', 'write_stdin', 'view_image')], tool_choice='auto',
+            text={'format': {'type': 'json_schema', 'strict': False, 'schema': GUARDIAN_SCHEMA}},
+            client_metadata={'x-openai-subagent': 'guardian', 'x-codex-parent-thread-id': 'origin-thread',
+                             'parent_turn_id': 'origin-turn'})
+
+    def test_developer_review_policy_preserved_and_incomplete_contracts_rejected(self):
+        with self.boundary() as (observer, seen):
+            body = self.developer_review()
+            self.post(observer, '/responses', body, 'client-token', 200)
+            self.assertEqual(seen[0]['input'], body['input'])
+            self.assertNotIn('instructions', seen[0])
+            self.assertEqual(observer.records[0]['role'], 'guardian')
+        changes = [lambda b: b['client_metadata'].pop('parent_turn_id'),
+                   lambda b: b['client_metadata'].update({'x-openai-subagent': 'other'}),
+                   lambda b: b['input'][0].update(role='user'),
+                   lambda b: b['input'][0].update(content=[]),
+                   lambda b: b.update(instructions=42),
+                   lambda b: b['tools'].append(dict(b['tools'][0])),
+                   lambda b: b['text']['format'].update(future=True)]
+        for change in changes:
+            with self.subTest(change=changes.index(change)), self.boundary() as (observer, seen):
+                body = self.developer_review(); change(body)
+                self.post(observer, '/responses', body, 'client-token', 400)
+                self.assertEqual(seen, [])
+
     def test_unknown_contract_never_reaches_upstream(self):
         for change in ({'tools': [{'type': 'remote_inference'}]}, {'previous_response_id': 'private-id'},
                        {'model': 'unselected/model'}, {'input': [{'type': 'future_item'}]}):
@@ -252,9 +282,9 @@ class BoundaryTests(unittest.TestCase):
                 self.assertNotIn('private-', json.dumps(observer.records))
                 self.assertEqual(seen, [])
 
-    def test_current_desktop_developer_role_review_is_an_observer_block(self):
+    def test_redacted_developer_review_without_origin_remains_blocked(self):
         # Structural replay of engine 0.162.0-alpha.17.2, with policy text and
-        # native IDs removed. This is a contract limit, not a Guardian decision.
+        # native IDs removed. Missing provenance remains a contract rejection.
         body = json.loads((SCRIPT_ROOT / 'scripts/fixtures/current-desktop-review-shape.json').read_text())
         with self.boundary(guardian='moonshotai/Kimi-K3') as (observer, seen):
             self.post(observer, '/responses', body, 'client-token', 400)
@@ -741,6 +771,35 @@ class ServiceDeclarationTests(unittest.TestCase):
                 'wall_clock': 'enforced', 'requests': 'enforced', 'bytes': 'enforced',
                 'output_tokens': 'observed_usage', 'upstream_output_cap': None})
             self.assertTrue(native_record['completed'])
+
+    def test_native_review_retains_origin_across_other_thread_and_service(self):
+        helper = SplitAuthorizationTests()
+        def upstream(handler):
+            body = json.loads(handler.raw_body)
+            handler.send_response(200); handler.end_headers()
+            handler.wfile.write(('data: ' + json.dumps({'type': 'response.completed',
+                'response': {'model': body['model'], 'output': [], 'usage': {'output_tokens': 2}}}) + '\n\n').encode())
+        with helper.boundary(response=upstream, model_services=self.services) as (observer, seen, registration):
+            helper.register(observer, registration)
+            headers = [('Authorization', 'Bearer ' + helper.native), ('X-TOFA-Launch', helper.inference)]
+            for model, turn in [('gpt-6-astra', 'origin-turn'), ('moonshotai/Kimi-K3', 'subsequent-turn')]:
+                body = {'model': model, 'stream': True, 'input': [], 'tools': [],
+                        'client_metadata': {'thread_id': 'origin-thread', 'turn_id': turn}}
+                status, data = helper.request(observer, '/responses', headers, body)
+                self.assertEqual(status, 200, data)
+            review = BoundaryTests.developer_review('gpt-6-astra')
+            raw = json.dumps(review, indent=2).encode()
+            status, data = helper.request(observer, '/responses', headers, None, raw=raw)
+            self.assertEqual(status, 200, data)
+            self.assertEqual(observer.records[-1]['service'], 'native')
+            self.assertEqual(observer.records[-1]['role'], 'guardian')
+            self.assertNotIn('max_output_tokens', seen[-1][2])
+            self.assertEqual(seen[-1][2], review)
+        with helper.boundary(model_services=self.services) as (observer, seen, registration):
+            helper.register(observer, registration)
+            status, data = helper.request(observer, '/responses', headers, review)
+            self.assertEqual(status, 400, data)
+            self.assertEqual(observer.records[-1]['rejection_category'], 'review_origin_unavailable')
 
     def test_service_declarations_are_bounded_and_native_contracts_fail_before_forwarding(self):
         helper = SplitAuthorizationTests()

@@ -120,7 +120,7 @@ def tool_contract(tools):
     return True
 
 
-def role(body, main, guardian):
+def role(body, main, guardian, *, native_review=False):
     """Classify the client's captured contracts; the launcher still validates them."""
     if body.get('stream') is not True or not isinstance(body.get('input'), list):
         raise ContractError('stream_or_input')
@@ -154,10 +154,45 @@ def role(body, main, guardian):
         raise ContractError('auxiliary')
     review = schema.get('schema') == GUARDIAN_SCHEMA
     if review:
-        names = {tool.get('name') for tool in body.get('tools', [])}
+        tools = body.get('tools', [])
+        policy_input = body['input']
+        if native_review and not tools and policy_input and policy_input[0].get('type') == 'additional_tools':
+            inventory = policy_input[0]
+            namespaces = inventory.get('tools', [])
+            if (inventory.get('role') != 'developer' or len(namespaces) != 1 or
+                    namespaces[0].get('type') != 'namespace' or namespaces[0].get('name') != 'functions'):
+                raise ContractError('native_guardian_tools')
+            entries = namespaces[0].get('tools', [])
+            names = {tool.get('name') for tool in entries}
+            if len(entries) != 2 or names != {'exec', 'wait'}:
+                raise ContractError('native_guardian_tools')
+            for tool in entries:
+                if tool['name'] == 'exec' and (tool.get('type') != 'custom' or
+                        tool.get('format', {}).get('type') != 'grammar' or tool['format'].get('syntax') != 'lark'):
+                    raise ContractError('native_guardian_tools')
+                if tool['name'] == 'wait' and tool.get('type') != 'function':
+                    raise ContractError('native_guardian_tools')
+            policy_input = policy_input[1:]
+            tools = [{'type': 'function', 'name': name} for name in ('exec_command', 'write_stdin', 'view_image')]
+        names = {tool.get('name') for tool in tools}
+        client = body.get('client_metadata', {})
+        policy = policy_input[0] if policy_input else {}
+        parts = policy.get('content')
+        developer_policy = (client.get('x-openai-subagent') == 'guardian' and
+            all(isinstance(client.get(key), str) and client[key].strip()
+                for key in ('x-codex-parent-thread-id', 'parent_turn_id')) and
+            policy.get('type') == 'message' and policy.get('role') == 'developer' and
+            isinstance(parts, list) and bool(parts) and all(isinstance(part, dict) and
+                part.get('type') == 'input_text' and isinstance(part.get('text'), str) and
+                part['text'].strip() for part in parts))
+        policy_valid = isinstance(body.get('instructions'), str) or (
+            body.get('instructions') is None and developer_policy)
         if (body.get('model') != guardian or schema.get('strict') is not False or
                 schema.get('type') != 'json_schema' or body.get('tool_choice') != 'auto' or
-                not isinstance(body.get('instructions'), str) or
+                not policy_valid or len(tools) != 3 or
+                any(tool.get('type') != 'function' for tool in tools) or
+                set(schema) - {'type', 'schema', 'strict', 'name'} or
+                ('name' in schema and not isinstance(schema['name'], str)) or
                 names != {'exec_command', 'write_stdin', 'view_image'}):
             raise ContractError('guardian')
         return 'guardian'
@@ -220,6 +255,7 @@ class Observer:
                 for identity, service in model_services.items())):
             raise ValueError('invalid_observer_model_services')
         self.model_services = dict(model_services) if model_services is not None else {model: 'token_factory'}
+        self.review_origins = {}
         self.secret = secrets.token_hex(32)
         self.endpoint = self.token = self.inference_token = None
         self.authorization_version = 1
@@ -431,8 +467,19 @@ class Observer:
     def request(self, handler, body):
         try:
             selected = body.get('model')
-            kind = role(body, selected if selected in self.model_services else self.model, self.guardian)
-            service = self.model_services[selected] if kind == 'main' else 'token_factory'
+            client = body.get('client_metadata', {})
+            review_service = None
+            if self.authorization_version == 2 and client.get('x-openai-subagent') == 'guardian':
+                parent = tuple(client.get(key) for key in ('x-codex-parent-thread-id', 'parent_turn_id'))
+                if not all(isinstance(value, str) and 0 < len(value) <= 256 and
+                           value.strip() == value for value in parent):
+                    raise ContractError('review_origin_missing')
+                with self.lock:
+                    review_service = self.review_origins.get(parent)
+                if review_service is None: raise ContractError('review_origin_unavailable')
+            reviewer = selected if review_service == 'native' else self.guardian
+            kind = role(body, selected if selected in self.model_services else self.model, reviewer, native_review=review_service == 'native')
+            service = self.model_services[selected] if kind == 'main' else (review_service or 'token_factory')
             cap = body.get('max_output_tokens', self.limits['output_tokens'])
             if type(cap) is not int or cap <= 0: raise ContractError('output_token_cap')
             if service == 'native':
@@ -444,7 +491,7 @@ class Observer:
                 # separate qualification, not assumptions about protocol validity.
                 client_metadata = body.get('client_metadata', {})
                 metadata = json.loads(client_metadata.get('x-codex-turn-metadata', '{}'))
-                if (client_metadata.get('x-openai-subagent') not in (None, '') or
+                if kind == 'main' and (client_metadata.get('x-openai-subagent') not in (None, '') or
                         metadata.get('request_kind') not in (None, 'turn') or
                         metadata.get('thread_source') not in (None, 'user') or
                         metadata.get('turn_trigger') not in (None, 'composer')):
@@ -453,6 +500,16 @@ class Observer:
             self.reject(handler, 'unsupported_request_contract', 400, body,
                         category=getattr(error, 'category', 'malformed_contract')); return
         with self.lock:
+            if kind == 'main' and self.authorization_version == 2:
+                origin = tuple(client.get(key) for key in ('thread_id', 'turn_id'))
+                if all(isinstance(value, str) and 0 < len(value) <= 256 and
+                       value.strip() == value for value in origin):
+                    old = self.review_origins.get(origin)
+                    if old is not None and old != service:
+                        self.reject(handler, 'conflicting_review_origin', 400, body); return
+                    if old is None and len(self.review_origins) >= 4096:
+                        self.reject(handler, 'review_origin_capacity', 400, body); return
+                    self.review_origins[origin] = service
             if self.expected_prompt:
                 encoded_input = json.dumps(body['input'], ensure_ascii=False)
                 # Each run is a fresh workspace and conversation. The observer
