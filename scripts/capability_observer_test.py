@@ -554,6 +554,7 @@ class SplitAuthorizationTests(unittest.TestCase):
             def respond(self):
                 raw = self.rfile.read(int(self.headers.get('Content-Length', 0)))
                 seen.append((self.path, dict(self.headers), json.loads(raw) if raw else None))
+                self.raw_body = raw
                 if response and self.path == '/responses':
                     response(self); return
                 self.send_response(200); self.end_headers()
@@ -702,6 +703,205 @@ class SplitAuthorizationTests(unittest.TestCase):
             self.assertIn('BadStatusLine', retained)
             for secret in (self.native, self.control, self.inference):
                 self.assertNotIn(secret, retained)
+
+
+class ServiceDeclarationTests(unittest.TestCase):
+    services = {'moonshotai/Kimi-K3': 'token_factory', 'gpt-6-astra': 'native'}
+
+    def test_declared_switching_preserves_native_wire_body_and_reports_enforced_limits(self):
+        helper = SplitAuthorizationTests()
+        raw_requests = []
+        def upstream(handler):
+            raw_requests.append(handler.raw_body)
+            body = json.loads(handler.raw_body)
+            event = {'type': 'response.completed', 'response': {'model': body['model'], 'output': [],
+                     'usage': {'input_tokens': 3, 'output_tokens': 2}}}
+            handler.send_response(200); handler.end_headers()
+            handler.wfile.write(('data: ' + json.dumps(event) + '\n\n').encode())
+        with helper.boundary(response=upstream, model_services=self.services) as (observer, seen, registration):
+            helper.register(observer, registration)
+            headers = [('Authorization', 'Bearer ' + helper.native), ('X-TOFA-Launch', helper.inference)]
+            factory = {'model': 'moonshotai/Kimi-K3', 'stream': True, 'input': [], 'tools': [],
+                       'max_output_tokens': 5000, 'parallel_tool_calls': True}
+            native = {'model': 'gpt-6-astra', 'stream': True, 'input': [], 'tools': [],
+                      'parallel_tool_calls': True, 'client_metadata': {'x-codex-turn-metadata': '{"request_kind":"turn"}'}}
+            raw = json.dumps(native, indent=3).encode()
+            for body, payload in ((factory, None), (None, raw), (factory, None)):
+                status, data = helper.request(observer, '/responses', headers, body, raw=payload)
+                self.assertEqual(status, 200, data)
+            self.assertEqual([body['model'] for _, _, body in seen], list(self.services) + ['moonshotai/Kimi-K3'])
+            self.assertEqual(raw_requests[1], raw)
+            self.assertNotIn('max_output_tokens', seen[1][2])
+            self.assertTrue(seen[1][2]['parallel_tool_calls'])
+            self.assertEqual(seen[0][2]['max_output_tokens'], 4096)
+            self.assertFalse(seen[0][2]['parallel_tool_calls'])
+            native_record = observer.records[1]
+            self.assertEqual(native_record['service'], 'native')
+            self.assertEqual(native_record['limit_enforcement'], {
+                'wall_clock': 'enforced', 'requests': 'enforced', 'bytes': 'enforced',
+                'output_tokens': 'observed_usage', 'upstream_output_cap': None})
+            self.assertTrue(native_record['completed'])
+
+    def test_service_declarations_are_bounded_and_native_contracts_fail_before_forwarding(self):
+        helper = SplitAuthorizationTests()
+        for declaration in ({}, {'gpt-6-astra': 'native'}, {'moonshotai/Kimi-K3': 'https://arbitrary.invalid'},
+                            {'moonshotai/Kimi-K3': None}, [('moonshotai/Kimi-K3', 'token_factory')],
+                            dict(self.services, **{'x' * 513: 'native'}),
+                            dict(self.services, **{str(i): 'native' for i in range(128)})):
+            with self.subTest(declaration_type=type(declaration).__name__), self.assertRaisesRegex(ValueError, 'model_services'):
+                with helper.boundary(model_services=declaration): pass
+        native = {'model': 'gpt-6-astra', 'stream': True, 'input': [], 'tools': []}
+        changes = [
+            {'max_output_tokens': 4097}, {'max_output_tokens': True},
+            {'parallel_tool_calls': 'true'}, {'previous_response_id': 'previous'},
+            {'client_metadata': {'x-codex-turn-metadata': '{"request_kind":"unknown"}'}},
+            {'client_metadata': {'x-codex-turn-metadata': '{"thread_source":"future_helper"}'}},
+            {'client_metadata': {'x-codex-turn-metadata': '{"turn_trigger":"guardian"}'}},
+            {'client_metadata': {'x-openai-subagent': 'guardian'}},
+            *[{'client_metadata': {'x-codex-turn-metadata': json.dumps({'thread_source': source})}}
+              for source in ('cli', 'vscode', 'appServer')],
+            {'client_metadata': {'x-codex-turn-metadata': '{"turn_trigger":"user"}'}},
+            {'model': 'undeclared/model'},
+        ]
+        for change in changes:
+            with self.subTest(fields=list(change)), helper.boundary(model_services=self.services) as (observer, seen, registration):
+                helper.register(observer, registration)
+                body = dict(native, **change)
+                status, data = helper.request(observer, '/responses', [('Authorization', 'Bearer ' + helper.native),
+                    ('X-TOFA-Launch', helper.inference)], body)
+                self.assertEqual(status, 400, data)
+                self.assertFalse(any(path == '/responses' for path, _, _ in seen))
+        with helper.boundary() as (observer, seen, registration):
+            helper.register(observer, registration)
+            status, data = helper.request(observer, '/responses', [('X-TOFA-Launch', helper.inference)], native)
+            self.assertEqual(status, 400, data)
+            self.assertFalse(any(path == '/responses' for path, _, _ in seen))
+
+    def test_native_usage_must_be_observed_and_over_budget_stops_subsequent_requests(self):
+        helper = SplitAuthorizationTests()
+        for usage, cap, reason in ((None, None, 'native_output_usage_unobserved'),
+                                  ({'input_tokens': 3}, None, 'native_output_usage_unobserved'),
+                                  ({'output_tokens': -1}, None, 'native_output_usage_unobserved'),
+                                  ({'output_tokens': True}, None, 'native_output_usage_unobserved'),
+                                  ({'output_tokens': 4097}, None, 'provider_output_limit_violation'),
+                                  ({'output_tokens': 129}, 128, 'provider_output_limit_violation')):
+            def upstream(handler):
+                response = {'model': 'gpt-6-astra', 'output': []}
+                if usage is not None: response['usage'] = usage
+                handler.send_response(200); handler.end_headers()
+                handler.wfile.write(('data: ' + json.dumps({'type': 'response.completed', 'response': response}) + '\n\n').encode())
+            with self.subTest(usage=usage, cap=cap), helper.boundary(response=upstream, model_services=self.services) as (observer, seen, registration):
+                helper.register(observer, registration)
+                body = {'model': 'gpt-6-astra', 'stream': True, 'input': [], 'tools': []}
+                if cap is not None: body['max_output_tokens'] = cap
+                headers = [('Authorization', 'Bearer ' + helper.native), ('X-TOFA-Launch', helper.inference)]
+                helper.request(observer, '/responses', headers, body)
+                self.assertEqual(observer.reason, reason)
+                self.assertFalse(observer.records[0]['completed'])
+                status, _ = helper.request(observer, '/responses', headers, body)
+                self.assertEqual(status, 401)
+                self.assertEqual(len([path for path, _, _ in seen if path == '/responses']), 1)
+
+    def test_native_protocol_headers_reach_only_registered_adapter_without_arbitrary_headers(self):
+        helper = SplitAuthorizationTests()
+        forwarded = {'OpenAI-Beta': 'responses=fixture', 'Originator': 'codex_fixture',
+                     'Session-Id': 'fixture-session', 'X-Client-Request-Id': 'fixture-request',
+                     'X-Codex-Turn-State': 'fixture-turn-state', 'X-Codex-Turn-Metadata': '{"request_kind":"turn"}',
+                     'Thread-Id': 'fixture-thread', 'User-Agent': 'fixture-engine',
+                     'X-Codex-Beta-Features': 'fixture-feature', 'X-Codex-Window-Id': 'fixture-window',
+                     'X-Openai-Internal-Codex-Responses-Lite': 'true'}
+        def upstream(handler):
+            event = {'type': 'response.completed', 'response': {'model': 'gpt-6-astra', 'output': [], 'usage': {'output_tokens': 2}}}
+            handler.send_response(200); handler.end_headers()
+            handler.wfile.write(('data: ' + json.dumps(event) + '\n\n').encode())
+        with helper.boundary(response=upstream, model_services=self.services) as (observer, seen, registration):
+            helper.register(observer, registration)
+            headers = [('Authorization', 'Bearer ' + helper.native), ('X-TOFA-Launch', helper.inference),
+                       ('Cookie', 'private-cookie'), ('X-Arbitrary-Upstream', 'https://arbitrary.invalid'), *forwarded.items()]
+            status, data = helper.request(observer, '/responses', headers,
+                {'model': 'gpt-6-astra', 'stream': True, 'input': [], 'tools': []})
+            self.assertEqual(status, 200, data)
+            for name, value in forwarded.items(): self.assertEqual(seen[0][1].get(name), value)
+            self.assertNotIn('Cookie', seen[0][1])
+            self.assertNotIn('X-Arbitrary-Upstream', seen[0][1])
+            retained = ''.join(p.read_text() for p in observer.run.iterdir() if p.is_file())
+            for value in ('private-cookie', 'fixture-turn-state', 'fixture-session', 'fixture-request'):
+                self.assertNotIn(value, retained)
+
+    def test_native_turn_state_response_is_preserved_without_retaining_or_forwarding_other_headers(self):
+        helper = SplitAuthorizationTests()
+        for model in self.services:
+            def upstream(handler):
+                event = {'type': 'response.completed', 'response': {'model': model, 'output': [], 'usage': {'output_tokens': 2}}}
+                handler.send_response(200)
+                handler.send_header('X-Codex-Turn-State', 'private-next-turn-state')
+                handler.send_header('Set-Cookie', 'private-cookie')
+                handler.send_header('X-Arbitrary-Response', 'private-extra')
+                handler.end_headers()
+                handler.wfile.write(('data: ' + json.dumps(event) + '\n\n').encode())
+            with self.subTest(model=model), helper.boundary(response=upstream, model_services=self.services) as (observer, seen, registration):
+                helper.register(observer, registration)
+                connection = http.client.HTTPConnection('127.0.0.1', observer.port, timeout=3)
+                try:
+                    connection.request('POST', '/responses', json.dumps({'model': model, 'stream': True, 'input': [], 'tools': []}),
+                        {'X-TOFA-Launch': helper.inference})
+                    response = connection.getresponse()
+                    self.assertEqual(response.getheader('X-Codex-Turn-State'),
+                        'private-next-turn-state' if self.services[model] == 'native' else None)
+                    self.assertIsNone(response.getheader('Set-Cookie'))
+                    self.assertIsNone(response.getheader('X-Arbitrary-Response'))
+                    response.read()
+                finally: connection.close()
+                retained = ''.join(p.read_text() for p in observer.run.iterdir() if p.is_file())
+                for value in ('private-next-turn-state', 'private-cookie', 'private-extra'):
+                    self.assertNotIn(value, retained)
+
+    def test_native_declared_main_accepts_known_client_origins_and_triggers(self):
+        helper = SplitAuthorizationTests()
+        def upstream(handler):
+            event = {'type': 'response.completed', 'response': {'model': 'gpt-6-astra', 'output': [], 'usage': {'output_tokens': 2}}}
+            handler.send_response(200); handler.end_headers()
+            handler.wfile.write(('data: ' + json.dumps(event) + '\n\n').encode())
+        with helper.boundary(response=upstream, model_services=self.services) as (observer, seen, registration):
+            helper.register(observer, registration)
+            for source in (None, 'user'):
+                for trigger in (None, 'composer'):
+                    body = {'model': 'gpt-6-astra', 'stream': True, 'input': [], 'tools': [],
+                        'client_metadata': {'x-codex-turn-metadata': json.dumps({
+                            'request_kind': 'turn', 'thread_source': source, 'turn_trigger': trigger})}}
+                    status, data = helper.request(observer, '/responses', [('X-TOFA-Launch', helper.inference)], body)
+                    self.assertEqual(status, 200, data)
+                    self.assertEqual(seen[-1][2], body)
+
+    def test_native_response_turn_state_is_bounded_and_unambiguous(self):
+        helper = SplitAuthorizationTests()
+        for values in (['one', 'two'], ['x' * 8193], ['state\twith-control']):
+            def upstream(handler):
+                handler.send_response(200)
+                for value in values: handler.send_header('X-Codex-Turn-State', value)
+                handler.end_headers()
+            with self.subTest(lengths=[len(value) for value in values]), helper.boundary(response=upstream, model_services=self.services) as (observer, seen, registration):
+                helper.register(observer, registration)
+                with self.assertRaises(http.client.RemoteDisconnected):
+                    helper.request(observer, '/responses', [('X-TOFA-Launch', helper.inference)],
+                        {'model': 'gpt-6-astra', 'stream': True, 'input': [], 'tools': []})
+                self.assertFalse(observer.records[0]['completed'])
+                self.assertEqual(observer.records[0]['transport_failure']['stage'], 'upstream_headers')
+
+    def test_declared_native_lane_requires_v2_and_unambiguous_wire_model(self):
+        helper = SplitAuthorizationTests()
+        with helper.boundary(model_services=self.services) as (observer, seen, registration):
+            helper.register(observer, {'endpoint': registration['endpoint'], 'token': 'legacy-client'})
+            status, data = helper.request(observer, '/responses', [('Authorization', 'Bearer legacy-client')],
+                {'model': 'gpt-6-astra', 'stream': True, 'input': [], 'tools': []})
+            self.assertEqual(status, 400, data)
+            self.assertFalse(any(path == '/responses' for path, _, _ in seen))
+        with helper.boundary(model_services=self.services) as (observer, seen, registration):
+            helper.register(observer, registration)
+            status, data = helper.request(observer, '/responses', [('X-TOFA-Launch', helper.inference)],
+                raw=b'{"model":"moonshotai/Kimi-K3","model":"gpt-6-astra","stream":true,"input":[],"tools":[]}')
+            self.assertEqual(status, 400, data)
+            self.assertFalse(any(path == '/responses' for path, _, _ in seen))
 
 
 if __name__ == '__main__':
