@@ -18,6 +18,7 @@ import (
 	"net/url"
 	"reflect"
 	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -620,15 +621,56 @@ func approvalReviewFormat(payload map[string]json.RawMessage) (map[string]json.R
 		delete(allowed, name)
 	}
 	var instructions *string
-	if json.Unmarshal(payload["instructions"], &instructions) != nil || instructions == nil {
+	if len(payload["instructions"]) != 0 && json.Unmarshal(payload["instructions"], &instructions) != nil {
 		return nil, nil, nil, false
+	}
+	if instructions == nil {
+		if !hasDeveloperGuardianPolicy(payload) {
+			return nil, nil, nil, false
+		}
+		// Keep native policy in input, preserving its role and order. Kimi's
+		// final-answer schema guidance can occupy the otherwise-absent field.
+		instructions = new(string)
 	}
 	return textOptions, format, instructions, true
 }
 
-// The pinned engine sends no role metadata with review requests. Recognize
-// either its assessment fields or its inspection-tool inventory before admitting
-// an ordinary main request, so a changed review cannot bypass the role gate.
+// The newer native contract carries policy in the leading developer message
+// and identifies the originating work explicitly. This is an additional known
+// review shape, not permission to accept an arbitrary absent/null instructions field.
+func hasDeveloperGuardianPolicy(payload map[string]json.RawMessage) bool {
+	var metadata map[string]string
+	if json.Unmarshal(payload["client_metadata"], &metadata) != nil ||
+		metadata["x-openai-subagent"] != "guardian" ||
+		strings.TrimSpace(metadata["x-codex-parent-thread-id"]) == "" ||
+		strings.TrimSpace(metadata["parent_turn_id"]) == "" {
+		return false
+	}
+	var input []json.RawMessage
+	if json.Unmarshal(payload["input"], &input) != nil || len(input) == 0 {
+		return false
+	}
+	var policy struct {
+		Type, Role string
+		Content    []struct {
+			Type string
+			Text *string
+		}
+	}
+	if json.Unmarshal(input[0], &policy) != nil || policy.Type != "message" || policy.Role != "developer" || len(policy.Content) == 0 {
+		return false
+	}
+	for _, content := range policy.Content {
+		if content.Type != "input_text" || content.Text == nil || strings.TrimSpace(*content.Text) == "" {
+			return false
+		}
+	}
+	return true
+}
+
+// Older engines omit review role metadata. Recognize assessment fields or the
+// inspection-tool inventory before admitting an ordinary main request, so a
+// changed review cannot bypass the role gate.
 func isApprovalReviewCandidate(payload map[string]json.RawMessage) bool {
 	var text struct {
 		Format struct {
