@@ -20,12 +20,13 @@ import (
 
 // Public app-server protocol driver. Responses and notifications share stdout.
 type desktopEngine struct {
-	t       *testing.T
-	command *exec.Cmd
-	input   io.WriteCloser
-	encoder *json.Encoder
-	decoder *json.Decoder
-	id      int
+	t          *testing.T
+	command    *exec.Cmd
+	input      io.WriteCloser
+	encoder    *json.Encoder
+	decoder    *json.Decoder
+	id         int
+	stderrPath string
 }
 
 func TestDesktopUsesAuthenticatedNativeCatalog(t *testing.T) {
@@ -238,6 +239,13 @@ func openDesktopEngine(t *testing.T, child capturedDesktop, overrides ...string)
 		args = append(args, "-c", override)
 	}
 	command := exec.CommandContext(ctx, child.Env["CODEX_CLI_PATH"], args...)
+	stderrPath := filepath.Join(t.TempDir(), "engine.stderr")
+	stderr, err := os.Create(stderrPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { stderr.Close() })
+	command.Stderr = stderr
 	command.Dir = child.Cwd
 	for key, value := range child.Env {
 		command.Env = append(command.Env, key+"="+value)
@@ -253,7 +261,7 @@ func openDesktopEngine(t *testing.T, child capturedDesktop, overrides ...string)
 	if err := command.Start(); err != nil {
 		t.Fatal(err)
 	}
-	e := &desktopEngine{t: t, command: command, input: input, encoder: json.NewEncoder(input), decoder: json.NewDecoder(output)}
+	e := &desktopEngine{t: t, stderrPath: stderrPath, command: command, input: input, encoder: json.NewEncoder(input), decoder: json.NewDecoder(output)}
 	t.Cleanup(e.close)
 	e.call("initialize", map[string]any{"clientInfo": map[string]string{"name": "tofa_catalog_fixture", "version": "1"}, "capabilities": map[string]bool{"experimentalApi": true}})
 	if err := e.encoder.Encode(map[string]any{"method": "initialized"}); err != nil {

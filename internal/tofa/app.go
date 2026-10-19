@@ -26,13 +26,14 @@ type App struct {
 	Dir     string
 	Vault   Vault
 	// Endpoint and HTTP exist for local protocol tests. The CLI never overrides the endpoint.
-	Endpoint   string
-	HTTP       *http.Client
-	Listen     func(network, address string) (net.Listener, error)
-	RunClient  func(args, env []string) error
-	Prompt     func(label string, secret bool) (string, error)
-	Uninstall  func(purge bool) error
-	evaluation *evaluationObserver
+	Endpoint               string
+	HTTP                   *http.Client
+	Listen                 func(network, address string) (net.Listener, error)
+	RunClient              func(args, env []string) error
+	Prompt                 func(label string, secret bool) (string, error)
+	Uninstall              func(purge bool) error
+	evaluation             *evaluationObserver
+	nativeAccountCandidate bool
 }
 
 const help = `tofa — Token Factory launcher (prototype)
