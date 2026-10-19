@@ -486,3 +486,67 @@ func (t historyCatalogTransport) RoundTrip(r *http.Request) (*http.Response, err
 	res.ContentLength = int64(len(raw))
 	return res, nil
 }
+
+func TestDesktopNativeCandidateOrdinaryCompactConfigOverrides(t *testing.T) {
+	installed := os.Getenv("TOFA_TEST_DESKTOP_ENGINE")
+	if installed == "" {
+		t.Skip("set TOFA_TEST_DESKTOP_ENGINE")
+	}
+	bundle, capture := nativeCandidateFixture(t)
+	app, _ := adapterFixture(t, nil, nil)
+	child, stop := liveDesktopFixture(t, app, bundle, capture, "--native-account-candidate", "--evaluation-observer", candidateProxyObserver(t))
+	stop()
+	engine := filepath.Join(bundle, "Contents/Resources/codex")
+	if err := os.Remove(engine); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(installed, engine); err != nil {
+		t.Fatal(err)
+	}
+	command := exec.Command(installed, "debug", "models", "--bundled")
+	command.Env = []string{"PATH=" + os.Getenv("PATH"), "HOME=" + os.Getenv("HOME"), "CODEX_HOME=" + child.Env["CODEX_HOME"]}
+	catalog, err := command.Output()
+	if err != nil {
+		t.Fatal(err)
+	}
+	catalogPath := filepath.Join(t.TempDir(), "models.json")
+	if err = os.WriteFile(catalogPath, catalog, 0600); err != nil {
+		t.Fatal(err)
+	}
+	value := `model_providers.tofa-native-router.name="User-owned command-line provider"`
+	for _, form := range []struct {
+		name string
+		args []string
+	}{
+		{"short-separated", []string{"-c", value}},
+		{"short-compact", []string{"-c" + value}},
+		{"short-equals", []string{"-c=" + value}},
+		{"long-separated", []string{"--config", value}},
+		{"long-equals", []string{"--config=" + value}},
+	} {
+		t.Run(form.name, func(t *testing.T) {
+			// First establish that the real native CLI accepts this spelling. Then send
+			// the identical argv through the ordinary saved bridge and compare ownership.
+			for _, target := range []string{installed, child.Env["CODEX_CLI_PATH"]} {
+				wrapper := filepath.Join(t.TempDir(), "engine-argv")
+				targetJSON, _ := json.Marshal(target)
+				argsJSON, _ := json.Marshal(form.args)
+				script := "#!/usr/bin/env python3\nimport os,sys\ntarget=" + string(targetJSON) + "\nos.execv(target,[target,*sys.argv[1:],*" + string(argsJSON) + "])\n"
+				if err := os.WriteFile(wrapper, []byte(script), 0700); err != nil {
+					t.Fatal(err)
+				}
+				ordinary := capturedDesktop{Cwd: child.Cwd, Env: map[string]string{"PATH": os.Getenv("PATH"), "HOME": os.Getenv("HOME"), "CODEX_HOME": child.Env["CODEX_HOME"], "CODEX_CLI_PATH": wrapper}}
+				e := openDesktopEngine(t, ordinary, "features.plugins=false", "model_catalog_json="+strconv.Quote(catalogPath))
+				config := e.call("config/read", map[string]any{})["config"].(map[string]any)
+				provider := config["model_providers"].(map[string]any)["tofa-native-router"].(map[string]any)
+				e.close()
+				if provider["name"] != "User-owned command-line provider" {
+					t.Fatalf("native CLI did not apply %s: %v", form.name, provider["name"])
+				}
+				if provider["env_key"] != nil {
+					t.Errorf("ordinary bridge overrode user-owned %s provider with inactive env_key: %v", form.name, provider["env_key"])
+				}
+			}
+		})
+	}
+}
