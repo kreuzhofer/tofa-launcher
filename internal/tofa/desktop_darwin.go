@@ -342,6 +342,12 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 		if err != nil {
 			return err
 		}
+		if options.nativeAccountCandidate {
+			route.services, err = prepareServiceCatalog(catalog, mainModels)
+			if err != nil {
+				return err
+			}
+		}
 		route.Overrides = []string{
 			"model=" + strconv.Quote(*model), `model_provider="nebius-tofa"`, "model_catalog_json=" + strconv.Quote(catalog), `web_search="disabled"`,
 			`model_providers.nebius-tofa.name="Nebius Token Factory"`, "model_providers.nebius-tofa.base_url=" + strconv.Quote(adapter.endpoint),
@@ -376,11 +382,11 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 		}
 		close(route.ready)
 		if options.nativeAccountCandidate {
-			fmt.Fprintln(a.Out, "Qualification candidate: native account retained; tofa-native-router is session-scoped. General Desktop rollout remains blocked pending qualification.")
+			fmt.Fprintln(a.Out, "Qualification candidate: native account retained; tofa-native-router is session-scoped. New routed conversations explicitly selecting ChatGPT or Token Factory models send subsequent context to that service. General Desktop rollout remains blocked pending qualification.")
 		}
 		fmt.Fprintln(a.Out, "Native model catalog resolved and merged for this launch. Relaunch after account or catalog changes; only the announced automatic-title contract has an auxiliary route through Token Factory.")
 		fmt.Fprintf(a.Out, "Automatic review for all eligible Token Factory conversations uses %s through Token Factory. The engine retains approval decisions, policy and execution gates; native reviewers are unchanged.\n", *guardian)
-		fmt.Fprintf(a.Out, "Launching Codex desktop using ordinary history and profile.\nMain: %s\nGuardian: %s\nRoute: adapted Token Factory connection.\nStatus: %s\nToken Factory conversations use their selected main independently of this launch default. All eligible available models, including labelled Experimental choices, are enabled in the desktop picker. The Guardian above applies to every Token Factory main. Choosing GPT does not migrate providers.\nAutomatic title generation can fail; other auxiliary requests and compaction remain unsupported. Keep this terminal open.\n", *model, *guardian, status)
+		fmt.Fprintf(a.Out, "Launching Codex desktop using ordinary history and profile.\nMain: %s\nGuardian: %s\nRoute: adapted Token Factory connection.\nStatus: %s\nToken Factory conversations use their selected main independently of this launch default. All eligible available models, including labelled Experimental choices, are enabled in the desktop picker. The Guardian above applies to every Token Factory main. Existing histories retain their providers.\nAutomatic title generation can fail; other auxiliary requests and compaction remain unsupported. Keep this terminal open.\n", *model, *guardian, status)
 		fmt.Fprintln(a.Out, "Desktop environment probe isolated; coding commands retain normal shell startup.")
 		fmt.Fprintln(a.Out, "Desktop model defaults apply only to this desktop session; CLI model and reasoning defaults are preserved.")
 		return nil

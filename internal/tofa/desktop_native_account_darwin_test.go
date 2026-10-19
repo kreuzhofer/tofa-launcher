@@ -489,7 +489,7 @@ func TestDesktopNativeCandidateExpiresCapabilities(t *testing.T) {
 // This starts the repository's actual observer, not a matching Go mock. It is
 // deliberately case05 with no prompt restriction: this fixture tests transport,
 // not presentation qualification or an externally submitted model task.
-func actualCandidateObserver(t *testing.T) string {
+func actualCandidateObserver(t *testing.T, serviceMaps ...map[string]string) string {
 	t.Helper()
 	scripts, err := filepath.Abs("../../scripts")
 	if err != nil {
@@ -502,7 +502,7 @@ from pathlib import Path
 sys.path.insert(0,sys.argv[1])
 from capability_observer import Observer
 run=Path(sys.argv[2]);(run/'workspace').mkdir()
-with Observer(run,model='moonshotai/Kimi-K3',guardian='zai-org/GLM-5.3-Flash',limits={'seconds':600,'requests':10,'output_tokens':4096}) as observer:
+with Observer(run,model='moonshotai/Kimi-K3',guardian='zai-org/GLM-5.3-Flash',limits={'seconds':600,'requests':10,'output_tokens':4096},model_services=json.loads(sys.argv[3])) as observer:
  config=run/'observer.json'
  config.write_text(json.dumps({'version':2,'endpoint':observer.url,'secret':observer.secret,'seconds':600}))
  config.chmod(0o600)
@@ -510,7 +510,12 @@ with Observer(run,model='moonshotai/Kimi-K3',guardian='zai-org/GLM-5.3-Flash',li
  sys.stdin.read()
 `
 	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
-	command := exec.CommandContext(ctx, "python3", "-B", "-c", driver, scripts, run)
+	var services map[string]string
+	if len(serviceMaps) > 0 {
+		services = serviceMaps[0]
+	}
+	declaration, _ := json.Marshal(services)
+	command := exec.CommandContext(ctx, "python3", "-B", "-c", driver, scripts, run, string(declaration))
 	input, err := command.StdinPipe()
 	if err != nil {
 		t.Fatal(err)

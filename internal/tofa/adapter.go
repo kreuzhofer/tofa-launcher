@@ -110,6 +110,7 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 			return nil
 		},
 	}
+	nativeProxy := nativeResponsesProxy(transport)
 	var approvalNotice sync.Once
 	var titleNotice sync.Once
 	var reasoningNotice sync.Once
@@ -191,6 +192,14 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 				} else {
 					http.Error(writer, "request adapter: could not read request", http.StatusBadRequest)
 				}
+				return
+			}
+			if native, routeErr := nativeMainRequest(body, adapter.desktop.Load()); routeErr != nil {
+				notice(routeErr.Error())
+				http.Error(writer, "request adapter: "+routeErr.Error(), http.StatusBadRequest)
+				return
+			} else if native {
+				serveNativeMain(nativeProxy, writer, request, body)
 				return
 			}
 			body, err = normalizeHistory(body)

@@ -14,5 +14,6 @@ type desktopRoute struct {
 	claim               chan int
 	mainPID             *atomic.Int64
 	mainModels          map[string]bool
+	services            map[string]inferenceService
 	namingUnavailable   string
 }
