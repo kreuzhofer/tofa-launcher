@@ -105,5 +105,42 @@ class ShutdownTests(unittest.TestCase):
         self.assertFalse(any(entry[0] == '/responses' for entry in seen), 'inference forwarded after attempt cancellation')
 
 
+    def test_stop_does_not_wait_for_stalled_request_send(self):
+        import http.client
+        from unittest.mock import patch
+        helper = boundary_tests.SplitAuthorizationTests()
+        sending, release, stopped = threading.Event(), threading.Event(), threading.Event()
+        original_send = http.client.HTTPConnection.send
+        with helper.boundary() as (observer, seen, registration):
+            helper.register(observer, registration)
+            upstream_port = int(registration['endpoint'].rsplit(':', 1)[1])
+            def held_send(connection, data):
+                if connection.port == upstream_port and not sending.is_set():
+                    sending.set()
+                    if not release.wait(5): raise TimeoutError('owned send barrier was not released')
+                return original_send(connection, data)
+            def request():
+                try:
+                    helper.request(observer, '/responses', [('Authorization', 'Bearer ' + helper.inference)],
+                        {'model': 'moonshotai/Kimi-K3', 'stream': True,
+                         'input': [{'role': 'user', 'content': 'Synthetic large upload. ' * 65536}], 'tools': []})
+                except (OSError, http.client.HTTPException): pass
+            def stop():
+                observer.stop('operator_cancelled'); stopped.set()
+            with patch.object(http.client.HTTPConnection, 'send', held_send):
+                client = threading.Thread(target=request); client.start()
+                cancelling = None
+                try:
+                    self.assertTrue(sending.wait(2), 'owned request never reached send barrier')
+                    cancelling = threading.Thread(target=stop); cancelling.start()
+                    self.assertTrue(stopped.wait(2), 'cancellation waited for stalled request send')
+                finally:
+                    release.set(); client.join(3)
+                    if cancelling: cancelling.join(3)
+                self.assertFalse(client.is_alive())
+                self.assertFalse(cancelling.is_alive())
+        self.assertFalse(any(entry[0] == '/responses' for entry in seen), 'released send forwarded after cancellation acknowledgement')
+
+
 if __name__ == '__main__':
     unittest.main()

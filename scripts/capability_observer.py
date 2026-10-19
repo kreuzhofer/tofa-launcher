@@ -854,26 +854,29 @@ class Observer:
         try:
             connection.connect()
             upstream_socket = connection.sock
+            # Shutdown keeps this socket owned until finally closes it. Never
+            # reconnect if cancellation interrupts the initial request write.
+            connection.auto_open = 0
             with self.lock:
                 if self.reason or self.done.is_set() or title_cancelled.is_set():
                     raise ConnectionAbortedError('observer_stopped')
                 if time.monotonic() >= self.deadline: raise TimeoutError()
                 self.active.add(upstream_socket)
-                headers = {'Authorization': 'Bearer ' + self.token, 'Content-Type': 'application/json'}
-                if record is not None and self.authorization_version == 2:
-                    headers.pop('Authorization')
-                    if 'Authorization' in handler.headers:
-                        headers['Authorization'] = handler.headers['Authorization']
-                    local_headers = ('X-TOFA-Launch', 'ChatGPT-Account-Id')
-                    if record.get('service') == 'native': local_headers += NATIVE_PROTOCOL_HEADERS
-                    for key in local_headers:
-                        if handler.headers.get(key): headers[key] = handler.headers[key]
-                if record is None:
-                    for key in ('X-Tofa-Parent-Pid', 'X-Tofa-Main-Engine-Pid'):
-                        if handler.headers.get(key): headers[key] = handler.headers[key]
-                stage = 'upstream_send'
-                payload = handler.raw_request if record is not None and record.get('service') == 'native' else None if body is None else json.dumps(body)
-                connection.request(handler.command, handler.path, payload, headers)
+            headers = {'Authorization': 'Bearer ' + self.token, 'Content-Type': 'application/json'}
+            if record is not None and self.authorization_version == 2:
+                headers.pop('Authorization')
+                if 'Authorization' in handler.headers:
+                    headers['Authorization'] = handler.headers['Authorization']
+                local_headers = ('X-TOFA-Launch', 'ChatGPT-Account-Id')
+                if record.get('service') == 'native': local_headers += NATIVE_PROTOCOL_HEADERS
+                for key in local_headers:
+                    if handler.headers.get(key): headers[key] = handler.headers[key]
+            if record is None:
+                for key in ('X-Tofa-Parent-Pid', 'X-Tofa-Main-Engine-Pid'):
+                    if handler.headers.get(key): headers[key] = handler.headers[key]
+            stage = 'upstream_send'
+            payload = handler.raw_request if record is not None and record.get('service') == 'native' else None if body is None else json.dumps(body)
+            connection.request(handler.command, handler.path, payload, headers)
             stage = 'upstream_headers'
             response = connection.getresponse()
             if record is not None:
