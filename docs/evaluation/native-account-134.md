@@ -100,7 +100,13 @@ are written only after owned request handlers drain; every retained request must
 be reconciled, including failed naming requests. A normal launcher exit1 qualifies
 only for an acknowledged owned evaluation stop while that launcher was still live;
 an earlier exit/failure cannot be relabeled by pressing Finish. Declared crashes
-have separate exit semantics and retain their action receipts. Expiry/cancellation stays unqualified.
+have separate exit semantics and retain their action receipts. Expiry/cancellation
+stays unqualified. Cancellation or a crash during active inference retains an
+incomplete attempt; interrupted Main/review work never becomes successful
+transport evidence. An idle lifecycle fault can qualify only with its declared
+case-specific action and terminal receipts. The pending-review, cancellation and
+late-allow boundaries are tested through the actual bundled engine and Observer;
+those fixture checks do not turn an incomplete native attempt into a pass.
 
 The collector captures the registered route's post-stop HTTP rejection or
 connection-refused outcomes using its old capabilities, without saving token
