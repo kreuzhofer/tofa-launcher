@@ -101,6 +101,28 @@ def request_shape(body, main, guardian):
 
 
 class LoopbackServer(http.server.ThreadingHTTPServer):
+    def __init__(self, *args, **kwargs):
+        self.connections = set()
+        self.connections_lock = threading.Lock()
+        super().__init__(*args, **kwargs)
+
+    def get_request(self):
+        connection, address = super().get_request()
+        with self.connections_lock: self.connections.add(connection)
+        return connection, address
+
+    def shutdown_request(self, request):
+        try: super().shutdown_request(request)
+        finally:
+            with self.connections_lock: self.connections.discard(request)
+
+    def close_connections(self):
+        # Include accepted clients still parsing headers, before authentication.
+        with self.connections_lock:
+            for connection in self.connections:
+                try: connection.shutdown(socket.SHUT_RDWR)
+                except OSError: pass
+
     def server_bind(self):
         # Numeric loopback listeners need no reverse DNS. HTTPServer's lookup
         # can stall startup before the watchdog or owned client starts.
@@ -236,8 +258,182 @@ def audit(body):
                 input_roles=[item.get('role') for item in body.get('input', [])])
 
 
+class DeclaredScope:
+    """One immutable private attempt declaration; request IDs are bound once."""
+    def __init__(self, run, path, digest, attempt, services):
+        self.run, self.path = Path(run).resolve(), Path(path)
+        self.digest = digest
+        if (not isinstance(digest, str) or not re.fullmatch(r'[0-9a-f]{64}', digest) or
+                not isinstance(attempt, str) or not re.fullmatch(r'[A-Za-z0-9._-]{1,128}', attempt) or
+                not self.path.is_absolute() or self.path.resolve().parent != self.run):
+            raise ValueError('invalid_scope_declaration')
+        raw = self.read()
+        def unique(pairs):
+            result = {}
+            for key, value in pairs:
+                if key in result: raise ValueError('duplicate_scope_field')
+                result[key] = value
+            return result
+        data = json.loads(raw, object_pairs_hook=unique)
+        if (not isinstance(data, dict) or set(data) - {'schema', 'attempt', 'root', 'threads', 'titles'} or
+                data.get('schema') != 'tofa-observer-scope-v1' or data.get('attempt') != attempt or
+                data.get('root') != str(self.run) or not isinstance(data.get('threads'), list) or
+                not isinstance(data.get('titles', []), list) or
+                len(data['threads']) > 8 or len(data.get('titles', [])) > 8 or
+                not data['threads'] and not data.get('titles')):
+            raise ValueError('invalid_scope_declaration')
+        self.states, self.titles = [], data.get('titles', [])
+        prompts, labels, identities = set(), set(), set()
+        total = 0
+        def prompt(value):
+            if (not isinstance(value, str) or not value.strip() or value.strip() != value or
+                    len(value.encode()) > 16384 or value in prompts):
+                raise ValueError('invalid_scope_prompt')
+            prompts.add(value)
+        for thread in data['threads']:
+            if not isinstance(thread, dict) or set(thread) != {'label', 'thread_id', 'workspace', 'initial_user_messages_sha256', 'turns'}:
+                raise ValueError('invalid_scope_thread')
+            label, identity = thread['label'], thread['thread_id']
+            initial, workspace = thread['initial_user_messages_sha256'], thread['workspace']
+            if not isinstance(label, str) or not re.fullmatch(r'[a-z][a-z0-9_-]{0,63}', label) or label in labels:
+                raise ValueError('invalid_scope_label')
+            labels.add(label)
+            if identity is not None:
+                if not self.identifier(identity) or identity in identities or not isinstance(initial, str) or not re.fullmatch(r'[0-9a-f]{64}', initial):
+                    raise ValueError('invalid_scope_existing_thread')
+                identities.add(identity)
+            elif initial is not None: raise ValueError('invalid_scope_initial_history')
+            if not isinstance(workspace, str) or not Path(workspace).is_absolute() or not Path(workspace).is_dir():
+                raise ValueError('invalid_scope_workspace')
+            workspace = Path(workspace).resolve()
+            if identity is None:
+                try: workspace.relative_to(self.run / 'workspace')
+                except ValueError: raise ValueError('scope_new_workspace_outside_run')
+            turns = thread['turns']
+            if not isinstance(turns, list) or not 1 <= len(turns) <= 16:
+                raise ValueError('invalid_scope_turns')
+            total += len(turns)
+            for turn in turns:
+                if (not isinstance(turn, dict) or set(turn) != {'model', 'service', 'prompt'} or
+                        not isinstance(turn['model'], str) or turn['model'] not in services or
+                        turn['service'] != services[turn['model']]):
+                    raise ValueError('invalid_scope_turn')
+                prompt(turn['prompt'])
+            self.states.append(dict(declaration=thread, workspace=str(workspace), thread_id=identity, last=-1, turns={}))
+        if total > 16: raise ValueError('scope_turn_limit')
+        for title in self.titles:
+            if not isinstance(title, dict) or set(title) != {'thread_id', 'prompt'} or not self.identifier(title['thread_id']):
+                raise ValueError('invalid_scope_title')
+            prompt(title['prompt'])
+        with open(self.run / 'scope-consumed.json', 'x', opener=lambda p, f: os.open(p, f, 0o600)) as output:
+            json.dump({'attempt': attempt, 'scope_sha256': digest}, output)
+
+    @staticmethod
+    def identifier(value):
+        return isinstance(value, str) and 0 < len(value) <= 256 and value.strip() == value and not any(ord(c) < 32 for c in value)
+
+    def read(self):
+        import stat
+        descriptor = os.open(self.path, os.O_RDONLY | os.O_NOFOLLOW)
+        with os.fdopen(descriptor, 'rb') as source:
+            info = os.fstat(source.fileno())
+            if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077 or info.st_size > 1024 * 1024:
+                raise ValueError('scope_file_not_private')
+            raw = source.read(1024 * 1024 + 1)
+        if hashlib.sha256(raw).hexdigest() != self.digest: raise ValueError('scope_declaration_drift')
+        return raw
+
+    @staticmethod
+    def user_text(item):
+        content = item.get('content')
+        if isinstance(content, str): return content
+        if (isinstance(content, list) and content and all(isinstance(part, dict) and
+                part.get('type') == 'input_text' and isinstance(part.get('text'), str) for part in content)):
+            return '\n'.join(part['text'] for part in content)
+        return None
+
+    def admit(self, body, kind):
+        self.read()
+        metadata = body.get('client_metadata', {})
+        base = {'declaration_sha256': self.digest, 'kind': kind}
+        if kind == 'auxiliary_title':
+            text = json.dumps(body['input'], ensure_ascii=False)
+            contexts = []
+            for state in self.states:
+                for entry in state['turns'].values():
+                    turn = state['declaration']['turns'][entry['index']]
+                    if json.dumps(turn['prompt'], ensure_ascii=False)[1:-1] in text:
+                        contexts.append({'prompt_sha256': hashed(turn['prompt'])['sha256'], 'main_observed': True})
+            for title in self.titles:
+                if json.dumps(title['prompt'], ensure_ascii=False)[1:-1] in text:
+                    contexts.append({'prompt_sha256': hashed(title['prompt'])['sha256'], 'main_observed': False,
+                        'intended_ui_thread_sha256': hashed(title['thread_id'])['sha256']})
+            if not contexts: raise ValueError('scope_title_context_unobserved')
+            return dict(base, contexts=contexts, parent_unverified=True,
+                        main_observed=all(context['main_observed'] for context in contexts))
+        thread = metadata.get('x-codex-parent-thread-id' if kind == 'guardian' else 'thread_id')
+        turn_id = metadata.get('parent_turn_id' if kind == 'guardian' else 'turn_id')
+        if not self.identifier(thread) or not self.identifier(turn_id): raise ValueError('scope_origin_missing')
+        state = next((state for state in self.states if state['thread_id'] == thread), None)
+        if kind == 'guardian':
+            if state is None or turn_id not in state['turns']: raise ValueError('scope_review_unobserved')
+            entry = state['turns'][turn_id]
+        else:
+            users = [item for item in body['input'] if item.get('role') == 'user']
+            text = self.user_text(users[-1]) if users else None
+            if state is None:
+                state = next((state for state in self.states if state['thread_id'] is None and
+                    state['declaration']['turns'][0]['prompt'] == text), None)
+            if state is None: raise ValueError('scope_thread_unavailable')
+            entry = state['turns'].get(turn_id)
+            user_hash = hashed(users)['sha256']
+            if entry is not None:
+                if entry['users'] != user_hash or entry['model'] != body['model']:
+                    raise ValueError('scope_turn_changed')
+            else:
+                index = state['last'] + 1
+                turns = state['declaration']['turns']
+                if index >= len(turns) or turns[index]['prompt'] != text or turns[index]['model'] != body['model']:
+                    raise ValueError('scope_turn_sequence')
+                user_texts = [self.user_text(item) for item in users]
+                workspaces = []
+                for value in user_texts:
+                    if value:
+                        workspaces.extend(re.findall(r'<cwd>([^<>\n]+)</cwd>', value))
+                        if Path(value).is_absolute() and '\n' not in value: workspaces.append(value)
+                if not any(str(Path(value).resolve()) == state['workspace'] for value in workspaces):
+                    raise ValueError('scope_workspace_missing')
+                preceding = hashed(users[:-1])['sha256']
+                if index:
+                    previous = next(entry for entry in state['turns'].values() if entry['index'] == index - 1)
+                    if preceding != previous['users']: raise ValueError('scope_history_changed')
+                elif state['declaration']['thread_id'] is not None:
+                    if preceding != state['declaration']['initial_user_messages_sha256']: raise ValueError('scope_initial_history_changed')
+                elif any(item.get('role') == 'assistant' or item.get('type') in
+                        ('function_call', 'function_call_output', 'custom_tool_call', 'custom_tool_call_output') for item in body['input']):
+                    raise ValueError('scope_new_thread_has_history')
+                state['thread_id'], state['last'] = thread, index
+                entry = {'index': index, 'users': user_hash, 'model': body['model']}
+                state['turns'][turn_id] = entry
+        return dict(base, label=state['declaration']['label'], turn_index=entry['index'],
+                    thread_sha256=hashed(thread)['sha256'], turn_sha256=hashed(turn_id)['sha256'],
+                    user_messages_sha256=entry['users'])
+
+    def persist(self):
+        threads = []
+        for state in self.states:
+            latest = next((entry for entry in state['turns'].values() if entry['index'] == state['last']), None)
+            threads.append({'label': state['declaration']['label'], 'thread_id': state['thread_id'],
+                'admitted_turns': state['last'] + 1, 'user_messages_sha256': latest['users'] if latest else None})
+        path = self.run / 'scope-state.tmp'
+        with open(path, 'w', opener=lambda p, f: os.open(p, f, 0o600)) as output:
+            json.dump({'declaration_sha256': self.digest, 'threads': threads}, output)
+        path.replace(self.run / 'scope-state.json')
+
+
 class Observer:
-    def __init__(self, run, *, model, guardian, limits, case='05', runtime_qualification=None, model_services=None):
+    def __init__(self, run, *, model, guardian, limits, case='05', runtime_qualification=None, model_services=None,
+                 scope_declaration=None, scope_sha256=None, scope_attempt=None):
         self.runtime_qualification = None
         if runtime_qualification is not None:
             evidence = runtime_qualification
@@ -255,6 +451,11 @@ class Observer:
                 for identity, service in model_services.items())):
             raise ValueError('invalid_observer_model_services')
         self.model_services = dict(model_services) if model_services is not None else {model: 'token_factory'}
+        self.scope = None
+        if scope_declaration is not None:
+            self.scope = DeclaredScope(self.run, scope_declaration, scope_sha256, scope_attempt, self.model_services)
+        elif scope_sha256 is not None or scope_attempt is not None:
+            raise ValueError('incomplete_scope_declaration')
         self.review_origins = {}
         self.secret = secrets.token_hex(32)
         self.endpoint = self.token = self.inference_token = None
@@ -301,8 +502,12 @@ class Observer:
                 control = self.path == '/register'
                 body = UNAVAILABLE
                 self.raw_request = None
+                if owner.done.is_set(): return
                 if not owner.authorized(self):
-                    self.reply(401, {'error': 'unauthorized'}); return
+                    try: self.reply(401, {'error': 'unauthorized'})
+                    except OSError:
+                        if not owner.done.is_set(): raise
+                    return
                 owner.request_secrets.values = (self.headers.get('Authorization', '').removeprefix('Bearer '),
                                                self.headers.get('ChatGPT-Account-Id', ''))
                 with owner.lock:
@@ -385,7 +590,7 @@ class Observer:
                 self.reply(200, {'ready': True})
 
         self.server = LoopbackServer(('127.0.0.1', 0), Handler)
-        self.server.daemon_threads = True
+        self.server.daemon_threads = False
         self.port = self.server.server_port
         self.url = 'http://127.0.0.1:' + str(self.port)
 
@@ -429,6 +634,7 @@ class Observer:
         temporary.write_text(json.dumps(self.records, indent=2) + '\n')
         temporary.chmod(0o600)
         temporary.replace(self.run / 'requests.json')
+        if self.scope: self.scope.persist()
 
     def reject(self, handler, reason, status, body=UNAVAILABLE, *, category=None,
                known_role=None, presentation_runtime=None):
@@ -510,7 +716,14 @@ class Observer:
                     if old is None and len(self.review_origins) >= 4096:
                         self.reject(handler, 'review_origin_capacity', 400, body); return
                     self.review_origins[origin] = service
-            if self.expected_prompt:
+            scope_record = None
+            if self.scope:
+                try:
+                    if self.authorization_version != 2: raise ValueError('scope_requires_split_authorization')
+                    scope_record = self.scope.admit(body, kind)
+                except (OSError, ValueError, TypeError, KeyError, AttributeError):
+                    self.reject(handler, 'scope_mismatch', 403, body); return
+            elif self.expected_prompt:
                 encoded_input = json.dumps(body['input'], ensure_ascii=False)
                 # Each run is a fresh workspace and conversation. The observer
                 # never admits an existing conversation merely because it uses
@@ -582,6 +795,7 @@ class Observer:
             record = dict(number=self.used, role=kind, model=body['model'], service=service, forwarded=True,
                           routed_model=NAMING_MODEL if kind == 'auxiliary_title' else body['model'],
                           audit=audit(body), completed=False, started_ms=self.elapsed())
+            if scope_record is not None: record['scope'] = scope_record
             if kind == 'main': record['instruction_variant_observed'] = self.expected_instructions is not None
             self.records.append(record)
             self.persist()
@@ -639,24 +853,27 @@ class Observer:
         stage = 'upstream_connect'
         try:
             connection.connect()
-            with self.lock: self.active.add(connection.sock)
             upstream_socket = connection.sock
-            if title_cancelled.is_set(): raise ConnectionAbortedError()
-            headers = {'Authorization': 'Bearer ' + self.token, 'Content-Type': 'application/json'}
-            if record is not None and self.authorization_version == 2:
-                headers.pop('Authorization')
-                if 'Authorization' in handler.headers:
-                    headers['Authorization'] = handler.headers['Authorization']
-                local_headers = ('X-TOFA-Launch', 'ChatGPT-Account-Id')
-                if record.get('service') == 'native': local_headers += NATIVE_PROTOCOL_HEADERS
-                for key in local_headers:
-                    if handler.headers.get(key): headers[key] = handler.headers[key]
-            if record is None:
-                for key in ('X-Tofa-Parent-Pid', 'X-Tofa-Main-Engine-Pid'):
-                    if handler.headers.get(key): headers[key] = handler.headers[key]
-            stage = 'upstream_send'
-            payload = handler.raw_request if record is not None and record.get('service') == 'native' else None if body is None else json.dumps(body)
-            connection.request(handler.command, handler.path, payload, headers)
+            with self.lock:
+                if self.reason or self.done.is_set() or title_cancelled.is_set():
+                    raise ConnectionAbortedError('observer_stopped')
+                if time.monotonic() >= self.deadline: raise TimeoutError()
+                self.active.add(upstream_socket)
+                headers = {'Authorization': 'Bearer ' + self.token, 'Content-Type': 'application/json'}
+                if record is not None and self.authorization_version == 2:
+                    headers.pop('Authorization')
+                    if 'Authorization' in handler.headers:
+                        headers['Authorization'] = handler.headers['Authorization']
+                    local_headers = ('X-TOFA-Launch', 'ChatGPT-Account-Id')
+                    if record.get('service') == 'native': local_headers += NATIVE_PROTOCOL_HEADERS
+                    for key in local_headers:
+                        if handler.headers.get(key): headers[key] = handler.headers[key]
+                if record is None:
+                    for key in ('X-Tofa-Parent-Pid', 'X-Tofa-Main-Engine-Pid'):
+                        if handler.headers.get(key): headers[key] = handler.headers[key]
+                stage = 'upstream_send'
+                payload = handler.raw_request if record is not None and record.get('service') == 'native' else None if body is None else json.dumps(body)
+                connection.request(handler.command, handler.path, payload, headers)
             stage = 'upstream_headers'
             response = connection.getresponse()
             if record is not None:
@@ -795,12 +1012,14 @@ class Observer:
 
     def stop(self, reason):
         with self.lock:
-            if self.reason: return
-            self.reason = reason
-            (self.run / 'stop-reason.txt').write_text(reason)
+            already_stopped = self.reason is not None
+            if not already_stopped:
+                self.reason = reason
+                (self.run / 'stop-reason.txt').write_text(reason)
             for stream in list(self.active):
                 try: stream.shutdown(socket.SHUT_RDWR)
                 except OSError: pass
+        if already_stopped: return
         if self.endpoint:
             target = urlsplit(self.endpoint)
             connection = http.client.HTTPConnection(target.hostname, target.port, timeout=1)
@@ -825,6 +1044,10 @@ class Observer:
             active = bool(self.active)
         if active: self.stop(self.reason or 'observer_closed')
         self.done.set()
-        self.server.shutdown(); self.server.server_close()
-        self.thread.join(); self.watchdog.join(timeout=2)
+        self.server.shutdown(); self.thread.join()
+        self.server.close_connections()
+        # Non-daemon request handlers own diagnostic writes. Join them before
+        # final persistence and before callers may remove the private run root.
+        self.server.server_close()
+        self.watchdog.join(timeout=2)
         with self.lock: self.persist()
