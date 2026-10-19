@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
 	"sync"
@@ -23,7 +24,7 @@ import (
 // config version without writing, then return an explicit override result. The
 // pinned renderer retains its requested selection locally on okOverridden and
 // supplies it when starting a thread. All other protocol traffic stays native.
-func runDesktopSettingsBridge(engine string, args, env []string, home string) error {
+func runDesktopSettingsBridge(engine string, args, env []string, home, inferenceCapability string) error {
 	configFile, err := filepath.EvalSymlinks(filepath.Join(home, "config.toml"))
 	if err != nil {
 		return errors.New("desktop model isolation could not resolve the ordinary configuration file")
@@ -78,6 +79,10 @@ func runDesktopSettingsBridge(engine string, args, env []string, home string) er
 	}
 	engineInput.Close()
 	engineOutput.Close()
+	if inferenceCapability != "" {
+		env = slices.DeleteFunc(env, func(entry string) bool { return strings.HasPrefix(entry, "TOFA_") })
+		env = append(env, nativeDesktopInferenceEnv+"="+inferenceCapability)
+	}
 	return syscall.Exec(engine, append([]string{engine}, args...), env)
 }
 

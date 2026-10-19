@@ -162,13 +162,13 @@ func runDesktopBridge(args []string) error {
 				merged = append(merged, "-c", value)
 			}
 			args = append(merged, args[end:]...)
-			return runDesktopSettingsBridge(owner.Engine, args, env, route.Home)
+			return runDesktopSettingsBridge(owner.Engine, args, env, route.Home, route.InferenceCapability)
 		}
 	} else {
 		// An ordinary invocation must not revive inactive Token Factory metadata
 		// using a bearer inherited from an earlier launch.
 		env = slices.DeleteFunc(env, func(entry string) bool {
-			return strings.HasPrefix(entry, "TOFA_API_KEY=") || strings.HasPrefix(entry, "TOFA_DESKTOP_INACTIVE=")
+			return strings.HasPrefix(entry, "TOFA_API_KEY=") || strings.HasPrefix(entry, "TOFA_DESKTOP_INACTIVE=") || strings.HasPrefix(entry, nativeDesktopInferenceEnv+"=")
 		})
 		// Saved ordinary references survive known bundle layout changes. Keep the
 		// recorded identity immutable; active launches use their own current bridge.

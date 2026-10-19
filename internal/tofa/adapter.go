@@ -27,13 +27,14 @@ import (
 const maxAdapterBody = 16 << 20
 
 type requestAdapter struct {
-	endpoint string
-	token    string
-	server   *http.Server
-	cancel   context.CancelFunc
-	context  context.Context
-	done     chan error
-	desktop  atomic.Pointer[desktopRoute]
+	endpoint       string
+	token          string
+	inferenceToken string
+	server         *http.Server
+	cancel         context.CancelFunc
+	context        context.Context
+	done           chan error
+	desktop        atomic.Pointer[desktopRoute]
 }
 
 func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, guardian string) (*requestAdapter, error) {
@@ -47,7 +48,7 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 	}
 	query := url.Values{"ai_project_id": {project}}
 	upstream.RawQuery = query.Encode()
-	secret := make([]byte, 32)
+	secret := make([]byte, 64)
 	if _, err := rand.Read(secret); err != nil {
 		return nil, errors.New("could not generate adapter credential")
 	}
@@ -60,7 +61,10 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 		return nil, errors.New("could not start loopback request adapter")
 	}
 	ctx, cancel := context.WithCancel(ctx)
-	adapter := &requestAdapter{endpoint: "http://" + listener.Addr().String(), token: hex.EncodeToString(secret), cancel: cancel, context: ctx, done: make(chan error, 1)}
+	adapter := &requestAdapter{endpoint: "http://" + listener.Addr().String(), token: hex.EncodeToString(secret[:32]), cancel: cancel, context: ctx, done: make(chan error, 1)}
+	if a.nativeAccountCandidate {
+		adapter.inferenceToken = hex.EncodeToString(secret[32:])
+	}
 	var noticeMu sync.Mutex
 	notice := func(message string) {
 		if selectedModel != "" {
@@ -120,7 +124,7 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 		ErrorLog:          log.New(io.Discard, "", 0),
 		BaseContext:       func(net.Listener) context.Context { return ctx },
 		Handler: http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-			if subtle.ConstantTimeCompare([]byte(request.Header.Get("Authorization")), []byte("Bearer "+adapter.token)) != 1 {
+			if !adapter.authorized(request) {
 				http.Error(writer, "request adapter: unauthorized", http.StatusUnauthorized)
 				return
 			}
@@ -695,4 +699,34 @@ func isApprovalReviewCandidate(payload map[string]json.RawMessage) bool {
 		delete(names, tool.Name)
 	}
 	return true
+}
+
+// Control and inference are distinct capabilities. Legacy bearer inference is
+// retained only for recorded nebius-tofa conversations, never for control.
+func (adapter *requestAdapter) authorized(request *http.Request) bool {
+	auth := request.Header.Values("Authorization")
+	headers := request.Header.Values("X-TOFA-Launch")
+	if len(auth) > 1 || len(headers) > 1 {
+		return false
+	}
+	equal := func(actual, want string) bool {
+		return len(actual) == len(want) && subtle.ConstantTimeCompare([]byte(actual), []byte(want)) == 1
+	}
+	if adapter.inferenceToken == "" {
+		return len(headers) == 0 && len(auth) == 1 && equal(auth[0], "Bearer "+adapter.token)
+	}
+	control := request.URL.Path == "/desktop-launch" || request.URL.Path == "/evaluation-stop"
+	if control {
+		return len(headers) == 0 && len(auth) == 1 && equal(auth[0], "Bearer "+adapter.token)
+	}
+	if len(headers) == 1 {
+		if len(auth) == 1 && (!strings.HasPrefix(auth[0], "Bearer ") || len(auth[0]) <= 7 || len(auth[0]) > 8192 || strings.ContainsAny(auth[0][7:], " \t\r\n,")) {
+			return false
+		}
+		if len(auth) == 1 && (equal(auth[0], "Bearer "+adapter.token) || equal(auth[0], "Bearer "+adapter.inferenceToken)) {
+			return false
+		}
+		return equal(headers[0], adapter.inferenceToken)
+	}
+	return len(auth) == 1 && equal(auth[0], "Bearer "+adapter.inferenceToken)
 }

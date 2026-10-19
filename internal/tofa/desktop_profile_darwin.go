@@ -74,8 +74,11 @@ type desktopConfigClient struct {
 	id      int
 }
 
-func openDesktopConfig(ctx context.Context, engine, home, profile, workspace, runtimeDir string) (*desktopConfigClient, error) {
+func openDesktopConfig(ctx context.Context, engine, home, profile, workspace, runtimeDir string, overrides ...string) (*desktopConfigClient, error) {
 	command := exec.CommandContext(ctx, engine, "app-server", "-c", "log_dir="+strconv.Quote(filepath.Join(runtimeDir, "logs")), "-c", "sqlite_home="+strconv.Quote(filepath.Join(runtimeDir, "state")))
+	for _, value := range overrides {
+		command.Args = append(command.Args, "-c", value)
+	}
 	command.Env, command.Dir = desktopEnv(home, profile, ""), workspace
 	input, err := command.StdinPipe()
 	if err != nil {

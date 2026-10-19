@@ -131,7 +131,7 @@ def overrides(args):
 def apply_overrides(values, args):
     for override in args:
         key,value=override.split('=',1)
-        values[key.strip()]=json.loads(value.strip())
+        values[key.strip()]=json.loads(value.strip().replace('"=', '":'))
 values = parse_config(config_text)
 apply_overrides(values, overrides(sys.argv))
 def setting(key):
@@ -141,6 +141,10 @@ def config_response():
     result['model_providers']={}
     provider={k.removeprefix('model_providers.nebius-tofa.'):v for k,v in values.items() if k.startswith('model_providers.nebius-tofa.')}
     if provider: result['model_providers']['nebius-tofa']=provider
+    router={k.removeprefix('model_providers.tofa-native-router.'):v for k,v in values.items() if k.startswith('model_providers.tofa-native-router.')}
+    if router: result['model_providers']['tofa-native-router']=router
+    policy={k.removeprefix('shell_environment_policy.'):v for k,v in values.items() if k.startswith('shell_environment_policy.')}
+    if policy: result['shell_environment_policy']=policy
     return result
 if 'app-server' in sys.argv:
     if MODE == 'slow-preflight' and not pathlib.Path(CAPTURE+'.resume').exists():
