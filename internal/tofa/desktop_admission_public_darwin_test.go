@@ -2,6 +2,7 @@ package tofa_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"github.com/kreuzhofer/tofa-launcher/internal/tofa"
 	"net/http"
@@ -158,5 +159,50 @@ func TestDesktopDeclaredCandidateEnforcesAdapterRequestBudget(t *testing.T) {
 	}
 	if forwarded.Load() != 2 {
 		t.Fatalf("upstream attempts=%d", forwarded.Load())
+	}
+}
+
+func TestDesktopDeclaredCandidateDetectsExactCatalogNumericDrift(t *testing.T) {
+	bundle, capture := nativeCandidateFixture(t)
+	app, _ := adapterFixture(t, nil, nil)
+	observer := declaredCandidateObserver(t, app, bundle)
+	cache := filepath.Join(os.Getenv("HOME"), ".codex/models_cache.json")
+	raw, _ := os.ReadFile(cache)
+	raw = bytes.Replace(raw, []byte(`100000`), []byte(`9007199254740992`), 1)
+	os.WriteFile(cache, raw, 0600)
+	// Freeze the large integer in a new read-only snapshot before changing only its last bit.
+	declarationPath := filepath.Join(filepath.Dir(observer), "declaration.json")
+	raw, _ = os.ReadFile(declarationPath)
+	var d map[string]json.RawMessage
+	json.Unmarshal(raw, &d)
+	var id struct {
+		Runtime string `json:"runtime_root"`
+		Harness string `json:"harness_root"`
+	}
+	json.Unmarshal(d["identity"], &id)
+	var output bytes.Buffer
+	old := app.Out
+	app.Out = &output
+	e := app.Run([]string{"desktop-qualification", "snapshot", "--app-bundle", bundle, "--runtime-root", id.Runtime, "--harness-root", id.Harness, "--source-revision", strings.Repeat("a", 40)})
+	app.Out = old
+	if e != nil {
+		t.Fatal(e)
+	}
+	var snapshot map[string]json.RawMessage
+	json.Unmarshal(output.Bytes(), &snapshot)
+	d["identity"] = snapshot["identity"]
+	raw, _ = json.Marshal(d)
+	os.WriteFile(declarationPath, raw, 0600)
+	raw, _ = os.ReadFile(cache)
+	raw = bytes.Replace(raw, []byte(`9007199254740992`), []byte(`9007199254740993`), 1)
+	os.WriteFile(cache, raw, 0600)
+	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
+	defer cancel()
+	e = app.RunContext(ctx, []string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--native-account-candidate", "--evaluation-observer", observer})
+	if e == nil || !strings.Contains(e.Error(), "mismatched") {
+		t.Fatalf("numeric drift admitted: %v", e)
+	}
+	if _, e := os.Stat(capture); !os.IsNotExist(e) {
+		t.Fatal("drift started native fixture")
 	}
 }

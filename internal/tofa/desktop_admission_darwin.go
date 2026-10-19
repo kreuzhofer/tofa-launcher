@@ -442,7 +442,7 @@ func admissionTree(root, engine, bridge, pluginFile string) (string, error) {
 				return e
 			}
 			var value map[string]any
-			if uniqueReviewJSON(raw, 0) != nil || json.Unmarshal(raw, &value) != nil {
+			if decodeAdmissionJSON(raw, &value) != nil {
 				return admissionError("MCP configuration invalid")
 			}
 			if e = normalizeDesktopReference(value, []string{"mcpServers", "cua_repl", "env", "CODEX_CLI_PATH"}, engine, bridge); e != nil {
@@ -561,7 +561,7 @@ func desktopCompatibilityIdentity(bundle desktopBundle, home, profile, bridge, r
 	var cache struct {
 		Models []map[string]any `json:"models"`
 	}
-	if json.Unmarshal(cacheBytes, &cache) != nil || len(cache.Models) == 0 {
+	if decodeAdmissionJSON(cacheBytes, &cache) != nil || len(cache.Models) == 0 {
 		return result, admissionError("native catalog identity invalid")
 	}
 	seen := map[string]bool{}
@@ -785,6 +785,19 @@ func validateAdmissionRuntime(root string) error {
 		if e != nil || !info.Mode().IsRegular() || !strings.HasSuffix(relative, "package.json") && info.Mode().Perm()&0111 == 0 {
 			return admissionError("required runtime executable unavailable")
 		}
+	}
+	return nil
+}
+
+// Preserve exact JSON numbers, including unknown future settings/descriptors.
+func decodeAdmissionJSON(raw []byte, target any) error {
+	if uniqueReviewJSON(raw, 0) != nil {
+		return admissionError("ambiguous JSON")
+	}
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.UseNumber()
+	if decoder.Decode(target) != nil || decoder.Decode(new(any)) != io.EOF {
+		return admissionError("invalid JSON")
 	}
 	return nil
 }

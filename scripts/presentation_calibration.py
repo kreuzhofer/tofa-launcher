@@ -156,6 +156,7 @@ def main():
     limits = {'seconds': 600, 'requests': 8, 'output_tokens': 4096}
     process = None
     termination = None
+    exited_before_stop = True
     records = []
     qualification_plan = None
     try:
@@ -202,7 +203,9 @@ def main():
                         while process.poll() is None and not observer.reason:
                             if qualification_plan:
                                 qualification.calibration_process(run, options.launcher, process, qualification.read(run/'before.json')['identity']['profile'])
-                            if (run / 'finish.request').exists(): observer.stop('operator_finished')
+                            if (run / 'finish.request').exists():
+                                exited_before_stop=process.poll() is not None
+                                observer.stop('operator_finished')
                             elif (run / 'cancel.request').exists(): observer.stop('operator_cancelled')
                             time.sleep(.1)
                 except subprocess.TimeoutExpired:
@@ -215,7 +218,7 @@ def main():
                         except subprocess.TimeoutExpired: os.killpg(process.pid, signal.SIGKILL); process.wait(timeout=5)
             records = observer.records
             termination = observer.reason
-            if qualification_plan: qualification.finish_calibration(run, qualification_plan, process, observer)
+        if qualification_plan: qualification.finish_calibration(run, qualification_plan, process, observer, exited_before_stop)
     except KeyboardInterrupt:
         state['failure'] = 'operator_cancelled'
         termination = 'operator_cancelled'

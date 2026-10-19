@@ -139,7 +139,7 @@ func TestDesktopNativeCandidateReviewOrigin(t *testing.T) {
 				}
 			}
 			e, child, stop := routedCandidateEngineGuardian(t, scenario.guardian, handler("tf"), handler("native"), func(t *testing.T) string {
-				if scenario.cancel || scenario.guardian != "" {
+				if scenario.guardian != "" {
 					return candidateProxyObserver(t)
 				}
 				observerConfig = actualCandidateObserver(t, map[string]string{"moonshotai/Kimi-K3": "token_factory", "gpt-6-astra": "native"})

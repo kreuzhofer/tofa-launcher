@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -249,7 +250,6 @@ func qualificationFixture(t *testing.T) (string, desktopAdmissionIdentity) {
 		stopRef := write(base, "route-stop.json", map[string]any{"schema": "tofa-native-account-route-stop-v1", "attempt": name, "launcher_pid": 10, "endpoint": "http://127.0.0.1:4321", "observed_utc": now, "inference": map[string]any{"http_status": 401, "socket_closed": false}, "control": map[string]any{"http_status": 401, "socket_closed": false}})
 		r.RouteStop = &stopRef
 		r.ProcessReceipt = write(base, "process.json", map[string]any{"schema": "tofa-native-account-process-v1", "launcher_pid": 10, "native_pid": 11, "launcher_sha256": id.Hashes["launcher"], "started_utc": now})
-		r.FinishReceipt = write(base, "finish.json", map[string]any{"schema": "tofa-native-account-finish-v1", "stop": r.Stop, "finished_utc": r.Finished, "exit_code": 0, "observer_stop": r.Stop, "observer_requests": len(r.Transport), "scope": "owned fixture only", "qualified": false})
 		if name == "native-crash" || name == "bridge-update" || name == "uninstall-reinstall" {
 			ref := write(base, "external.json", desktopAttributedInspection{Schema: "tofa-native-account-inspection-v1", Attempt: name, Operator: "fixture", Method: "retained_trace_review", Observed: now, Sources: r.Raw, Action: r.Stop, NativePID: 11, Outcome: "observed"})
 			r.ExternalAction = &ref
@@ -285,7 +285,14 @@ func qualificationFixture(t *testing.T) (string, desktopAdmissionIdentity) {
 			event.Request = write(base, "request-"+strconv.Itoa(event.Number)+".json", map[string]any{"model": event.OriginalModel, "client_metadata": metadata})
 			requests = append(requests, map[string]any{"number": event.Number, "role": role, "service": event.Service, "routed_model": event.Model, "model": event.OriginalModel, "status": event.HTTP, "completed": event.Completed, "forwarded": true, "failure": event.Failure})
 		}
-		r.FinishReceipt = write(base, "finish.json", map[string]any{"schema": "tofa-native-account-finish-v1", "stop": r.Stop, "finished_utc": r.Finished, "exit_code": 0, "observer_stop": r.Stop, "observer_requests": len(requests), "scope": "owned fixture only", "qualified": false})
+		exitCode := 0
+		if name == "launcher-crash" {
+			exitCode = -9
+		}
+		if name == "runtime-preview" {
+			requests = append(requests, map[string]any{"number": 1, "role": "main", "status": 200, "completed": true, "forwarded": false, "transport": "synthetic_observer", "final_answer": true})
+		}
+		r.FinishReceipt = write(base, "finish.json", map[string]any{"schema": "tofa-native-account-finish-v1", "stop": r.Stop, "finished_utc": r.Finished, "exit_code": exitCode, "observer_stop": r.Stop, "observer_requests": len(requests), "scope": "owned fixture only", "qualified": false, "stop_acknowledged": false, "process_exited_before_stop": true})
 		r.Requests = write(base, "requests.json", requests)
 		ref := write(base, "case.json", r)
 		ref.Path = name + "/" + ref.Path
@@ -449,5 +456,147 @@ func TestDesktopAdmissionTOMLBoundsAndSpecialFloats(t *testing.T) {
 	raw := "unused=" + strings.Repeat("[", 70) + "0" + strings.Repeat("]", 70)
 	if _, e := normalizeDesktopConfig([]byte(raw), "engine", ""); e == nil {
 		t.Fatal("excessive nesting admitted")
+	}
+}
+
+func TestDesktopAdmissionMCPNumbersRetainExactUnknownInteger(t *testing.T) {
+	root := t.TempDir()
+	path := filepath.Join(root, ".mcp.json")
+	put := func(number string) string {
+		os.WriteFile(path, []byte(`{"mcpServers":{"cua_repl":{"env":{"CODEX_CLI_PATH":"/engine"},"unknown":`+number+`}}}`), 0600)
+		hash, e := admissionTree(root, "/engine", "", path)
+		if e != nil {
+			t.Fatal(e)
+		}
+		return hash
+	}
+	if put("9007199254740992") == put("9007199254740993") {
+		t.Fatal("unknown integer drift hidden")
+	}
+}
+
+func TestDesktopAdmissionRejectsTerminalFailureAndUnreportedLedger(t *testing.T) {
+	for _, fault := range []string{"observer failure", "exit failure", "omitted failed request", "omitted successful request"} {
+		t.Run(fault, func(t *testing.T) {
+			path, id := qualificationFixture(t)
+			base := filepath.Dir(path)
+			raw, _ := os.ReadFile(path)
+			var proof desktopQualificationProof
+			json.Unmarshal(raw, &proof)
+			ref := proof.Cases["clean-exit"]
+			casePath := filepath.Join(base, ref.Path)
+			caseBase := filepath.Dir(casePath)
+			raw, _ = os.ReadFile(casePath)
+			var r desktopQualificationCase
+			json.Unmarshal(raw, &r)
+			finishPath := filepath.Join(caseBase, r.FinishReceipt.Path)
+			raw, _ = os.ReadFile(finishPath)
+			var finish map[string]any
+			json.Unmarshal(raw, &finish)
+			switch fault {
+			case "observer failure":
+				finish["observer_stop"] = "scope_mismatch"
+			case "exit failure":
+				finish["exit_code"] = 1
+			default:
+				requests := []any{map[string]any{"number": 1, "role": "main", "status": 200, "completed": true, "forwarded": true}}
+				if fault == "omitted failed request" {
+					requests[0].(map[string]any)["failure"] = "request_budget_limit"
+				}
+				raw, _ = json.Marshal(requests)
+				os.WriteFile(filepath.Join(caseBase, r.Requests.Path), raw, 0600)
+				r.Requests.SHA256 = digestBytes(raw)
+				finish["observer_requests"] = 1
+			}
+			raw, _ = json.Marshal(finish)
+			os.WriteFile(finishPath, raw, 0600)
+			r.FinishReceipt.SHA256 = digestBytes(raw)
+			raw, _ = json.Marshal(r)
+			os.WriteFile(casePath, raw, 0600)
+			ref.SHA256 = digestBytes(raw)
+			proof.Cases["clean-exit"] = ref
+			raw, _ = json.Marshal(proof)
+			os.WriteFile(path, raw, 0600)
+			if _, e := readDesktopProof(path, id); e == nil {
+				t.Fatal("failed or omitted outcome admitted")
+			}
+		})
+	}
+}
+
+func TestDesktopAdmissionConsumesSmokeGeneratedWithOrdinaryUmask(t *testing.T) {
+	path, id := qualificationFixture(t)
+	base := filepath.Join(filepath.Dir(path), "runtime-preview")
+	raw, _ := os.ReadFile(filepath.Join(base, "case.json"))
+	var record desktopQualificationCase
+	json.Unmarshal(raw, &record)
+	seed := filepath.Join(base, "seed")
+	os.Mkdir(seed, 0700)
+	for _, name := range []string{"deck.pptx", "deck.pdf", "slide.png"} {
+		raw, _ = os.ReadFile(filepath.Join(base, "workspace/output", name))
+		os.WriteFile(filepath.Join(seed, name), raw, 0600)
+	}
+	raw, _ = os.ReadFile(filepath.Join(base, "workspace/build/finalization.json"))
+	os.WriteFile(filepath.Join(seed, "finalization.json"), raw, 0600)
+	os.WriteFile(filepath.Join(seed, "loader.json"), []byte(`{}`), 0600)
+	os.RemoveAll(filepath.Join(base, "workspace/build"))
+	os.RemoveAll(filepath.Join(base, "workspace/output"))
+	// Real collector runs under normal022. Only its supplied executables are owned fixtures.
+	command := exec.Command("python3", "../../scripts/fixtures/smoke_permission_fixture.py", filepath.Join(base, "workspace"), id.Runtime, seed)
+	output, e := command.CombinedOutput()
+	if e != nil {
+		t.Fatalf("smoke fixture: %v: %s", e, output)
+	}
+	for name, version := range record.Runtime.Versions {
+		version.SHA256, _ = hashAdmissionFile(version.Path)
+		record.Runtime.Versions[name] = version
+	}
+	raw, _ = json.Marshal(map[string]any{"exit_code": 0, "output": string(output)})
+	os.WriteFile(filepath.Join(base, "smoke-result.json"), raw, 0600)
+	record.Runtime.Smoke.SHA256 = digestBytes(raw)
+	if e := validateDesktopRuntimeEvidence(base, record); e != nil {
+		t.Fatal(e)
+	}
+}
+
+func TestDesktopAdmissionNormalStopExitOneRequiresOwnedAcknowledgment(t *testing.T) {
+	for _, test := range []struct {
+		name               string
+		ack, alreadyExited bool
+		want               bool
+	}{{"acknowledged live stop", true, false, true}, {"unacknowledged stop", false, false, false}, {"already failed", true, true, false}} {
+		t.Run(test.name, func(t *testing.T) {
+			path, id := qualificationFixture(t)
+			base := filepath.Dir(path)
+			raw, _ := os.ReadFile(path)
+			var proof desktopQualificationProof
+			json.Unmarshal(raw, &proof)
+			ref := proof.Cases["clean-exit"]
+			casePath := filepath.Join(base, ref.Path)
+			caseBase := filepath.Dir(casePath)
+			raw, _ = os.ReadFile(casePath)
+			var r desktopQualificationCase
+			json.Unmarshal(raw, &r)
+			finishPath := filepath.Join(caseBase, r.FinishReceipt.Path)
+			raw, _ = os.ReadFile(finishPath)
+			var finish map[string]any
+			json.Unmarshal(raw, &finish)
+			finish["exit_code"] = 1
+			finish["stop_acknowledged"] = test.ack
+			finish["process_exited_before_stop"] = test.alreadyExited
+			raw, _ = json.Marshal(finish)
+			os.WriteFile(finishPath, raw, 0600)
+			r.FinishReceipt.SHA256 = digestBytes(raw)
+			raw, _ = json.Marshal(r)
+			os.WriteFile(casePath, raw, 0600)
+			ref.SHA256 = digestBytes(raw)
+			proof.Cases["clean-exit"] = ref
+			raw, _ = json.Marshal(proof)
+			os.WriteFile(path, raw, 0600)
+			_, e := readDesktopProof(path, id)
+			if (e == nil) != test.want {
+				t.Fatalf("admitted=%v want=%v error=%v", e == nil, test.want, e)
+			}
+		})
 	}
 }

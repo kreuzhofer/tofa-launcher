@@ -79,6 +79,25 @@ class QualificationTests(unittest.TestCase):
             with patch.object(q,'ROOT',root), patch.object(q,'snapshot',return_value={**frozen,'identity':{'source_revision':'b'*40}}), self.assertRaisesRegex(ValueError,'identity_drift'):
                 q.prepare_calibration(run,options,{'seconds':600,'requests':8})
 
+    def test_finish_preserves_prior_failure_and_drains_before_receipts(self):
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory() as temporary:
+            run=Path(temporary)
+            class Observer:
+                reason='scope_mismatch';records=[];stop_acknowledged=True
+                def __exit__(self,*unused):
+                    self.records.append({'failure':'scope_mismatch'})
+                    q.save(run/'requests.json',self.records)
+            observer=Observer();process=SimpleNamespace(returncode=1,pid=123)
+            with patch.object(q,'snapshot',return_value={'identity':{},'protected':{}}),patch.object(q,'probe_stopped_route'):
+                q.finish_collection(run,{},process,observer,'operator_finished',False)
+            finish=q.read(run/'finish.json')
+            self.assertEqual(finish['stop'],'scope_mismatch')
+            self.assertEqual(finish['observer_stop'],'scope_mismatch')
+            self.assertEqual(finish['observer_requests'],1)
+            self.assertEqual(len(q.read(run/'requests.json')),1)
+            self.assertFalse(finish['qualified'])
+
     def test_record_uses_immutable_receipts_and_never_grants_pass(self):
         from types import SimpleNamespace
         with tempfile.TemporaryDirectory() as temporary:

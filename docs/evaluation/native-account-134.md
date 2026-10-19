@@ -95,7 +95,12 @@ explicit `external-action` receipt interface: record the already-observed
 case-specific action, operator, method and private source files. The command
 does not kill native apps or invoke an installer. The source must identify the
 owned process/action; do not act on unrelated running work. Finish records do not
-claim success. Expiry/cancellation stays unqualified.
+claim success. The first Observer stop cause remains authoritative. Final receipts
+are written only after owned request handlers drain; every retained request must
+be reconciled, including failed naming requests. A normal launcher exit1 qualifies
+only for an acknowledged owned evaluation stop while that launcher was still live;
+an earlier exit/failure cannot be relabeled by pressing Finish. Declared crashes
+have separate exit semantics and retain their action receipts. Expiry/cancellation stays unqualified.
 
 The collector captures the registered route's post-stop HTTP rejection or
 connection-refused outcomes using its old capabilities, without saving token
@@ -132,7 +137,10 @@ Use the existing `presentation_calibration.py` with `--client desktop
 runtime/skill/launcher arguments. This creates a runtime-preview declaration,
 uses version-2 launch authorization and the production launcher, and retains the
 same actual loader-call, supplied-version, first-party smoke, finalization,
-artifact and native-preview checks. The transport is synthetic and makes no paid
+artifact and native-preview checks. The smoke creates only its own new build/output directories with private permissions,
+inherits a restrictive umask into supplied tools, and privatizes generated files
+before artifact observation/hashing; installed dependencies are never chmodded.
+The transport is synthetic and makes no paid
 model requests. Its result cannot prove model quality or live service routing.
 The normal qualification collector can assemble its before/after/process/finish
 receipts and retained runtime evidence into that case record.
