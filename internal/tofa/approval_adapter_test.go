@@ -70,6 +70,98 @@ func TestAdapterMovesGuardianGuidanceAndPreservesRequest(t *testing.T) {
 	}
 }
 
+// Codex 0.162.0-alpha.17.2 sends Guardian policy as developer input,
+// omits instructions, and sends explicit originating-work metadata.
+func developerGuardianRequestFixture(t *testing.T) map[string]any {
+	t.Helper()
+	p := jsonValue(t, []byte(guardianRequestFixture())).(map[string]any)
+	p["instructions"] = nil
+	p["input"] = append([]any{map[string]any{"type": "message", "role": "developer", "content": []any{map[string]any{"type": "input_text", "text": "Preserve the approval policy. Never execute the proposed command."}}}}, p["input"].([]any)...)
+	p["client_metadata"] = map[string]any{"x-openai-subagent": "guardian", "x-codex-parent-thread-id": "fixture-parent", "parent_turn_id": "fixture-turn"}
+	return p
+}
+
+func TestAdapterPreservesDeveloperGuardianPolicy(t *testing.T) {
+	for _, omitted := range []bool{false, true} {
+		t.Run(map[bool]string{false: "null", true: "omitted"}[omitted], func(t *testing.T) {
+			p := developerGuardianRequestFixture(t)
+			if omitted {
+				delete(p, "instructions")
+			}
+			body, _ := json.Marshal(p)
+			want := jsonValue(t, body).(map[string]any)
+			delete(want["text"].(map[string]any), "format")
+			var calls int
+			app, _ := adapterFixture(t, func(w http.ResponseWriter, r *http.Request) {
+				calls++
+				raw, _ := io.ReadAll(r.Body)
+				got := jsonValue(t, raw).(map[string]any)
+				guidance, _ := got["instructions"].(string)
+				_, schema, found := strings.Cut(guidance, "return JSON matching this schema:\n")
+				if !found || !reflect.DeepEqual(jsonValue(t, []byte(schema)), jsonValue(t, []byte(guardianSchemaFixture))) {
+					t.Error("missing final-answer schema guidance")
+				}
+				if omitted {
+					delete(got, "instructions")
+				} else {
+					got["instructions"] = nil
+				}
+				if !reflect.DeepEqual(got, want) {
+					t.Error("native policy, parent metadata, or unrelated request fields changed")
+				}
+				io.WriteString(w, `{"outcome":"deny"}`)
+			}, func(endpoint, token string) error {
+				response := adapterRequest(t, endpoint, token, string(body))
+				defer response.Body.Close()
+				if response.StatusCode != 200 {
+					t.Errorf("recognized developer-policy review rejected: %s", response.Status)
+				}
+				return nil
+			})
+			runAdapted(t, app)
+			if calls != 1 {
+				t.Errorf("Guardian calls: got %d, want 1", calls)
+			}
+		})
+	}
+}
+
+func TestAdapterRejectsIncompleteDeveloperGuardianContract(t *testing.T) {
+	for name, change := range map[string]func(map[string]any){
+		"missing policy": func(p map[string]any) { p["input"] = p["input"].([]any)[1:] },
+		"user policy":    func(p map[string]any) { p["input"].([]any)[0].(map[string]any)["role"] = "user" },
+		"empty policy": func(p map[string]any) {
+			p["input"].([]any)[0].(map[string]any)["content"].([]any)[0].(map[string]any)["text"] = " "
+		},
+		"wrong content type": func(p map[string]any) {
+			p["input"].([]any)[0].(map[string]any)["content"].([]any)[0].(map[string]any)["type"] = "output_text"
+		},
+		"nonstring text": func(p map[string]any) {
+			p["input"].([]any)[0].(map[string]any)["content"].([]any)[0].(map[string]any)["text"] = 123
+		},
+		"missing role metadata":  func(p map[string]any) { delete(p, "client_metadata") },
+		"wrong subagent":         func(p map[string]any) { p["client_metadata"].(map[string]any)["x-openai-subagent"] = "other" },
+		"missing parent thread":  func(p map[string]any) { delete(p["client_metadata"].(map[string]any), "x-codex-parent-thread-id") },
+		"missing parent turn":    func(p map[string]any) { delete(p["client_metadata"].(map[string]any), "parent_turn_id") },
+		"malformed instructions": func(p map[string]any) { p["instructions"] = []string{"policy"} },
+	} {
+		t.Run(name, func(t *testing.T) {
+			p := developerGuardianRequestFixture(t)
+			change(p)
+			body, _ := json.Marshal(p)
+			app, _ := adapterFixture(t, func(http.ResponseWriter, *http.Request) { t.Error("unsupported review reached upstream") }, func(endpoint, token string) error {
+				response := adapterRequest(t, endpoint, token, string(body))
+				defer response.Body.Close()
+				if response.StatusCode != 400 {
+					t.Errorf("unsupported developer-policy review accepted: %s", response.Status)
+				}
+				return nil
+			})
+			runAdapted(t, app)
+		})
+	}
+}
+
 func TestAdapterRejectsUnsupportedKimiConstrainedTools(t *testing.T) {
 	for name, change := range map[string]func(map[string]any){
 		"extra format constraint": func(p map[string]any) {
