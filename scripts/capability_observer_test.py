@@ -539,5 +539,170 @@ class BoundaryTests(unittest.TestCase):
             connection.close()
 
 
+class SplitAuthorizationTests(unittest.TestCase):
+    control = 'c' * 64
+    inference = 'a' * 64
+    native = 'synthetic-native-credential'
+
+    @contextmanager
+    def boundary(self, observer_type=Observer, response=None, **options):
+        seen = []
+        class Adapter(http.server.BaseHTTPRequestHandler):
+            def log_message(self, *unused): pass
+            def do_GET(self): self.respond()
+            def do_POST(self): self.respond()
+            def respond(self):
+                raw = self.rfile.read(int(self.headers.get('Content-Length', 0)))
+                seen.append((self.path, dict(self.headers), json.loads(raw) if raw else None))
+                if response and self.path == '/responses':
+                    response(self); return
+                self.send_response(200); self.end_headers()
+                if self.path == '/responses':
+                    event = {'type': 'response.completed', 'response': {'model': 'moonshotai/Kimi-K3', 'output': []}}
+                    self.wfile.write(('data: ' + json.dumps(event) + '\n\n').encode())
+                else: self.wfile.write(b'{}')
+        adapter = LoopbackServer(('127.0.0.1', 0), Adapter)
+        threading.Thread(target=adapter.serve_forever, daemon=True).start()
+        try:
+            with tempfile.TemporaryDirectory() as directory:
+                run = Path(directory); (run / 'workspace').mkdir()
+                with observer_type(run, model='moonshotai/Kimi-K3', guardian='zai-org/GLM-5.3-Flash',
+                        limits={'seconds': 180, 'requests': 12, 'output_tokens': 4096}, **options) as observer:
+                    registration = {'version': 2, 'endpoint': 'http://127.0.0.1:' + str(adapter.server_port),
+                                    'control_token': self.control, 'inference_token': self.inference}
+                    yield observer, seen, registration
+        finally:
+            adapter.shutdown(); adapter.server_close()
+
+    def request(self, observer, path, headers, body=None, method='POST', raw=None):
+        connection = http.client.HTTPConnection('127.0.0.1', observer.port, timeout=3)
+        try:
+            payload = raw if raw is not None else json.dumps(body) if body is not None else b''
+            connection.putrequest(method, path)
+            for key, value in headers: connection.putheader(key, value)
+            connection.putheader('Content-Length', str(len(payload.encode() if isinstance(payload, str) else payload)))
+            connection.endheaders(payload.encode() if isinstance(payload, str) else payload)
+            response = connection.getresponse()
+            return response.status, response.read()
+        finally: connection.close()
+
+    def register(self, observer, registration):
+        status, data = self.request(observer, '/register', [('Authorization', 'Bearer ' + observer.secret)], registration)
+        self.assertEqual(status, 200, data)
+
+    def test_native_and_legacy_inference_preserve_separate_control_authority(self):
+        with self.boundary() as (observer, seen, registration):
+            self.register(observer, registration)
+            body = {'model': 'moonshotai/Kimi-K3', 'stream': True, 'input': [], 'tools': []}
+            status, data = self.request(observer, '/responses', [
+                ('Authorization', 'Bearer ' + self.native), ('X-TOFA-Launch', self.inference),
+                ('ChatGPT-Account-Id', 'synthetic-account')], body)
+            self.assertEqual(status, 200, data)
+            self.assertEqual(seen[0][1]['Authorization'], 'Bearer ' + self.native)
+            self.assertEqual(seen[0][1]['X-TOFA-Launch'], self.inference)
+            self.assertEqual(seen[0][1]['ChatGPT-Account-Id'], 'synthetic-account')
+            status, data = self.request(observer, '/responses', [('Authorization', 'Bearer ' + self.inference)], body)
+            self.assertEqual(status, 200, data)
+            self.assertEqual(seen[1][1]['Authorization'], 'Bearer ' + self.inference)
+            self.assertNotIn('X-TOFA-Launch', seen[1][1])
+            status, data = self.request(observer, '/desktop-launch', [('Authorization', 'Bearer ' + self.control),
+                ('X-Tofa-Parent-Pid', '123')], method='GET')
+            self.assertEqual(status, 200, data)
+            self.assertEqual(seen[2][1]['Authorization'], 'Bearer ' + self.control)
+            self.assertEqual(seen[2][1]['X-Tofa-Parent-Pid'], '123')
+            observer.stop('operator_finished')
+            self.assertEqual(seen[3][0], '/evaluation-stop')
+            self.assertEqual(seen[3][1]['Authorization'], 'Bearer ' + self.control)
+            retained = ''.join(p.read_text() for p in observer.run.iterdir() if p.is_file())
+            for secret in (self.control, self.inference, self.native, 'synthetic-account'):
+                self.assertNotIn(secret, retained)
+
+    def test_launch_capabilities_cannot_cross_scopes_or_use_ambiguous_headers(self):
+        with self.boundary() as (observer, seen, registration):
+            self.register(observer, registration)
+            bearer = lambda token: ('Authorization', 'Bearer ' + token)
+            launch = ('X-TOFA-Launch', self.inference)
+            attempts = [
+                ('POST', '/responses', [bearer(self.native)]),
+                ('POST', '/responses', [bearer(self.control)]),
+                ('POST', '/responses', [bearer(observer.secret)]),
+                ('POST', '/responses', [('Authorization', 'Bearer '), launch]),
+                ('POST', '/responses', [bearer(self.native), ('X-TOFA-Launch', 'wrong')]),
+                ('POST', '/responses', [bearer(self.control), launch]),
+                ('POST', '/responses', [bearer(self.native), launch, launch]),
+                ('POST', '/responses', [bearer(self.native), bearer('other'), launch]),
+                ('POST', '/responses', [bearer('x' * 8193), launch]),
+                ('POST', '/responses', [bearer(self.native), launch,
+                                       ('ChatGPT-Account-Id', 'one'), ('ChatGPT-Account-Id', 'two')]),
+                ('GET', '/responses', [bearer(self.native), launch]),
+                ('POST', '/responses?control=1', [bearer(self.native), launch]),
+                ('POST', '/desktop-launch', [bearer(self.control)]),
+                ('GET', '/desktop-launch', [bearer(self.native), launch]),
+                ('GET', '/desktop-launch', [bearer(self.inference)]),
+                ('GET', '/desktop-launch', [bearer(self.control), launch]),
+                ('POST', '/evaluation-stop', [bearer(self.inference)]),
+                ('POST', '/evaluation-stop', [bearer(self.control)]),
+                ('GET', '/register', [bearer(observer.secret)]),
+            ]
+            for method, path, headers in attempts:
+                with self.subTest(method=method, path=path, header_names=[name for name, _ in headers]):
+                    status, data = self.request(observer, path, headers, {'model': 'moonshotai/Kimi-K3', 'input': []}, method)
+                    self.assertEqual(status, 401, data)
+            self.assertEqual(seen, [])
+            self.assertEqual(observer.records, [])
+
+    def test_registration_is_bounded_exact_and_cannot_be_replaced(self):
+        changes = [
+            {'version': True}, {'version': 3}, {'version': 1},
+            {'control_token': 'short'}, {'inference_token': 'g' * 64},
+            {'inference_token': self.control}, {'token': 'legacy-extra'},
+            {'endpoint': 'http://127.0.0.1:80/'}, {'endpoint': 'http://localhost:80'},
+            {'endpoint': 'http://127.0.0.1:70000'}, {'endpoint': 'http://user@127.0.0.1:80'},
+        ]
+        for change in changes:
+            with self.subTest(fields=list(change)), self.boundary() as (observer, seen, registration):
+                registration.update(change)
+                status, data = self.request(observer, '/register', [('Authorization', 'Bearer ' + observer.secret)], registration)
+                self.assertEqual(status, 400, data)
+                self.assertEqual(seen, [])
+        for shape in ('duplicate', 'oversized'):
+            with self.subTest(shape=shape), self.boundary() as (observer, seen, registration):
+                raw = json.dumps(registration)
+                raw = raw[:-1] + ', "version": 2}' if shape == 'duplicate' else raw + ' ' * 4096
+                status, data = self.request(observer, '/register', [('Authorization', 'Bearer ' + observer.secret)], raw=raw)
+                self.assertEqual(status, 400, data)
+                self.assertEqual(seen, [])
+        with self.boundary() as (observer, seen, registration):
+            self.register(observer, registration)
+            registration['endpoint'] = 'http://127.0.0.1:1'
+            status, data = self.request(observer, '/register', [('Authorization', 'Bearer ' + observer.secret)], registration)
+            self.assertEqual(status, 409, data)
+            status, data = self.request(observer, '/desktop-launch', [('Authorization', 'Bearer ' + self.control)], method='GET')
+            self.assertEqual(status, 200, data)
+            self.assertEqual(len(seen), 1)
+
+    def test_inference_capability_is_independent_of_native_authentication(self):
+        with self.boundary() as (observer, seen, registration):
+            self.register(observer, registration)
+            status, data = self.request(observer, '/responses', [('X-TOFA-Launch', self.inference)],
+                {'model': 'moonshotai/Kimi-K3', 'stream': True, 'input': [], 'tools': []})
+            self.assertEqual(status, 200, data)
+            self.assertNotIn('Authorization', seen[0][1])
+            self.assertEqual(seen[0][1]['X-TOFA-Launch'], self.inference)
+
+    def test_reflected_native_credentials_never_enter_retained_diagnostics(self):
+        def broken(handler):
+            handler.wfile.write(('reflected ' + self.native + ' ' + self.control + ' ' + self.inference + '\r\n\r\n').encode())
+        with self.boundary(response=broken) as (observer, _, registration):
+            self.register(observer, registration)
+            with self.assertRaises(http.client.RemoteDisconnected):
+                self.request(observer, '/responses', [('Authorization', 'Bearer ' + self.native),
+                    ('X-TOFA-Launch', self.inference)], {'model': 'moonshotai/Kimi-K3', 'stream': True, 'input': [], 'tools': []})
+            retained = ''.join(p.read_text() for p in observer.run.iterdir() if p.is_file())
+            self.assertIn('BadStatusLine', retained)
+            for secret in (self.native, self.control, self.inference):
+                self.assertNotIn(secret, retained)
+
+
 if __name__ == '__main__':
     unittest.main()
