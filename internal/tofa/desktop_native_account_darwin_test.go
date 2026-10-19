@@ -503,7 +503,7 @@ func actualCandidateObserver(t *testing.T, serviceMaps ...map[string]string) str
 	return actualCandidateObserverBudget(t, services, 10)
 }
 
-func actualCandidateObserverBudget(t *testing.T, services map[string]string, requests int) string {
+func actualCandidateObserverBudget(t *testing.T, services map[string]string, requests int, scopes ...map[string]any) string {
 	t.Helper()
 	scripts, err := filepath.Abs("../../scripts")
 	if err != nil {
@@ -511,12 +511,18 @@ func actualCandidateObserverBudget(t *testing.T, services map[string]string, req
 	}
 	run := t.TempDir()
 	config := filepath.Join(run, "observer.json")
-	driver := `import json,sys
+	driver := `import hashlib,json,sys
 from pathlib import Path
 sys.path.insert(0,sys.argv[1])
 from capability_observer import Observer
-run=Path(sys.argv[2]);(run/'workspace').mkdir()
-with Observer(run,model='moonshotai/Kimi-K3',guardian='zai-org/GLM-5.3-Flash',limits={'seconds':600,'requests':int(sys.argv[4]),'output_tokens':4096},model_services=json.loads(sys.argv[3])) as observer:
+run=Path(sys.argv[2]).resolve();(run/'workspace').mkdir()
+options={}
+if len(sys.argv)>5:
+ scope=json.loads(sys.argv[5]);scope.update(root=str(run),attempt=run.name)
+ for thread in scope['threads']: thread['workspace']=str(run/'workspace')
+ path=run/'scope.json';raw=json.dumps(scope).encode();path.write_bytes(raw);path.chmod(0o600)
+ options=dict(scope_declaration=path,scope_sha256=hashlib.sha256(raw).hexdigest(),scope_attempt=run.name)
+with Observer(run,**options,model='moonshotai/Kimi-K3',guardian='zai-org/GLM-5.3-Flash',limits={'seconds':600,'requests':int(sys.argv[4]),'output_tokens':4096},model_services=json.loads(sys.argv[3])) as observer:
  config=run/'observer.json'
  config.write_text(json.dumps({'version':2,'endpoint':observer.url,'secret':observer.secret,'seconds':600}))
  config.chmod(0o600)
@@ -525,7 +531,12 @@ with Observer(run,model='moonshotai/Kimi-K3',guardian='zai-org/GLM-5.3-Flash',li
 `
 	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
 	declaration, _ := json.Marshal(services)
-	command := exec.CommandContext(ctx, "python3", "-B", "-c", driver, scripts, run, string(declaration), strconv.Itoa(requests))
+	arguments := []string{"-B", "-c", driver, scripts, run, string(declaration), strconv.Itoa(requests)}
+	if len(scopes) > 0 {
+		scope, _ := json.Marshal(scopes[0])
+		arguments = append(arguments, string(scope))
+	}
+	command := exec.CommandContext(ctx, "python3", arguments...)
 	input, err := command.StdinPipe()
 	if err != nil {
 		t.Fatal(err)
