@@ -20,11 +20,12 @@ import (
 )
 
 type evaluationObserver struct {
-	Version             int                `json:"version"`
-	Endpoint            string             `json:"endpoint"`
-	Secret              string             `json:"secret"`
-	Seconds             int                `json:"seconds"`
-	PresentationRuntime *evaluationRuntime `json:"presentation_runtime,omitempty"`
+	QualificationDeclaration string             `json:"qualification_declaration,omitempty"`
+	Version                  int                `json:"version"`
+	Endpoint                 string             `json:"endpoint"`
+	Secret                   string             `json:"secret"`
+	Seconds                  int                `json:"seconds"`
+	PresentationRuntime      *evaluationRuntime `json:"presentation_runtime,omitempty"`
 }
 
 type evaluationRuntime struct {
@@ -88,7 +89,11 @@ func (a *App) evaluationContext(ctx context.Context, path string) (*App, context
 	}
 	defer file.Close()
 	var config evaluationObserver
-	decoder := json.NewDecoder(io.LimitReader(file, 4097))
+	raw, err := io.ReadAll(io.LimitReader(file, 4097))
+	if err != nil || len(raw) > 4096 || uniqueReviewJSON(raw, 0) != nil {
+		return nil, nil, nil, errors.New("invalid evaluation observer configuration")
+	}
+	decoder := json.NewDecoder(bytes.NewReader(raw))
 	decoder.DisallowUnknownFields()
 	if decoder.Decode(&config) != nil || decoder.Decode(new(any)) != io.EOF {
 		return nil, nil, nil, errors.New("invalid evaluation observer configuration")

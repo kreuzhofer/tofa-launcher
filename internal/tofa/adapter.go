@@ -62,7 +62,7 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 	}
 	ctx, cancel := context.WithCancel(ctx)
 	adapter := &requestAdapter{endpoint: "http://" + listener.Addr().String(), token: hex.EncodeToString(secret[:32]), cancel: cancel, context: ctx, done: make(chan error, 1)}
-	if a.nativeAccountCandidate {
+	if a.nativeAccountRoute {
 		adapter.inferenceToken = hex.EncodeToString(secret[32:])
 	}
 	var noticeMu sync.Mutex
@@ -112,6 +112,7 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 	}
 	nativeProxy := nativeResponsesProxy(transport)
 	origins := reviewOrigins{parent: ctx}
+	var qualificationRequests atomic.Int64
 	var approvalNotice sync.Once
 	var titleNotice sync.Once
 	var reasoningNotice sync.Once
@@ -128,6 +129,10 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 		Handler: http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 			if !adapter.authorized(request) {
 				http.Error(writer, "request adapter: unauthorized", http.StatusUnauthorized)
+				return
+			}
+			if a.qualificationRequests > 0 && request.Method == http.MethodPost && request.URL.RequestURI() == "/responses" && qualificationRequests.Add(1) > int64(a.qualificationRequests) {
+				http.Error(writer, "qualification request budget exhausted; no retry", http.StatusTooManyRequests)
 				return
 			}
 			if adapter.inferenceToken != "" && request.Method == http.MethodPost && request.URL.RequestURI() == "/desktop-review-cancel" {
