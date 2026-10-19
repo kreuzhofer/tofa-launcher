@@ -64,6 +64,35 @@ var inactiveDesktopProvider = map[string]any{
 	"request_max_retries": float64(0), "stream_max_retries": float64(0),
 }
 
+// Deliberately omit env_key here. The engine gives it precedence over native
+// account authorization even when requires_openai_auth is true, and process
+// configuration overrides cannot remove it. The ordinary saved bridge adds the
+// unavailable sentinel only to its own invocation, after validating ownership.
+var inactiveNativeDesktopProvider = map[string]any{
+	"name": "TOFA native-account router", "base_url": "http://127.0.0.1:0",
+	"wire_api": "responses", "env_key_instructions": "TOFA routing is unavailable in ordinary mode. Relaunch through tofa with any default main model, then reopen this conversation.",
+	"requires_openai_auth": false, "supports_websockets": false,
+	"request_max_retries": float64(0), "stream_max_retries": float64(0),
+}
+
+func ownedDesktopProvider(raw any, expected map[string]any) bool {
+	settings, ok := raw.(map[string]any)
+	if !ok {
+		return false
+	}
+	clean := map[string]any{}
+	for key, value := range settings {
+		if value == nil || (key == "supports_standalone_web_search" && value == false) {
+			continue
+		}
+		clean[key] = value
+	}
+	if expected["env_key"] == "TOFA_DESKTOP_INACTIVE" && (clean["env_key_instructions"] == legacyDesktopRecovery || clean["env_key_instructions"] == selectedMainDesktopRecovery) {
+		clean["env_key_instructions"] = expected["env_key_instructions"]
+	}
+	return reflect.DeepEqual(clean, expected)
+}
+
 // The engine owns TOML parsing, policy discovery and version-checked edits.
 // Only its public configuration API is used; no credentials or history are read.
 type desktopConfigClient struct {
@@ -135,49 +164,48 @@ func (client *desktopConfigClient) call(method string, params any) (map[string]a
 	}
 }
 
-func (client *desktopConfigClient) inspect(workspace string) (string, bool, error) {
+func (client *desktopConfigClient) inspect(workspace string, nativeCandidate bool) (string, []any, error) {
 	result, err := client.call("configRequirements/read", map[string]any{})
 	if err != nil {
-		return "", false, err
+		return "", nil, err
 	}
 	requirements, _ := result["requirements"].(map[string]any)
 	if err := checkDesktopRequirements(requirements); err != nil {
-		return "", false, err
+		return "", nil, err
 	}
 	result, err = client.call("config/read", map[string]any{"includeLayers": true, "cwd": workspace})
 	if err != nil {
-		return "", false, err
+		return "", nil, err
 	}
 	config, _ := result["config"].(map[string]any)
 	if raw := config["plugins"]; raw != nil {
 		plugins, ok := raw.(map[string]any)
 		if !ok {
-			return "", false, errors.New("could not inspect native plugin configuration; Desktop launch cancelled")
+			return "", nil, errors.New("could not inspect native plugin configuration; Desktop launch cancelled")
 		}
 		if _, configured := plugins["code-review@openai-bundled"]; configured {
-			return "", false, errDesktopPluginRemoval
+			return "", nil, errDesktopPluginRemoval
 		}
 	}
 	providers, _ := config["model_providers"].(map[string]any)
-	provider, present := providers["nebius-tofa"]
-	if present {
-		settings, ok := provider.(map[string]any)
-		if !ok {
-			return "", false, errors.New("conflicting user-owned nebius-tofa provider; resolve it before launching")
-		}
-		clean := map[string]any{}
-		for key, value := range settings {
-			if value == nil || (key == "supports_standalone_web_search" && value == false) {
-				continue
+	entries := []struct {
+		id       string
+		settings map[string]any
+	}{{"nebius-tofa", inactiveDesktopProvider}}
+	if nativeCandidate {
+		entries = append(entries, struct {
+			id       string
+			settings map[string]any
+		}{nativeDesktopProvider, inactiveNativeDesktopProvider})
+	}
+	var edits []any
+	for _, entry := range entries {
+		if provider, present := providers[entry.id]; present {
+			if !ownedDesktopProvider(provider, entry.settings) {
+				return "", nil, fmt.Errorf("conflicting user-owned %s provider; preserve or rename that integration before launching", entry.id)
 			}
-			clean[key] = value
-		}
-		// Keep the exact legacy owned entry compatible without changing user settings.
-		if clean["env_key_instructions"] == legacyDesktopRecovery || clean["env_key_instructions"] == selectedMainDesktopRecovery {
-			clean["env_key_instructions"] = inactiveDesktopProvider["env_key_instructions"]
-		}
-		if !reflect.DeepEqual(clean, inactiveDesktopProvider) {
-			return "", false, errors.New("conflicting user-owned nebius-tofa provider; preserve or rename that integration before launching")
+		} else {
+			edits = append(edits, map[string]any{"keyPath": "model_providers." + entry.id, "value": entry.settings, "mergeStrategy": "replace"})
 		}
 	}
 	layers, _ := result["layers"].([]any)
@@ -187,14 +215,14 @@ func (client *desktopConfigClient) inspect(workspace string) (string, bool, erro
 		if name["type"] == "user" {
 			version, _ := layer["version"].(string)
 			if version != "" {
-				return version, present, nil
+				return version, edits, nil
 			}
 		}
 	}
-	return "", false, errors.New("ordinary engine did not supply a user configuration version; launch cancelled")
+	return "", nil, errors.New("ordinary engine did not supply a user configuration version; launch cancelled")
 }
 
-func integrateDesktopProvider(ctx context.Context, engine, home, profile, workspace, runtimeDir string, ownerPID int) error {
+func integrateDesktopProvider(ctx context.Context, engine, home, profile, workspace, runtimeDir string, ownerPID int, nativeCandidate bool) error {
 	if err := refuseDesktopPluginRemoval(home); err != nil {
 		return err
 	}
@@ -205,14 +233,14 @@ func integrateDesktopProvider(ctx context.Context, engine, home, profile, worksp
 		return err
 	}
 	defer client.close()
-	version, present, err := client.inspect(workspace)
-	if err != nil || present || ownerPID == 0 {
+	version, edits, err := client.inspect(workspace, nativeCandidate)
+	if err != nil || len(edits) == 0 || ownerPID == 0 {
 		return err
 	}
 	if !desktopOwnsNativeProfile(profile, ownerPID) {
 		return errors.New("desktop native profile ownership lost before integration; owned launch cancelled")
 	}
-	_, err = client.call("config/batchWrite", map[string]any{"filePath": nil, "expectedVersion": version, "reloadUserConfig": true, "edits": []any{map[string]any{"keyPath": "model_providers.nebius-tofa", "value": inactiveDesktopProvider, "mergeStrategy": "replace"}}})
+	_, err = client.call("config/batchWrite", map[string]any{"filePath": nil, "expectedVersion": version, "reloadUserConfig": true, "edits": edits})
 	return err
 }
 
