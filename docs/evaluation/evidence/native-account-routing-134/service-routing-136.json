@@ -1,0 +1,118 @@
+{
+  "schema": "tofa-native-service-fixture-v1",
+  "issue": 136,
+  "baseline": "ab6e542",
+  "status": "passed_fixture_only",
+  "engine": {
+    "version": "codex-cli 0.162.0-alpha.17.2",
+    "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28"
+  },
+  "boundary": "public launch -> real bundled engine -> actual Python Observer -> Go adapter -> owned local native/Token Factory upstreams",
+  "credentials": "synthetic only",
+  "installed_desktop_launched": false,
+  "external_inference": false,
+  "production_guard_retained": true,
+  "switching": {
+    "provider": "tofa-native-router",
+    "sequence": [
+      "token_factory:moonshotai/Kimi-K3",
+      "native:gpt-6-astra",
+      "token_factory:moonshotai/Kimi-K3"
+    ],
+    "thread_identity_retained": true,
+    "prior_context_retained": true
+  },
+  "generated_catalog_labels": {
+    "gpt-6-astra": "GPT-6-Astra (ChatGPT)",
+    "moonshotai/Kimi-K3": "Kimi-K3 (Token Factory \u00b7 Experimental)"
+  },
+  "observed_main_provenance": {
+    "client_metadata_keys": [
+      "root_turn_id",
+      "session_id",
+      "thread_id",
+      "turn_id",
+      "x-codex-installation-id",
+      "x-codex-turn-metadata",
+      "x-codex-window-id"
+    ],
+    "encoded_turn_metadata_keys": [
+      "installation_id",
+      "session_id",
+      "thread_id",
+      "agent_name",
+      "turn_id",
+      "window_id",
+      "window_number",
+      "context_window_id",
+      "request_kind",
+      "root_turn_id",
+      "sandbox",
+      "sandbox_mode",
+      "auto_review_enabled",
+      "node_repl_auto_review_required",
+      "node_repl_disabled",
+      "turn_started_at_unix_ms",
+      "analytics_enabled",
+      "model",
+      "reasoning_effort"
+    ],
+    "request_kind": "turn",
+    "source_and_trigger": "absent in this Main fixture",
+    "same_thread_across_services": true,
+    "new_turn_id_each_turn": true
+  },
+  "observed_native_header_names": [
+    "Accept",
+    "Authorization",
+    "Content-Length",
+    "Content-Type",
+    "Originator",
+    "Session-Id",
+    "Thread-Id",
+    "User-Agent",
+    "X-Client-Request-Id",
+    "X-Codex-Beta-Features",
+    "X-Codex-Turn-Metadata",
+    "X-Codex-Window-Id",
+    "X-Openai-Internal-Codex-Responses-Lite",
+    "X-Tofa-Launch"
+  ],
+  "checks": [
+    "native custom tool continuation",
+    "native image delivery and persisted image across switch",
+    "native stream deltas",
+    "pending request retains destination",
+    "concurrent independent TF conversation",
+    "cancellation reaches native upstream",
+    "unavailable selection refuses without fallback",
+    "native body exact bytes",
+    "credential/header isolation",
+    "redirect target receives no request",
+    "bounded native HTTP error diagnostics",
+    "duplicate model/role/protocol headers rejected",
+    "unknown auxiliary/compaction rejection"
+  ],
+  "validation": {
+    "candidate_race_seconds": 35.037,
+    "broader_routing_catalog_history_regression_race_seconds": 186.179,
+    "combined_python_observer_real_engine_race_seconds": 18.373,
+    "go_vet": "passed",
+    "windows_arm64_cross_compile": "passed; availability remains disabled"
+  },
+  "native_output_budget": {
+    "explicit_cap": "checked against declaration; not rewritten",
+    "absent_cap": "observed response usage only; no upstream hard-cap claim",
+    "missing_or_exceeded_usage": "stops subsequent requests",
+    "time_requests_bytes": "bounded"
+  },
+  "remaining_gates": [
+    "new-provider ordinary history/resume (#137)",
+    "originating-work review (#138)",
+    "final naming (#139)",
+    "recovery (#140)",
+    "actual Desktop account/plugin preservation (#141)",
+    "signed-in transport and rendered UI (#142)",
+    "runtime/native previews and general admission (#143)"
+  ]
+}

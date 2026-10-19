@@ -2,6 +2,11 @@
 
 Only the launcher registers the upstream adapter. No provider credentials, endpoint
 override, retries, model substitutions or approval answers live in this observer.
+
+Explicit model_services declarations admit native Main switching. Native payloads
+remain unchanged: output caps are validated only when supplied, and completed
+usage is required and checked. A missing native request cap is NOT an upstream
+hard token limit; wall-clock, shared request and byte limits remain enforced.
 """
 import hashlib
 import hmac
@@ -29,6 +34,10 @@ EVENT_LIMIT = 32 * 1024 * 1024
 RESPONSE_LIMIT = 64 * 1024 * 1024
 UNAVAILABLE = object()
 NAMING_MODEL = 'nvidia/Nemotron-3_5-Lightning'
+# These travel only to the launcher-owned adapter; it owns native upstream policy.
+NATIVE_PROTOCOL_HEADERS = ('OpenAI-Beta', 'Originator', 'Session-Id', 'X-Client-Request-Id',
+                           'X-Codex-Turn-State', 'X-Codex-Turn-Metadata', 'Thread-Id', 'User-Agent',
+                           'X-Codex-Beta-Features', 'X-Codex-Window-Id', 'X-Openai-Internal-Codex-Responses-Lite')
 GUARDIAN_SCHEMA = {'type': 'object', 'additionalProperties': False,
     'properties': {'risk_level': {'type': 'string', 'enum': ['low', 'medium', 'high', 'critical']},
         'user_authorization': {'type': 'string', 'enum': ['unknown', 'low', 'medium', 'high']},
@@ -193,7 +202,7 @@ def audit(body):
 
 
 class Observer:
-    def __init__(self, run, *, model, guardian, limits, case='05', runtime_qualification=None):
+    def __init__(self, run, *, model, guardian, limits, case='05', runtime_qualification=None, model_services=None):
         self.runtime_qualification = None
         if runtime_qualification is not None:
             evidence = runtime_qualification
@@ -205,6 +214,12 @@ class Observer:
             self.runtime_qualification = verified
         self.run = Path(run)
         self.model, self.guardian, self.limits = model, guardian, limits
+        if model_services is not None and (not isinstance(model_services, dict) or not 1 <= len(model_services) <= 128 or
+                model not in model_services or any(not isinstance(identity, str) or
+                not re.fullmatch(r'[A-Za-z0-9._:/-]{1,512}', identity) or service not in ('token_factory', 'native')
+                for identity, service in model_services.items())):
+            raise ValueError('invalid_observer_model_services')
+        self.model_services = dict(model_services) if model_services is not None else {model: 'token_factory'}
         self.secret = secrets.token_hex(32)
         self.endpoint = self.token = self.inference_token = None
         self.authorization_version = 1
@@ -295,10 +310,10 @@ class Observer:
                 def unique(pairs):
                     result = {}
                     for key, value in pairs:
-                        if key in result: raise ContractError('duplicate_registration_field')
+                        if key in result: raise ContractError('duplicate_registration_field' if self.path == '/register' else 'duplicate_request_field')
                         result[key] = value
                     return result
-                return json.loads(raw, object_pairs_hook=unique) if self.path == '/register' else json.loads(raw)
+                return json.loads(raw, object_pairs_hook=unique) if self.path == '/register' or owner.authorization_version == 2 else json.loads(raw)
 
             def register(self):
                 body = self.read_json()
@@ -340,7 +355,7 @@ class Observer:
 
     def authorized(self, handler):
         # Never collapse duplicate credentials or forward arbitrary local headers.
-        for name in ('Authorization', 'X-TOFA-Launch', 'ChatGPT-Account-Id'):
+        for name in ('Authorization', 'X-TOFA-Launch', 'ChatGPT-Account-Id', *NATIVE_PROTOCOL_HEADERS):
             values = handler.headers.get_all(name, [])
             if len(values) > 1 or any(len(value) > 8192 or not value.isascii() or
                     any(ord(char) < 32 or ord(char) == 127 for char in value) for value in values):
@@ -415,9 +430,25 @@ class Observer:
 
     def request(self, handler, body):
         try:
-            kind = role(body, self.model, self.guardian)
+            selected = body.get('model')
+            kind = role(body, selected if selected in self.model_services else self.model, self.guardian)
+            service = self.model_services[selected] if kind == 'main' else 'token_factory'
             cap = body.get('max_output_tokens', self.limits['output_tokens'])
             if type(cap) is not int or cap <= 0: raise ContractError('output_token_cap')
+            if service == 'native':
+                if self.authorization_version != 2: raise ContractError('native_authorization_contract')
+                if cap > self.limits['output_tokens']: raise ContractError('native_output_token_cap')
+                if 'parallel_tool_calls' in body and type(body['parallel_tool_calls']) is not bool:
+                    raise ContractError('native_parallel_tool_calls')
+                # Admit only observed Main markers; other native origins require
+                # separate qualification, not assumptions about protocol validity.
+                client_metadata = body.get('client_metadata', {})
+                metadata = json.loads(client_metadata.get('x-codex-turn-metadata', '{}'))
+                if (client_metadata.get('x-openai-subagent') not in (None, '') or
+                        metadata.get('request_kind') not in (None, 'turn') or
+                        metadata.get('thread_source') not in (None, 'user') or
+                        metadata.get('turn_trigger') not in (None, 'composer')):
+                    raise ContractError('native_request_role')
         except (ValueError, TypeError, AttributeError) as error:
             self.reject(handler, 'unsupported_request_contract', 400, body,
                         category=getattr(error, 'category', 'malformed_contract')); return
@@ -491,7 +522,7 @@ class Observer:
             if time.monotonic() >= self.deadline:
                 self.reject(handler, 'deadline', 429, body); return
             self.used += 1
-            record = dict(number=self.used, role=kind, model=body['model'], forwarded=True,
+            record = dict(number=self.used, role=kind, model=body['model'], service=service, forwarded=True,
                           routed_model=NAMING_MODEL if kind == 'auxiliary_title' else body['model'],
                           audit=audit(body), completed=False, started_ms=self.elapsed())
             if kind == 'main': record['instruction_variant_observed'] = self.expected_instructions is not None
@@ -499,10 +530,17 @@ class Observer:
             self.persist()
         raw = self.run / ('request-' + str(record['number']) + '.json')
         raw.write_text(self.redact(json.dumps(body))); raw.chmod(0o600)
-        body['max_output_tokens'] = min(cap, self.limits['output_tokens'])
-        body['parallel_tool_calls'] = False
-        record['output_token_cap'] = body['max_output_tokens']
-        record['parallel_tool_calls'] = False
+        if service == 'native':
+            record['output_token_cap'] = cap
+            record['parallel_tool_calls'] = body.get('parallel_tool_calls')
+            record['limit_enforcement'] = {'wall_clock': 'enforced', 'requests': 'enforced', 'bytes': 'enforced',
+                'output_tokens': 'request_cap_and_observed_usage' if 'max_output_tokens' in body else 'observed_usage',
+                'upstream_output_cap': body.get('max_output_tokens')}
+        else:
+            body['max_output_tokens'] = min(cap, self.limits['output_tokens'])
+            body['parallel_tool_calls'] = False
+            record['output_token_cap'] = body['max_output_tokens']
+            record['parallel_tool_calls'] = False
         self.forward(handler, body, record)
 
     def elapsed(self):
@@ -552,20 +590,30 @@ class Observer:
                 headers.pop('Authorization')
                 if 'Authorization' in handler.headers:
                     headers['Authorization'] = handler.headers['Authorization']
-                for key in ('X-TOFA-Launch', 'ChatGPT-Account-Id'):
+                local_headers = ('X-TOFA-Launch', 'ChatGPT-Account-Id')
+                if record.get('service') == 'native': local_headers += NATIVE_PROTOCOL_HEADERS
+                for key in local_headers:
                     if handler.headers.get(key): headers[key] = handler.headers[key]
             if record is None:
                 for key in ('X-Tofa-Parent-Pid', 'X-Tofa-Main-Engine-Pid'):
                     if handler.headers.get(key): headers[key] = handler.headers[key]
             stage = 'upstream_send'
-            connection.request(handler.command, handler.path, None if body is None else json.dumps(body), headers)
+            payload = handler.raw_request if record is not None and record.get('service') == 'native' else None if body is None else json.dumps(body)
+            connection.request(handler.command, handler.path, payload, headers)
             stage = 'upstream_headers'
             response = connection.getresponse()
             if record is not None:
                 record.update(status=response.status, headers_ms=self.elapsed())
+            turn_states = []
+            if record is not None and record.get('service') == 'native':
+                turn_states = response.headers.get_all('X-Codex-Turn-State', [])
+                if len(turn_states) > 1 or any(len(value) > 8192 or not value.isascii() or
+                        any(ord(char) < 32 or ord(char) == 127 for char in value) for value in turn_states):
+                    raise ValueError('native_response_headers')
             stage = 'client_write'
             handler.send_response(response.status)
             handler.send_header('Content-Type', response.getheader('Content-Type', 'application/json'))
+            for value in turn_states: handler.send_header('X-Codex-Turn-State', value)
             handler.end_headers()
             total, pending = 0, b''
             while True:
@@ -665,6 +713,11 @@ class Observer:
             response = event['response']
             if response.get('model', record['routed_model']) != record['routed_model']:
                 raise ValueError('response_model_mismatch')
+            if record.get('service') == 'native':
+                usage = response.get('usage')
+                if not isinstance(usage, dict) or type(usage.get('output_tokens')) is not int or usage['output_tokens'] < 0:
+                    self.stop('native_output_usage_unobserved')
+                    raise ValueError('native_output_usage_unobserved')
             record['completed'] = True
             record['usage'] = {key: value for key, value in response.get('usage', {}).items()
                                if key in ('input_tokens', 'output_tokens', 'total_tokens') and type(value) is int and value >= 0}
