@@ -304,7 +304,7 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 			return err
 		}
 	}
-	if err := integrateDesktopProvider(ctx, bundle.engine, home, profile, workspace, root, 0); err != nil {
+	if err := integrateDesktopProvider(ctx, bundle.engine, home, profile, workspace, root, 0, options.nativeAccountCandidate); err != nil {
 		return err
 	}
 	bridge, err := installDesktopBridge(a.Dir, bundle.engine)
@@ -377,12 +377,12 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 		if !desktopOwnsNativeProfile(profile, pid) {
 			return errors.New("desktop native profile ownership lost before integration; owned launch cancelled")
 		}
-		if err := integrateDesktopProvider(ownerContext, bundle.engine, home, profile, workspace, root, pid); err != nil {
+		if err := integrateDesktopProvider(ownerContext, bundle.engine, home, profile, workspace, root, pid, options.nativeAccountCandidate); err != nil {
 			return err
 		}
 		close(route.ready)
 		if options.nativeAccountCandidate {
-			fmt.Fprintln(a.Out, "Qualification candidate: native account retained; tofa-native-router is session-scoped. New routed conversations explicitly selecting ChatGPT or Token Factory models send subsequent context to that service. General Desktop rollout remains blocked pending qualification.")
+			fmt.Fprintln(a.Out, "Qualification candidate: native account retained; active tofa-native-router routing and defaults are session-scoped. Inactive provider metadata remains for recorded history. New routed conversations explicitly selecting ChatGPT or Token Factory models send subsequent context to that service. General Desktop rollout remains blocked pending qualification.")
 		}
 		fmt.Fprintln(a.Out, "Native model catalog resolved and merged for this launch. Relaunch after account or catalog changes; only the announced automatic-title contract has an auxiliary route through Token Factory.")
 		fmt.Fprintf(a.Out, "Automatic review for all eligible Token Factory conversations uses %s through Token Factory. The engine retains approval decisions, policy and execution gates; native reviewers are unchanged.\n", *guardian)

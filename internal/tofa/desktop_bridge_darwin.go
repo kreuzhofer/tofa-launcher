@@ -184,6 +184,40 @@ func runDesktopBridge(args []string) error {
 			engine = bundle.engine
 			fmt.Fprintln(os.Stderr, "tofa: desktop engine moved; saved reference now uses the compatible engine in the same app bundle")
 		}
+
+		if desktopAppServerIndex(args) >= 0 {
+			workspace, err := os.Getwd()
+			if err != nil {
+				return err
+			}
+			root, err := os.MkdirTemp(filepath.Dir(path), "ordinary-provider-check-")
+			if err != nil {
+				return errors.New("could not inspect ordinary routed-history metadata; relaunch through tofa")
+			}
+			home := os.Getenv("CODEX_HOME")
+			if home == "" {
+				userHome, err := os.UserHomeDir()
+				if err != nil {
+					os.RemoveAll(root)
+					return err
+				}
+				home = filepath.Join(userHome, ".codex")
+			}
+			end := len(args)
+			if separator := slices.Index(args, "--"); separator >= 0 {
+				end = separator
+			}
+			overrides, inspectErr := ordinaryNativeDesktopOverrides(engine, home, workspace, root, args[:end])
+			os.RemoveAll(root)
+			if inspectErr != nil {
+				return inspectErr
+			}
+			merged := append([]string{}, args[:end]...)
+			for _, override := range overrides {
+				merged = append(merged, "-c", override)
+			}
+			args = append(merged, args[end:]...)
+		}
 	}
 	if err := syscall.Exec(engine, append([]string{engine}, args...), env); err != nil {
 		return fmt.Errorf("desktop bridge could not execute the installed bundled engine: %w", err)

@@ -164,8 +164,9 @@ if 'app-server' in sys.argv:
             text=config_path.read_text() if config_path.exists() else ''
             if req['params']['expectedVersion'] != 'sha256:'+hashlib.sha256(text.encode()).hexdigest():
                 print(json.dumps({'id':req['id'],'error':{'message':'configuration changed'}}),flush=True); continue
-            provider=req['params']['edits'][0]['value']
-            config_path.write_text(text+'\n[model_providers.nebius-tofa]\n'+''.join(k+' = '+json.dumps(v)+'\n' for k,v in provider.items()))
+            for edit in req['params']['edits']:
+                text+='\n['+edit['keyPath']+']\n'+''.join(k+' = '+json.dumps(v)+'\n' for k,v in edit['value'].items())
+            config_path.write_text(text)
         print(json.dumps({'id': req['id'], 'result': result}), flush=True)
     sys.exit(0)
 profile=pathlib.Path(os.environ['CODEX_ELECTRON_USER_DATA_PATH'])
