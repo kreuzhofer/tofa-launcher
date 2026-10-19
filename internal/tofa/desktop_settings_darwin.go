@@ -54,7 +54,11 @@ func runDesktopSettingsBridge(engine string, args, env []string, home, inference
 	}
 	defer ready.Close()
 	defer readyWriter.Close()
-	command := exec.Command(executable, "--tofa-desktop-settings-relay", configFile, strconv.Itoa(os.Getpid()), strconv.Itoa(os.Getppid()))
+	relayArgs := []string{"--tofa-desktop-settings-relay", configFile, strconv.Itoa(os.Getpid()), strconv.Itoa(os.Getppid())}
+	if inferenceCapability != "" {
+		relayArgs = append(relayArgs, "native-review-cancellation")
+	}
+	command := exec.Command(executable, relayArgs...)
 	command.Env, command.Stdin, command.Stdout, command.Stderr = env, os.Stdin, os.Stdout, os.Stderr
 	command.ExtraFiles = []*os.File{relayInput, relayOutput, readyWriter}
 	if err := command.Start(); err != nil {
@@ -87,7 +91,8 @@ func runDesktopSettingsBridge(engine string, args, env []string, home, inference
 }
 
 func runDesktopSettingsRelay(args []string) (result error) {
-	if len(args) != 3 {
+	nativeReviewCancellation := len(args) == 4 && args[3] == "native-review-cancellation"
+	if len(args) != 3 && !nativeReviewCancellation {
 		return errors.New("invalid desktop settings relay arguments")
 	}
 	configFile := args[0]
@@ -158,6 +163,14 @@ func runDesktopSettingsRelay(args []string) (result error) {
 				pendingMu.Lock()
 				mainInitialize = true
 				pendingMu.Unlock()
+			}
+			if nativeReviewCancellation && request.Method == "turn/interrupt" {
+				if err := cancelDesktopReview(os.Getenv("TOFA_DESKTOP_CONTEXT"), os.Getenv("TOFA_API_KEY"), request.Params); err != nil {
+					failure(request.ID, "tofa: review cancellation could not be authenticated; the engine is stopping without releasing pending approvals")
+					inputDone <- err
+					killEngine()
+					return
+				}
 			}
 			intercept, valid := desktopModelWrite(request.Method, request.Params)
 			if intercept {

@@ -109,6 +109,8 @@ func TestDesktopNativeCandidateIsolatesInferenceAndControl(t *testing.T) {
 		{"comma", "POST", "/responses", "native-account", []string{route.InferenceCapability + ", " + route.InferenceCapability}, 401},
 		{"inference cannot read control", "GET", "/desktop-launch", "", []string{route.InferenceCapability}, 401},
 		{"inference cannot stop", "POST", "/evaluation-stop", "", []string{route.InferenceCapability}, 401},
+		{"inference cannot cancel review", "POST", "/desktop-review-cancel", "", []string{route.InferenceCapability}, 401},
+		{"legacy inference cannot cancel review", "POST", "/desktop-review-cancel", route.InferenceCapability, nil, 401},
 		{"wrong method", "GET", "/responses", "native-account", []string{route.InferenceCapability}, 405},
 		{"query", "POST", "/responses?x=1", "native-account", []string{route.InferenceCapability}, 404},
 		{"authorized", "POST", "/responses", "native-account", []string{route.InferenceCapability}, 200},
@@ -494,6 +496,14 @@ func TestDesktopNativeCandidateExpiresCapabilities(t *testing.T) {
 // deliberately case05 with no prompt restriction: this fixture tests transport,
 // not presentation qualification or an externally submitted model task.
 func actualCandidateObserver(t *testing.T, serviceMaps ...map[string]string) string {
+	var services map[string]string
+	if len(serviceMaps) > 0 {
+		services = serviceMaps[0]
+	}
+	return actualCandidateObserverBudget(t, services, 10)
+}
+
+func actualCandidateObserverBudget(t *testing.T, services map[string]string, requests int) string {
 	t.Helper()
 	scripts, err := filepath.Abs("../../scripts")
 	if err != nil {
@@ -506,7 +516,7 @@ from pathlib import Path
 sys.path.insert(0,sys.argv[1])
 from capability_observer import Observer
 run=Path(sys.argv[2]);(run/'workspace').mkdir()
-with Observer(run,model='moonshotai/Kimi-K3',guardian='zai-org/GLM-5.3-Flash',limits={'seconds':600,'requests':10,'output_tokens':4096},model_services=json.loads(sys.argv[3])) as observer:
+with Observer(run,model='moonshotai/Kimi-K3',guardian='zai-org/GLM-5.3-Flash',limits={'seconds':600,'requests':int(sys.argv[4]),'output_tokens':4096},model_services=json.loads(sys.argv[3])) as observer:
  config=run/'observer.json'
  config.write_text(json.dumps({'version':2,'endpoint':observer.url,'secret':observer.secret,'seconds':600}))
  config.chmod(0o600)
@@ -514,12 +524,8 @@ with Observer(run,model='moonshotai/Kimi-K3',guardian='zai-org/GLM-5.3-Flash',li
  sys.stdin.read()
 `
 	ctx, cancel := context.WithTimeout(context.Background(), 120*time.Second)
-	var services map[string]string
-	if len(serviceMaps) > 0 {
-		services = serviceMaps[0]
-	}
 	declaration, _ := json.Marshal(services)
-	command := exec.CommandContext(ctx, "python3", "-B", "-c", driver, scripts, run, string(declaration))
+	command := exec.CommandContext(ctx, "python3", "-B", "-c", driver, scripts, run, string(declaration), strconv.Itoa(requests))
 	input, err := command.StdinPipe()
 	if err != nil {
 		t.Fatal(err)

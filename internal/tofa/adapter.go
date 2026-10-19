@@ -111,6 +111,7 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 		},
 	}
 	nativeProxy := nativeResponsesProxy(transport)
+	origins := reviewOrigins{parent: ctx}
 	var approvalNotice sync.Once
 	var titleNotice sync.Once
 	var reasoningNotice sync.Once
@@ -127,6 +128,19 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 		Handler: http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 			if !adapter.authorized(request) {
 				http.Error(writer, "request adapter: unauthorized", http.StatusUnauthorized)
+				return
+			}
+			if adapter.inferenceToken != "" && request.Method == http.MethodPost && request.URL.RequestURI() == "/desktop-review-cancel" {
+				body, err := io.ReadAll(http.MaxBytesReader(writer, request.Body, 1024))
+				if err != nil {
+					http.Error(writer, "invalid bounded review cancellation", http.StatusBadRequest)
+					return
+				}
+				if err = origins.cancelTurn(body); err != nil {
+					http.Error(writer, err.Error(), http.StatusBadRequest)
+					return
+				}
+				writer.WriteHeader(http.StatusNoContent)
 				return
 			}
 			if a.evaluation != nil && request.Method == http.MethodPost && request.URL.RequestURI() == "/evaluation-stop" {
@@ -194,7 +208,15 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 				}
 				return
 			}
-			if native, routeErr := nativeMainRequest(body, adapter.desktop.Load()); routeErr != nil {
+			native, routeErr := origins.route(body, adapter.desktop.Load(), request.Header.Get("X-TOFA-Launch") != "")
+			if routeErr == nil && request.Header.Get("X-TOFA-Launch") != "" {
+				var finish func()
+				request, finish, routeErr = origins.bindReview(body, request)
+				if routeErr == nil {
+					defer finish()
+				}
+			}
+			if routeErr != nil {
 				notice(routeErr.Error())
 				http.Error(writer, "request adapter: "+routeErr.Error(), http.StatusBadRequest)
 				return
@@ -725,7 +747,7 @@ func (adapter *requestAdapter) authorized(request *http.Request) bool {
 	if adapter.inferenceToken == "" {
 		return len(headers) == 0 && len(auth) == 1 && equal(auth[0], "Bearer "+adapter.token)
 	}
-	control := request.URL.Path == "/desktop-launch" || request.URL.Path == "/evaluation-stop"
+	control := request.URL.Path == "/desktop-launch" || request.URL.Path == "/evaluation-stop" || request.URL.Path == "/desktop-review-cancel"
 	if control {
 		return len(headers) == 0 && len(auth) == 1 && equal(auth[0], "Bearer "+adapter.token)
 	}

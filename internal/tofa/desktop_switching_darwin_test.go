@@ -41,6 +41,10 @@ func (t nativeFixtureTransport) RoundTrip(r *http.Request) (*http.Response, erro
 }
 
 func routedCandidateEngine(t *testing.T, tf, native http.HandlerFunc, observers ...func(*testing.T) string) (*desktopEngine, capturedDesktop, func()) {
+	return routedCandidateEngineGuardian(t, "", tf, native, observers...)
+}
+
+func routedCandidateEngineGuardian(t *testing.T, guardian string, tf, native http.HandlerFunc, observers ...func(*testing.T) string) (*desktopEngine, capturedDesktop, func()) {
 	t.Helper()
 	installed := os.Getenv("TOFA_TEST_DESKTOP_ENGINE")
 	if installed == "" {
@@ -65,7 +69,11 @@ func routedCandidateEngine(t *testing.T, tf, native http.HandlerFunc, observers 
 	if len(observers) > 0 {
 		observer = observers[0]
 	}
-	child, stop := liveDesktopFixture(t, app, bundle, capture, "--native-account-candidate", "--evaluation-observer", observer(t))
+	args := []string{"--native-account-candidate", "--evaluation-observer", observer(t)}
+	if guardian != "" {
+		args = append(args, "--guardian-model", guardian)
+	}
+	child, stop := liveDesktopFixture(t, app, bundle, capture, args...)
 	t.Cleanup(stop)
 	deadline := time.Now().Add(10 * time.Second)
 	for {
@@ -87,7 +95,10 @@ func routedCandidateEngine(t *testing.T, tf, native http.HandlerFunc, observers 
 	if err = os.WriteFile(filepath.Join(child.Env["CODEX_HOME"], "auth.json"), []byte(`{"OPENAI_API_KEY":"synthetic-native"}`), 0600); err != nil {
 		t.Fatal(err)
 	}
-	return openDesktopEngine(t, child), child, stop
+	// These owned protocol fixtures test routing and native action gates, not
+	// plugin initialization/preservation. Avoid asynchronous marketplace clones;
+	// actual Desktop qualification retains the ordinary enabled plugins.
+	return openDesktopEngine(t, child, "features.plugins=false"), child, stop
 }
 
 func TestDesktopNativeCandidateSwitchesServices(t *testing.T) {
