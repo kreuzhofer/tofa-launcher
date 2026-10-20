@@ -208,7 +208,7 @@ def launch(run):
         command = [plan['launcher'], 'launch', 'codex-desktop', '--app-bundle', plan['app_bundle'],
                    '--model', plan['model'], '--guardian-model', plan['guardian'],
                    '--native-account-candidate', '--evaluation-observer', str(run / 'observer.json')]
-        with (run / 'launcher.log').open('x', opener=lambda p,f: os.open(p,f,0o600)) as log:
+        with open(run / 'launcher.log', 'x', opener=lambda p,f: os.open(p,f,0o600)) as log:
             process = subprocess.Popen(command, cwd=run / 'workspace', stdout=log, stderr=log, start_new_session=True)
             save(run / 'launcher-process.json', {'schema': 'tofa-native-account-process-v1', 'launcher_pid': process.pid,
                  'launcher_sha256': digest(plan['launcher']), 'started_utc': utc(now)})

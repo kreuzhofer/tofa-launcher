@@ -5,12 +5,67 @@ import os
 from pathlib import Path
 import tempfile
 import unittest
+import contextlib
+import io
+import sys
 from unittest.mock import patch
 
 import desktop_qualification as q
 
 
 class QualificationTests(unittest.TestCase):
+    def test_launch_creates_private_exclusive_log_and_stops_owned_process(self):
+        # Actual launch orchestration, Observer and subprocesses. Only the
+        # launcher/native application are task-owned fixtures; Path.open and
+        # Popen are not replaced.
+        with tempfile.TemporaryDirectory() as temporary:
+            root=Path(temporary).resolve()
+            launcher=root/'launcher'
+            fixture=(Path(__file__).parent/'fixtures/qualification-launcher.py').read_text()
+            launcher.write_text('#!'+sys.executable+'\n'+fixture)
+            launcher.chmod(0o700)
+            profile=root/'profile';profile.mkdir(mode=0o700)
+            frozen={'identity':{'profile':str(profile)},'protected':{'fixture':'unchanged'}}
+            q.save(root/'snapshot.json',frozen)
+            def attempt(name):
+                run=root/name;run.mkdir(mode=0o700);(run/'workspace').mkdir(mode=0o700)
+                q.save(run/'before.json',frozen)
+                q.save(run/'plan.json',{'launcher':str(launcher),'app_bundle':str(root/'unused'),
+                    'runtime_root':str(root/'unused'),'source_revision':'a'*40,'case':'clean-exit',
+                    'model':'moonshotai/Kimi-K3','guardian':'zai-org/GLM-5.3-Flash',
+                    'seconds':600,'requests':2,'output_tokens':100,
+                    'model_services':{'moonshotai/Kimi-K3':'token_factory'},'scope':None})
+                return run
+            run=attempt('successful')
+            old_umask=os.umask(0o022)
+            try:
+                with patch.object(q,'ROOT',root),contextlib.redirect_stdout(io.StringIO()):
+                    q.launch(run)
+            finally:
+                os.umask(old_umask)
+            log=run/'launcher.log'
+            self.assertEqual(log.stat().st_mode & 0o777,0o600)
+            self.assertIn('owned launcher stdout',log.read_text())
+            self.assertIn('owned launcher stderr',log.read_text())
+            process=q.read(run/'process.json');stop=q.read(run/'fixture-stop.json')
+            self.assertEqual(process['launcher_pid'],stop['launcher_pid'])
+            self.assertEqual(process['native_pid'],stop['child_pid'])
+            for pid in (process['launcher_pid'],process['native_pid']):
+                with self.assertRaises(ProcessLookupError):os.kill(pid,0)
+            finish=q.read(run/'finish.json')
+            self.assertEqual((finish['stop'],finish['exit_code']),('operator_finished',0))
+            self.assertTrue(finish['stop_acknowledged'])
+            self.assertFalse(finish['process_exited_before_stop'])
+            self.assertFalse(finish['qualified'])
+            self.assertEqual(q.read(run/'requests.json'),[])
+            self.assertEqual(q.read(run/'after.json'),frozen)
+            blocked=attempt('existing-log')
+            (blocked/'launcher.log').write_text('retain existing log')
+            with patch.object(q,'ROOT',root),self.assertRaises(FileExistsError):
+                q.launch(blocked)
+            self.assertEqual((blocked/'launcher.log').read_text(),'retain existing log')
+            self.assertFalse((blocked/'launcher-process.json').exists())
+
     def test_records_are_private_exclusive_and_ambiguous_json_rejected(self):
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / 'record.json'
