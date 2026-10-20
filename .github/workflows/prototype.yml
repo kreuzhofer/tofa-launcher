@@ -12,9 +12,9 @@ jobs:
     needs: [artifacts]
     env:
       VERSION: ${{ needs.artifacts.outputs.version }}
-    # The full macOS race and offline lifecycle sequence exceeds ten minutes.
+    # The aggregate macOS race and offline lifecycle sequence exceeded 20 minutes.
     # This is the CI job budget; client request deadlines remain unchanged.
-    timeout-minutes: 20
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -75,6 +75,9 @@ jobs:
           python3 scripts/desktop_evaluation_test.py -v
           python3 scripts/capability_evaluation_test.py -v
           python3 scripts/capability_observer_test.py -v
+          python3 scripts/desktop_qualification_test.py -v
+          python3 scripts/capability_scope_test.py -v
+          python3 scripts/capability_shutdown_test.py -v
       - name: Offline macOS qualification lifecycle
         if: runner.os != 'Windows'
         run: python3 scripts/qualify_macos_test.py -v

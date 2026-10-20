@@ -20,11 +20,12 @@ import (
 )
 
 type evaluationObserver struct {
-	Version             int                `json:"version"`
-	Endpoint            string             `json:"endpoint"`
-	Secret              string             `json:"secret"`
-	Seconds             int                `json:"seconds"`
-	PresentationRuntime *evaluationRuntime `json:"presentation_runtime,omitempty"`
+	QualificationDeclaration string             `json:"qualification_declaration,omitempty"`
+	Version                  int                `json:"version"`
+	Endpoint                 string             `json:"endpoint"`
+	Secret                   string             `json:"secret"`
+	Seconds                  int                `json:"seconds"`
+	PresentationRuntime      *evaluationRuntime `json:"presentation_runtime,omitempty"`
 }
 
 type evaluationRuntime struct {
@@ -88,7 +89,11 @@ func (a *App) evaluationContext(ctx context.Context, path string) (*App, context
 	}
 	defer file.Close()
 	var config evaluationObserver
-	decoder := json.NewDecoder(io.LimitReader(file, 4097))
+	raw, err := io.ReadAll(io.LimitReader(file, 4097))
+	if err != nil || len(raw) > 4096 || uniqueReviewJSON(raw, 0) != nil {
+		return nil, nil, nil, errors.New("invalid evaluation observer configuration")
+	}
+	decoder := json.NewDecoder(bytes.NewReader(raw))
 	decoder.DisallowUnknownFields()
 	if decoder.Decode(&config) != nil || decoder.Decode(new(any)) != io.EOF {
 		return nil, nil, nil, errors.New("invalid evaluation observer configuration")
@@ -96,8 +101,8 @@ func (a *App) evaluationContext(ctx context.Context, path string) (*App, context
 	u, err := url.Parse(config.Endpoint)
 	if err != nil || u.Scheme != "http" || u.Hostname() != "127.0.0.1" || u.Port() == "" ||
 		u.User != nil || u.Path != "" || u.RawQuery != "" || u.Fragment != "" ||
-		config.Version != 1 || len(config.Secret) < 20 ||
-		(config.Seconds != 180 && config.Seconds != 900) || runtime.GOOS != "darwin" {
+		(config.Version != 1 && config.Version != 2) || len(config.Secret) < 20 ||
+		!((config.Version == 1 && (config.Seconds == 180 || config.Seconds == 900)) || (config.Version == 2 && (config.Seconds == 600 || config.Seconds == 900))) || runtime.GOOS != "darwin" {
 		return nil, nil, nil, errors.New("unsupported evaluation observer contract")
 	}
 	launch := *a
@@ -107,7 +112,14 @@ func (a *App) evaluationContext(ctx context.Context, path string) (*App, context
 }
 
 func (e *evaluationObserver) register(ctx context.Context, adapter *requestAdapter) error {
-	body, _ := json.Marshal(map[string]string{"endpoint": adapter.endpoint, "token": adapter.token})
+	registration := map[string]any{"endpoint": adapter.endpoint, "token": adapter.token}
+	if e.Version == 2 {
+		if adapter.inferenceToken == "" {
+			return errors.New("native-account observer requires isolated inference authorization")
+		}
+		registration = map[string]any{"version": 2, "endpoint": adapter.endpoint, "control_token": adapter.token, "inference_token": adapter.inferenceToken}
+	}
+	body, _ := json.Marshal(registration)
 	request, err := http.NewRequestWithContext(ctx, http.MethodPost, e.Endpoint+"/register", bytes.NewReader(body))
 	if err != nil {
 		return err

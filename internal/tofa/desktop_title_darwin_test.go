@@ -187,6 +187,15 @@ func TestDesktopRejectsChangedLuna6TitleContracts(t *testing.T) {
 		"main turn":                    func(p map[string]any) { titleSource(t, p, "user", "composer") },
 		"mismatched trigger":           func(p map[string]any) { titleSource(t, p, "thread_title", "composer") },
 		"changed schema":               func(p map[string]any) { titleFormat(p)["schema"].(map[string]any)["required"] = []string{"title"} },
+		"compaction despite title markers": func(p map[string]any) {
+			p["client_metadata"].(map[string]any)["x-codex-turn-metadata"] = `{"thread_source":"thread_title","turn_trigger":"thread_title","request_kind":"compaction"}`
+		},
+		"unknown request kind": func(p map[string]any) {
+			p["client_metadata"].(map[string]any)["x-codex-turn-metadata"] = `{"thread_source":"thread_title","turn_trigger":"thread_title","request_kind":"future_auxiliary"}`
+		},
+		"Guardian marker despite title markers": func(p map[string]any) {
+			p["client_metadata"].(map[string]any)["x-openai-subagent"] = "guardian"
+		},
 		"extra namespace": func(p map[string]any) {
 			item := p["input"].([]any)[0].(map[string]any)
 			item["tools"] = append(item["tools"].([]any), map[string]any{"type": "namespace", "name": "unknown", "tools": []any{}})

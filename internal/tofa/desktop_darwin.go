@@ -183,6 +183,13 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 		return err
 	}
 	defer finishEvaluation()
+	a.nativeAccountRoute = options.nativeAccountCandidate || options.nativeAccountProof != ""
+	if options.nativeAccountCandidate && (a.evaluation == nil || a.evaluation.Version != 2) {
+		return errors.New("native-account candidate requires evaluation observer version 2 with isolated authorization")
+	}
+	if !options.nativeAccountCandidate && a.evaluation != nil && a.evaluation.Version == 2 {
+		return errors.New("evaluation observer version 2 requires the bounded native-account candidate")
+	}
 	if a.evaluation != nil && a.evaluation.PresentationRuntime != nil {
 		return errors.New("presentation MCP override is CLI-only; Desktop requires its native loader")
 	}
@@ -271,14 +278,11 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 		return err
 	}
 	defer lease.Close()
-	bridge, err := installDesktopBridge(a.Dir, bundle.engine)
-	if err != nil {
-		return err
-	}
 	home, err := desktopHome(ctx)
 	if err != nil {
 		return err
 	}
+
 	if err := os.MkdirAll(home, 0700); err != nil {
 		return err
 	}
@@ -293,7 +297,29 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 	// Only preflight/control state lives here. History, profile and workspace
 	// remain at the client's ordinary locations and are never cleanup targets.
 	defer func() { result = errors.Join(result, os.RemoveAll(root)) }()
-	if err := integrateDesktopProvider(ctx, bundle.engine, home, profile, workspace, root, 0); err != nil {
+	if a.nativeAccountRoute {
+		if err := checkDesktopNativeAccount(ctx, bundle.engine, home, profile, workspace, root); err != nil {
+			return err
+		}
+	}
+	admission, err := resolveDesktopAdmission(ctx, options, a.evaluation, bundle, home, profile, desktopBridgePath(a.Dir, bundle.engine), models)
+	if err != nil {
+		return err
+	}
+	if admission != nil && admission.mode == "candidate" {
+		var endAttempt context.CancelFunc
+		ctx, endAttempt = context.WithDeadline(ctx, admission.declaration.Expires)
+		defer endAttempt()
+		a.qualificationRequests = admission.declaration.Requests
+	}
+	if err := checkDesktopPluginAdmission(home, admission); err != nil {
+		return err
+	}
+	if err := integrateDesktopProvider(ctx, bundle.engine, home, profile, workspace, root, 0, a.nativeAccountRoute, admission); err != nil {
+		return err
+	}
+	bridge, err := installDesktopBridge(a.Dir, bundle.engine)
+	if err != nil {
 		return err
 	}
 	adapter, err := a.startAdapter(ctx, c.ProjectID, key, *model, *guardian)
@@ -307,6 +333,7 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 		}
 	}()
 	route := &desktopRoute{Bridge: bridge, Engine: bundle.engine, Home: home, ready: make(chan struct{}), claim: make(chan int, 1), mainPID: &atomic.Int64{}}
+	route.InferenceCapability = adapter.inferenceToken
 	route.namingUnavailable = desktopNamingUnavailable(models)
 	if route.namingUnavailable != "" {
 		fmt.Fprintln(a.Out, "Automatic naming unavailable:", route.namingUnavailable)
@@ -322,9 +349,23 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 	}
 	env := append(desktopEnv(home, profile, adapter.token), "ZDOTDIR="+shellDir, "CODEX_CLI_PATH="+bridge, "TOFA_DESKTOP_CONTEXT="+adapter.endpoint)
 	owned := func(ownerContext context.Context, pid int) error {
+		if err := admission.recheck(bundle, home, profile, bridge, models); err != nil {
+			return err
+		}
+		if admission != nil {
+			if err := checkDesktopNativeAccount(ownerContext, bundle.engine, home, profile, workspace, root); err != nil {
+				return err
+			}
+		}
 		catalog, err := prepareDesktopCatalog(ownerContext, bundle, home, profile, workspace, mainModels, *guardian, root)
 		if err != nil {
 			return err
+		}
+		if a.nativeAccountRoute {
+			route.services, err = prepareServiceCatalog(catalog, mainModels)
+			if err != nil {
+				return err
+			}
 		}
 		route.Overrides = []string{
 			"model=" + strconv.Quote(*model), `model_provider="nebius-tofa"`, "model_catalog_json=" + strconv.Quote(catalog), `web_search="disabled"`,
@@ -333,22 +374,44 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 			`model_providers.nebius-tofa.requires_openai_auth=false`, `model_providers.nebius-tofa.supports_websockets=false`,
 			`model_providers.nebius-tofa.request_max_retries=0`, `model_providers.nebius-tofa.stream_max_retries=0`,
 		}
+		if a.nativeAccountRoute {
+			// Legacy histories use the inference capability, never the bridge control bearer.
+			route.Overrides = append(route.Overrides, `model_providers.nebius-tofa.env_key="TOFA_DESKTOP_INFERENCE"`)
+			route.Overrides = append(route.Overrides, nativeDesktopProviderOverrides(adapter.endpoint)...)
+			exclusions, err := desktopSecretExclusions(ownerContext, bundle.engine, home, profile, workspace, root)
+			if err != nil {
+				return err
+			}
+			route.Overrides = append(route.Overrides, exclusions)
+		}
 		// Resolve live overrides through the actual engine before publishing them
 		// to the blocked desktop bridge or editing ordinary integration entries.
 		checkEnv := desktopEnv(home, profile, adapter.token)
-		if err := checkDesktopRoutingOverrides(ownerContext, bundle.engine, workspace, checkEnv, *model, adapter.endpoint, catalog, route.Overrides); err != nil {
+		if a.nativeAccountRoute {
+			checkEnv = append(checkEnv, nativeDesktopInferenceEnv+"="+adapter.inferenceToken)
+		}
+		if err := checkDesktopRoutingOverrides(ownerContext, bundle.engine, workspace, checkEnv, *model, adapter.endpoint, catalog, route.Overrides, a.nativeAccountRoute); err != nil {
 			return err
 		}
 		if !desktopOwnsNativeProfile(profile, pid) {
 			return errors.New("desktop native profile ownership lost before integration; owned launch cancelled")
 		}
-		if err := integrateDesktopProvider(ownerContext, bundle.engine, home, profile, workspace, root, pid); err != nil {
+		if err := integrateDesktopProvider(ownerContext, bundle.engine, home, profile, workspace, root, pid, a.nativeAccountRoute, admission); err != nil {
+			return err
+		}
+		if err := admission.recheck(bundle, home, profile, bridge, models); err != nil {
 			return err
 		}
 		close(route.ready)
+		if options.nativeAccountCandidate {
+			fmt.Fprintln(a.Out, "Qualification candidate: native account retained; active tofa-native-router routing and defaults are session-scoped. Inactive provider metadata remains for recorded history. New routed conversations explicitly selecting ChatGPT or Token Factory models send subsequent context to that service. General Desktop rollout remains blocked pending qualification.")
+		}
+		if options.nativeAccountProof != "" {
+			fmt.Fprintln(a.Out, "Native-account route admitted against matching lifecycle, signed-in routing and runtime-preview evidence. Model capability and release readiness remain separate.")
+		}
 		fmt.Fprintln(a.Out, "Native model catalog resolved and merged for this launch. Relaunch after account or catalog changes; only the announced automatic-title contract has an auxiliary route through Token Factory.")
 		fmt.Fprintf(a.Out, "Automatic review for all eligible Token Factory conversations uses %s through Token Factory. The engine retains approval decisions, policy and execution gates; native reviewers are unchanged.\n", *guardian)
-		fmt.Fprintf(a.Out, "Launching Codex desktop using ordinary history and profile.\nMain: %s\nGuardian: %s\nRoute: adapted Token Factory connection.\nStatus: %s\nToken Factory conversations use their selected main independently of this launch default. All eligible available models, including labelled Experimental choices, are enabled in the desktop picker. The Guardian above applies to every Token Factory main. Choosing GPT does not migrate providers.\nAutomatic title generation can fail; other auxiliary requests and compaction remain unsupported. Keep this terminal open.\n", *model, *guardian, status)
+		fmt.Fprintf(a.Out, "Launching Codex desktop using ordinary history and profile.\nMain: %s\nGuardian: %s\nRoute: adapted Token Factory connection.\nStatus: %s\nToken Factory conversations use their selected main independently of this launch default. All eligible available models, including labelled Experimental choices, are enabled in the desktop picker. The Guardian above applies to every Token Factory main. Existing histories retain their providers.\nAutomatic title generation can fail; other auxiliary requests and compaction remain unsupported. Keep this terminal open.\n", *model, *guardian, status)
 		fmt.Fprintln(a.Out, "Desktop environment probe isolated; coding commands retain normal shell startup.")
 		fmt.Fprintln(a.Out, "Desktop model defaults apply only to this desktop session; CLI model and reasoning defaults are preserved.")
 		return nil
@@ -361,7 +424,7 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 }
 
 // Resolve live routing against ordinary settings without printing private policy.
-func checkDesktopRoutingOverrides(ctx context.Context, engine, workspace string, env []string, model, endpoint, catalog string, overrides []string) error {
+func checkDesktopRoutingOverrides(ctx context.Context, engine, workspace string, env []string, model, endpoint, catalog string, overrides []string, nativeCandidate bool) error {
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 	args := []string{"app-server"}
@@ -427,13 +490,17 @@ func checkDesktopRoutingOverrides(ctx context.Context, engine, workspace string,
 			continue
 		}
 		config := response.Result.Config
-		for key, value := range map[string]string{"model": model, "model_provider": "nebius-tofa", "model_catalog_json": catalog, "web_search": "disabled"} {
+		providerID := "nebius-tofa"
+		if nativeCandidate {
+			providerID = nativeDesktopProvider
+		}
+		for key, value := range map[string]string{"model": model, "model_provider": providerID, "model_catalog_json": catalog, "web_search": "disabled"} {
 			if config[key] != value {
 				return fmt.Errorf("desktop effective routing conflict for %s; inspect policy and use launch codex if necessary", key)
 			}
 		}
 		providers, _ := config["model_providers"].(map[string]any)
-		provider, _ := providers["nebius-tofa"].(map[string]any)
+		provider, _ := providers[providerID].(map[string]any)
 		for key, value := range provider {
 			if value == nil {
 				continue
@@ -442,12 +509,32 @@ func checkDesktopRoutingOverrides(ctx context.Context, engine, workspace string,
 				continue
 			}
 			switch key {
-			case "name", "base_url", "env_key", "env_key_instructions", "wire_api", "requires_openai_auth", "supports_websockets", "request_max_retries", "stream_max_retries":
+			case "name", "base_url", "env_http_headers", "env_key", "env_key_instructions", "wire_api", "requires_openai_auth", "supports_websockets", "request_max_retries", "stream_max_retries":
 			default:
 				return fmt.Errorf("desktop effective provider has unexpected %s setting; launch cancelled", key)
 			}
 		}
-		for key, value := range map[string]any{"base_url": endpoint, "env_key": "TOFA_API_KEY", "wire_api": "responses", "requires_openai_auth": false, "supports_websockets": false} {
+		expected := map[string]any{"base_url": endpoint, "env_key": "TOFA_API_KEY", "wire_api": "responses", "requires_openai_auth": false, "supports_websockets": false, "request_max_retries": float64(0), "stream_max_retries": float64(0)}
+		if nativeCandidate {
+			policy, _ := config["shell_environment_policy"].(map[string]any)
+			excluded, _ := policy["exclude"].([]any)
+			protected := false
+			for _, value := range excluded {
+				if value == "TOFA_*" {
+					protected = true
+				}
+			}
+			if !protected {
+				return errors.New("native-account engine did not retain secret environment exclusions")
+			}
+			expected["env_key"] = nil
+			expected["requires_openai_auth"] = true
+			headers, _ := provider["env_http_headers"].(map[string]any)
+			if len(headers) != 1 || headers[nativeDesktopHeader] != nativeDesktopInferenceEnv {
+				return errors.New("native-account launch header contract rejected by engine")
+			}
+		}
+		for key, value := range expected {
 			if provider[key] != value {
 				return fmt.Errorf("desktop effective provider conflict for %s; launch cancelled", key)
 			}

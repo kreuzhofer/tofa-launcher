@@ -2,6 +2,11 @@
 
 Only the launcher registers the upstream adapter. No provider credentials, endpoint
 override, retries, model substitutions or approval answers live in this observer.
+
+Explicit model_services declarations admit native Main switching. Native payloads
+remain unchanged: output caps are validated only when supplied, and completed
+usage is required and checked. A missing native request cap is NOT an upstream
+hard token limit; wall-clock, shared request and byte limits remain enforced.
 """
 import hashlib
 import hmac
@@ -29,6 +34,10 @@ EVENT_LIMIT = 32 * 1024 * 1024
 RESPONSE_LIMIT = 64 * 1024 * 1024
 UNAVAILABLE = object()
 NAMING_MODEL = 'nvidia/Nemotron-3_5-Lightning'
+# These travel only to the launcher-owned adapter; it owns native upstream policy.
+NATIVE_PROTOCOL_HEADERS = ('OpenAI-Beta', 'Originator', 'Session-Id', 'X-Client-Request-Id',
+                           'X-Codex-Turn-State', 'X-Codex-Turn-Metadata', 'Thread-Id', 'User-Agent',
+                           'X-Codex-Beta-Features', 'X-Codex-Window-Id', 'X-Openai-Internal-Codex-Responses-Lite')
 GUARDIAN_SCHEMA = {'type': 'object', 'additionalProperties': False,
     'properties': {'risk_level': {'type': 'string', 'enum': ['low', 'medium', 'high', 'critical']},
         'user_authorization': {'type': 'string', 'enum': ['unknown', 'low', 'medium', 'high']},
@@ -92,6 +101,28 @@ def request_shape(body, main, guardian):
 
 
 class LoopbackServer(http.server.ThreadingHTTPServer):
+    def __init__(self, *args, **kwargs):
+        self.connections = set()
+        self.connections_lock = threading.Lock()
+        super().__init__(*args, **kwargs)
+
+    def get_request(self):
+        connection, address = super().get_request()
+        with self.connections_lock: self.connections.add(connection)
+        return connection, address
+
+    def shutdown_request(self, request):
+        try: super().shutdown_request(request)
+        finally:
+            with self.connections_lock: self.connections.discard(request)
+
+    def close_connections(self):
+        # Include accepted clients still parsing headers, before authentication.
+        with self.connections_lock:
+            for connection in self.connections:
+                try: connection.shutdown(socket.SHUT_RDWR)
+                except OSError: pass
+
     def server_bind(self):
         # Numeric loopback listeners need no reverse DNS. HTTPServer's lookup
         # can stall startup before the watchdog or owned client starts.
@@ -111,7 +142,7 @@ def tool_contract(tools):
     return True
 
 
-def role(body, main, guardian):
+def role(body, main, guardian, *, native_review=False):
     """Classify the client's captured contracts; the launcher still validates them."""
     if body.get('stream') is not True or not isinstance(body.get('input'), list):
         raise ContractError('stream_or_input')
@@ -145,10 +176,45 @@ def role(body, main, guardian):
         raise ContractError('auxiliary')
     review = schema.get('schema') == GUARDIAN_SCHEMA
     if review:
-        names = {tool.get('name') for tool in body.get('tools', [])}
+        tools = body.get('tools', [])
+        policy_input = body['input']
+        if native_review and not tools and policy_input and policy_input[0].get('type') == 'additional_tools':
+            inventory = policy_input[0]
+            namespaces = inventory.get('tools', [])
+            if (inventory.get('role') != 'developer' or len(namespaces) != 1 or
+                    namespaces[0].get('type') != 'namespace' or namespaces[0].get('name') != 'functions'):
+                raise ContractError('native_guardian_tools')
+            entries = namespaces[0].get('tools', [])
+            names = {tool.get('name') for tool in entries}
+            if len(entries) != 2 or names != {'exec', 'wait'}:
+                raise ContractError('native_guardian_tools')
+            for tool in entries:
+                if tool['name'] == 'exec' and (tool.get('type') != 'custom' or
+                        tool.get('format', {}).get('type') != 'grammar' or tool['format'].get('syntax') != 'lark'):
+                    raise ContractError('native_guardian_tools')
+                if tool['name'] == 'wait' and tool.get('type') != 'function':
+                    raise ContractError('native_guardian_tools')
+            policy_input = policy_input[1:]
+            tools = [{'type': 'function', 'name': name} for name in ('exec_command', 'write_stdin', 'view_image')]
+        names = {tool.get('name') for tool in tools}
+        client = body.get('client_metadata', {})
+        policy = policy_input[0] if policy_input else {}
+        parts = policy.get('content')
+        developer_policy = (client.get('x-openai-subagent') == 'guardian' and
+            all(isinstance(client.get(key), str) and client[key].strip()
+                for key in ('x-codex-parent-thread-id', 'parent_turn_id')) and
+            policy.get('type') == 'message' and policy.get('role') == 'developer' and
+            isinstance(parts, list) and bool(parts) and all(isinstance(part, dict) and
+                part.get('type') == 'input_text' and isinstance(part.get('text'), str) and
+                part['text'].strip() for part in parts))
+        policy_valid = isinstance(body.get('instructions'), str) or (
+            body.get('instructions') is None and developer_policy)
         if (body.get('model') != guardian or schema.get('strict') is not False or
                 schema.get('type') != 'json_schema' or body.get('tool_choice') != 'auto' or
-                not isinstance(body.get('instructions'), str) or
+                not policy_valid or len(tools) != 3 or
+                any(tool.get('type') != 'function' for tool in tools) or
+                set(schema) - {'type', 'schema', 'strict', 'name'} or
+                ('name' in schema and not isinstance(schema['name'], str)) or
                 names != {'exec_command', 'write_stdin', 'view_image'}):
             raise ContractError('guardian')
         return 'guardian'
@@ -192,8 +258,182 @@ def audit(body):
                 input_roles=[item.get('role') for item in body.get('input', [])])
 
 
+class DeclaredScope:
+    """One immutable private attempt declaration; request IDs are bound once."""
+    def __init__(self, run, path, digest, attempt, services):
+        self.run, self.path = Path(run).resolve(), Path(path)
+        self.digest = digest
+        if (not isinstance(digest, str) or not re.fullmatch(r'[0-9a-f]{64}', digest) or
+                not isinstance(attempt, str) or not re.fullmatch(r'[A-Za-z0-9._-]{1,128}', attempt) or
+                not self.path.is_absolute() or self.path.resolve().parent != self.run):
+            raise ValueError('invalid_scope_declaration')
+        raw = self.read()
+        def unique(pairs):
+            result = {}
+            for key, value in pairs:
+                if key in result: raise ValueError('duplicate_scope_field')
+                result[key] = value
+            return result
+        data = json.loads(raw, object_pairs_hook=unique)
+        if (not isinstance(data, dict) or set(data) - {'schema', 'attempt', 'root', 'threads', 'titles'} or
+                data.get('schema') != 'tofa-observer-scope-v1' or data.get('attempt') != attempt or
+                data.get('root') != str(self.run) or not isinstance(data.get('threads'), list) or
+                not isinstance(data.get('titles', []), list) or
+                len(data['threads']) > 8 or len(data.get('titles', [])) > 8 or
+                not data['threads'] and not data.get('titles')):
+            raise ValueError('invalid_scope_declaration')
+        self.states, self.titles = [], data.get('titles', [])
+        prompts, labels, identities = set(), set(), set()
+        total = 0
+        def prompt(value):
+            if (not isinstance(value, str) or not value.strip() or value.strip() != value or
+                    len(value.encode()) > 16384 or value in prompts):
+                raise ValueError('invalid_scope_prompt')
+            prompts.add(value)
+        for thread in data['threads']:
+            if not isinstance(thread, dict) or set(thread) != {'label', 'thread_id', 'workspace', 'initial_user_messages_sha256', 'turns'}:
+                raise ValueError('invalid_scope_thread')
+            label, identity = thread['label'], thread['thread_id']
+            initial, workspace = thread['initial_user_messages_sha256'], thread['workspace']
+            if not isinstance(label, str) or not re.fullmatch(r'[a-z][a-z0-9_-]{0,63}', label) or label in labels:
+                raise ValueError('invalid_scope_label')
+            labels.add(label)
+            if identity is not None:
+                if not self.identifier(identity) or identity in identities or not isinstance(initial, str) or not re.fullmatch(r'[0-9a-f]{64}', initial):
+                    raise ValueError('invalid_scope_existing_thread')
+                identities.add(identity)
+            elif initial is not None: raise ValueError('invalid_scope_initial_history')
+            if not isinstance(workspace, str) or not Path(workspace).is_absolute() or not Path(workspace).is_dir():
+                raise ValueError('invalid_scope_workspace')
+            workspace = Path(workspace).resolve()
+            if identity is None:
+                try: workspace.relative_to(self.run / 'workspace')
+                except ValueError: raise ValueError('scope_new_workspace_outside_run')
+            turns = thread['turns']
+            if not isinstance(turns, list) or not 1 <= len(turns) <= 16:
+                raise ValueError('invalid_scope_turns')
+            total += len(turns)
+            for turn in turns:
+                if (not isinstance(turn, dict) or set(turn) != {'model', 'service', 'prompt'} or
+                        not isinstance(turn['model'], str) or turn['model'] not in services or
+                        turn['service'] != services[turn['model']]):
+                    raise ValueError('invalid_scope_turn')
+                prompt(turn['prompt'])
+            self.states.append(dict(declaration=thread, workspace=str(workspace), thread_id=identity, last=-1, turns={}))
+        if total > 16: raise ValueError('scope_turn_limit')
+        for title in self.titles:
+            if not isinstance(title, dict) or set(title) != {'thread_id', 'prompt'} or not self.identifier(title['thread_id']):
+                raise ValueError('invalid_scope_title')
+            prompt(title['prompt'])
+        with open(self.run / 'scope-consumed.json', 'x', opener=lambda p, f: os.open(p, f, 0o600)) as output:
+            json.dump({'attempt': attempt, 'scope_sha256': digest}, output)
+
+    @staticmethod
+    def identifier(value):
+        return isinstance(value, str) and 0 < len(value) <= 256 and value.strip() == value and not any(ord(c) < 32 for c in value)
+
+    def read(self):
+        import stat
+        descriptor = os.open(self.path, os.O_RDONLY | os.O_NOFOLLOW)
+        with os.fdopen(descriptor, 'rb') as source:
+            info = os.fstat(source.fileno())
+            if not stat.S_ISREG(info.st_mode) or info.st_uid != os.getuid() or info.st_mode & 0o077 or info.st_size > 1024 * 1024:
+                raise ValueError('scope_file_not_private')
+            raw = source.read(1024 * 1024 + 1)
+        if hashlib.sha256(raw).hexdigest() != self.digest: raise ValueError('scope_declaration_drift')
+        return raw
+
+    @staticmethod
+    def user_text(item):
+        content = item.get('content')
+        if isinstance(content, str): return content
+        if (isinstance(content, list) and content and all(isinstance(part, dict) and
+                part.get('type') == 'input_text' and isinstance(part.get('text'), str) for part in content)):
+            return '\n'.join(part['text'] for part in content)
+        return None
+
+    def admit(self, body, kind):
+        self.read()
+        metadata = body.get('client_metadata', {})
+        base = {'declaration_sha256': self.digest, 'kind': kind}
+        if kind == 'auxiliary_title':
+            text = json.dumps(body['input'], ensure_ascii=False)
+            contexts = []
+            for state in self.states:
+                for entry in state['turns'].values():
+                    turn = state['declaration']['turns'][entry['index']]
+                    if json.dumps(turn['prompt'], ensure_ascii=False)[1:-1] in text:
+                        contexts.append({'prompt_sha256': hashed(turn['prompt'])['sha256'], 'main_observed': True})
+            for title in self.titles:
+                if json.dumps(title['prompt'], ensure_ascii=False)[1:-1] in text:
+                    contexts.append({'prompt_sha256': hashed(title['prompt'])['sha256'], 'main_observed': False,
+                        'intended_ui_thread_sha256': hashed(title['thread_id'])['sha256']})
+            if not contexts: raise ValueError('scope_title_context_unobserved')
+            return dict(base, contexts=contexts, parent_unverified=True,
+                        main_observed=all(context['main_observed'] for context in contexts))
+        thread = metadata.get('x-codex-parent-thread-id' if kind == 'guardian' else 'thread_id')
+        turn_id = metadata.get('parent_turn_id' if kind == 'guardian' else 'turn_id')
+        if not self.identifier(thread) or not self.identifier(turn_id): raise ValueError('scope_origin_missing')
+        state = next((state for state in self.states if state['thread_id'] == thread), None)
+        if kind == 'guardian':
+            if state is None or turn_id not in state['turns']: raise ValueError('scope_review_unobserved')
+            entry = state['turns'][turn_id]
+        else:
+            users = [item for item in body['input'] if item.get('role') == 'user']
+            text = self.user_text(users[-1]) if users else None
+            if state is None:
+                state = next((state for state in self.states if state['thread_id'] is None and
+                    state['declaration']['turns'][0]['prompt'] == text), None)
+            if state is None: raise ValueError('scope_thread_unavailable')
+            entry = state['turns'].get(turn_id)
+            user_hash = hashed(users)['sha256']
+            if entry is not None:
+                if entry['users'] != user_hash or entry['model'] != body['model']:
+                    raise ValueError('scope_turn_changed')
+            else:
+                index = state['last'] + 1
+                turns = state['declaration']['turns']
+                if index >= len(turns) or turns[index]['prompt'] != text or turns[index]['model'] != body['model']:
+                    raise ValueError('scope_turn_sequence')
+                user_texts = [self.user_text(item) for item in users]
+                workspaces = []
+                for value in user_texts:
+                    if value:
+                        workspaces.extend(re.findall(r'<cwd>([^<>\n]+)</cwd>', value))
+                        if Path(value).is_absolute() and '\n' not in value: workspaces.append(value)
+                if not any(str(Path(value).resolve()) == state['workspace'] for value in workspaces):
+                    raise ValueError('scope_workspace_missing')
+                preceding = hashed(users[:-1])['sha256']
+                if index:
+                    previous = next(entry for entry in state['turns'].values() if entry['index'] == index - 1)
+                    if preceding != previous['users']: raise ValueError('scope_history_changed')
+                elif state['declaration']['thread_id'] is not None:
+                    if preceding != state['declaration']['initial_user_messages_sha256']: raise ValueError('scope_initial_history_changed')
+                elif any(item.get('role') == 'assistant' or item.get('type') in
+                        ('function_call', 'function_call_output', 'custom_tool_call', 'custom_tool_call_output') for item in body['input']):
+                    raise ValueError('scope_new_thread_has_history')
+                state['thread_id'], state['last'] = thread, index
+                entry = {'index': index, 'users': user_hash, 'model': body['model']}
+                state['turns'][turn_id] = entry
+        return dict(base, label=state['declaration']['label'], turn_index=entry['index'],
+                    thread_sha256=hashed(thread)['sha256'], turn_sha256=hashed(turn_id)['sha256'],
+                    user_messages_sha256=entry['users'])
+
+    def persist(self):
+        threads = []
+        for state in self.states:
+            latest = next((entry for entry in state['turns'].values() if entry['index'] == state['last']), None)
+            threads.append({'label': state['declaration']['label'], 'thread_id': state['thread_id'],
+                'admitted_turns': state['last'] + 1, 'user_messages_sha256': latest['users'] if latest else None})
+        path = self.run / 'scope-state.tmp'
+        with open(path, 'w', opener=lambda p, f: os.open(p, f, 0o600)) as output:
+            json.dump({'declaration_sha256': self.digest, 'threads': threads}, output)
+        path.replace(self.run / 'scope-state.json')
+
+
 class Observer:
-    def __init__(self, run, *, model, guardian, limits, case='05', runtime_qualification=None):
+    def __init__(self, run, *, model, guardian, limits, case='05', runtime_qualification=None, model_services=None,
+                 scope_declaration=None, scope_sha256=None, scope_attempt=None):
         self.runtime_qualification = None
         if runtime_qualification is not None:
             evidence = runtime_qualification
@@ -205,14 +445,30 @@ class Observer:
             self.runtime_qualification = verified
         self.run = Path(run)
         self.model, self.guardian, self.limits = model, guardian, limits
+        if model_services is not None and (not isinstance(model_services, dict) or not 1 <= len(model_services) <= 128 or
+                model not in model_services or any(not isinstance(identity, str) or
+                not re.fullmatch(r'[A-Za-z0-9._:/-]{1,512}', identity) or service not in ('token_factory', 'native')
+                for identity, service in model_services.items())):
+            raise ValueError('invalid_observer_model_services')
+        self.model_services = dict(model_services) if model_services is not None else {model: 'token_factory'}
+        self.scope = None
+        if scope_declaration is not None:
+            self.scope = DeclaredScope(self.run, scope_declaration, scope_sha256, scope_attempt, self.model_services)
+        elif scope_sha256 is not None or scope_attempt is not None:
+            raise ValueError('incomplete_scope_declaration')
+        self.review_origins = {}
+        self.origin_records = {}
         self.secret = secrets.token_hex(32)
-        self.endpoint = self.token = None
+        self.endpoint = self.token = self.inference_token = None
+        self.authorization_version = 1
+        self.request_secrets = threading.local()
         self.records = []
         self.used = 0
         self.lock = threading.RLock()
         self.active = set()
         self.done = threading.Event()
         self.reason = None
+        self.stop_acknowledged = False
         self.started = time.monotonic()
         self.deadline = self.started + limits['seconds']
         self.action_watch = Actions(self.run / 'workspace')
@@ -248,9 +504,14 @@ class Observer:
                 control = self.path == '/register'
                 body = UNAVAILABLE
                 self.raw_request = None
-                expected = owner.secret if control else owner.token
-                if not expected or not hmac.compare_digest(self.headers.get('Authorization', ''), 'Bearer ' + expected):
-                    self.reply(401, {'error': 'unauthorized'}); return
+                if owner.done.is_set(): return
+                if not owner.authorized(self):
+                    try: self.reply(401, {'error': 'unauthorized'})
+                    except OSError:
+                        if not owner.done.is_set(): raise
+                    return
+                owner.request_secrets.values = (self.headers.get('Authorization', '').removeprefix('Bearer '),
+                                               self.headers.get('ChatGPT-Account-Id', ''))
                 with owner.lock:
                     owner.active.add(self.connection)
                 try:
@@ -258,6 +519,20 @@ class Observer:
                         self.register(); return
                     if self.command == 'GET' and self.path == '/desktop-launch':
                         owner.forward(self, None, None); return
+                    if owner.authorization_version == 2 and self.path == '/desktop-review-cancel':
+                        try:
+                            if self.headers.get('Content-Encoding', 'identity') != 'identity': raise ContractError('unsupported_encoding')
+                            body = self.read_json()
+                            if (not isinstance(body,dict) or set(body) != {'thread_id','turn_id'} or
+                                any(not isinstance(value,str) or not 0<len(value.encode('utf-8'))<=256 or value.strip()!=value or any(char in value for char in '\r\n\t') for value in body.values())):
+                                raise ContractError('cancellation_contract')
+                        except (ValueError,TypeError,UnicodeError):
+                            self.reply(400,{'error':'invalid_bounded_cancellation'}); return
+                        with owner.lock:
+                            for record in owner.origin_records.get((body['thread_id'],body['turn_id']),[]):
+                                record['interruption_requested'] = True
+                            owner.persist()
+                        owner.forward(self,body,None); return
                     if self.command != 'POST' or self.path != '/responses':
                         owner.reject(self, 'unsupported_request_contract', 400); return
                     if self.headers.get('Content-Encoding', 'identity') != 'identity':
@@ -277,38 +552,107 @@ class Observer:
                 finally:
                     with owner.lock:
                         owner.active.discard(self.connection)
+                    owner.request_secrets.values = ()
 
             def read_json(self):
+                if len(self.headers.get_all('Content-Length', [])) != 1 or self.headers.get('Transfer-Encoding'):
+                    raise ContractError('body_framing')
                 length = int(self.headers.get('Content-Length', '0'))
-                if not 0 < length <= BODY_LIMIT:
+                limit = 1024 if self.path == '/desktop-review-cancel' else 4096 if self.path == '/register' else BODY_LIMIT
+                if not 0 < length <= limit:
                     raise ContractError('body_limit')
                 self.connection.settimeout(max(.01, owner.deadline - time.monotonic()))
                 raw = self.rfile.read(length)
                 if self.path == '/responses': self.raw_request = raw
-                return json.loads(raw)
+                def unique(pairs):
+                    result = {}
+                    for key, value in pairs:
+                        if key in result: raise ContractError('duplicate_registration_field' if self.path == '/register' else 'duplicate_request_field')
+                        result[key] = value
+                    return result
+                return json.loads(raw, object_pairs_hook=unique) if self.path == '/register' or owner.authorization_version == 2 else json.loads(raw)
 
             def register(self):
                 body = self.read_json()
-                target = urlsplit(body['endpoint'])
+                if not isinstance(body, dict): raise ContractError('registration_contract')
+                version = body.get('version')
+                if version is None:
+                    if set(body) != {'endpoint', 'token'} or not isinstance(body['token'], str) or not 0 < len(body['token']) <= 4096:
+                        raise ContractError('registration_contract')
+                    token, inference = body['token'], None
+                    if not token.isascii() or any(ord(char) < 33 or ord(char) == 127 for char in token):
+                        raise ContractError('registration_contract')
+                else:
+                    if type(version) is not int or version != 2 or set(body) != {'version', 'endpoint', 'control_token', 'inference_token'}:
+                        raise ContractError('registration_contract')
+                    token, inference = body['control_token'], body['inference_token']
+                    if any(not isinstance(value, str) or not re.fullmatch(r'[0-9a-f]{64}', value) for value in (token, inference)):
+                        raise ContractError('registration_contract')
+                    if token == inference or owner.secret in (token, inference):
+                        raise ContractError('registration_contract')
+                endpoint = body['endpoint']
+                if not isinstance(endpoint, str) or any(char.isspace() for char in endpoint):
+                    raise ContractError('registration_contract')
+                target = urlsplit(endpoint)
                 if (target.scheme != 'http' or target.hostname != '127.0.0.1' or not target.port or
-                        target.path or target.query or target.fragment or target.username or not body['token']):
+                        target.path or target.query or target.fragment or target.username):
                     self.reply(400, {'error': 'loopback_adapter_required'}); return
                 with owner.lock:
                     if owner.endpoint is not None:
                         self.reply(409, {'error': 'already_registered'}); return
-                    owner.endpoint, owner.token = body['endpoint'], body['token']
+                    owner.token, owner.inference_token = token, inference
+                    owner.authorization_version = version or 1
+                    owner.endpoint = endpoint
                 self.reply(200, {'ready': True})
 
         self.server = LoopbackServer(('127.0.0.1', 0), Handler)
-        self.server.daemon_threads = True
+        self.server.daemon_threads = False
         self.port = self.server.server_port
         self.url = 'http://127.0.0.1:' + str(self.port)
+
+    def authorized(self, handler):
+        # Never collapse duplicate credentials or forward arbitrary local headers.
+        for name in ('Authorization', 'X-TOFA-Launch', 'ChatGPT-Account-Id', *NATIVE_PROTOCOL_HEADERS):
+            values = handler.headers.get_all(name, [])
+            if len(values) > 1 or any(len(value) > 8192 or not value.isascii() or
+                    any(ord(char) < 32 or ord(char) == 127 for char in value) for value in values):
+                return False
+        authorization = handler.headers.get('Authorization', '')
+        launch = handler.headers.get('X-TOFA-Launch')
+        if handler.path == '/register':
+            return handler.command == 'POST' and launch is None and hmac.compare_digest(authorization, 'Bearer ' + self.secret)
+        if self.authorization_version == 1:
+            return bool(self.token) and hmac.compare_digest(authorization, 'Bearer ' + self.token)
+        if self.reason: return False
+        if handler.path == '/desktop-launch':
+            return handler.command == 'GET' and launch is None and hmac.compare_digest(authorization, 'Bearer ' + self.token)
+        if handler.path == '/desktop-review-cancel':
+            return handler.command == 'POST' and launch is None and hmac.compare_digest(authorization, 'Bearer ' + self.token)
+        if handler.path != '/responses' or handler.command != 'POST': return False
+        if launch is None:
+            return hmac.compare_digest(authorization, 'Bearer ' + self.inference_token)
+        if not hmac.compare_digest(launch, self.inference_token): return False
+        if 'Authorization' not in handler.headers: return True
+        if not re.fullmatch(r'Bearer [A-Za-z0-9._~+/-]+=*', authorization): return False
+        return not any(hmac.compare_digest(authorization, 'Bearer ' + value)
+                       for value in (self.secret, self.token, self.inference_token))
+
+    def redact(self, text):
+        # Headers remain only in request-local memory. Even private diagnostics
+        # must not retain a credential reflected by an upstream error.
+        values = (self.secret, self.token, self.inference_token, *getattr(self.request_secrets, 'values', ()))
+        for value in values:
+            if value:
+                text = text.replace(value.encode() if isinstance(text, bytes) else value,
+                                    b'<REDACTED>' if isinstance(text, bytes) else '<REDACTED>')
+        return text
 
     def persist(self):
         temporary = self.run / 'requests.tmp'
         temporary.write_text(json.dumps(self.records, indent=2) + '\n')
         temporary.chmod(0o600)
         temporary.replace(self.run / 'requests.json')
+        if self.scope: self.scope.persist()
 
     def reject(self, handler, reason, status, body=UNAVAILABLE, *, category=None,
                known_role=None, presentation_runtime=None):
@@ -329,7 +673,7 @@ class Observer:
                 raw = self.run / ('rejected-request-' + str(len(self.records) + 1) + '.json')
                 try:
                     with open(raw, 'xb', opener=lambda path, flags: os.open(path, flags, 0o600)) as output:
-                        output.write(raw_bytes)
+                        output.write(self.redact(raw_bytes))
                     record['raw_body_retained'] = True
                 except OSError:
                     record.update(failure='diagnostic_capture_failure', original_rejection=reason)
@@ -346,14 +690,58 @@ class Observer:
 
     def request(self, handler, body):
         try:
-            kind = role(body, self.model, self.guardian)
+            selected = body.get('model')
+            client = body.get('client_metadata', {})
+            review_service = None
+            if self.authorization_version == 2 and client.get('x-openai-subagent') == 'guardian':
+                parent = tuple(client.get(key) for key in ('x-codex-parent-thread-id', 'parent_turn_id'))
+                if not all(isinstance(value, str) and 0 < len(value) <= 256 and
+                           value.strip() == value for value in parent):
+                    raise ContractError('review_origin_missing')
+                with self.lock:
+                    review_service = self.review_origins.get(parent)
+                if review_service is None: raise ContractError('review_origin_unavailable')
+            reviewer = selected if review_service == 'native' else self.guardian
+            kind = role(body, selected if selected in self.model_services else self.model, reviewer, native_review=review_service == 'native')
+            service = self.model_services[selected] if kind == 'main' else (review_service or 'token_factory')
             cap = body.get('max_output_tokens', self.limits['output_tokens'])
             if type(cap) is not int or cap <= 0: raise ContractError('output_token_cap')
+            if service == 'native':
+                if self.authorization_version != 2: raise ContractError('native_authorization_contract')
+                if cap > self.limits['output_tokens']: raise ContractError('native_output_token_cap')
+                if 'parallel_tool_calls' in body and type(body['parallel_tool_calls']) is not bool:
+                    raise ContractError('native_parallel_tool_calls')
+                # Admit only observed Main markers; other native origins require
+                # separate qualification, not assumptions about protocol validity.
+                client_metadata = body.get('client_metadata', {})
+                metadata = json.loads(client_metadata.get('x-codex-turn-metadata', '{}'))
+                if kind == 'main' and (client_metadata.get('x-openai-subagent') not in (None, '') or
+                        metadata.get('request_kind') not in (None, 'turn') or
+                        metadata.get('thread_source') not in (None, 'user') or
+                        metadata.get('turn_trigger') not in (None, 'composer')):
+                    raise ContractError('native_request_role')
         except (ValueError, TypeError, AttributeError) as error:
             self.reject(handler, 'unsupported_request_contract', 400, body,
                         category=getattr(error, 'category', 'malformed_contract')); return
         with self.lock:
-            if self.expected_prompt:
+            if kind == 'main' and self.authorization_version == 2:
+                origin = tuple(client.get(key) for key in ('thread_id', 'turn_id'))
+                if all(isinstance(value, str) and 0 < len(value) <= 256 and
+                       value.strip() == value for value in origin):
+                    old = self.review_origins.get(origin)
+                    if old is not None and old != service:
+                        self.reject(handler, 'conflicting_review_origin', 400, body); return
+                    if old is None and len(self.review_origins) >= 4096:
+                        self.reject(handler, 'review_origin_capacity', 400, body); return
+                    self.review_origins[origin] = service
+            scope_record = None
+            if self.scope:
+                try:
+                    if self.authorization_version != 2: raise ValueError('scope_requires_split_authorization')
+                    scope_record = self.scope.admit(body, kind)
+                except (OSError, ValueError, TypeError, KeyError, AttributeError):
+                    self.reject(handler, 'scope_mismatch', 403, body); return
+            elif self.expected_prompt:
                 encoded_input = json.dumps(body['input'], ensure_ascii=False)
                 # Each run is a fresh workspace and conversation. The observer
                 # never admits an existing conversation merely because it uses
@@ -422,18 +810,29 @@ class Observer:
             if time.monotonic() >= self.deadline:
                 self.reject(handler, 'deadline', 429, body); return
             self.used += 1
-            record = dict(number=self.used, role=kind, model=body['model'], forwarded=True,
+            record = dict(number=self.used, role=kind, model=body['model'], service=service, forwarded=True,
                           routed_model=NAMING_MODEL if kind == 'auxiliary_title' else body['model'],
                           audit=audit(body), completed=False, started_ms=self.elapsed())
+            if scope_record is not None: record['scope'] = scope_record
             if kind == 'main': record['instruction_variant_observed'] = self.expected_instructions is not None
             self.records.append(record)
+            origin = (client.get('thread_id'),client.get('turn_id')) if kind=='main' else (client.get('x-codex-parent-thread-id'),client.get('parent_turn_id')) if kind=='guardian' else None
+            if origin is not None and all(isinstance(value,str) and value for value in origin):
+                self.origin_records.setdefault(origin,[]).append(record)
             self.persist()
         raw = self.run / ('request-' + str(record['number']) + '.json')
-        raw.write_text(json.dumps(body)); raw.chmod(0o600)
-        body['max_output_tokens'] = min(cap, self.limits['output_tokens'])
-        body['parallel_tool_calls'] = False
-        record['output_token_cap'] = body['max_output_tokens']
-        record['parallel_tool_calls'] = False
+        raw.write_text(self.redact(json.dumps(body))); raw.chmod(0o600)
+        if service == 'native':
+            record['output_token_cap'] = cap
+            record['parallel_tool_calls'] = body.get('parallel_tool_calls')
+            record['limit_enforcement'] = {'wall_clock': 'enforced', 'requests': 'enforced', 'bytes': 'enforced',
+                'output_tokens': 'request_cap_and_observed_usage' if 'max_output_tokens' in body else 'observed_usage',
+                'upstream_output_cap': body.get('max_output_tokens')}
+        else:
+            body['max_output_tokens'] = min(cap, self.limits['output_tokens'])
+            body['parallel_tool_calls'] = False
+            record['output_token_cap'] = body['max_output_tokens']
+            record['parallel_tool_calls'] = False
         self.forward(handler, body, record)
 
     def elapsed(self):
@@ -444,36 +843,82 @@ class Observer:
         connection = http.client.HTTPConnection(target.hostname, target.port,
             timeout=max(.01, self.deadline - time.monotonic()))
         finished = threading.Event()
+        title_cancelled = threading.Event()
+        upstream_socket = None
+        def client_disconnected(source):
+            with self.lock:
+                if record is None or record.get('completed') or self.reason: return
+                record.setdefault('client_disconnect', {'source': source, 'elapsed_ms': self.elapsed()})
+                if record.get('interruption_requested'):
+                    record['failure']='operator_interrupt'
+                    self.persist()
+                    if upstream_socket is not None:
+                        try: upstream_socket.shutdown(socket.SHUT_RDWR)
+                        except OSError: pass
+                    return
+                if record['role'] != 'auxiliary_title':
+                    self.stop('client_disconnected')
+                    return
+                # Native title timeouts cancel one request, not the main turn.
+                title_cancelled.set()
+                record['failure'] = 'client_disconnected'
+                self.persist()
+                if upstream_socket is not None:
+                    try: upstream_socket.shutdown(socket.SHUT_RDWR)
+                    except OSError: pass
         def disconnect():
             while not finished.wait(.02):
                 try:
                     ready, _, _ = select.select([handler.connection], [], [], 0)
                     if ready and not handler.connection.recv(1, socket.MSG_PEEK):
-                        if record is not None and not record.get('completed'):
-                            self.stop('client_disconnected')
+                        client_disconnected('socket_eof')
                         return
                 except OSError:
+                    if not finished.is_set(): client_disconnected('socket_error')
                     return
         watcher = threading.Thread(target=disconnect, daemon=True)
         watcher.start()
         stage = 'upstream_connect'
         try:
             connection.connect()
-            with self.lock: self.active.add(connection.sock)
             upstream_socket = connection.sock
+            # Shutdown keeps this socket owned until finally closes it. Never
+            # reconnect if cancellation interrupts the initial request write.
+            connection.auto_open = 0
+            with self.lock:
+                if self.reason or self.done.is_set() or title_cancelled.is_set():
+                    raise ConnectionAbortedError('observer_stopped')
+                if time.monotonic() >= self.deadline: raise TimeoutError()
+                self.active.add(upstream_socket)
             headers = {'Authorization': 'Bearer ' + self.token, 'Content-Type': 'application/json'}
+            if record is not None and self.authorization_version == 2:
+                headers.pop('Authorization')
+                if 'Authorization' in handler.headers:
+                    headers['Authorization'] = handler.headers['Authorization']
+                local_headers = ('X-TOFA-Launch', 'ChatGPT-Account-Id')
+                if record.get('service') == 'native': local_headers += NATIVE_PROTOCOL_HEADERS
+                for key in local_headers:
+                    if handler.headers.get(key): headers[key] = handler.headers[key]
             if record is None:
                 for key in ('X-Tofa-Parent-Pid', 'X-Tofa-Main-Engine-Pid'):
                     if handler.headers.get(key): headers[key] = handler.headers[key]
             stage = 'upstream_send'
-            connection.request(handler.command, handler.path, None if body is None else json.dumps(body), headers)
+            payload = handler.raw_request if record is not None and record.get('service') == 'native' else None if body is None else json.dumps(body)
+            connection.request(handler.command, handler.path, payload, headers)
             stage = 'upstream_headers'
             response = connection.getresponse()
             if record is not None:
                 record.update(status=response.status, headers_ms=self.elapsed())
+            turn_states = []
+            if record is not None and record.get('service') == 'native':
+                turn_states = response.headers.get_all('X-Codex-Turn-State', [])
+                if len(turn_states) > 1 or any(len(value) > 8192 or not value.isascii() or
+                        any(ord(char) < 32 or ord(char) == 127 for char in value) for value in turn_states):
+                    raise ValueError('native_response_headers')
             stage = 'client_write'
             handler.send_response(response.status)
             handler.send_header('Content-Type', response.getheader('Content-Type', 'application/json'))
+            for value in turn_states: handler.send_header('X-Codex-Turn-State', value)
             handler.end_headers()
             total, pending = 0, b''
             while True:
@@ -482,7 +927,7 @@ class Observer:
                 chunk = response.read1(65536)
                 if not chunk: break
                 total += len(chunk)
-                if total > RESPONSE_LIMIT: raise ValueError('response_body_limit')
+                if total > (1024 if handler.path == '/desktop-review-cancel' else RESPONSE_LIMIT): raise ValueError('response_body_limit')
                 if record is None or response.status != 200:
                     stage = 'client_write'
                     handler.wfile.write(chunk); handler.wfile.flush(); continue
@@ -499,25 +944,27 @@ class Observer:
                     handler.wfile.write(framed); handler.wfile.flush()
                 if record['completed']: break
             if record is not None and not record['completed']:
-                record['failure'] = 'upstream_http_error' if response.status != 200 else 'response_incomplete'
+                record['failure'] = record.get('failure') or ('operator_interrupt' if record.get('interruption_requested') else None) or ('upstream_http_error' if response.status != 200 else 'response_incomplete')
                 category = ('http_status' if response.status != 200 else 'provider_error' if record.get('provider_failure') else
                     self.reason if self.reason in ('client_disconnected', 'deadline', 'operator_finished', 'operator_cancelled')
                     else 'incomplete_response')
                 record['transport_failure'] = {'stage': 'upstream_read', 'category': category,
                     'exception_type': None}
         except (OSError, http.client.HTTPException, ValueError, TypeError, AttributeError, KeyError) as error:
+            if stage == 'client_write' and isinstance(error, OSError):
+                client_disconnected('client_write')
             if isinstance(error, TimeoutError) or time.monotonic() >= self.deadline:
                 self.stop('deadline')
             elif str(error) == 'diagnostic_call_limit':
                 self.stop('diagnostic_call_limit')
             if record is not None:
-                record['failure'] = self.reason or ('deadline' if isinstance(error, TimeoutError) else 'stream_failure')
+                record['failure'] = record.get('failure') or ('operator_interrupt' if record.get('interruption_requested') else None) or self.reason or ('deadline' if isinstance(error, TimeoutError) else 'stream_failure')
                 self.transport_failure(record, stage, error)
         finally:
             finished.set()
             watcher.join(timeout=2)
             with self.lock:
-                if 'upstream_socket' in locals(): self.active.discard(upstream_socket)
+                if upstream_socket is not None: self.active.discard(upstream_socket)
                 if record is not None:
                     record['ended_ms'] = self.elapsed()
                     self.persist()
@@ -545,7 +992,7 @@ class Observer:
         try:
             descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
             with os.fdopen(descriptor, 'w') as stream:
-                json.dump(detail, stream)
+                stream.write(self.redact(json.dumps(detail)))
         except OSError:
             record['private_' + kind + '_error_retention_failed'] = True
 
@@ -571,6 +1018,11 @@ class Observer:
             response = event['response']
             if response.get('model', record['routed_model']) != record['routed_model']:
                 raise ValueError('response_model_mismatch')
+            if record.get('service') == 'native':
+                usage = response.get('usage')
+                if not isinstance(usage, dict) or type(usage.get('output_tokens')) is not int or usage['output_tokens'] < 0:
+                    self.stop('native_output_usage_unobserved')
+                    raise ValueError('native_output_usage_unobserved')
             record['completed'] = True
             record['usage'] = {key: value for key, value in response.get('usage', {}).items()
                                if key in ('input_tokens', 'output_tokens', 'total_tokens') and type(value) is int and value >= 0}
@@ -587,22 +1039,25 @@ class Observer:
                     for item in response.get('output', []))
                 if text:
                     path = self.run / 'final.txt'
-                    path.write_text(text); path.chmod(0o600)
+                    path.write_text(self.redact(text)); path.chmod(0o600)
 
     def stop(self, reason):
         with self.lock:
-            if self.reason: return
-            self.reason = reason
-            (self.run / 'stop-reason.txt').write_text(reason)
+            already_stopped = self.reason is not None
+            if not already_stopped:
+                self.reason = reason
+                (self.run / 'stop-reason.txt').write_text(reason)
             for stream in list(self.active):
                 try: stream.shutdown(socket.SHUT_RDWR)
                 except OSError: pass
+        if already_stopped: return
         if self.endpoint:
             target = urlsplit(self.endpoint)
             connection = http.client.HTTPConnection(target.hostname, target.port, timeout=1)
             try:
                 connection.request('POST', '/evaluation-stop', b'', {'Authorization': 'Bearer ' + self.token})
-                connection.getresponse().read()
+                response=connection.getresponse(); response.read(1024)
+                self.stop_acknowledged=response.status==204
             except (OSError, http.client.HTTPException): pass
             finally: connection.close()
 
@@ -621,6 +1076,10 @@ class Observer:
             active = bool(self.active)
         if active: self.stop(self.reason or 'observer_closed')
         self.done.set()
-        self.server.shutdown(); self.server.server_close()
-        self.thread.join(); self.watchdog.join(timeout=2)
+        self.server.shutdown(); self.thread.join()
+        self.server.close_connections()
+        # Non-daemon request handlers own diagnostic writes. Join them before
+        # final persistence and before callers may remove the private run root.
+        self.server.server_close()
+        self.watchdog.join(timeout=2)
         with self.lock: self.persist()

@@ -71,6 +71,21 @@ main/Guardian outcomes, naming limits, timings, shared costs and promotion prove
 Main/Guardian support labels cover the pinned headless bundled-engine baseline,
 not comprehensive Electron UI or release qualification. See the [offline selection evidence](evaluation/desktop-selection-2026-09-28.md).
 
+### Bundled code-review plugin preservation
+
+Adapted startup is blocked when the ordinary home contains the bundled
+`code-review` cache or the native configuration contains
+`code-review@openai-bundled`, including a disabled entry. The installed native app
+can remove this plugin when provider authentication changes; ordinary startup
+can install it again. The launcher refuses before replacing its retained bridge
+or starting Desktop, and rechecks before releasing native startup. The check
+discovers the ordinary home and does not depend on an installed plugin version.
+
+The error leaves ordinary Desktop available. Do not delete or disable the plugin
+to get past it. This is a preservation guard, not a native reconciliation fix;
+authentication, plugin eligibility and shared configuration are unchanged.
+See [the diagnosis and remaining implementation scope](evaluation/desktop-plugin-preservation-130.md).
+
 ### Switching launch modes and recovering a conversation
 
 1. Quit the ordinary desktop, then run the command above from your workspace.
@@ -500,6 +515,12 @@ The naming route omits those fields and uses provider-default reasoning; the
 launcher announces this policy. Main, Guardian, native
 catalog descriptors and CLI title routing remain unchanged. There is no naming
 picker, configurable fallback, or automatic substitution.
+
+The guarded native-account candidate extends this policy to all automatic titles
+in the launch, including native GPT title context sent to Token Factory. Startup
+announces that destination. Saved native Main conversations remain direct; the
+separate title helper uses the launch default. The [#139 fixture evidence](evaluation/launch-wide-naming-139.md)
+does not replace actual Desktop title-visibility and preservation qualification.
 
 The naming model must appear in the project's launch-time catalog and have
 compatible dedicated provider metadata. If unavailable, naming fails explicitly

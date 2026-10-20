@@ -1,0 +1,54 @@
+{
+  "schema": "tofa-native-lifecycle-fixture-v1",
+  "ticket": 140,
+  "status": "scoped_fixture_verified_with_open_ordinary_desktop_gap",
+  "boundary": "public launcher, owned fake Desktop/account preflight, real bundled engine history, owned loopback upstreams and disposable installer targets",
+  "installed_desktop_launched": false,
+  "real_provider_inference": false,
+  "production_lifecycle_changes": false,
+  "engine_version": "codex-cli 0.162.0-alpha.17.2",
+  "engine_sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+  "verified_faults": [
+    "launcher SIGKILL and surviving-client refusal",
+    "client SIGKILL",
+    "clean client exit",
+    "interrupted bridge ownership-journal replacement",
+    "uninstall and reattach with retained native/legacy/mixed history",
+    "actual fixture install/update/uninstall/reinstall/purge scripts",
+    "engine relocation and incompatible client refusal",
+    "active-owner and competing-launch refusal",
+    "conflicting configuration and ownership artifact preservation",
+    "expired inference/control rejection through observer and subsequent launch"
+  ],
+  "preservation": [
+    "native openai and legacy nebius-tofa provider identities",
+    "new tofa-native-router selection, title, cross-service context and coding tool result",
+    "synthetic account/configuration bytes",
+    "concurrent ordinary settings",
+    "workspace and saved references",
+    "unrelated process and outside symlink target"
+  ],
+  "validation": {
+    "combined_race_seconds": 258.396,
+    "combined_pass_events": 46,
+    "combined_failure_events": 6,
+    "combined_failed_tests": 4,
+    "scoped_retest": {
+      "status": "passed",
+      "seconds": 59.551,
+      "pass_events": 24,
+      "scope": "four previously failing tests with matching legacy/candidate controls and tightened fresh-route HTTP401 assertion",
+      "client_and_test_deadlines_changed": false
+    },
+    "combined_status": "failed_with_retained_preflight_and_deadline_outcomes",
+    "go_vet": "passed",
+    "diff_check": "passed"
+  },
+  "ci_budget": {
+    "native_job_minutes_before": 20,
+    "native_job_minutes_after": 30,
+    "reason": "CI run 39293124397 completed macOS test steps but exceeded the 20-minute job limit at 1205 seconds; client/test/observer/review deadlines unchanged"
+  },
+  "qualification_blocker": "Actual ordinary Desktop recovery guidance remains unqualified. Saved bridge refusal does not satisfy direct bundled-engine reconnect behavior observed under #137. Actual account/plugin lifecycle, native UI recovery, signed-in routing and previews remain #141-143 gates.",
+  "failed_attempts_retained": true
+}

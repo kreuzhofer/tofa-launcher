@@ -10,7 +10,7 @@ import unittest
 from contextlib import contextmanager
 from unittest.mock import patch
 
-from capability_observer import LoopbackServer, Observer
+from capability_observer import LoopbackServer, Observer, GUARDIAN_SCHEMA
 
 SCRIPT_ROOT = Path(__file__).resolve().parent.parent
 
@@ -194,6 +194,36 @@ class BoundaryTests(unittest.TestCase):
             self.assertEqual(seen[1]['text'], guardian['text'])
             self.assertEqual(observer.records[2]['routed_model'], 'nvidia/Nemotron-3_5-Lightning')
 
+    @staticmethod
+    def developer_review(model='zai-org/GLM-5.3-Flash'):
+        return dict(model=model, stream=True, input=[{'type': 'message', 'role': 'developer',
+            'content': [{'type': 'input_text', 'text': 'Retain native approval policy.'}]}],
+            tools=[{'type': 'function', 'name': name, 'parameters': {'type': 'object'}}
+                   for name in ('exec_command', 'write_stdin', 'view_image')], tool_choice='auto',
+            text={'format': {'type': 'json_schema', 'strict': False, 'schema': GUARDIAN_SCHEMA}},
+            client_metadata={'x-openai-subagent': 'guardian', 'x-codex-parent-thread-id': 'origin-thread',
+                             'parent_turn_id': 'origin-turn'})
+
+    def test_developer_review_policy_preserved_and_incomplete_contracts_rejected(self):
+        with self.boundary() as (observer, seen):
+            body = self.developer_review()
+            self.post(observer, '/responses', body, 'client-token', 200)
+            self.assertEqual(seen[0]['input'], body['input'])
+            self.assertNotIn('instructions', seen[0])
+            self.assertEqual(observer.records[0]['role'], 'guardian')
+        changes = [lambda b: b['client_metadata'].pop('parent_turn_id'),
+                   lambda b: b['client_metadata'].update({'x-openai-subagent': 'other'}),
+                   lambda b: b['input'][0].update(role='user'),
+                   lambda b: b['input'][0].update(content=[]),
+                   lambda b: b.update(instructions=42),
+                   lambda b: b['tools'].append(dict(b['tools'][0])),
+                   lambda b: b['text']['format'].update(future=True)]
+        for change in changes:
+            with self.subTest(change=changes.index(change)), self.boundary() as (observer, seen):
+                body = self.developer_review(); change(body)
+                self.post(observer, '/responses', body, 'client-token', 400)
+                self.assertEqual(seen, [])
+
     def test_unknown_contract_never_reaches_upstream(self):
         for change in ({'tools': [{'type': 'remote_inference'}]}, {'previous_response_id': 'private-id'},
                        {'model': 'unselected/model'}, {'input': [{'type': 'future_item'}]}):
@@ -252,9 +282,9 @@ class BoundaryTests(unittest.TestCase):
                 self.assertNotIn('private-', json.dumps(observer.records))
                 self.assertEqual(seen, [])
 
-    def test_current_desktop_developer_role_review_is_an_observer_block(self):
+    def test_redacted_developer_review_without_origin_remains_blocked(self):
         # Structural replay of engine 0.162.0-alpha.17.2, with policy text and
-        # native IDs removed. This is a contract limit, not a Guardian decision.
+        # native IDs removed. Missing provenance remains a contract rejection.
         body = json.loads((SCRIPT_ROOT / 'scripts/fixtures/current-desktop-review-shape.json').read_text())
         with self.boundary(guardian='moonshotai/Kimi-K3') as (observer, seen):
             self.post(observer, '/responses', body, 'client-token', 400)
@@ -314,6 +344,54 @@ class BoundaryTests(unittest.TestCase):
             self.post(observer, '/responses', self.body(), 'client-token', 200)
             self.assertTrue(observer.records[0]['completed'])
             self.assertEqual(observer.records[0]['usage']['output_tokens'], 2)
+
+    def test_title_disconnect_does_not_stop_main(self):
+        for send_headers in (False, True):
+            title_started = threading.Event()
+            title_closed = threading.Event()
+            release_main = threading.Event()
+            def upstream(handler, body):
+                if body['model'].startswith('gpt-'):
+                    if send_headers:
+                        handler.send_response(200); handler.end_headers(); handler.wfile.flush()
+                    title_started.set()
+                    handler.connection.settimeout(3)
+                    try:
+                        if not handler.connection.recv(1): title_closed.set()
+                    except OSError: pass
+                else:
+                    handler.send_response(200); handler.end_headers(); handler.wfile.flush()
+                    release_main.wait(3)
+                    event = {'type': 'response.completed', 'response': {'model': body['model'], 'output': []}}
+                    try: handler.wfile.write(('data: ' + json.dumps(event) + '\n\n').encode())
+                    except OSError: pass
+            with self.subTest(send_headers=send_headers), self.boundary(response=upstream) as (observer, seen):
+                title = json.loads((SCRIPT_ROOT / 'internal/tofa/testdata/desktop-luna6-title-request.json').read_text())
+                clients, responses = [], []
+                try:
+                    for body in (title, self.body()):
+                        client = http.client.HTTPConnection('127.0.0.1', observer.port, timeout=3)
+                        clients.append(client)
+                        client.request('POST', '/responses', json.dumps(body), {'Authorization': 'Bearer client-token'})
+                        if body is title:
+                            self.assertTrue(title_started.wait(1))
+                            responses.append(client.getresponse() if send_headers else None)
+                        else: responses.append(client.getresponse())
+                    if responses[0] is not None: responses[0].close()
+                    clients[0].close()
+                    self.assertTrue(title_closed.wait(1), 'cancelled title left its upstream request alive')
+                    self.assertIsNone(observer.reason, 'title cancellation stopped the entire run')
+                    release_main.set(); responses[1].read()
+                    self.assertTrue(observer.records[1]['completed'])
+                    self.assertEqual(observer.records[0]['failure'], 'client_disconnected')
+                    self.assertEqual(observer.records[0]['client_disconnect']['source'], 'socket_eof')
+                    self.assertEqual(len(seen), 2, 'cancellation must not retry either request')
+                    self.assertEqual(observer.used, 2, 'cancelled naming still consumes its request budget')
+                finally:
+                    release_main.set()
+                    for response in responses:
+                        if response is not None: response.close()
+                    for client in clients: client.close()
 
     def test_native_client_disconnect_cancels_a_stalled_upstream(self):
         closed = threading.Event()
@@ -489,6 +567,424 @@ class BoundaryTests(unittest.TestCase):
             return payload
         finally:
             connection.close()
+
+
+class SplitAuthorizationTests(unittest.TestCase):
+    control = 'c' * 64
+    inference = 'a' * 64
+    native = 'synthetic-native-credential'
+
+    @contextmanager
+    def boundary(self, observer_type=Observer, response=None, **options):
+        seen = []
+        class Adapter(http.server.BaseHTTPRequestHandler):
+            def log_message(self, *unused): pass
+            def do_GET(self): self.respond()
+            def do_POST(self): self.respond()
+            def respond(self):
+                raw = self.rfile.read(int(self.headers.get('Content-Length', 0)))
+                seen.append((self.path, dict(self.headers), json.loads(raw) if raw else None))
+                self.raw_body = raw
+                if response and self.path == '/responses':
+                    response(self); return
+                self.send_response(200); self.end_headers()
+                if self.path == '/responses':
+                    event = {'type': 'response.completed', 'response': {'model': 'moonshotai/Kimi-K3', 'output': []}}
+                    self.wfile.write(('data: ' + json.dumps(event) + '\n\n').encode())
+                else: self.wfile.write(b'{}')
+        adapter = LoopbackServer(('127.0.0.1', 0), Adapter)
+        threading.Thread(target=adapter.serve_forever, daemon=True).start()
+        try:
+            with tempfile.TemporaryDirectory() as directory:
+                run = Path(directory); (run / 'workspace').mkdir()
+                with observer_type(run, model='moonshotai/Kimi-K3', guardian='zai-org/GLM-5.3-Flash',
+                        limits={'seconds': 180, 'requests': 12, 'output_tokens': 4096}, **options) as observer:
+                    registration = {'version': 2, 'endpoint': 'http://127.0.0.1:' + str(adapter.server_port),
+                                    'control_token': self.control, 'inference_token': self.inference}
+                    yield observer, seen, registration
+        finally:
+            adapter.shutdown(); adapter.server_close()
+
+    def request(self, observer, path, headers, body=None, method='POST', raw=None):
+        connection = http.client.HTTPConnection('127.0.0.1', observer.port, timeout=3)
+        try:
+            payload = raw if raw is not None else json.dumps(body) if body is not None else b''
+            connection.putrequest(method, path)
+            for key, value in headers: connection.putheader(key, value)
+            connection.putheader('Content-Length', str(len(payload.encode() if isinstance(payload, str) else payload)))
+            connection.endheaders(payload.encode() if isinstance(payload, str) else payload)
+            response = connection.getresponse()
+            return response.status, response.read()
+        finally: connection.close()
+
+    def register(self, observer, registration):
+        status, data = self.request(observer, '/register', [('Authorization', 'Bearer ' + observer.secret)], registration)
+        self.assertEqual(status, 200, data)
+
+    def test_review_cancel_forwards_only_exact_independent_control(self):
+        with self.boundary() as (observer,seen,registration):
+            self.register(observer,registration)
+            body={'thread_id':'thread','turn_id':'turn'}
+            for token in (self.inference,self.native,observer.secret):
+                status,_=self.request(observer,'/desktop-review-cancel',[('Authorization','Bearer '+token)],body)
+                self.assertEqual(status,401)
+            self.assertEqual(seen,[])
+            status,data=self.request(observer,'/desktop-review-cancel',[('Authorization','Bearer '+self.control)],body)
+            self.assertEqual(status,200,data)
+            self.assertEqual(seen[0][0],'/desktop-review-cancel')
+            self.assertEqual(seen[0][2],body)
+            self.assertEqual(seen[0][1]['Authorization'],'Bearer '+self.control)
+            for raw in ('{"thread_id":"thread","turn_id":"turn","extra":1}',
+                        '{"thread_id":"thread","thread_id":"other","turn_id":"turn"}',
+                        '{"thread_id":"'+('x'*1100)+'","turn_id":"turn"}'):
+                status,_=self.request(observer,'/desktop-review-cancel',[('Authorization','Bearer '+self.control)],raw=raw)
+                self.assertEqual(status,400)
+            for path,method in (('/desktop-review-cancel?x=1','POST'),('/desktop-review-cancel','GET')):
+                status,_=self.request(observer,path,[('Authorization','Bearer '+self.control)],body,method=method)
+                self.assertEqual(status,401)
+            self.assertEqual(len(seen),1)
+            self.assertEqual(observer.records,[])
+
+    def test_native_and_legacy_inference_preserve_separate_control_authority(self):
+        with self.boundary() as (observer, seen, registration):
+            self.register(observer, registration)
+            body = {'model': 'moonshotai/Kimi-K3', 'stream': True, 'input': [], 'tools': []}
+            status, data = self.request(observer, '/responses', [
+                ('Authorization', 'Bearer ' + self.native), ('X-TOFA-Launch', self.inference),
+                ('ChatGPT-Account-Id', 'synthetic-account')], body)
+            self.assertEqual(status, 200, data)
+            self.assertEqual(seen[0][1]['Authorization'], 'Bearer ' + self.native)
+            self.assertEqual(seen[0][1]['X-TOFA-Launch'], self.inference)
+            self.assertEqual(seen[0][1]['ChatGPT-Account-Id'], 'synthetic-account')
+            status, data = self.request(observer, '/responses', [('Authorization', 'Bearer ' + self.inference)], body)
+            self.assertEqual(status, 200, data)
+            self.assertEqual(seen[1][1]['Authorization'], 'Bearer ' + self.inference)
+            self.assertNotIn('X-TOFA-Launch', seen[1][1])
+            status, data = self.request(observer, '/desktop-launch', [('Authorization', 'Bearer ' + self.control),
+                ('X-Tofa-Parent-Pid', '123')], method='GET')
+            self.assertEqual(status, 200, data)
+            self.assertEqual(seen[2][1]['Authorization'], 'Bearer ' + self.control)
+            self.assertEqual(seen[2][1]['X-Tofa-Parent-Pid'], '123')
+            observer.stop('operator_finished')
+            self.assertEqual(seen[3][0], '/evaluation-stop')
+            self.assertEqual(seen[3][1]['Authorization'], 'Bearer ' + self.control)
+            retained = ''.join(p.read_text() for p in observer.run.iterdir() if p.is_file())
+            for secret in (self.control, self.inference, self.native, 'synthetic-account'):
+                self.assertNotIn(secret, retained)
+
+    def test_launch_capabilities_cannot_cross_scopes_or_use_ambiguous_headers(self):
+        with self.boundary() as (observer, seen, registration):
+            self.register(observer, registration)
+            bearer = lambda token: ('Authorization', 'Bearer ' + token)
+            launch = ('X-TOFA-Launch', self.inference)
+            attempts = [
+                ('POST', '/responses', [bearer(self.native)]),
+                ('POST', '/responses', [bearer(self.control)]),
+                ('POST', '/responses', [bearer(observer.secret)]),
+                ('POST', '/responses', [('Authorization', 'Bearer '), launch]),
+                ('POST', '/responses', [bearer(self.native), ('X-TOFA-Launch', 'wrong')]),
+                ('POST', '/responses', [bearer(self.control), launch]),
+                ('POST', '/responses', [bearer(self.native), launch, launch]),
+                ('POST', '/responses', [bearer(self.native), bearer('other'), launch]),
+                ('POST', '/responses', [bearer('x' * 8193), launch]),
+                ('POST', '/responses', [bearer(self.native), launch,
+                                       ('ChatGPT-Account-Id', 'one'), ('ChatGPT-Account-Id', 'two')]),
+                ('GET', '/responses', [bearer(self.native), launch]),
+                ('POST', '/responses?control=1', [bearer(self.native), launch]),
+                ('POST', '/desktop-launch', [bearer(self.control)]),
+                ('GET', '/desktop-launch', [bearer(self.native), launch]),
+                ('GET', '/desktop-launch', [bearer(self.inference)]),
+                ('GET', '/desktop-launch', [bearer(self.control), launch]),
+                ('POST', '/evaluation-stop', [bearer(self.inference)]),
+                ('POST', '/evaluation-stop', [bearer(self.control)]),
+                ('GET', '/register', [bearer(observer.secret)]),
+            ]
+            for method, path, headers in attempts:
+                with self.subTest(method=method, path=path, header_names=[name for name, _ in headers]):
+                    status, data = self.request(observer, path, headers, {'model': 'moonshotai/Kimi-K3', 'input': []}, method)
+                    self.assertEqual(status, 401, data)
+            self.assertEqual(seen, [])
+            self.assertEqual(observer.records, [])
+
+    def test_registration_is_bounded_exact_and_cannot_be_replaced(self):
+        changes = [
+            {'version': True}, {'version': 3}, {'version': 1},
+            {'control_token': 'short'}, {'inference_token': 'g' * 64},
+            {'inference_token': self.control}, {'token': 'legacy-extra'},
+            {'endpoint': 'http://127.0.0.1:80/'}, {'endpoint': 'http://localhost:80'},
+            {'endpoint': 'http://127.0.0.1:70000'}, {'endpoint': 'http://user@127.0.0.1:80'},
+        ]
+        for change in changes:
+            with self.subTest(fields=list(change)), self.boundary() as (observer, seen, registration):
+                registration.update(change)
+                status, data = self.request(observer, '/register', [('Authorization', 'Bearer ' + observer.secret)], registration)
+                self.assertEqual(status, 400, data)
+                self.assertEqual(seen, [])
+        for shape in ('duplicate', 'oversized'):
+            with self.subTest(shape=shape), self.boundary() as (observer, seen, registration):
+                raw = json.dumps(registration)
+                raw = raw[:-1] + ', "version": 2}' if shape == 'duplicate' else raw + ' ' * 4096
+                status, data = self.request(observer, '/register', [('Authorization', 'Bearer ' + observer.secret)], raw=raw)
+                self.assertEqual(status, 400, data)
+                self.assertEqual(seen, [])
+        with self.boundary() as (observer, seen, registration):
+            self.register(observer, registration)
+            registration['endpoint'] = 'http://127.0.0.1:1'
+            status, data = self.request(observer, '/register', [('Authorization', 'Bearer ' + observer.secret)], registration)
+            self.assertEqual(status, 409, data)
+            status, data = self.request(observer, '/desktop-launch', [('Authorization', 'Bearer ' + self.control)], method='GET')
+            self.assertEqual(status, 200, data)
+            self.assertEqual(len(seen), 1)
+
+    def test_inference_capability_is_independent_of_native_authentication(self):
+        with self.boundary() as (observer, seen, registration):
+            self.register(observer, registration)
+            status, data = self.request(observer, '/responses', [('X-TOFA-Launch', self.inference)],
+                {'model': 'moonshotai/Kimi-K3', 'stream': True, 'input': [], 'tools': []})
+            self.assertEqual(status, 200, data)
+            self.assertNotIn('Authorization', seen[0][1])
+            self.assertEqual(seen[0][1]['X-TOFA-Launch'], self.inference)
+
+    def test_reflected_native_credentials_never_enter_retained_diagnostics(self):
+        def broken(handler):
+            handler.wfile.write(('reflected ' + self.native + ' ' + self.control + ' ' + self.inference + '\r\n\r\n').encode())
+        with self.boundary(response=broken) as (observer, _, registration):
+            self.register(observer, registration)
+            with self.assertRaises(http.client.RemoteDisconnected):
+                self.request(observer, '/responses', [('Authorization', 'Bearer ' + self.native),
+                    ('X-TOFA-Launch', self.inference)], {'model': 'moonshotai/Kimi-K3', 'stream': True, 'input': [], 'tools': []})
+            retained = ''.join(p.read_text() for p in observer.run.iterdir() if p.is_file())
+            self.assertIn('BadStatusLine', retained)
+            for secret in (self.native, self.control, self.inference):
+                self.assertNotIn(secret, retained)
+
+
+class ServiceDeclarationTests(unittest.TestCase):
+    services = {'moonshotai/Kimi-K3': 'token_factory', 'gpt-6-astra': 'native'}
+
+    def test_declared_switching_preserves_native_wire_body_and_reports_enforced_limits(self):
+        helper = SplitAuthorizationTests()
+        raw_requests = []
+        def upstream(handler):
+            raw_requests.append(handler.raw_body)
+            body = json.loads(handler.raw_body)
+            event = {'type': 'response.completed', 'response': {'model': body['model'], 'output': [],
+                     'usage': {'input_tokens': 3, 'output_tokens': 2}}}
+            handler.send_response(200); handler.end_headers()
+            handler.wfile.write(('data: ' + json.dumps(event) + '\n\n').encode())
+        with helper.boundary(response=upstream, model_services=self.services) as (observer, seen, registration):
+            helper.register(observer, registration)
+            headers = [('Authorization', 'Bearer ' + helper.native), ('X-TOFA-Launch', helper.inference)]
+            factory = {'model': 'moonshotai/Kimi-K3', 'stream': True, 'input': [], 'tools': [],
+                       'max_output_tokens': 5000, 'parallel_tool_calls': True}
+            native = {'model': 'gpt-6-astra', 'stream': True, 'input': [], 'tools': [],
+                      'parallel_tool_calls': True, 'client_metadata': {'x-codex-turn-metadata': '{"request_kind":"turn"}'}}
+            raw = json.dumps(native, indent=3).encode()
+            for body, payload in ((factory, None), (None, raw), (factory, None)):
+                status, data = helper.request(observer, '/responses', headers, body, raw=payload)
+                self.assertEqual(status, 200, data)
+            self.assertEqual([body['model'] for _, _, body in seen], list(self.services) + ['moonshotai/Kimi-K3'])
+            self.assertEqual(raw_requests[1], raw)
+            self.assertNotIn('max_output_tokens', seen[1][2])
+            self.assertTrue(seen[1][2]['parallel_tool_calls'])
+            self.assertEqual(seen[0][2]['max_output_tokens'], 4096)
+            self.assertFalse(seen[0][2]['parallel_tool_calls'])
+            native_record = observer.records[1]
+            self.assertEqual(native_record['service'], 'native')
+            self.assertEqual(native_record['limit_enforcement'], {
+                'wall_clock': 'enforced', 'requests': 'enforced', 'bytes': 'enforced',
+                'output_tokens': 'observed_usage', 'upstream_output_cap': None})
+            self.assertTrue(native_record['completed'])
+
+    def test_native_review_retains_origin_across_other_thread_and_service(self):
+        helper = SplitAuthorizationTests()
+        def upstream(handler):
+            body = json.loads(handler.raw_body)
+            handler.send_response(200); handler.end_headers()
+            handler.wfile.write(('data: ' + json.dumps({'type': 'response.completed',
+                'response': {'model': body['model'], 'output': [], 'usage': {'output_tokens': 2}}}) + '\n\n').encode())
+        with helper.boundary(response=upstream, model_services=self.services) as (observer, seen, registration):
+            helper.register(observer, registration)
+            headers = [('Authorization', 'Bearer ' + helper.native), ('X-TOFA-Launch', helper.inference)]
+            for model, turn in [('gpt-6-astra', 'origin-turn'), ('moonshotai/Kimi-K3', 'subsequent-turn')]:
+                body = {'model': model, 'stream': True, 'input': [], 'tools': [],
+                        'client_metadata': {'thread_id': 'origin-thread', 'turn_id': turn}}
+                status, data = helper.request(observer, '/responses', headers, body)
+                self.assertEqual(status, 200, data)
+            review = BoundaryTests.developer_review('gpt-6-astra')
+            raw = json.dumps(review, indent=2).encode()
+            status, data = helper.request(observer, '/responses', headers, None, raw=raw)
+            self.assertEqual(status, 200, data)
+            self.assertEqual(observer.records[-1]['service'], 'native')
+            self.assertEqual(observer.records[-1]['role'], 'guardian')
+            self.assertNotIn('max_output_tokens', seen[-1][2])
+            self.assertEqual(seen[-1][2], review)
+        with helper.boundary(model_services=self.services) as (observer, seen, registration):
+            helper.register(observer, registration)
+            status, data = helper.request(observer, '/responses', headers, review)
+            self.assertEqual(status, 400, data)
+            self.assertEqual(observer.records[-1]['rejection_category'], 'review_origin_unavailable')
+
+    def test_service_declarations_are_bounded_and_native_contracts_fail_before_forwarding(self):
+        helper = SplitAuthorizationTests()
+        for declaration in ({}, {'gpt-6-astra': 'native'}, {'moonshotai/Kimi-K3': 'https://arbitrary.invalid'},
+                            {'moonshotai/Kimi-K3': None}, [('moonshotai/Kimi-K3', 'token_factory')],
+                            dict(self.services, **{'x' * 513: 'native'}),
+                            dict(self.services, **{str(i): 'native' for i in range(128)})):
+            with self.subTest(declaration_type=type(declaration).__name__), self.assertRaisesRegex(ValueError, 'model_services'):
+                with helper.boundary(model_services=declaration): pass
+        native = {'model': 'gpt-6-astra', 'stream': True, 'input': [], 'tools': []}
+        changes = [
+            {'max_output_tokens': 4097}, {'max_output_tokens': True},
+            {'parallel_tool_calls': 'true'}, {'previous_response_id': 'previous'},
+            {'client_metadata': {'x-codex-turn-metadata': '{"request_kind":"unknown"}'}},
+            {'client_metadata': {'x-codex-turn-metadata': '{"thread_source":"future_helper"}'}},
+            {'client_metadata': {'x-codex-turn-metadata': '{"turn_trigger":"guardian"}'}},
+            {'client_metadata': {'x-openai-subagent': 'guardian'}},
+            *[{'client_metadata': {'x-codex-turn-metadata': json.dumps({'thread_source': source})}}
+              for source in ('cli', 'vscode', 'appServer')],
+            {'client_metadata': {'x-codex-turn-metadata': '{"turn_trigger":"user"}'}},
+            {'model': 'undeclared/model'},
+        ]
+        for change in changes:
+            with self.subTest(fields=list(change)), helper.boundary(model_services=self.services) as (observer, seen, registration):
+                helper.register(observer, registration)
+                body = dict(native, **change)
+                status, data = helper.request(observer, '/responses', [('Authorization', 'Bearer ' + helper.native),
+                    ('X-TOFA-Launch', helper.inference)], body)
+                self.assertEqual(status, 400, data)
+                self.assertFalse(any(path == '/responses' for path, _, _ in seen))
+        with helper.boundary() as (observer, seen, registration):
+            helper.register(observer, registration)
+            status, data = helper.request(observer, '/responses', [('X-TOFA-Launch', helper.inference)], native)
+            self.assertEqual(status, 400, data)
+            self.assertFalse(any(path == '/responses' for path, _, _ in seen))
+
+    def test_native_usage_must_be_observed_and_over_budget_stops_subsequent_requests(self):
+        helper = SplitAuthorizationTests()
+        for usage, cap, reason in ((None, None, 'native_output_usage_unobserved'),
+                                  ({'input_tokens': 3}, None, 'native_output_usage_unobserved'),
+                                  ({'output_tokens': -1}, None, 'native_output_usage_unobserved'),
+                                  ({'output_tokens': True}, None, 'native_output_usage_unobserved'),
+                                  ({'output_tokens': 4097}, None, 'provider_output_limit_violation'),
+                                  ({'output_tokens': 129}, 128, 'provider_output_limit_violation')):
+            def upstream(handler):
+                response = {'model': 'gpt-6-astra', 'output': []}
+                if usage is not None: response['usage'] = usage
+                handler.send_response(200); handler.end_headers()
+                handler.wfile.write(('data: ' + json.dumps({'type': 'response.completed', 'response': response}) + '\n\n').encode())
+            with self.subTest(usage=usage, cap=cap), helper.boundary(response=upstream, model_services=self.services) as (observer, seen, registration):
+                helper.register(observer, registration)
+                body = {'model': 'gpt-6-astra', 'stream': True, 'input': [], 'tools': []}
+                if cap is not None: body['max_output_tokens'] = cap
+                headers = [('Authorization', 'Bearer ' + helper.native), ('X-TOFA-Launch', helper.inference)]
+                helper.request(observer, '/responses', headers, body)
+                self.assertEqual(observer.reason, reason)
+                self.assertFalse(observer.records[0]['completed'])
+                status, _ = helper.request(observer, '/responses', headers, body)
+                self.assertEqual(status, 401)
+                self.assertEqual(len([path for path, _, _ in seen if path == '/responses']), 1)
+
+    def test_native_protocol_headers_reach_only_registered_adapter_without_arbitrary_headers(self):
+        helper = SplitAuthorizationTests()
+        forwarded = {'OpenAI-Beta': 'responses=fixture', 'Originator': 'codex_fixture',
+                     'Session-Id': 'fixture-session', 'X-Client-Request-Id': 'fixture-request',
+                     'X-Codex-Turn-State': 'fixture-turn-state', 'X-Codex-Turn-Metadata': '{"request_kind":"turn"}',
+                     'Thread-Id': 'fixture-thread', 'User-Agent': 'fixture-engine',
+                     'X-Codex-Beta-Features': 'fixture-feature', 'X-Codex-Window-Id': 'fixture-window',
+                     'X-Openai-Internal-Codex-Responses-Lite': 'true'}
+        def upstream(handler):
+            event = {'type': 'response.completed', 'response': {'model': 'gpt-6-astra', 'output': [], 'usage': {'output_tokens': 2}}}
+            handler.send_response(200); handler.end_headers()
+            handler.wfile.write(('data: ' + json.dumps(event) + '\n\n').encode())
+        with helper.boundary(response=upstream, model_services=self.services) as (observer, seen, registration):
+            helper.register(observer, registration)
+            headers = [('Authorization', 'Bearer ' + helper.native), ('X-TOFA-Launch', helper.inference),
+                       ('Cookie', 'private-cookie'), ('X-Arbitrary-Upstream', 'https://arbitrary.invalid'), *forwarded.items()]
+            status, data = helper.request(observer, '/responses', headers,
+                {'model': 'gpt-6-astra', 'stream': True, 'input': [], 'tools': []})
+            self.assertEqual(status, 200, data)
+            for name, value in forwarded.items(): self.assertEqual(seen[0][1].get(name), value)
+            self.assertNotIn('Cookie', seen[0][1])
+            self.assertNotIn('X-Arbitrary-Upstream', seen[0][1])
+            retained = ''.join(p.read_text() for p in observer.run.iterdir() if p.is_file())
+            for value in ('private-cookie', 'fixture-turn-state', 'fixture-session', 'fixture-request'):
+                self.assertNotIn(value, retained)
+
+    def test_native_turn_state_response_is_preserved_without_retaining_or_forwarding_other_headers(self):
+        helper = SplitAuthorizationTests()
+        for model in self.services:
+            def upstream(handler):
+                event = {'type': 'response.completed', 'response': {'model': model, 'output': [], 'usage': {'output_tokens': 2}}}
+                handler.send_response(200)
+                handler.send_header('X-Codex-Turn-State', 'private-next-turn-state')
+                handler.send_header('Set-Cookie', 'private-cookie')
+                handler.send_header('X-Arbitrary-Response', 'private-extra')
+                handler.end_headers()
+                handler.wfile.write(('data: ' + json.dumps(event) + '\n\n').encode())
+            with self.subTest(model=model), helper.boundary(response=upstream, model_services=self.services) as (observer, seen, registration):
+                helper.register(observer, registration)
+                connection = http.client.HTTPConnection('127.0.0.1', observer.port, timeout=3)
+                try:
+                    connection.request('POST', '/responses', json.dumps({'model': model, 'stream': True, 'input': [], 'tools': []}),
+                        {'X-TOFA-Launch': helper.inference})
+                    response = connection.getresponse()
+                    self.assertEqual(response.getheader('X-Codex-Turn-State'),
+                        'private-next-turn-state' if self.services[model] == 'native' else None)
+                    self.assertIsNone(response.getheader('Set-Cookie'))
+                    self.assertIsNone(response.getheader('X-Arbitrary-Response'))
+                    response.read()
+                finally: connection.close()
+                retained = ''.join(p.read_text() for p in observer.run.iterdir() if p.is_file())
+                for value in ('private-next-turn-state', 'private-cookie', 'private-extra'):
+                    self.assertNotIn(value, retained)
+
+    def test_native_declared_main_accepts_known_client_origins_and_triggers(self):
+        helper = SplitAuthorizationTests()
+        def upstream(handler):
+            event = {'type': 'response.completed', 'response': {'model': 'gpt-6-astra', 'output': [], 'usage': {'output_tokens': 2}}}
+            handler.send_response(200); handler.end_headers()
+            handler.wfile.write(('data: ' + json.dumps(event) + '\n\n').encode())
+        with helper.boundary(response=upstream, model_services=self.services) as (observer, seen, registration):
+            helper.register(observer, registration)
+            for source in (None, 'user'):
+                for trigger in (None, 'composer'):
+                    body = {'model': 'gpt-6-astra', 'stream': True, 'input': [], 'tools': [],
+                        'client_metadata': {'x-codex-turn-metadata': json.dumps({
+                            'request_kind': 'turn', 'thread_source': source, 'turn_trigger': trigger})}}
+                    status, data = helper.request(observer, '/responses', [('X-TOFA-Launch', helper.inference)], body)
+                    self.assertEqual(status, 200, data)
+                    self.assertEqual(seen[-1][2], body)
+
+    def test_native_response_turn_state_is_bounded_and_unambiguous(self):
+        helper = SplitAuthorizationTests()
+        for values in (['one', 'two'], ['x' * 8193], ['state\twith-control']):
+            def upstream(handler):
+                handler.send_response(200)
+                for value in values: handler.send_header('X-Codex-Turn-State', value)
+                handler.end_headers()
+            with self.subTest(lengths=[len(value) for value in values]), helper.boundary(response=upstream, model_services=self.services) as (observer, seen, registration):
+                helper.register(observer, registration)
+                with self.assertRaises(http.client.RemoteDisconnected):
+                    helper.request(observer, '/responses', [('X-TOFA-Launch', helper.inference)],
+                        {'model': 'gpt-6-astra', 'stream': True, 'input': [], 'tools': []})
+                self.assertFalse(observer.records[0]['completed'])
+                self.assertEqual(observer.records[0]['transport_failure']['stage'], 'upstream_headers')
+
+    def test_declared_native_lane_requires_v2_and_unambiguous_wire_model(self):
+        helper = SplitAuthorizationTests()
+        with helper.boundary(model_services=self.services) as (observer, seen, registration):
+            helper.register(observer, {'endpoint': registration['endpoint'], 'token': 'legacy-client'})
+            status, data = helper.request(observer, '/responses', [('Authorization', 'Bearer legacy-client')],
+                {'model': 'gpt-6-astra', 'stream': True, 'input': [], 'tools': []})
+            self.assertEqual(status, 400, data)
+            self.assertFalse(any(path == '/responses' for path, _, _ in seen))
+        with helper.boundary(model_services=self.services) as (observer, seen, registration):
+            helper.register(observer, registration)
+            status, data = helper.request(observer, '/responses', [('X-TOFA-Launch', helper.inference)],
+                raw=b'{"model":"moonshotai/Kimi-K3","model":"gpt-6-astra","stream":true,"input":[],"tools":[]}')
+            self.assertEqual(status, 400, data)
+            self.assertFalse(any(path == '/responses' for path, _, _ in seen))
 
 
 if __name__ == '__main__':

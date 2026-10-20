@@ -19,6 +19,10 @@ The Nebius inference service that supplies models to target clients launched by
 this tool.
 _Avoid_: Local model runtime
 
+**Native account**:
+The target client's signed-in account with its own service, distinct from the
+Token Factory credentials used for inference through the launcher.
+
 **Direct connection**:
 A target client's inference connection straight to Token Factory, without a
 launcher-provided request adapter.

@@ -18,6 +18,7 @@ import (
 	"net/url"
 	"reflect"
 	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -26,13 +27,14 @@ import (
 const maxAdapterBody = 16 << 20
 
 type requestAdapter struct {
-	endpoint string
-	token    string
-	server   *http.Server
-	cancel   context.CancelFunc
-	context  context.Context
-	done     chan error
-	desktop  atomic.Pointer[desktopRoute]
+	endpoint       string
+	token          string
+	inferenceToken string
+	server         *http.Server
+	cancel         context.CancelFunc
+	context        context.Context
+	done           chan error
+	desktop        atomic.Pointer[desktopRoute]
 }
 
 func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, guardian string) (*requestAdapter, error) {
@@ -46,7 +48,7 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 	}
 	query := url.Values{"ai_project_id": {project}}
 	upstream.RawQuery = query.Encode()
-	secret := make([]byte, 32)
+	secret := make([]byte, 64)
 	if _, err := rand.Read(secret); err != nil {
 		return nil, errors.New("could not generate adapter credential")
 	}
@@ -59,7 +61,10 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 		return nil, errors.New("could not start loopback request adapter")
 	}
 	ctx, cancel := context.WithCancel(ctx)
-	adapter := &requestAdapter{endpoint: "http://" + listener.Addr().String(), token: hex.EncodeToString(secret), cancel: cancel, context: ctx, done: make(chan error, 1)}
+	adapter := &requestAdapter{endpoint: "http://" + listener.Addr().String(), token: hex.EncodeToString(secret[:32]), cancel: cancel, context: ctx, done: make(chan error, 1)}
+	if a.nativeAccountRoute {
+		adapter.inferenceToken = hex.EncodeToString(secret[32:])
+	}
 	var noticeMu sync.Mutex
 	notice := func(message string) {
 		if selectedModel != "" {
@@ -105,6 +110,9 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 			return nil
 		},
 	}
+	nativeProxy := nativeResponsesProxy(transport)
+	origins := reviewOrigins{parent: ctx}
+	var qualificationRequests atomic.Int64
 	var approvalNotice sync.Once
 	var titleNotice sync.Once
 	var reasoningNotice sync.Once
@@ -119,8 +127,25 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 		ErrorLog:          log.New(io.Discard, "", 0),
 		BaseContext:       func(net.Listener) context.Context { return ctx },
 		Handler: http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-			if subtle.ConstantTimeCompare([]byte(request.Header.Get("Authorization")), []byte("Bearer "+adapter.token)) != 1 {
+			if !adapter.authorized(request) {
 				http.Error(writer, "request adapter: unauthorized", http.StatusUnauthorized)
+				return
+			}
+			if a.qualificationRequests > 0 && request.Method == http.MethodPost && request.URL.RequestURI() == "/responses" && qualificationRequests.Add(1) > int64(a.qualificationRequests) {
+				http.Error(writer, "qualification request budget exhausted; no retry", http.StatusTooManyRequests)
+				return
+			}
+			if adapter.inferenceToken != "" && request.Method == http.MethodPost && request.URL.RequestURI() == "/desktop-review-cancel" {
+				body, err := io.ReadAll(http.MaxBytesReader(writer, request.Body, 1024))
+				if err != nil {
+					http.Error(writer, "invalid bounded review cancellation", http.StatusBadRequest)
+					return
+				}
+				if err = origins.cancelTurn(body); err != nil {
+					http.Error(writer, err.Error(), http.StatusBadRequest)
+					return
+				}
+				writer.WriteHeader(http.StatusNoContent)
 				return
 			}
 			if a.evaluation != nil && request.Method == http.MethodPost && request.URL.RequestURI() == "/evaluation-stop" {
@@ -186,6 +211,22 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 				} else {
 					http.Error(writer, "request adapter: could not read request", http.StatusBadRequest)
 				}
+				return
+			}
+			native, routeErr := origins.route(body, adapter.desktop.Load(), request.Header.Get("X-TOFA-Launch") != "")
+			if routeErr == nil && request.Header.Get("X-TOFA-Launch") != "" {
+				var finish func()
+				request, finish, routeErr = origins.bindReview(body, request)
+				if routeErr == nil {
+					defer finish()
+				}
+			}
+			if routeErr != nil {
+				notice(routeErr.Error())
+				http.Error(writer, "request adapter: "+routeErr.Error(), http.StatusBadRequest)
+				return
+			} else if native {
+				serveNativeMain(nativeProxy, writer, request, body)
 				return
 			}
 			body, err = normalizeHistory(body)
@@ -339,6 +380,7 @@ func (a *App) startAdapter(ctx context.Context, project, key, selectedModel, gua
 	fmt.Fprintln(a.Out, "Route: per-launch Responses request adapter (assistant-history repair).")
 	if selectedModel != "" {
 		fmt.Fprintf(a.Out, "Naming: %s (automatic desktop titles; independent of main and Guardian; no fallback).\n", desktopNamingModel)
+		fmt.Fprintln(a.Out, "Automatic-title context, including native GPT context, is sent to Token Factory during this launch.")
 		fmt.Fprintln(a.Out, "Automatic title routing: recognized gpt-5.6-luna/gpt-6-luna thread_title requests use the naming model; tool-free; provider-default reasoning; native title schema retained. Native reasoning inclusion and cache hints are omitted. Other auxiliary requests remain unsupported.")
 	}
 	go func() {
@@ -620,15 +662,56 @@ func approvalReviewFormat(payload map[string]json.RawMessage) (map[string]json.R
 		delete(allowed, name)
 	}
 	var instructions *string
-	if json.Unmarshal(payload["instructions"], &instructions) != nil || instructions == nil {
+	if len(payload["instructions"]) != 0 && json.Unmarshal(payload["instructions"], &instructions) != nil {
 		return nil, nil, nil, false
+	}
+	if instructions == nil {
+		if !hasDeveloperGuardianPolicy(payload) {
+			return nil, nil, nil, false
+		}
+		// Keep native policy in input, preserving its role and order. Kimi's
+		// final-answer schema guidance can occupy the otherwise-absent field.
+		instructions = new(string)
 	}
 	return textOptions, format, instructions, true
 }
 
-// The pinned engine sends no role metadata with review requests. Recognize
-// either its assessment fields or its inspection-tool inventory before admitting
-// an ordinary main request, so a changed review cannot bypass the role gate.
+// The newer native contract carries policy in the leading developer message
+// and identifies the originating work explicitly. This is an additional known
+// review shape, not permission to accept an arbitrary absent/null instructions field.
+func hasDeveloperGuardianPolicy(payload map[string]json.RawMessage) bool {
+	var metadata map[string]string
+	if json.Unmarshal(payload["client_metadata"], &metadata) != nil ||
+		metadata["x-openai-subagent"] != "guardian" ||
+		strings.TrimSpace(metadata["x-codex-parent-thread-id"]) == "" ||
+		strings.TrimSpace(metadata["parent_turn_id"]) == "" {
+		return false
+	}
+	var input []json.RawMessage
+	if json.Unmarshal(payload["input"], &input) != nil || len(input) == 0 {
+		return false
+	}
+	var policy struct {
+		Type, Role string
+		Content    []struct {
+			Type string
+			Text *string
+		}
+	}
+	if json.Unmarshal(input[0], &policy) != nil || policy.Type != "message" || policy.Role != "developer" || len(policy.Content) == 0 {
+		return false
+	}
+	for _, content := range policy.Content {
+		if content.Type != "input_text" || content.Text == nil || strings.TrimSpace(*content.Text) == "" {
+			return false
+		}
+	}
+	return true
+}
+
+// Older engines omit review role metadata. Recognize assessment fields or the
+// inspection-tool inventory before admitting an ordinary main request, so a
+// changed review cannot bypass the role gate.
 func isApprovalReviewCandidate(payload map[string]json.RawMessage) bool {
 	var text struct {
 		Format struct {
@@ -653,4 +736,34 @@ func isApprovalReviewCandidate(payload map[string]json.RawMessage) bool {
 		delete(names, tool.Name)
 	}
 	return true
+}
+
+// Control and inference are distinct capabilities. Legacy bearer inference is
+// retained only for recorded nebius-tofa conversations, never for control.
+func (adapter *requestAdapter) authorized(request *http.Request) bool {
+	auth := request.Header.Values("Authorization")
+	headers := request.Header.Values("X-TOFA-Launch")
+	if len(auth) > 1 || len(headers) > 1 {
+		return false
+	}
+	equal := func(actual, want string) bool {
+		return len(actual) == len(want) && subtle.ConstantTimeCompare([]byte(actual), []byte(want)) == 1
+	}
+	if adapter.inferenceToken == "" {
+		return len(headers) == 0 && len(auth) == 1 && equal(auth[0], "Bearer "+adapter.token)
+	}
+	control := request.URL.Path == "/desktop-launch" || request.URL.Path == "/evaluation-stop" || request.URL.Path == "/desktop-review-cancel"
+	if control {
+		return len(headers) == 0 && len(auth) == 1 && equal(auth[0], "Bearer "+adapter.token)
+	}
+	if len(headers) == 1 {
+		if len(auth) == 1 && (!strings.HasPrefix(auth[0], "Bearer ") || len(auth[0]) <= 7 || len(auth[0]) > 8192 || strings.ContainsAny(auth[0][7:], " \t\r\n,")) {
+			return false
+		}
+		if len(auth) == 1 && (equal(auth[0], "Bearer "+adapter.token) || equal(auth[0], "Bearer "+adapter.inferenceToken)) {
+			return false
+		}
+		return equal(headers[0], adapter.inferenceToken)
+	}
+	return len(auth) == 1 && equal(auth[0], "Bearer "+adapter.inferenceToken)
 }
