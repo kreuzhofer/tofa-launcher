@@ -98,6 +98,39 @@ func TestDesktopDeclaredCandidatePreservesProtectedPlugin(t *testing.T) {
 		t.Fatalf("replay admitted: %v", err)
 	}
 }
+
+func TestDesktopSnapshotAcceptsIndependentCachedPluginVersions(t *testing.T) {
+	bundle, _ := nativeCandidateFixture(t)
+	home := filepath.Join(os.Getenv("HOME"), ".codex")
+	files := map[string][]byte{}
+	for _, version := range []string{"26.1007.71326", "26.1001.10000"} {
+		root := filepath.Join(home, "plugins/cache/openai-bundled/unified-computer-use", version)
+		manifest := filepath.Join(root, ".codex-plugin/plugin.json")
+		mcp := filepath.Join(root, ".mcp.json")
+		files[manifest] = []byte(`{"name":"unified-computer-use","version":"` + version + `"}`)
+		raw, err := json.Marshal(map[string]any{"mcpServers": map[string]any{"cua_repl": map[string]any{"env": map[string]any{"CODEX_CLI_PATH": filepath.Join(bundle, "Contents/Resources/codex")}}}})
+		if err != nil {
+			t.Fatal(err)
+		}
+		files[mcp] = raw
+	}
+	for path, raw := range files {
+		if err := os.MkdirAll(filepath.Dir(path), 0700); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(path, raw, 0600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	app, _ := adapterFixture(t, nil, nil)
+	declaredCandidateObserver(t, app, bundle) // Calls the public snapshot entry point.
+	for path, expected := range files {
+		raw, err := os.ReadFile(path)
+		if err != nil || !bytes.Equal(raw, expected) {
+			t.Fatalf("snapshot modified plugin %s: %v", path, err)
+		}
+	}
+}
 func TestDesktopDeclaredCandidateRejectsDriftBeforeNativeStart(t *testing.T) {
 	bundle, capture := nativeCandidateFixture(t)
 	app, _ := adapterFixture(t, nil, nil)

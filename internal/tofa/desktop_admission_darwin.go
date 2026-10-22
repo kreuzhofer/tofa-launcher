@@ -14,7 +14,6 @@ import (
 	"io"
 	"io/fs"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"reflect"
 	"sort"
@@ -393,8 +392,12 @@ func hashAdmissionFile(path string) (string, error) {
 	}
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
-func admissionTree(root, engine, bridge, pluginFile string) (string, error) {
+func admissionTree(root, engine, bridge string, pluginFiles ...string) (string, error) {
 	entries := map[string]string{}
+	nativeMCP := map[string]bool{}
+	for _, path := range pluginFiles {
+		nativeMCP[path] = true
+	}
 	e := filepath.WalkDir(root, func(path string, d fs.DirEntry, e error) error {
 		if errors.Is(e, os.ErrNotExist) && path == root {
 			entries["."] = "absent"
@@ -436,7 +439,7 @@ func admissionTree(root, engine, bridge, pluginFile string) (string, error) {
 		if e != nil || !info.Mode().IsRegular() {
 			return admissionError("unsupported resource file")
 		}
-		if path == pluginFile {
+		if nativeMCP[path] {
 			raw, e := readAdmissionBounded(path, 4<<20)
 			if e != nil {
 				return e
@@ -467,6 +470,63 @@ func admissionTree(root, engine, bridge, pluginFile string) (string, error) {
 	}
 	raw, _ := json.Marshal(entries)
 	return digestBytes(raw), nil
+}
+
+// Inventory every installed version rather than inferring an active plugin from
+// the application version. Desktop owns selection. The full cache (including
+// manifests and version paths) remains part of the identity; only recognized
+// engine/owned-bridge references are normalized by admissionTree.
+func desktopCachedMCPFiles(home string) ([]string, error) {
+	root := filepath.Join(home, "plugins/cache/openai-bundled/unified-computer-use")
+	info, err := os.Lstat(root)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	if !info.IsDir() {
+		return nil, admissionError("native MCP cache must be a directory")
+	}
+	entries, err := os.ReadDir(root)
+	if err != nil {
+		return nil, err
+	}
+	var files []string
+	for _, entry := range entries {
+		if entry.Type()&os.ModeSymlink != 0 {
+			return nil, admissionError("native MCP cache symlink unsupported")
+		}
+		if !entry.IsDir() {
+			continue
+		} // Other files are still hashed by admissionTree.
+		version := entry.Name()
+		if !validText(version, 80) {
+			return nil, admissionError("native MCP cache version invalid")
+		}
+		manifestDir := filepath.Join(root, version, ".codex-plugin")
+		manifest := filepath.Join(manifestDir, "plugin.json")
+		mcp := filepath.Join(root, version, ".mcp.json")
+		for _, path := range []string{manifestDir, manifest, mcp} {
+			info, err := os.Lstat(path)
+			if err != nil || (path == manifestDir && !info.IsDir()) || (path != manifestDir && !info.Mode().IsRegular()) {
+				return nil, admissionError("native MCP cache manifest or configuration unavailable")
+			}
+		}
+		raw, err := readAdmissionBounded(manifest, 4<<20)
+		if err != nil {
+			return nil, err
+		}
+		var value struct {
+			Name    string `json:"name"`
+			Version string `json:"version"`
+		}
+		if decodeAdmissionJSON(raw, &value) != nil || value.Name != "unified-computer-use" || value.Version != version {
+			return nil, admissionError("native MCP cache manifest identity mismatch")
+		}
+		files = append(files, mcp)
+	}
+	return files, nil
 }
 
 var qualificationHarnessFiles = []string{"desktop_qualification.py", "capability_observer.py", "capability_evaluation.py", "capability_actions.py", "presentation_calibration.py", "presentation_runtime.py", "presentation_smoke.py", "presentation_synthetic.py", "presentation_preview.py", "capability_runtime.py", "retained_mcp.py", "evaluation_proxy.py", "fixtures/presentation-smoke.mjs"}
@@ -514,20 +574,9 @@ func desktopCompatibilityIdentity(bundle desktopBundle, home, profile, bridge, r
 		}
 		result.Hashes[name] = hash
 	}
-	versionBytes, e := exec.Command("/usr/libexec/PlistBuddy", "-c", "Print :CFBundleShortVersionString", filepath.Join(app, "Contents/Info.plist")).Output()
+	pluginFiles, e := desktopCachedMCPFiles(home)
 	if e != nil {
-		return result, admissionError("native plugin version unavailable")
-	}
-	version := strings.TrimSpace(string(versionBytes))
-	if !validText(version, 80) || strings.ContainsAny(version, "/\\") {
-		return result, admissionError("native plugin version invalid")
-	}
-	pluginRoot := filepath.Join(home, "plugins/cache/openai-bundled/unified-computer-use")
-	pluginFile := filepath.Join(pluginRoot, version, ".mcp.json")
-	if _, e := os.Lstat(pluginRoot); e == nil {
-		if _, e := os.Lstat(pluginFile); e != nil {
-			return result, admissionError("current native MCP plugin path unqualified")
-		}
+		return result, e
 	}
 
 	if _, e := os.Lstat(bridge); e == nil {
@@ -541,7 +590,7 @@ func desktopCompatibilityIdentity(bundle desktopBundle, home, profile, bridge, r
 		return result, admissionError("saved bridge unavailable")
 	}
 	for name, path := range map[string]string{"plugins": filepath.Join(home, "plugins/cache"), "skills": filepath.Join(home, "skills"), "agent_skills": filepath.Join(filepath.Dir(home), ".agents/skills"), "runtime": runtimeRoot} {
-		hash, e := admissionTree(path, bundle.engine, bridge, pluginFile)
+		hash, e := admissionTree(path, bundle.engine, bridge, pluginFiles...)
 		if e != nil {
 			return result, e
 		}
