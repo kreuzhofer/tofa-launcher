@@ -24,6 +24,10 @@ supported boundary, including explicit naming and compaction limitations.
 Historical CLI evidence remains in the [rc2 report](docs/releases/v0.1.0-rc.2.md).
 Claude, other desktop modes and browser OAuth remain outside the current scope.
 
+Maintainers continuing the experimental native-account qualification should use
+the [manual qualification guide](docs/evaluation/native-account-manual-141.md).
+Its candidate is separate from the published release and remains unqualified.
+
 ## Installation
 
 The commands below install the **latest stable release** without a version
