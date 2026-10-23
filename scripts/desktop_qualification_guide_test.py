@@ -156,6 +156,29 @@ class GuideTests(unittest.TestCase):
             self.assertFalse(report['existing_bytes_preserved'])
             self.assertEqual(report['changed'], ['sessions/retained.jsonl'])
 
+    def test_history_cli_rejects_unreadable_directories(self):
+        import subprocess
+        import sys
+        root = Path('/tmp/tofa-presentation-validation')
+        root.mkdir(exist_ok=True, mode=0o700)
+        with tempfile.TemporaryDirectory(dir=root) as temporary:
+            run = Path(temporary)
+            home = run/'home'
+            hidden = home/'sessions/inaccessible'
+            hidden.mkdir(parents=True, mode=0o700)
+            (hidden/'retained.jsonl').write_bytes(b'original history\n')
+            before = run/'before.json'
+            before.write_text(json.dumps({'identity':{'home':str(home)}})); before.chmod(0o600)
+            hidden.chmod(0)
+            try:
+                result = subprocess.run([sys.executable, str(Path(__file__).with_name('desktop_qualification_guide.py')),
+                                         str(run/'kit'),'history-before',str(run)],capture_output=True,text=True,timeout=3)
+                self.assertNotEqual(result.returncode, 0, result.stdout)
+                self.assertIn('Permission denied', result.stderr)
+                self.assertFalse((run/'history-before.json').exists())
+            finally:
+                hidden.chmod(0o700)
+
     def test_history_cli_rejects_special_files_without_hanging(self):
         import os
         import subprocess

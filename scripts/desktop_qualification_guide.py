@@ -119,12 +119,14 @@ def history_digest(path, length):
 def history_before(run):
     home = Path(private_read(run/'before.json')['identity']['home']).resolve()
     entries = {}
+    def traversal_error(error):
+        raise error
     for name in ('sessions', 'archived_sessions'):
         root = home/name
         if root.is_symlink(): raise ValueError('history_symlink_not_supported')
         if not root.exists(): continue
         if not root.is_dir(): raise ValueError('history_directory_required')
-        for current, directories, files in os.walk(root, followlinks=False):
+        for current, directories, files in os.walk(root, followlinks=False, onerror=traversal_error):
             for part in directories + files:
                 path = Path(current)/part
                 if path.is_symlink(): raise ValueError('history_symlink_not_supported')
