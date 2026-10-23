@@ -1392,6 +1392,9 @@ func TestDesktopNativeCandidateAllowsSlowEngineFirstGracefulShutdown(t *testing.
 	if err != nil {
 		t.Fatal(err)
 	}
+	if strings.Count(string(raw), "time.sleep(0.8)") != 1 {
+		t.Fatal("expected exactly one native shutdown delay in fixture")
+	}
 	raw = []byte(strings.Replace(string(raw), "time.sleep(0.8)", "time.sleep(3)", 1))
 	if err := os.WriteFile(application, raw, 0700); err != nil {
 		t.Fatal(err)
