@@ -34,6 +34,30 @@ class GuideTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'collector'):
                 guide.ensure_active(self.run, 123)
 
+    def test_refused_launch_cli_reports_profile_ownership_without_echoing_logs(self):
+        import subprocess
+        import sys
+        root = Path('/tmp/tofa-presentation-validation')
+        root.mkdir(exist_ok=True, mode=0o700)
+        with tempfile.TemporaryDirectory(dir=root) as temporary:
+            run = Path(temporary)
+            (run/'launcher.log').write_text('private unrelated diagnostic\n'
+                'tofa: ordinary desktop profile is already owned or has an unresolved native lock. '
+                'Quit Codex desktop before launching through tofa; resolve unrecognized profile ownership '
+                'in the ordinary client first. No existing process was changed\n')
+            dead = subprocess.Popen([sys.executable, '-c', 'pass'])
+            dead.wait(timeout=3)
+            result = subprocess.run([sys.executable, str(Path(__file__).with_name('desktop_qualification_guide.py')),
+                                     str(run/'kit'),'ready',str(run),str(dead.pid)],capture_output=True,text=True,timeout=3)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn('Desktop profile is in use or has an unresolved native lock', result.stderr)
+            self.assertNotIn('private unrelated diagnostic', result.stderr)
+            report = guide.summary(run)
+            self.assertEqual(report['launcher_refusal'], 'ordinary_profile_owned_or_unresolved_lock')
+            self.assertFalse(report['qualified'])
+            self.assertEqual(report['status'], 'incomplete_collection')
+            self.assertIsNone(report['exit_code'])
+
     def test_observations_are_explicit(self):
         self.assertEqual(guide.outcome('p'), 'passed')
         self.assertEqual(guide.outcome('f'), 'failed')

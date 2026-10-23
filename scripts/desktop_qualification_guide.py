@@ -27,12 +27,28 @@ def alive(pid):
     return True
 
 
+def launcher_refusal(run):
+    log = run/'launcher.log'
+    if not log.exists(): return None
+    # Report a known launcher refusal, never echo arbitrary private diagnostics.
+    with log.open() as stream:
+        for line in stream:
+            if line.startswith('tofa: ordinary desktop profile is already owned or has an unresolved native lock.'):
+                return 'ordinary_profile_owned_or_unresolved_lock'
+    return None
+
+
 def ensure_active(run, pid):
     if (run/'finish.json').exists(): raise ValueError('attempt ended')
     if (run/'declaration.json').exists():
         expiry = datetime.fromisoformat(read(run/'declaration.json')['expires_utc'].replace('Z','+00:00'))
         if datetime.now(timezone.utc) >= expiry: raise ValueError('attempt deadline reached')
-    if not alive(pid): raise ValueError('collector stopped; retain logs for review')
+    if not alive(pid):
+        if launcher_refusal(run):
+            raise ValueError('Desktop profile is in use or has an unresolved native lock. '
+                             'Quit ChatGPT Desktop fully with Cmd-Q before a new attempt. '
+                             'Do not delete locks or retry this consumed attempt; retain logs for review.')
+        raise ValueError('collector stopped; retain logs for review')
 
 
 def outcome(value):
@@ -86,6 +102,7 @@ def summary(run):
     return {
         'schema':'tofa-manual-guide-summary-v1', 'run':str(run), 'qualified':False,
         'status':'awaiting_agent_review' if finish else 'incomplete_collection',
+        'launcher_refusal':launcher_refusal(run),
         'stop':finish.get('stop') if finish else None,
         'exit_code':finish.get('exit_code') if finish else None,
         'process_exited_before_stop':finish.get('process_exited_before_stop') if finish else None,
