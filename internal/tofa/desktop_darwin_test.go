@@ -1364,7 +1364,8 @@ func TestDesktopNativeCandidateEngineExitStopsOwnedApp(t *testing.T) {
 func desktopLifecycleEngineExitStopsOwnedApp(t *testing.T, native bool) {
 	bundle, capture := fixtureDesktopLifecycle(t, native, "engine-exit")
 	app, _ := adapterFixture(t, nil, nil)
-	ctx, cancel := context.WithTimeout(context.Background(), 6*time.Second)
+	// Allow startup plus the bounded native-quit window and owned cleanup.
+	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
 	defer cancel()
 	err := app.RunContext(ctx, append([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}, desktopLifecycleSelection(t, native)...))
 	if err == nil || !strings.Contains(err.Error(), "app-server exited") {
@@ -1379,6 +1380,33 @@ func TestDesktopAllowsEngineFirstGracefulShutdown(t *testing.T) {
 
 func TestDesktopNativeCandidateAllowsEngineFirstGracefulShutdown(t *testing.T) {
 	desktopLifecycleAllowsEngineFirstGracefulShutdown(t, true)
+}
+
+func TestDesktopNativeCandidateAllowsSlowEngineFirstGracefulShutdown(t *testing.T) {
+	bundle, capture := fixtureDesktopLifecycle(t, true, "graceful-engine-first")
+	// A normal native quit can finish its renderer/profile teardown after the
+	// acknowledged app-server has exited. Exercise that process ordering through
+	// the public launch entry point, without changing any launcher internals.
+	application := filepath.Join(bundle, "Contents/MacOS/ChatGPT")
+	raw, err := os.ReadFile(application)
+	if err != nil {
+		t.Fatal(err)
+	}
+	raw = []byte(strings.Replace(string(raw), "time.sleep(0.8)", "time.sleep(3)", 1))
+	if err := os.WriteFile(application, raw, 0700); err != nil {
+		t.Fatal(err)
+	}
+	app, _ := adapterFixture(t, nil, nil)
+	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
+	defer cancel()
+	err = app.RunContext(ctx, append([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}, desktopLifecycleSelection(t, true)...))
+	if err != nil {
+		t.Fatalf("normal quit was classified as engine loss: %v", err)
+	}
+	if _, err := os.Stat(capture + ".graceful-exit"); err != nil {
+		t.Fatalf("native quit was interrupted: %v", err)
+	}
+	assertDesktopWorkerStopped(t, capture)
 }
 
 func desktopLifecycleAllowsEngineFirstGracefulShutdown(t *testing.T, native bool) {

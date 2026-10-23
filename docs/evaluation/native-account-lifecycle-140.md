@@ -6,9 +6,9 @@ Desktop shell, synthetic credentials and owned local upstreams. The history
 matrix drives the installed bundled engine. No installed Desktop application,
 real sign-in inference or user configuration is changed by these tests.
 
-The existing lifecycle implementation handles the candidate route without a new
-manager or restore-on-exit mechanism. This slice adds regression coverage and
-fixture adaptations; it makes no production lifecycle change. The native CI job
+The original lifecycle slice handled the candidate route without a new
+manager or restore-on-exit mechanism. It added regression coverage and
+fixture adaptations; the follow-up below changes bounded shutdown handling. The native CI job
 budget increases from 20 to 30 minutes after run `39293124397` completed all
 macOS test steps but exceeded the aggregate job limit (1205 seconds). Every
 client, ownership, review and observer deadline remains unchanged.
@@ -75,3 +75,30 @@ actual ordinary Desktop behavior. Actual Desktop account/plugin preservation,
 process selection, native crash/restart behavior and visible recovery still need
 #141/#142 qualification. No model capability, presentation preview or release
 pass follows from this fixture matrix. Windows ownership remains a separate gate.
+
+## Clean-exit follow-up (#140)
+
+The host manual clean-exit check on candidate `0262178` completed its Main turn
+and the human account/plugin observations, but the launcher returned
+`owned desktop app-server exited; launch cancelled` after the operator quit.
+That run remains unqualified: title generation and preservation drift were
+independent failures and are not repaired or reclassified by this change.
+
+A public-launch regression uses the existing owned native-client/engine fixture:
+the engine exits first, and the client finishes its normal shutdown three seconds
+later. The previous two-second engine-loss window interrupted the client's quit
+with the same error. No real Desktop or paid model request is used by this test.
+
+The shutdown window is now five seconds. The launcher waits for the owned client's
+actual exit status, including nonzero exits, while continuing ownership and
+cancellation checks. A client still alive after that window is stopped as an
+engine-loss failure. A native exit already observed when the timer fires takes
+precedence over the timer; no replacement engine is adopted. This changes only
+the engine-first drain allowance, not request, startup, human-evaluation or
+signal-escalation deadlines. No shared settings are restored or rewritten.
+
+The new regression and existing graceful-exit, engine-loss and nonzero-exit
+controls passed. This reproduces a concrete shutdown-ordering failure; a fresh
+host manual run is still required to demonstrate that the observed Desktop
+quit completes within the new bound. Actual account/plugin preservation and
+the independent naming budget failure remain with #141/#142.

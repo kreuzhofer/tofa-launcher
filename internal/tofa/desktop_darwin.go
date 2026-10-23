@@ -643,6 +643,12 @@ claimLoop:
 		case <-ctx.Done():
 			return stop(ctx.Err())
 		case <-engineExit:
+			// Prefer an already-observed native exit if both events became ready.
+			select {
+			case err := <-done:
+				return err
+			default:
+			}
 			return stop(errors.New("owned desktop app-server exited; launch cancelled"))
 		case <-startup.C:
 			if !engineSeen {
@@ -684,10 +690,11 @@ claimLoop:
 				}
 			}
 			if engineSeen && !found {
-				// Electron can take longer than a polling interval to finish
-				// after its engine exits. Keep ownership/cancellation checks
-				// active during this bounded wait; never adopt a replacement.
-				shutdown = time.NewTimer(2 * time.Second)
+				// Native quit can drain renderer/profile work after its engine
+				// exits. Allow five seconds for the app's own exit status while
+				// continuing ownership/cancellation checks. A surviving app is
+				// still failed and stopped; never adopt a replacement engine.
+				shutdown = time.NewTimer(5 * time.Second)
 				engineExit = shutdown.C
 			}
 			engineSeen = engineSeen || found
