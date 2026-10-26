@@ -177,3 +177,26 @@ does not disable that behavior or grant a preservation exception. #141 must
 retain and evaluate any such transition, along with its separate prelaunch
 collection repair. No manual run, live account test, installation change or
 production admission is part of this correction.
+
+### Validation of the corrective slice
+
+Implementation commit: `fc33cfa425e94d01aebef2c2f12c43d826c9c8a9`.
+
+- Full `go test -race ./...` passed; the main package completed in 560.727
+  seconds. Tests requiring explicit installed-engine inputs are skipped in this
+  default suite and were exercised separately.
+- The installed mixed-engine regression passed under the race detector in 8.982
+  seconds, covering prerequisite refusal, account verification, provider conflict
+  and the later routing check. Both actual engines operated on disposable homes.
+- The focused authorization, managed-policy, declaration, control/inference
+  isolation and bundled-engine transport tests passed. `go vet ./...` passed.
+- All 24 qualification collector/guide Python tests passed. The collector needed
+  a rerun outside the filesystem sandbox to bind its owned loopback fixture;
+  the initial sandbox denial is retained separately from the passing result.
+- Independent Standards and Spec reviews reported no findings against baseline
+  `784c0b0663940cdca240b7a6738790d7d722c1c6`. Formatting and whitespace checks passed.
+
+Private logs remain in the durable qualification directory. These automated
+results do not qualify native Desktop account/plugin preservation or authorize
+a manual retry; the remaining #141 collection and startup-transition checks
+remain separate.
