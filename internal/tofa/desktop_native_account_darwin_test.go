@@ -95,6 +95,11 @@ func TestDesktopNativeCandidateIsolatesInferenceAndControl(t *testing.T) {
 	if route.InferenceCapability == "" || route.InferenceCapability == child.Env["TOFA_API_KEY"] {
 		t.Fatal("inference capability is absent or grants launch control")
 	}
+	for _, override := range route.Overrides {
+		if strings.HasPrefix(override, "skills.") {
+			t.Fatal("configuration helper changed conversation skill settings")
+		}
+	}
 	for _, tc := range []struct {
 		name, method, path, auth string
 		headers                  []string

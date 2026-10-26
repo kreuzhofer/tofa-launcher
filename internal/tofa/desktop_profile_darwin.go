@@ -104,7 +104,11 @@ type desktopConfigClient struct {
 }
 
 func openDesktopConfig(ctx context.Context, engine, home, profile, workspace, runtimeDir string, overrides ...string) (*desktopConfigClient, error) {
-	command := exec.CommandContext(ctx, engine, "app-server", "-c", "log_dir="+strconv.Quote(filepath.Join(runtimeDir, "logs")), "-c", "sqlite_home="+strconv.Quote(filepath.Join(runtimeDir, "state")))
+	// Configuration helpers never run turns or load skill instructions. Suppress
+	// native system-skill installation only in this helper, keeping the real home
+	// for account and managed policy resolution. Never persist or forward this
+	// override to the Desktop conversation engine.
+	command := exec.CommandContext(ctx, engine, "app-server", "-c", "log_dir="+strconv.Quote(filepath.Join(runtimeDir, "logs")), "-c", "sqlite_home="+strconv.Quote(filepath.Join(runtimeDir, "state")), "-c", "skills.bundled.enabled=false")
 	for _, value := range overrides {
 		command.Args = append(command.Args, "-c", value)
 	}

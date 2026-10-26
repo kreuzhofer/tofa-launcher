@@ -144,6 +144,56 @@ func TestDesktopDeclaredCandidateRejectsDriftBeforeNativeStart(t *testing.T) {
 		t.Fatal("drift launched native process")
 	}
 }
+
+func TestDesktopDeclaredCandidateExplainsPreflightRefusal(t *testing.T) {
+	for _, scenario := range []string{"skills", "expired", "untrusted-key"} {
+		t.Run(scenario, func(t *testing.T) {
+			bundle, capture := nativeCandidateFixture(t)
+			app, _ := adapterFixture(t, nil, nil)
+			observer := declaredCandidateObserver(t, app, bundle)
+			path := filepath.Join(filepath.Dir(observer), "declaration.json")
+			raw, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var declaration map[string]any
+			if err := json.Unmarshal(raw, &declaration); err != nil {
+				t.Fatal(err)
+			}
+			want := "identity mismatched (changed: skills)"
+			if scenario == "skills" {
+				skill := filepath.Join(os.Getenv("HOME"), ".codex/skills/personal/SKILL.md")
+				if err := os.MkdirAll(filepath.Dir(skill), 0700); err != nil {
+					t.Fatal(err)
+				}
+				if err := os.WriteFile(skill, []byte("changed skill"), 0600); err != nil {
+					t.Fatal(err)
+				}
+			} else if scenario == "expired" {
+				declaration["issued_utc"] = time.Now().UTC().Add(-20 * time.Minute)
+				declaration["expires_utc"] = time.Now().UTC().Add(-5 * time.Minute)
+				want = "declaration expired or invalid time window"
+			} else {
+				declaration["identity"].(map[string]any)["hashes"].(map[string]any)["private-user-supplied-key"] = "private-value"
+				want = "identity mismatched (changed: identity metadata)"
+			}
+			raw, err = json.Marshal(declaration)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if err := os.WriteFile(path, raw, 0600); err != nil {
+				t.Fatal(err)
+			}
+			err = app.Run([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--native-account-candidate", "--evaluation-observer", observer})
+			if err == nil || !strings.Contains(err.Error(), want) || strings.Contains(err.Error(), "private-") {
+				t.Fatalf("expected safe %q diagnostic, got %v", want, err)
+			}
+			if _, err := os.Stat(capture); !os.IsNotExist(err) {
+				t.Fatal("refused declaration launched Desktop")
+			}
+		})
+	}
+}
 func TestDesktopQualifiedProofCannotBeCombinedWithCandidate(t *testing.T) {
 	app, _ := adapterFixture(t, nil, nil)
 	err := app.Run([]string{"launch", "codex-desktop", "--model", "moonshotai/Kimi-K3", "--native-account-candidate", "--native-account-proof", "/tmp/missing", "--evaluation-observer", "/tmp/missing"})

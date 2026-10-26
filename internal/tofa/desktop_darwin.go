@@ -431,6 +431,9 @@ func checkDesktopRoutingOverrides(ctx context.Context, engine, workspace string,
 	for _, override := range overrides {
 		args = append(args, "-c", override)
 	}
+	// Like openDesktopConfig, this helper only validates configuration. Do not
+	// refresh shared system skills or add this setting to the live route.
+	args = append(args, "-c", "skills.bundled.enabled=false")
 	command := exec.CommandContext(ctx, engine, args...)
 	command.Env, command.Dir = env, workspace
 	command.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}

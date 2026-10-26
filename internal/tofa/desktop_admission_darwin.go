@@ -186,9 +186,15 @@ func readDesktopDeclaration(path string, id desktopAdmissionIdentity, seconds in
 		return nil, e
 	}
 	_, known := desktopQualificationCases[d.Case]
-	if d.Schema != desktopDeclarationSchema || !known || !validText(d.Attempt, 128) || strings.ContainsAny(d.Attempt, "/\\ ") || root != filepath.Dir(canonical) || !reflect.DeepEqual(d.Identity, id) ||
-		(seconds != 600 && seconds != 900) || d.Seconds != seconds || d.Requests < 1 || d.Requests > 80 || d.Issued.After(now) || now.Sub(d.Issued) > 30*time.Minute || !d.Expires.After(now) || d.Expires.Sub(d.Issued) != time.Duration(seconds)*time.Second {
+	if d.Schema != desktopDeclarationSchema || !known || !validText(d.Attempt, 128) || strings.ContainsAny(d.Attempt, "/\\ ") || root != filepath.Dir(canonical) ||
+		(seconds != 600 && seconds != 900) || d.Seconds != seconds || d.Requests < 1 || d.Requests > 80 {
 		return nil, admissionError("declaration is stale or mismatched")
+	}
+	if d.Issued.After(now) || now.Sub(d.Issued) > 30*time.Minute || !d.Expires.After(now) || d.Expires.Sub(d.Issued) != time.Duration(seconds)*time.Second {
+		return nil, admissionError("declaration expired or invalid time window")
+	}
+	if !reflect.DeepEqual(d.Identity, id) {
+		return nil, admissionError("declaration identity mismatched (changed: " + desktopIdentityChanges(d.Identity, id) + ")")
 	}
 	if e := validateAdmissionScope(root, d); e != nil {
 		return nil, e
@@ -197,6 +203,35 @@ func readDesktopDeclaration(path string, id desktopAdmissionIdentity, seconds in
 		return nil, admissionError("attempt already consumed")
 	}
 	return &desktopAdmission{mode: "candidate", path: canonical, digest: digest, identity: id, declaration: d}, nil
+}
+
+// Only emit fixed category names, never paths, hashes or untrusted JSON keys.
+func desktopIdentityChanges(before, after desktopAdmissionIdentity) string {
+	changed := []string{}
+	for _, field := range []struct{ name, before, after string }{
+		{"source", before.Source, after.Source}, {"home", before.Home, after.Home},
+		{"profile", before.Profile, after.Profile}, {"runtime root", before.Runtime, after.Runtime},
+		{"harness root", before.Harness, after.Harness},
+	} {
+		if field.before != field.after {
+			changed = append(changed, field.name)
+		}
+	}
+	for _, name := range []string{"launcher", "engine", "application", "application_info", "application_archive", "native_transport", "plugins", "skills", "agent_skills", "runtime", "native_catalog", "catalog"} {
+		if before.Hashes[name] != after.Hashes[name] {
+			changed = append(changed, name)
+		}
+	}
+	for _, name := range qualificationHarnessFiles {
+		if before.Hashes["harness/"+name] != after.Hashes["harness/"+name] {
+			changed = append(changed, "harness")
+			break
+		}
+	}
+	if len(changed) == 0 {
+		return "identity metadata"
+	}
+	return strings.Join(changed, ", ")
 }
 func (a *desktopAdmission) consume(now time.Time) error {
 	if a == nil || a.mode != "candidate" {

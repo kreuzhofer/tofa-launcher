@@ -20,12 +20,14 @@ A pre-existing definition of the new identifier is refused; the candidate does
 not overwrite it. The candidate currently supports Token Factory inference only;
 native switching and inactive-history registration are subsequent slices.
 
-Before Desktop startup, the launcher uses native read-only configuration and
-account RPCs, with token refresh disabled, to require an existing ChatGPT account
+Before Desktop startup, the launcher uses native configuration and
+account read RPCs, with token refresh disabled, to require an existing ChatGPT account
 under the native-authenticated provider. It rejects unsupported managed routing
 requirements and conflicting provider definitions. It neither creates credentials
 nor changes authentication modes. Native engine discovery retains the existing
 bundle resolver and compatibility checks, without version-directory literals.
+Read RPCs do not imply side-effect-free process startup; the 26 October correction
+below records the native generated-skill behavior and its helper-only control.
 
 The candidate provider requires native authentication and sends its independent
 inference capability through an environment-backed `X-TOFA-Launch` header. The URL
@@ -97,3 +99,81 @@ attempt failed locally before starting the engine because the host Python lacked
 a hashing convenience function; that preflight failure remains in private evidence. Actual Desktop account/plugin preservation, rendered service labels,
 native previews, crash/update qualification and model comparison remain later
 acceptance gates. No qualification or release claim follows from this document.
+
+## 2026-10-26: preserve system skills during configuration preflight
+
+Starting revision: `784c0b0663940cdca240b7a6738790d7d722c1c6` on the existing
+integration worktree. This correction does not rebuild the previously implemented
+authorization route or repeat the earlier real-account probe.
+
+The previous manual refusal occurred before inference. The retained diagnosis
+found that native account/config startup replaced the generated system-skill
+cache when the standalone CLI and Desktop engine embedded different versions.
+The new public-launch regression uses disposable homes and actual engine startup:
+standalone CLI `0.164.0` seeds the cache, and bundled engine
+`0.163.0-alpha.11.2` performs the launcher checks. Engine paths are explicit test
+inputs; production discovery remains unchanged. The test skips with an explicit
+reason if the selected engines embed identical skills.
+
+The original failure was reproduced twice in 0.64 and 0.53 seconds: the marker
+and two generated openai-docs scripts changed. Configuration, fixture credentials
+and a personal skill are also checked. A normal target-engine control still
+installs its own skills, confirming both the distinct cache versions and the
+absence of a global skill-disable setting.
+
+### Minimal correction and upstream comparison
+
+The native `skills.bundled.enabled=false` override prevents system-skill
+installation in the **short-lived configuration helpers only**. It is applied
+in `openDesktopConfig` and the later routing-validation helper. The latter had
+its own red public-launch regression (2.42 seconds) after the first helper was
+fixed, demonstrating that fixing only the initial account check was insufficient.
+Neither helper runs a conversation. The override is not persisted, placed in
+the live route, or passed to Desktop's conversation engine.
+
+This retains the real home, account lookup, configuration layers and managed
+policy resolution. It needs no credential copy, replacement profile, system-cache
+warm-up, snapshot restoration or preservation-check exclusion. Prerequisite and
+provider-conflict refusals remain active. Exact bundled-engine discovery is retained.
+
+Ollama's [isolated catalog probe](https://github.com/ollama/ollama/blob/66ab8482e08035a3238dff04a5739c4371c61bfe/cmd/launch/codex_app.go#L1480-L1622)
+was inspected. That path copies auth/cache files and does not establish equivalent
+ordinary-home account/managed-policy semantics. The narrower process-only native
+control was tested first and reproduced the required preservation, so no separate
+home projection or credential-copy mechanism was added. This is a tested local
+alternative, not a claim that an isolated signed-in probe is impossible.
+
+The native [skills configuration parser](https://github.com/openai/codex/blob/970111f6cb62cc02fe36a82ea7d71b37a2889c97/codex-rs/config/src/skills_config.rs)
+and [host skills service](https://github.com/openai/codex/blob/970111f6cb62cc02fe36a82ea7d71b37a2889c97/codex-rs/ext/skills/src/host_service.rs)
+corroborate the control. These sources do not establish the exact installed
+binary's provenance; the installed-engine regressions establish its observed behavior.
+
+Declaration diagnostics now distinguish expiration/invalid time windows from
+identity mismatches and name fixed categories such as `skills`. Paths, hash
+values and user-supplied field names are not emitted. Unknown identity fields
+still fail closed, with a generic identity-metadata category.
+
+### Reproduction and limits
+
+With Go and both test engine paths configured, the focused command is:
+
+```sh
+go test ./internal/tofa -run '^(TestDesktopNativePreflightPreservesOtherEngineSkills|TestDesktopDeclaredCandidateExplainsPreflightRefusal|TestDesktopNativeCandidateIsolatesInferenceAndControl)$' -count=1 -v
+```
+
+Set `TOFA_TEST_DESKTOP_ENGINE` to the discovered bundled executable and
+`TOFA_TEST_OTHER_ENGINE` to an installed engine with distinct embedded skills.
+The tests never use the operator's account: account fixtures use synthetic tokens,
+file-only storage and owned local HTTP services. The signed-in-shaped fixture
+demonstrates native account parsing and prerequisite success, not real signed-in
+inference. The existing managed-policy fixture checks remain required; an attempted
+home-local `requirements.toml` experiment was not recognized as a managed source
+by this installed engine and was not retained as a purported passing policy test.
+
+The later-routing regression uses a fake Desktop/worker and real native
+configuration helpers. It does not launch the installed Desktop UI. Normal
+Desktop conversation startup can still refresh its generated cache; this fix
+does not disable that behavior or grant a preservation exception. #141 must
+retain and evaluate any such transition, along with its separate prelaunch
+collection repair. No manual run, live account test, installation change or
+production admission is part of this correction.
