@@ -42,12 +42,30 @@ logs without displaying arbitrary private diagnostics. Normal completion,
 cancellation, collector failure before process creation, observer-drain failure,
 snapshot failure and missing-route failure are covered by owned fixtures.
 
-Focused validation: all 16 collector and 16 guide tests passed. These tests
+Focused validation: all 16 collector and 17 guide tests passed. These tests
 exercise actual local observer servers, disposable launcher subprocesses and
 the guide CLI; none launches the installed Desktop or uses the real account.
-The full repository race suite and independent review results are recorded
-separately when completed. No actual Desktop lifecycle qualification follows
-from these automated results.
+
+Implementation commits: `0ca05a4` and `366201a`. Full `go test -race ./...`
+passed (main package: 517.059 seconds), as did `go vet ./...`, 47 observer tests,
+six build tests, Python syntax, shell syntax and whitespace checks. The final
+guide correction was followed by both collector and guide tests. The evaluation
+suite ran 26 tests; two cases of one test failed because the test PATH omitted
+installed Node. That test passed with Node restored to the test PATH. An extra
+broad Python discovery invocation was stopped and is not counted as a passing
+suite; its initial build failures were reproduced as missing Go on PATH, then
+all six build tests passed with the existing pinned toolchain. Failed invocation
+logs remain in the durable private diagnosis directory.
+
+Standards review: no findings. Spec review found missing top-level identity
+differences; a red regression reproduced the omission and disclosure of unknown
+hash keys. The correction reports fixed categories, including a generic category
+for unknown metadata. Both reviews were repeated for that correction and have
+no remaining findings against baseline `cb7fdd7`.
+
+No actual Desktop lifecycle qualification follows from these automated results.
+The production guard, installed settings, account credentials, skills and private
+wizard candidate were not changed. Nothing was published or merged by this slice.
 
 ## Earlier candidate and guide
 
