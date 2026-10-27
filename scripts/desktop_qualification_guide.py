@@ -93,6 +93,24 @@ def check(kit):
     print(roots[0].parent)
 
 
+def identity_changes(before, after):
+    # Fixed categories only: neither paths, values nor arbitrary JSON keys are
+    # suitable for the displayed summary. Full private snapshots stay retained.
+    fields = {'source_revision':'source', 'home':'home', 'profile':'profile',
+              'runtime_root':'runtime root', 'harness_root':'harness root'}
+    hashes = {'launcher','engine','application','application_info','application_archive',
+              'native_transport','plugins','skills','agent_skills','runtime','native_catalog','catalog'}
+    changed = set()
+    for key in before.keys() | after.keys():
+        if key != 'hashes' and before.get(key) != after.get(key):
+            changed.add(fields.get(key, 'identity metadata'))
+    left, right = before.get('hashes', {}), after.get('hashes', {})
+    for key in left.keys() | right.keys():
+        if left.get(key) != right.get(key):
+            changed.add(key if key in hashes else 'harness' if key.startswith('harness/') else 'identity metadata')
+    return sorted(changed)
+
+
 def summary(run):
     before = read(run/'before.json') if (run/'before.json').exists() else None
     after = read(run/'after.json') if (run/'after.json').exists() else (
@@ -128,7 +146,7 @@ def summary(run):
         'observer_requests':terminal.get('observer_requests') if terminal else None,
         'identity_equal':before['identity']==after['identity'] if before and after else None,
         'protected_equal':before['protected']==after['protected'] if before and after else None,
-        'identity_drift':changed(before['identity'].get('hashes', {}), after['identity'].get('hashes', {})) if before and after else None,
+        'identity_drift':identity_changes(before['identity'], after['identity']) if before and after else None,
         'protected_drift':changed(before['protected'], after['protected']) if before and after else None,
         'existing_history_bytes_preserved':history['existing_bytes_preserved'] if history else None,
         'history_drift':history['changed'] if history else None,

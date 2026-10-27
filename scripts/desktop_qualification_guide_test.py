@@ -150,6 +150,26 @@ class GuideTests(unittest.TestCase):
         self.assertEqual(result['protected_drift'], ['config.toml'])
         self.assertFalse(result['qualified'])
 
+    def test_summary_names_all_identity_differences_without_private_values_or_keys(self):
+        before = {'source_revision':'old', 'home':'/private/home-before',
+                  'hashes':{'engine':'old', 'harness/private-script.py':'old', 'private-key':'old'}}
+        after = {'source_revision':'new', 'home':'/private/home-after',
+                 'hashes':{'engine':'new', 'harness/private-script.py':'new', 'private-key':'new'}}
+        self.write('before.json', {'identity':before, 'protected':{}})
+        self.write('prelaunch.json', {'identity':after, 'protected':{}})
+        report = guide.summary(self.run)
+        self.assertFalse(report['identity_equal'])
+        self.assertEqual(report['identity_drift'], ['engine','harness','home','identity metadata','source'])
+        self.assertNotIn('private-', json.dumps(report))
+        for field, label in [('profile','profile'), ('runtime_root','runtime root'), ('harness_root','harness root'),
+                             ('private-unknown','identity metadata')]:
+            with self.subTest(field=field):
+                self.write('before.json', {'identity':{field:'private-old'}, 'protected':{}})
+                self.write('prelaunch.json', {'identity':{field:'private-new'}, 'protected':{}})
+                report = guide.summary(self.run)
+                self.assertEqual(report['identity_drift'], [label])
+                self.assertNotIn('private-', json.dumps(report))
+
     def test_history_cli_retains_existing_bytes_and_detects_rewrites(self):
         import os
         import subprocess
