@@ -15,6 +15,7 @@ import re
 import secrets
 import subprocess
 import time
+import traceback
 from datetime import datetime, timezone, timedelta
 
 ROOT = Path('/tmp/tofa-presentation-validation')
@@ -22,6 +23,7 @@ CASES = ('clean-exit', 'repeat-launch', 'launcher-crash', 'native-crash',
          'ordinary-launch', 'bridge-update', 'uninstall-reinstall',
          'service-switching', 'history-resume', 'review-routing',
          'launch-naming', 'runtime-preview')
+COLLECTION_ERRORS = (OSError, ValueError, KeyError, subprocess.SubprocessError, http.client.HTTPException)
 
 
 def digest(path):
@@ -129,24 +131,57 @@ def calibration_process(run, launcher, process, profile):
              'started_utc':read(run/'declaration.json')['issued_utc']})
 
 
-def write_finish(run,plan,process,observer,requested_stop,exited_before_stop):
+def terminal_outcome(plan,process,observer,requested_stop,exited_before_stop):
     # Observer's first terminal outcome is authoritative; a later finish cannot
     # turn scope/budget/disconnection failure into successful collection.
     reason=observer.reason or requested_stop
-    save(run/'after.json',snapshot(plan))
-    save(run/'finish.json',{'schema':'tofa-native-account-finish-v1','stop':reason,
+    return {'schema':'tofa-native-account-finish-v1','stop':reason,
          'finished_utc':utc(stamp()),'exit_code':process.returncode if process else None,
          'observer_stop':observer.reason,'observer_requests':len(observer.records),
          'stop_acknowledged':observer.stop_acknowledged,
          'process_exited_before_stop':exited_before_stop,
          'scope':plan.get('limits_note','Synthetic runtime transport; no model capability or paid inference.'),
-         'qualified':False})
+         'qualified':False}
 
 
-def finish_collection(run,plan,process,observer,requested_stop,exited_before_stop):
-    observer.__exit__(None,None,None)
-    probe_stopped_route(run,observer,process.pid)
-    write_finish(run,plan,process,observer,requested_stop,exited_before_stop)
+def write_finish(run,plan,process,observer,requested_stop,exited_before_stop):
+    save(run/'after.json',snapshot(plan))
+    save(run/'finish.json',terminal_outcome(plan,process,observer,requested_stop,exited_before_stop))
+
+
+def collection_record(run, errors, diagnostics, route_registered):
+    if diagnostics:
+        with open(run/'collection-error.log', 'x', opener=lambda p,f: os.open(p,f,0o600)) as log:
+            log.write('\n'.join(diagnostics))
+    save(run/'collection.json', {'schema':'tofa-native-account-collection-v1',
+         'status':'failed' if errors else 'complete', 'errors':errors,
+         'route_registered':route_registered})
+
+
+def finish_collection(run,plan,process,observer,requested_stop,exited_before_stop, failure=None):
+    errors = [failure[0]] if failure else []
+    diagnostics = [failure[1]] if failure else []
+    def collect(phase, reason, action):
+        try: action()
+        except COLLECTION_ERRORS:
+            errors.append({'phase':phase, 'reason':reason})
+            # Raw diagnostics stay in a private file; summaries use fixed codes.
+            diagnostics.append(traceback.format_exc())
+
+    collect('observer_drain', 'observer_drain_failed', lambda: observer.__exit__(None,None,None))
+    outcome = terminal_outcome(plan,process,observer,requested_stop,exited_before_stop)
+    if any(e['phase']=='observer_drain' for e in errors): outcome['observer_requests'] = None
+    save(run/'launch-outcome.json', outcome)
+    # A prerequisite refusal can end the launch before any route exists. No
+    # route-stop proof is fabricated for that case; admission still requires it.
+    if observer.endpoint or (run/'start.json').exists():
+        collect('route_stop', 'route_stop_probe_failed', lambda: probe_stopped_route(run,observer,process.pid))
+    collect('after_snapshot', 'snapshot_failed', lambda: save(run/'after.json',snapshot(plan)))
+    collection_record(run, errors, diagnostics, bool(observer.endpoint))
+    if errors:
+        if failure: return  # The original orchestration exception is in flight.
+        raise ValueError('collection_incomplete_private_diagnostics_retained')
+    save(run/'finish.json', outcome)
 
 
 def finish_calibration(run,plan,process,observer,exited_before_stop):
@@ -177,23 +212,38 @@ def prepare(options):
 
 def launch(run):
     from capability_observer import Observer
-    run = private_run(run); plan = read(run / 'plan.json'); before = read(run / 'before.json')
-    if (run / 'start.json').exists() or (run / 'declaration.json').exists(): raise ValueError('attempt_consumed_no_retry')
-    current = snapshot(plan)
-    if current != before: raise ValueError('environment_drift_before_launch')
-    limits = {key: plan[key] for key in ('seconds', 'requests', 'output_tokens')}
-    kwargs = {}
-    if plan['scope'] is not None:
-        scope = plan['scope']; scope['root'] = str(run); scope['attempt'] = run.name
-        # Workspace placeholders are explicit, never infer or rewrite history.
-        for thread in scope.get('threads', []):
-            if thread.get('workspace') == '$WORKSPACE': thread['workspace'] = str(run / 'workspace')
-        save(run / 'scope.json', scope)
-        kwargs.update(scope_declaration=run / 'scope.json', scope_sha256=digest(run / 'scope.json'), scope_attempt=run.name)
-    observer = Observer(run, model=plan['model'], guardian=plan['guardian'], limits=limits,
-                        case='05', model_services=plan['model_services'], **kwargs)
+    run = private_run(run)
+    if any((run/name).exists() for name in ('start.json', 'declaration.json', 'collection.json')):
+        raise ValueError('attempt_consumed_no_retry')
+    phase = 'prelaunch_snapshot'
+    try:
+        plan = read(run/'plan.json'); before = read(run/'before.json')
+        current = snapshot(plan)
+        if current != before:
+            save(run/'prelaunch.json', current)
+            raise ValueError('environment_drift_before_launch')
+        phase = 'observer_setup'
+        limits = {key: plan[key] for key in ('seconds', 'requests', 'output_tokens')}
+        kwargs = {}
+        if plan['scope'] is not None:
+            scope = plan['scope']; scope['root'] = str(run); scope['attempt'] = run.name
+            # Workspace placeholders are explicit, never infer or rewrite history.
+            for thread in scope.get('threads', []):
+                if thread.get('workspace') == '$WORKSPACE': thread['workspace'] = str(run / 'workspace')
+            save(run / 'scope.json', scope)
+            kwargs.update(scope_declaration=run / 'scope.json', scope_sha256=digest(run / 'scope.json'), scope_attempt=run.name)
+        observer = Observer(run, model=plan['model'], guardian=plan['guardian'], limits=limits,
+                            case='05', model_services=plan['model_services'], **kwargs)
+    except COLLECTION_ERRORS as error:
+        reason = 'environment_drift_before_launch' if str(error)=='environment_drift_before_launch' else 'prelaunch_collection_failed'
+        collection_record(run, [{'phase':phase, 'reason':reason}], [traceback.format_exc()], None)
+        raise
     process = None
     observer_drained = False
+    failure = None
+    reason = 'collector_failed'
+    exited_before_stop = None
+    phase = 'observer_start'
     try:
         observer.__enter__()
         save(run / 'observer.json', {'version': 2, 'endpoint': 'http://127.0.0.1:' + str(observer.port),
@@ -208,11 +258,13 @@ def launch(run):
         command = [plan['launcher'], 'launch', 'codex-desktop', '--app-bundle', plan['app_bundle'],
                    '--model', plan['model'], '--guardian-model', plan['guardian'],
                    '--native-account-candidate', '--evaluation-observer', str(run / 'observer.json')]
+        phase = 'launcher_start'
         with open(run / 'launcher.log', 'x', opener=lambda p,f: os.open(p,f,0o600)) as log:
             process = subprocess.Popen(command, cwd=run / 'workspace', stdout=log, stderr=log, start_new_session=True)
             save(run / 'launcher-process.json', {'schema': 'tofa-native-account-process-v1', 'launcher_pid': process.pid,
                  'launcher_sha256': digest(plan['launcher']), 'started_utc': utc(now)})
             print(json.dumps({'run': str(run), 'launcher_pid': process.pid, 'deadline_utc': utc(now + timedelta(seconds=plan['seconds']))}), flush=True)
+            phase = 'launch_monitor'
             reason = 'process_exit'
             native_recorded = False
             crashed = False
@@ -246,12 +298,24 @@ def launch(run):
         observer_drained=True
         finish_collection(run,plan,process,observer,reason,exited_before_stop)
         print(json.dumps({'run':str(run),'stop':observer.reason or reason,'qualified':False}))
+    except COLLECTION_ERRORS:
+        failure = ({'phase':phase, 'reason':'collector_failed'}, traceback.format_exc())
+        raise
     finally:
+        if not observer_drained:
+            exited_before_stop = process.poll() is not None if process else None
+            if process and exited_before_stop and not (run/'start.json').exists():
+                reason = 'launch_failed'
+            else:
+                reason = observer.reason or 'collector_failed'
+            observer.stop(reason)
+
         if process is not None and process.poll() is None:
             process.terminate()
             try: process.wait(timeout=15)
             except subprocess.TimeoutExpired: process.kill(); process.wait(timeout=5)
-        if not observer_drained: observer.__exit__(None, None, None)
+        if not observer_drained:
+            finish_collection(run,plan,process,observer,reason,exited_before_stop,failure)
 
 
 def owned_native_pid(profile, launcher_pid):
@@ -376,5 +440,5 @@ def main():
 
 if __name__ == '__main__':
     try: main()
-    except (OSError, ValueError, subprocess.SubprocessError):
+    except COLLECTION_ERRORS:
         raise SystemExit('qualification collection failed; retain private attempt for diagnosis; no retry or pass inferred')

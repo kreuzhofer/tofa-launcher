@@ -39,15 +39,16 @@ def launcher_refusal(run):
 
 
 def ensure_active(run, pid):
-    if (run/'finish.json').exists(): raise ValueError('attempt ended')
-    if (run/'declaration.json').exists():
+    finished = (run/'finish.json').exists()
+    if not finished and (run/'declaration.json').exists():
         expiry = datetime.fromisoformat(read(run/'declaration.json')['expires_utc'].replace('Z','+00:00'))
         if datetime.now(timezone.utc) >= expiry: raise ValueError('attempt deadline reached')
-    if not alive(pid):
+    if finished or not alive(pid):
         if launcher_refusal(run):
             raise ValueError('Desktop profile is in use or has an unresolved native lock. '
                              'Quit ChatGPT Desktop fully with Cmd-Q before a new attempt. '
                              'Do not delete locks or retry this consumed attempt; retain logs for review.')
+        if finished: raise ValueError('attempt ended; retain evidence for review')
         raise ValueError('collector stopped; retain logs for review')
 
 
@@ -94,8 +95,20 @@ def check(kit):
 
 def summary(run):
     before = read(run/'before.json') if (run/'before.json').exists() else None
-    after = read(run/'after.json') if (run/'after.json').exists() else None
+    after = read(run/'after.json') if (run/'after.json').exists() else (
+        read(run/'prelaunch.json') if (run/'prelaunch.json').exists() else None)
     finish = read(run/'finish.json') if (run/'finish.json').exists() else None
+    terminal = finish or (read(run/'launch-outcome.json') if (run/'launch-outcome.json').exists() else None)
+    collection = read(run/'collection.json') if (run/'collection.json').exists() else None
+    launcher = read(run/'launcher-process.json') if (run/'launcher-process.json').exists() else None
+    if not terminal:
+        # Recover only directly retained facts from older/abruptly ended runs.
+        # Never infer an exit code or successful shutdown from a PID receipt.
+        stop = (run/'stop-reason.txt').read_text().strip() if (run/'stop-reason.txt').exists() else None
+        if stop not in ('launch_failed', 'operator_cancelled', 'operator_finished', 'deadline', 'collector_failed'):
+            stop = None
+        requests = read(run/'requests.json') if (run/'requests.json').exists() else None
+        terminal = {'stop':stop, 'observer_requests':len(requests) if isinstance(requests,list) else None}
     history = read(run/'history-after.json') if (run/'history-after.json').exists() else None
     def changed(left, right):
         return sorted(k for k in left.keys() | right.keys() if left.get(k) != right.get(k))
@@ -103,10 +116,16 @@ def summary(run):
         'schema':'tofa-manual-guide-summary-v1', 'run':str(run), 'qualified':False,
         'status':'awaiting_agent_review' if finish else 'incomplete_collection',
         'launcher_refusal':launcher_refusal(run),
-        'stop':finish.get('stop') if finish else None,
-        'exit_code':finish.get('exit_code') if finish else None,
-        'process_exited_before_stop':finish.get('process_exited_before_stop') if finish else None,
-        'observer_requests':finish.get('observer_requests') if finish else None,
+        'launcher_pid':launcher.get('launcher_pid') if launcher else None,
+        'collection_status':collection['status'] if collection else 'not_recorded',
+        'route_registered':collection['route_registered'] if collection else None,
+        'collection_errors':collection['errors'] if collection else [],
+        'failure_phase':collection['errors'][0]['phase'] if collection and collection['errors'] else (
+            'prelaunch' if terminal and terminal.get('stop')=='launch_failed' and not (run/'start.json').exists() else None),
+        'stop':terminal.get('stop') if terminal else None,
+        'exit_code':terminal.get('exit_code') if terminal else None,
+        'process_exited_before_stop':terminal.get('process_exited_before_stop') if terminal else None,
+        'observer_requests':terminal.get('observer_requests') if terminal else None,
         'identity_equal':before['identity']==after['identity'] if before and after else None,
         'protected_equal':before['protected']==after['protected'] if before and after else None,
         'identity_drift':changed(before['identity'].get('hashes', {}), after['identity'].get('hashes', {})) if before and after else None,
@@ -184,9 +203,10 @@ def main():
     if action == 'history-after': return history_after(run)
     if action == 'summarize':
         value = summary(run)
+        archive = kit/'evidence'/run.name
+        value['durable_evidence'] = str(archive)
         with (run/'guide-summary.json').open('x') as stream: json.dump(value, stream, indent=2)
         # Copy only after the collector has ended. Keep original evidence paths.
-        archive = kit/'evidence'/run.name
         archive.parent.mkdir(mode=0o700, exist_ok=True)
         shutil.copytree(run, archive, symlinks=True)
         print(json.dumps(value, indent=2))

@@ -71,6 +71,26 @@ class GuideTests(unittest.TestCase):
         self.assertIsNone(result['protected_equal'])
         self.assertEqual(result['status'], 'incomplete_collection')
 
+    def test_retained_incomplete_run_reports_only_observed_launch_facts(self):
+        # The retained 1c913081dad1d33a run had these records, but no finish or
+        # after snapshot. An exit code cannot be recovered from a PID receipt.
+        (self.run/'stop-reason.txt').write_text('launch_failed')
+        self.write('requests.json', [])
+        self.write('launcher-process.json', {'launcher_pid':123})
+        report = guide.summary(self.run)
+        self.assertEqual(report['stop'], 'launch_failed')
+        self.assertEqual(report['failure_phase'], 'prelaunch')
+        self.assertEqual(report['observer_requests'], 0)
+        self.assertEqual(report['launcher_pid'], 123)
+        self.assertIsNone(report['exit_code'])
+        self.assertIsNone(report['protected_equal'])
+        self.assertEqual(report['status'], 'incomplete_collection')
+        self.assertFalse(report['qualified'])
+        (self.run/'stop-reason.txt').write_text('private-untrusted-diagnostic')
+        report = guide.summary(self.run)
+        self.assertIsNone(report['stop'])
+        self.assertNotIn('private-untrusted-diagnostic', json.dumps(report))
+
     def test_normal_collection_still_needs_review(self):
         self.write('before.json', {'identity':{}, 'protected':{'a':'hash'}})
         self.write('after.json', {'identity':{}, 'protected':{'a':'hash'}})

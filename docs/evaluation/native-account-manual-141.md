@@ -1,5 +1,56 @@
 # Manual native-account qualification (#141)
 
+**Current status (2026-10-27): do not rerun the old wizard.** The integration
+branch has the #135 preflight correction and the collector repair below. The
+private kit and checked-in wizard still name the older candidate; neither has
+been repinned or launched for this repair. Review and freeze the new candidate
+before a separately declared actual-Desktop clean-exit check. #141 remains open.
+
+## Collector repair before another qualification attempt
+
+Baseline: `cb7fdd7` on `fix/134-plugin-inventory`. The retained incomplete run
+`clean-exit.1c913081dad1d33a` contained an ordinary-profile ownership refusal,
+`launch_failed`, a launcher PID receipt and an empty request ledger, but neither
+a finish receipt nor an after-snapshot. Its original files remain unchanged.
+
+A disposable launcher fixture reproduced the same collector path in 0.884
+seconds: finalization raised `owned_route_not_registered` before writing the
+finish receipt. A refusal before route registration now finalizes without a
+route-stop receipt. A start receipt without a registered endpoint still fails;
+no missing-route shutdown proof is invented or accepted by admission.
+
+The collector now retains the observed launch outcome in `launch-outcome.json`
+independently of `collection.json`, whose failure entries contain fixed phase
+and reason codes. Raw exceptions remain in the private, exclusively created
+`collection-error.log`. Observer drain, route-stop probing and the after-snapshot
+retain their own outcomes. A collection failure never creates a successful
+finish receipt. A drain failure leaves the final request count unknown. The
+existing finish schema and production qualification validator are unchanged.
+
+A second red regression showed that an after-snapshot failure erased the known
+launcher refusal and exit code. The repaired summary reports both launch and
+collection outcomes, while unavailable preservation comparisons stay unknown.
+Prelaunch drift retains the comparison snapshot and consumes the attempt; it
+cannot be silently retried. Historical incomplete runs expose only available
+facts: for the retained run, zero observed requests and a prelaunch refusal are
+known, but the exit code and preservation outcome remain unknown.
+
+The guide keeps the actionable profile refusal even when finalization succeeds,
+retains its no-pass summary, and includes the durable evidence location. A CLI
+regression verifies byte-for-byte copying of the original private receipts and
+logs without displaying arbitrary private diagnostics. Normal completion,
+cancellation, collector failure before process creation, observer-drain failure,
+snapshot failure and missing-route failure are covered by owned fixtures.
+
+Focused validation: all 16 collector and 16 guide tests passed. These tests
+exercise actual local observer servers, disposable launcher subprocesses and
+the guide CLI; none launches the installed Desktop or uses the real account.
+The full repository race suite and independent review results are recorded
+separately when completed. No actual Desktop lifecycle qualification follows
+from these automated results.
+
+## Earlier candidate and guide
+
 This is a staged actual-Desktop qualification, not a release or model-capability
 claim. The first prepared case is clean launch/normal exit, using the reviewed
 candidate `372255f639db639b7ebb6f0077ca127981c1e0f1`. Its full Go race suite and

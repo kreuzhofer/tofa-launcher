@@ -14,6 +14,150 @@ import desktop_qualification as q
 
 
 class QualificationTests(unittest.TestCase):
+    def refused_attempt(self, temporary):
+        root = Path(temporary).resolve()
+        launcher = root/'launcher'
+        launcher.write_text('#!'+sys.executable+'\n'+
+            (Path(__file__).parent/'fixtures/qualification-launcher.py').read_text())
+        launcher.chmod(0o700)
+        (root/'refuse-launch').touch()
+        frozen = {'identity':{'profile':str(root/'profile')}, 'protected':{'fixture':'unchanged'}}
+        q.save(root/'snapshot.json', frozen)
+        run = root/'refused'; run.mkdir(mode=0o700); (run/'workspace').mkdir(mode=0o700)
+        q.save(run/'before.json', frozen)
+        q.save(run/'plan.json', {'launcher':str(launcher), 'app_bundle':str(root/'unused'),
+            'runtime_root':str(root/'unused'), 'source_revision':'a'*40, 'case':'clean-exit',
+            'model':'moonshotai/Kimi-K3', 'guardian':'zai-org/GLM-5.3-Flash',
+            'seconds':600, 'requests':2, 'output_tokens':100,
+            'model_services':{'moonshotai/Kimi-K3':'token_factory'}, 'scope':None})
+        return root, run, frozen
+
+    def test_snapshot_failure_retains_original_launch_outcome(self):
+        import desktop_qualification_guide as guide
+        with tempfile.TemporaryDirectory() as temporary:
+            root, run, frozen = self.refused_attempt(temporary)
+            (root/'fail-after-snapshot').touch()
+            with patch.object(q, 'ROOT', root), contextlib.redirect_stdout(io.StringIO()):
+                with self.assertRaises(ValueError): q.launch(run)
+            report = guide.summary(run)
+            self.assertEqual(report['stop'], 'launch_failed')
+            self.assertEqual(report['exit_code'], 7)
+            self.assertEqual(report['observer_requests'], 0)
+            self.assertEqual(report['launcher_refusal'], 'ordinary_profile_owned_or_unresolved_lock')
+            self.assertEqual(report['status'], 'incomplete_collection')
+            self.assertEqual(report['collection_errors'], [{'phase':'after_snapshot', 'reason':'snapshot_failed'}])
+            self.assertIsNone(report['protected_equal'])
+            self.assertFalse(report['qualified'])
+            self.assertNotIn('private-fixture-diagnostic', json.dumps(report))
+            self.assertFalse((run/'finish.json').exists())
+            self.assertTrue((run/'collection-error.log').is_file())
+
+    def test_drain_failure_retains_launch_failure_and_unknown_request_count(self):
+        import desktop_qualification_guide as guide
+        with tempfile.TemporaryDirectory() as temporary:
+            root, run, frozen = self.refused_attempt(temporary)
+            (root/'break-observer-drain').touch()
+            with patch.object(q, 'ROOT', root), contextlib.redirect_stdout(io.StringIO()):
+                with self.assertRaises(ValueError): q.launch(run)
+            report = guide.summary(run)
+            self.assertEqual(report['stop'], 'launch_failed')
+            self.assertEqual(report['exit_code'], 7)
+            self.assertIsNone(report['observer_requests'])
+            self.assertEqual(report['collection_errors'], [{'phase':'observer_drain', 'reason':'observer_drain_failed'}])
+            self.assertTrue(report['protected_equal'])
+            self.assertFalse(report['qualified'])
+            self.assertFalse((run/'finish.json').exists())
+
+    def test_missing_route_after_handoff_is_still_a_collection_failure(self):
+        import desktop_qualification_guide as guide
+        with tempfile.TemporaryDirectory() as temporary:
+            root, run, frozen = self.refused_attempt(temporary)
+            (root/'missing-route-after-handoff').touch()
+            with patch.object(q, 'ROOT', root), contextlib.redirect_stdout(io.StringIO()):
+                with self.assertRaises(ValueError): q.launch(run)
+            report = guide.summary(run)
+            self.assertEqual(report['collection_errors'], [{'phase':'route_stop', 'reason':'route_stop_probe_failed'}])
+            self.assertFalse(report['qualified'])
+            self.assertFalse((run/'finish.json').exists())
+            self.assertFalse((run/'route-stop.json').exists())
+
+    def test_launch_refusal_is_collected_before_route_registration(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root, run, frozen = self.refused_attempt(temporary)
+            with patch.object(q, 'ROOT', root), contextlib.redirect_stdout(io.StringIO()):
+                q.launch(run)
+            finish = q.read(run/'finish.json')
+            self.assertEqual(finish['stop'], 'launch_failed')
+            self.assertEqual(finish['exit_code'], 7)
+            self.assertTrue(finish['process_exited_before_stop'])
+            self.assertEqual(finish['observer_requests'], 0)
+            self.assertFalse(finish['qualified'])
+            self.assertEqual(q.read(run/'after.json'), frozen)
+            self.assertFalse((run/'route-stop.json').exists())
+            self.assertFalse((run/'start.json').exists())
+            for name in ('collection.json','launch-outcome.json','finish.json'):
+                self.assertEqual((run/name).stat().st_mode & 0o777, 0o600)
+
+    def test_refusal_guide_cli_keeps_safe_reason_and_durable_evidence(self):
+        import subprocess
+        root = q.ROOT; root.mkdir(mode=0o700, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=root) as temporary:
+            fixture_root, run, frozen = self.refused_attempt(temporary)
+            with contextlib.redirect_stdout(io.StringIO()): q.launch(run)
+            script = str(Path(__file__).with_name('desktop_qualification_guide.py'))
+            kit = fixture_root/'kit'; kit.mkdir(mode=0o700)
+            command = [sys.executable, script, str(kit)]
+            ready = subprocess.run(command+['ready',str(run),'99999999'], capture_output=True, text=True, timeout=3)
+            self.assertNotEqual(ready.returncode, 0)
+            self.assertIn('Desktop profile is in use', ready.stderr)
+            result = subprocess.run(command+['summarize',str(run)], capture_output=True, text=True, timeout=3)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            archive = kit/'evidence'/run.name
+            summary = json.loads((archive/'guide-summary.json').read_text())
+            self.assertEqual(summary['durable_evidence'], str(archive))
+            self.assertEqual(summary['failure_phase'], 'prelaunch')
+            self.assertEqual(summary['stop'], 'launch_failed')
+            self.assertEqual(summary['exit_code'], 7)
+            self.assertTrue(summary['protected_equal'])
+            self.assertFalse(summary['qualified'])
+            self.assertNotIn('private-fixture-diagnostic', result.stdout+ready.stderr)
+            for name in ('launcher.log','before.json','after.json','launch-outcome.json','collection.json'):
+                self.assertEqual((archive/name).read_bytes(), (run/name).read_bytes())
+
+    def test_drift_before_observer_retains_comparison_and_consumes_attempt(self):
+        import desktop_qualification_guide as guide
+        with tempfile.TemporaryDirectory() as temporary:
+            root, run, frozen = self.refused_attempt(temporary)
+            (root/'snapshot.json').write_text(json.dumps({**frozen, 'protected':{'fixture':'changed'}}))
+            with patch.object(q, 'ROOT', root):
+                with self.assertRaisesRegex(ValueError, 'environment_drift'): q.launch(run)
+                report = guide.summary(run)
+                self.assertEqual(report['failure_phase'], 'prelaunch_snapshot')
+                self.assertEqual(report['collection_errors'],
+                    [{'phase':'prelaunch_snapshot', 'reason':'environment_drift_before_launch'}])
+                self.assertEqual(report['protected_drift'], ['fixture'])
+                self.assertFalse(report['protected_equal'])
+                self.assertIsNone(report['exit_code'])
+                self.assertIsNone(report['observer_requests'])
+                self.assertFalse(report['qualified'])
+                self.assertFalse((run/'launcher-process.json').exists())
+                with self.assertRaisesRegex(ValueError, 'attempt_consumed'): q.launch(run)
+
+    def test_cancel_before_route_retains_stop_without_claiming_route_proof(self):
+        import desktop_qualification_guide as guide
+        with tempfile.TemporaryDirectory() as temporary:
+            root, run, frozen = self.refused_attempt(temporary)
+            (root/'refuse-launch').unlink()
+            (root/'cancel-before-route').touch()
+            with patch.object(q, 'ROOT', root), contextlib.redirect_stdout(io.StringIO()):
+                q.launch(run)
+            report = guide.summary(run)
+            self.assertEqual(report['stop'], 'operator_cancelled')
+            self.assertFalse(report['qualified'])
+            self.assertEqual(report['observer_requests'], 0)
+            self.assertFalse((run/'route-stop.json').exists())
+            self.assertFalse(q.read(run/'collection.json')['route_registered'])
+
     def test_launch_creates_private_exclusive_log_and_stops_owned_process(self):
         # Actual launch orchestration, Observer and subprocesses. Only the
         # launcher/native application are task-owned fixtures; Path.open and
@@ -65,6 +209,12 @@ class QualificationTests(unittest.TestCase):
                 q.launch(blocked)
             self.assertEqual((blocked/'launcher.log').read_text(),'retain existing log')
             self.assertFalse((blocked/'launcher-process.json').exists())
+            import desktop_qualification_guide as guide
+            report = guide.summary(blocked)
+            self.assertEqual(report['status'], 'incomplete_collection')
+            self.assertEqual(report['failure_phase'], 'launcher_start')
+            self.assertIsNone(report['exit_code'])
+            self.assertFalse(report['qualified'])
 
     def test_records_are_private_exclusive_and_ambiguous_json_rejected(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -139,7 +289,7 @@ class QualificationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             run=Path(temporary)
             class Observer:
-                reason='scope_mismatch';records=[];stop_acknowledged=True
+                reason='scope_mismatch';records=[];stop_acknowledged=True;endpoint='http://127.0.0.1:4321'
                 def __exit__(self,*unused):
                     self.records.append({'failure':'scope_mismatch'})
                     q.save(run/'requests.json',self.records)

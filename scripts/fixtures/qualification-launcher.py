@@ -18,10 +18,28 @@ def save(path, value):
 
 root = Path(__file__).parent
 if sys.argv[1:3] == ['desktop-qualification', 'snapshot']:
+    if (root/'snapshot-failed').exists(): raise SystemExit(3)
     print((root/'snapshot.json').read_text())
     raise SystemExit(0)
 assert sys.argv[1:3] == ['launch', 'codex-desktop']
 run = Path.cwd().parent
+if (root/'cancel-before-route').exists():
+    save(run/'cancel.request', {'fixture_only':True})
+    # Exit after cancellation is observed, without registering an endpoint.
+    deadline = time.monotonic()+8
+    while not (run/'stop-reason.txt').exists():
+        if time.monotonic() >= deadline: raise RuntimeError('cancellation not observed')
+        time.sleep(.02)
+    raise SystemExit(0)
+if (root/'refuse-launch').exists():
+    if (root/'fail-after-snapshot').exists(): (root/'snapshot-failed').touch()
+    if (root/'break-observer-drain').exists(): (run/'requests.json').mkdir()
+    if (root/'missing-route-after-handoff').exists():
+        save(run/'start.json', {'fixture_only':True})
+        save(run/'finish.request', {'fixture_only':True})
+    print('private-fixture-diagnostic', file=sys.stderr)
+    print('tofa: ordinary desktop profile is already owned or has an unresolved native lock.', file=sys.stderr)
+    raise SystemExit(7)
 control = json.loads((run/'observer.json').read_text())
 stopped = threading.Event()
 token = secrets.token_hex(32)
