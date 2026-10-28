@@ -1,0 +1,37 @@
+{
+  "at": "2026-10-09T12:55:57.546827+00:00",
+  "kind": "read-only catalog stability sample",
+  "paid_inference_requests": 0,
+  "samples": [
+    {
+      "http_status": 200,
+      "deepseek_present": true,
+      "glm_present": true,
+      "request_id": "af4d490fee00cccf7b6420536bc37576"
+    },
+    {
+      "http_status": 200,
+      "deepseek_present": true,
+      "glm_present": true,
+      "request_id": "e669d66099c3b862d57e882fdeadab09"
+    },
+    {
+      "http_status": 200,
+      "deepseek_present": true,
+      "glm_present": true,
+      "request_id": "51e0fdd4f106dcb3763f17cb59200b17"
+    },
+    {
+      "http_status": 200,
+      "deepseek_present": true,
+      "glm_present": true,
+      "request_id": "29c6b835102a914589e1e751b843dcad"
+    },
+    {
+      "http_status": 200,
+      "deepseek_present": true,
+      "glm_present": true,
+      "request_id": "4e653ad58500d742805723ef2be70861"
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "at": "2026-10-09T12:53:10.909409+00:00",
+  "route": "direct provider; same saved project/login as rc17",
+  "requests": [
+    {
+      "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+      "http_status": 404,
+      "seconds": 0.317,
+      "exact_model_not_found": true,
+      "request_id": "3ae38af7036847d39f91dd4390a87487",
+      "completed": false
+    },
+    {
+      "model": "zai-org/GLM-5.3",
+      "http_status": 200,
+      "seconds": 0.761,
+      "exact_model_not_found": false,
+      "request_id": "872d3b69512309c063b73550d11395d8",
+      "completed": true
+    }
+  ],
+  "catalog": {
+    "deepseek-ai/DeepSeek-V4.1-Flash": false,
+    "zai-org/GLM-5.3": true
+  },
+  "passed": false
+}

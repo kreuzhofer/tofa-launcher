@@ -58,14 +58,15 @@ Beyond the two supported pairs, metadata-compatible pairs among `zai-org/GLM-5.3
 `nvidia/Nemotron-3-Ultra-550b-a55b` are experimentally selectable. Each descriptor
 uses its own dated provider metadata; text-only candidates do not inherit Kimi's
 image capability. Offline routing tests do not qualify live model behavior.
-The development naming policy uses one fixed model,
+Starting with [rc17](releases/v0.1.0-rc.17.md), naming uses one fixed model,
 `nvidia/Nemotron-3_5-Lightning`, for recognized automatic title requests,
 independently of launch main, conversation main and Guardian. Changing a main
 does not change the naming model. [#111 qualification](research/independent-desktop-naming-2026-10-09.md)
 observed generated titles with GLM and DeepSeek, persistence across relaunch and
 manual-title preservation on the pinned Mac app. Naming took 6.3–28.2 seconds;
 the provisional first-message title can remain visible while generation completes.
-This development implementation is not included in rc16.
+The measurements above are from the #111 development build; exact-artifact
+checks are recorded separately in the rc17 report. rc16 retains the older route.
 The [five-model comparison](evaluation/desktop-comparison-2026-09-29.md) records
 main/Guardian outcomes, naming limits, timings, shared costs and promotion provenance.
 Main/Guardian support labels cover the pinned headless bundled-engine baseline,
@@ -491,7 +492,7 @@ The [#55 implementation checks](releases/desktop-model-routing-2026-09-30.md)
 record per-conversation routing, capability changes, CLI-default isolation and
 the remaining Electron UI qualification.
 
-The development naming route recognizes the captured `gpt-5.6-luna` and
+The naming route included in rc17 recognizes the captured `gpt-5.6-luna` and
 `gpt-6-luna` title requests by both source markers, exact title schema and tool
 inventory. It sends those requests to `nvidia/Nemotron-3_5-Lightning` as tool-free
 naming, retaining the prompt and structured-output schema. Live qualification found

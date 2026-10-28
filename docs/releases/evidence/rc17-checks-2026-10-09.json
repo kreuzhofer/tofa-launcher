@@ -1,0 +1,40 @@
+{
+  "version": "v0.1.0-rc.17",
+  "commit": "b293f1e0d49d53ca410b786ac28cb055f5ce5e20",
+  "ci_run": 37922280018,
+  "driver_sha256": {
+    "download_release.py": "ccd1146d652899e37be9ea8133e77dc59353a0a5f7222e3e41d0221ff1f5a8ad",
+    "check_candidate.py": "0eb54b346fb934b15bd3305b0f52e5a8586f9896618e0d782132e32779a18456",
+    "live_macos.py": "9a45e3b7cbbe3d2aed3395990e55b691867cbce53d1a64a97820d4e290bb9bb9"
+  },
+  "client": {
+    "cli": {
+      "sha256": "8238273076041e55beded03ba1d51e034f997b7d100b0642d36daf036620fe57",
+      "version": "0.162.0"
+    },
+    "desktop_engine": {
+      "sha256": "6b582e8813ce7e8ed4c52814ee5cf230dba647bf2292df747a4003f2657ef201",
+      "version": "0.160.0"
+    }
+  },
+  "native_loopback": {
+    "passed": true,
+    "tests": 1,
+    "seconds": 9.141,
+    "paid_inference": false
+  },
+  "prior_desktop_closed_by_user": true,
+  "candidate_checks": [
+    {
+      "name": "candidate-lifecycle",
+      "exit_code": 0,
+      "seconds": 5.682
+    },
+    {
+      "name": "candidate-terminal",
+      "exit_code": 0,
+      "seconds": 0.756
+    }
+  ],
+  "canonical_manifest_sha256": "0e5d96cea778ae653bc02ee6f40279d0ba26a612407ea68a42bcbff11711af15"
+}
