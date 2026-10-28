@@ -1,4 +1,5 @@
 import importlib.util
+import os
 import json
 from pathlib import Path
 import tempfile
@@ -136,10 +137,39 @@ class GuideTests(unittest.TestCase):
         result = subprocess.run(['bash','-c',capture,'fixture',str(self.run)],capture_output=True,text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
         args = json.loads((self.run/'prepare.json').read_text())
+        self.assertIn('--defer-snapshot', args)
         for flag, expected in {'--source-revision':'372255f639db639b7ebb6f0077ca127981c1e0f1',
                               '--seconds':'600','--requests':'8','--output-tokens':'4096',
                               '--case':'clean-exit','--model':'moonshotai/Kimi-K3'}.items():
             self.assertEqual(args[args.index(flag)+1], expected)
+
+    def test_workspace_setup_confirmation_precedes_freeze_and_launch(self):
+        import subprocess
+        script=Path(__file__).with_name('desktop_qualification_operator.sh').read_text()
+        start=script.index('  RUN=$(')
+        end=script.index('  say "Recording hashes',start)
+        fragment=script[start:end]
+        self.write('prepare.json',{'run':str(self.run/'attempt')})
+        fixture=('set -euo pipefail\n'
+            'INVOCATION="$1"; PYTHON=/usr/bin/python3; EVENTS="$1/events"\n'
+            'say() { :; }; step() { :; }; stage() { :; }; warn() { :; }\n'
+            'confirm() { echo confirm >> "$EVENTS"; return "$CONFIRM_RC"; }\n'
+            'collect() { echo "$*" >> "$EVENTS"; return "$FREEZE_RC"; }\n'
+            'run() {\n'+fragment+'\n}\nrun\n')
+        # The actual guidance boundary must require a positive setup response;
+        # EOF/cancellation and failed snapshots must never start collection.
+        for confirmed,freeze_rc in ((0,0),(1,0),(0,1)):
+            with self.subTest(confirmed=confirmed,freeze_rc=freeze_rc):
+                (self.run/'events').write_text('')
+                result=subprocess.run(['bash','-c',fixture,'fixture',str(self.run)],
+                    env={**os.environ,'CONFIRM_RC':str(confirmed),'FREEZE_RC':str(freeze_rc)},
+                    capture_output=True,text=True)
+                events=(self.run/'events').read_text().splitlines()
+                self.assertTrue(events and events[0]=='confirm', 'workspace setup must be confirmed before snapshot')
+                if confirmed: self.assertEqual(events,['confirm'])
+                else: self.assertEqual(events,['confirm','freeze '+str(self.run/'attempt')])
+                if confirmed or freeze_rc: self.assertNotEqual(result.returncode,0)
+                else: self.assertEqual(result.returncode,0,result.stderr)
 
     def test_summary_reports_drift_keys_without_claiming_qualification(self):
         self.write('before.json', {'identity':{'hashes':{'runtime':'old'}}, 'protected':{'config.toml':'old'}})

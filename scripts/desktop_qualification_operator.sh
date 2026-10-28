@@ -251,7 +251,7 @@ observation() {
 }
 
 run_wizard() {
-  TOTAL_STAGES=4
+  TOTAL_STAGES=5
   if [[ $# -lt 2 || "$1" != "--kit" ]]; then
     warn "Usage: bash desktop_qualification_operator.sh --kit PRIVATE_KIT [--check]"
     return 2
@@ -262,6 +262,7 @@ run_wizard() {
   COLLECTOR="$CANDIDATE/source/scripts/desktop_qualification.py"
   if [[ "${1:-}" == "--check" && $# == 1 ]]; then
     guide check >/dev/null
+    collect freeze --help >/dev/null
     "$PYTHON" -c 'import sys; sys.path.insert(0,sys.argv[1]); import desktop_qualification, capability_observer' "$CANDIDATE/source/scripts"
     say "Pinned assets and collector imports verified. No launch, network request, or inference."
     return
@@ -274,7 +275,7 @@ run_wizard() {
   stage "Prepare host Desktop"
   say "One clean-exit check on this Mac; candidate 372255f. No VM."
   say "Paid Kimi-K3; GLM-5.3-Flash Guardian; Lightning naming."
-  say "10 minutes from launch INCLUDING workspace setup and observations; 8 requests, 4096 output tokens/request."
+  say "Workspace setup happens before the baseline. Then 10 minutes from candidate launch, including observations; 8 requests, 4096 output tokens/request."
   say "One attempt only. No retries or model substitutions. Ctrl-C cancels and retains evidence."
   step "Save Desktop work. Note your current account, installed plugins and Code Review availability, then QUIT ChatGPT Desktop normally."
   note "Keep ordinary settings unchanged. No password, token, account name, or other secret is requested."
@@ -286,11 +287,11 @@ run_wizard() {
   trap 'exit 130' INT
   trap 'exit 143' TERM
   guide receipt "$INVOCATION"
-  say "Capturing current app, engine, account/config hashes, plugins, runtime and catalog."
+  say "Allocating one fresh workspace. The preservation baseline is captured after ordinary-client setup."
   if collect prepare --launcher "$CANDIDATE/tofa" --app-bundle /Applications/ChatGPT.app \
     --runtime-root "$runtime" --model-services "$KIT/model-services.json" \
     --source-revision 372255f639db639b7ebb6f0077ca127981c1e0f1 \
-    --case clean-exit --model moonshotai/Kimi-K3 --guardian zai-org/GLM-5.3-Flash \
+    --case clean-exit --defer-snapshot --model moonshotai/Kimi-K3 --guardian zai-org/GLM-5.3-Flash \
     --seconds 600 --requests 8 --output-tokens 4096 \
     --prompt 'Reply exactly: tofa-clean-exit-ok. Do not use tools or create files.' \
     > "$INVOCATION/prepare.json" 2> "$INVOCATION/prepare.log"; then
@@ -300,6 +301,18 @@ run_wizard() {
     return 1
   fi
   RUN=$("$PYTHON" -c 'import json,sys; print(json.load(open(sys.argv[1]))["run"])' "$INVOCATION/prepare.json")
+  stage "Set up the fresh workspace before the baseline"
+  step "Open ordinary ChatGPT Desktop yourself. In Codex mode, add/select this exact folder and start a NEW empty conversation within it."
+  printf '\n%s\n\n' "$RUN/workspace"
+  say "Complete the workspace trust prompt if shown. Do not send a message or change other settings."
+  step "Quit ordinary Desktop fully with Cmd-Q. This folder will be reused for the candidate check; earlier run folders are different."
+  confirm "The exact workspace is selected, setup is complete, and ordinary Desktop is quit?" || { say "Stopped before baseline and candidate launch."; return 1; }
+  if collect freeze "$RUN" > "$INVOCATION/freeze.json" 2> "$INVOCATION/freeze.log"; then
+    :
+  else
+    warn "Baseline capture failed before launch. Private diagnostic: $INVOCATION/freeze.log" >&2
+    return 1
+  fi
   say "Recording hashes of existing session-history bytes; new turns may append without changing those bytes."
   guide history-before "$RUN"
   collect run "$RUN" > "$INVOCATION/collector.log" 2>&1 &
@@ -318,7 +331,7 @@ run_wizard() {
   observation code-review-eligible "Code Review remains available"
 
   stage "Submit the fixed smoke prompt"
-  say "In Codex mode, add/select the EXACT workspace below and start a NEW conversation."
+  say "In Codex mode, select the EXACT workspace prepared above and start a NEW conversation within it."
   printf '\n%s\n\n' "$RUN/workspace"
   say "Select Kimi-K3. Submit exactly this one prompt:"
   printf '\n%s\n\n' 'Reply exactly: tofa-clean-exit-ok. Do not use tools or create files.'

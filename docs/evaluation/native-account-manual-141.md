@@ -1,10 +1,53 @@
 # Manual native-account qualification (#141)
 
-**Current status (2026-10-27): do not rerun the old wizard.** The integration
-branch has the #135 preflight correction and the collector repair below. The
-private kit and checked-in wizard still name the older candidate; neither has
-been repinned or launched for this repair. Review and freeze the new candidate
-before a separately declared actual-Desktop clean-exit check. #141 remains open.
+**Current status (2026-10-28): qualification remains open.** The guided
+`fb91537` GLM run completed the smoke response and normal exit, collected complete
+logs and closed both owned endpoints. Human account/plugin/review observations
+passed; identities and existing history bytes were preserved. Naming failed
+locally with HTTP 400. The protected configuration differed only by the new
+workspace's trust entry. Neither outcome is converted into a qualification pass.
+
+## Corrections after the clean-exit observation
+
+Baseline: `fb91537` on `fix/134-plugin-inventory`. An offline replay of the retained
+title request failed with `unsupported desktop title contract; request was not
+sent upstream`. Changing only `title.maxLength` from 60 to 36 restored routing.
+Desktop 26.1023.50603 now sends the 60-character schema. The adapter accepts that
+exact additional schema only for `gpt-6-luna`, retains the earlier schema and
+passes the native schema through unchanged. Unknown schemas, tool inventories
+and auxiliary-role contracts remain rejected; no model/service fallback is added.
+A synthetic regression through the public launch and actual bundled engine failed
+in 4.55 seconds before correction and passed after it. Owned local upstreams
+receive synthetic context only; no private provider replay or Desktop UI launch
+is needed for that check. Native title visibility still needs a manual observation.
+
+The configuration diagnosis used the candidate's production normalizer. Removing
+only the exact current workspace's `trust_level=trusted` entry **in memory** made
+the after-state hash equal the before-state hash. No user configuration was edited.
+The guide had captured its baseline before instructing the human to select/trust
+the fresh workspace, so ordinary setup necessarily appeared as run-time drift.
+
+The collector now offers `prepare --defer-snapshot` followed by one `freeze`.
+Preparation allocates a fresh private workspace but captures no preservation
+baseline and starts no process. The human opens ordinary Desktop, selects that
+exact folder, starts an empty conversation, completes any trust prompt, sends
+no message, and quits. Only then does `freeze` capture the immutable baseline.
+The candidate still gets ten minutes from launch. The same folder is selected
+inside the candidate for a new smoke conversation. Setup is outside the measured
+candidate interval; it is not represented as a successful preservation test.
+
+Default `prepare` behavior remains unchanged for existing callers. A second
+freeze, freeze after a consumed attempt, launch without a baseline, and drift
+after freeze are rejected. Full protected-state equality remains required; no
+trust entries are excluded, no settings are restored, and no snapshots from
+failed runs are replaced. The wizard requires explicit setup completion and
+stops on a failed baseline capture. `--check` also verifies that the frozen
+collector supports `freeze`, rejecting older kits before interactive work.
+
+The checked-in wizard's historical candidate pins must be replaced in the next
+private frozen kit before use. Existing candidates, guides and failed evidence
+remain retained. This correction does not close #141, enable production admission,
+or qualify the remaining lifecycle, service-switching or runtime-preview matrix.
 
 ## Collector repair before another qualification attempt
 

@@ -9,11 +9,65 @@ import contextlib
 import io
 import sys
 from unittest.mock import patch
+from types import SimpleNamespace
 
 import desktop_qualification as q
 
 
 class QualificationTests(unittest.TestCase):
+    def deferred_attempt(self, root):
+        (root/'runs').mkdir(mode=0o700)
+        services=root/'services.json'
+        q.save(services, {'zai-org/GLM-5.3':'token_factory'})
+        options=SimpleNamespace(launcher=root/'launcher',app_bundle=root/'unused',
+            runtime_root=root/'unused',source_revision='a'*40,case='clean-exit',
+            model='zai-org/GLM-5.3',guardian='zai-org/GLM-5.3-Flash',seconds=600,
+            requests=2,output_tokens=100,model_services=services,scope=None,
+            prompt='Reply exactly: fixture-ok.',defer_snapshot=True)
+        output=io.StringIO()
+        with contextlib.redirect_stdout(output): q.prepare(options)
+        return Path(json.loads(output.getvalue())['run'])
+
+    def test_workspace_setup_precedes_immutable_baseline(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root, unused, initial=self.refused_attempt(temporary)
+            with patch.object(q,'ROOT',root):
+                run=self.deferred_attempt(root)
+                self.assertTrue((run/'workspace').is_dir())
+                self.assertFalse((run/'before.json').exists(), 'baseline captured before workspace trust setup')
+                self.assertFalse((run/'launcher-process.json').exists())
+                ready={**initial,'protected':{'fixture':'trusted workspace'}}
+                (root/'snapshot.json').write_text(json.dumps(ready))
+                with contextlib.redirect_stdout(io.StringIO()): q.freeze(run)
+                self.assertEqual(q.read(run/'before.json'),ready)
+                with self.assertRaisesRegex(ValueError,'baseline_already_frozen'): q.freeze(run)
+                with contextlib.redirect_stdout(io.StringIO()): q.launch(run)
+                self.assertEqual(q.read(run/'finish.json')['stop'],'launch_failed')
+                self.assertEqual(q.read(run/'before.json'),q.read(run/'after.json'))
+
+    def test_deferred_setup_still_rejects_post_baseline_drift(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root,unused,initial=self.refused_attempt(temporary)
+            with patch.object(q,'ROOT',root):
+                run=self.deferred_attempt(root)
+                with contextlib.redirect_stdout(io.StringIO()): q.freeze(run)
+                (root/'snapshot.json').write_text(json.dumps({**initial,'protected':{'fixture':'changed'}}))
+                with contextlib.redirect_stdout(io.StringIO()):
+                    with self.assertRaisesRegex(ValueError,'environment_drift'): q.launch(run)
+                self.assertFalse((run/'launcher-process.json').exists())
+                with self.assertRaisesRegex(ValueError,'attempt_consumed'): q.freeze(run)
+                self.assertEqual(q.read(run/'before.json'),initial)
+
+    def test_deferred_setup_cannot_launch_without_baseline(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root,unused,initial=self.refused_attempt(temporary)
+            with patch.object(q,'ROOT',root):
+                run=self.deferred_attempt(root)
+                with contextlib.redirect_stdout(io.StringIO()):
+                    with self.assertRaises(ValueError): q.launch(run)
+                self.assertFalse((run/'launcher-process.json').exists())
+                with self.assertRaisesRegex(ValueError,'attempt_consumed'): q.freeze(run)
+
     def refused_attempt(self, temporary):
         root = Path(temporary).resolve()
         launcher = root/'launcher'

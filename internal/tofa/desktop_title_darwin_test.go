@@ -111,9 +111,12 @@ func TestDesktopRejectsChangedNativeTitleContracts(t *testing.T) {
 		"mismatched trigger":         func(p map[string]any) { titleSource(t, p, "thread_title", "composer") },
 		"schema":                     func(p map[string]any) { titleFormat(p)["schema"].(map[string]any)["required"] = []string{"title"} },
 		"non-strict":                 func(p map[string]any) { titleFormat(p)["strict"] = false },
-		"schema name":                func(p map[string]any) { titleFormat(p)["name"] = "other" },
-		"format extension":           func(p map[string]any) { titleFormat(p)["future"] = true },
-		"forced tool":                func(p map[string]any) { p["tool_choice"] = "required" },
+		"unobserved old-model title limit": func(p map[string]any) {
+			titleFormat(p)["schema"].(map[string]any)["properties"].(map[string]any)["title"].(map[string]any)["maxLength"] = 60
+		},
+		"schema name":      func(p map[string]any) { titleFormat(p)["name"] = "other" },
+		"format extension": func(p map[string]any) { titleFormat(p)["future"] = true },
+		"forced tool":      func(p map[string]any) { p["tool_choice"] = "required" },
 	} {
 		t.Run(name, func(t *testing.T) {
 			p := nativeTitleFixture(t)
@@ -187,6 +190,14 @@ func TestDesktopRejectsChangedLuna6TitleContracts(t *testing.T) {
 		"main turn":                    func(p map[string]any) { titleSource(t, p, "user", "composer") },
 		"mismatched trigger":           func(p map[string]any) { titleSource(t, p, "thread_title", "composer") },
 		"changed schema":               func(p map[string]any) { titleFormat(p)["schema"].(map[string]any)["required"] = []string{"title"} },
+		"unobserved title limit": func(p map[string]any) {
+			titleFormat(p)["schema"].(map[string]any)["properties"].(map[string]any)["title"].(map[string]any)["maxLength"] = 61
+		},
+		"60-character schema with extra property": func(p map[string]any) {
+			schema := titleFormat(p)["schema"].(map[string]any)
+			schema["properties"].(map[string]any)["title"].(map[string]any)["maxLength"] = 60
+			schema["additionalProperties"] = true
+		},
 		"compaction despite title markers": func(p map[string]any) {
 			p["client_metadata"].(map[string]any)["x-codex-turn-metadata"] = `{"thread_source":"thread_title","turn_trigger":"thread_title","request_kind":"compaction"}`
 		},

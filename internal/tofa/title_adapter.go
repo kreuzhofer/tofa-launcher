@@ -10,6 +10,10 @@ import (
 // The desktop independently parses JSON and validates title and description.
 const desktopTitleSchema = `{"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","properties":{"title":{"type":"string","minLength":1,"maxLength":36},"description":{"type":"string","minLength":1}},"required":["title","description"],"additionalProperties":false}`
 
+// Captured from Desktop 26.1023.50603. Only Luna 6 has demonstrated this
+// extended title limit; preserve its schema unchanged for native validation.
+const desktopLuna6TitleSchema = `{"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","properties":{"title":{"type":"string","minLength":1,"maxLength":60},"description":{"type":"string","minLength":1}},"required":["title","description"],"additionalProperties":false}`
+
 const desktopNamingModel = "nvidia/Nemotron-3_5-Lightning"
 
 func isDesktopTitle(metadataJSON json.RawMessage) bool {
@@ -148,12 +152,19 @@ func desktopTitleFormat(payload map[string]json.RawMessage) (map[string]json.Raw
 	var schema, expected any
 	json.Unmarshal(format["schema"], &schema)
 	json.Unmarshal([]byte(desktopTitleSchema), &expected)
+	knownSchema := reflect.DeepEqual(schema, expected)
+	var model string
+	json.Unmarshal(payload["model"], &model)
+	if model == "gpt-6-luna" {
+		json.Unmarshal([]byte(desktopLuna6TitleSchema), &expected)
+		knownSchema = knownSchema || reflect.DeepEqual(schema, expected)
+	}
 	var kind, name, choice string
 	var strict *bool
 	json.Unmarshal(format["type"], &kind)
 	json.Unmarshal(format["name"], &name)
 	json.Unmarshal(payload["tool_choice"], &choice)
-	valid := reflect.DeepEqual(schema, expected) && len(format) == 4 && kind == "json_schema" && name == "codex_output_schema" && json.Unmarshal(format["strict"], &strict) == nil && strict != nil && *strict && choice == "auto"
+	valid := knownSchema && len(format) == 4 && kind == "json_schema" && name == "codex_output_schema" && json.Unmarshal(format["strict"], &strict) == nil && strict != nil && *strict && choice == "auto"
 	return textOptions, schema, valid
 }
 

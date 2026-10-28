@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -35,6 +36,15 @@ func TestDesktopDisclosesLaunchWideNaming(t *testing.T) {
 // invented parent association. Actual renderer invocation/visibility is #142.
 func startLaunchTitle(t *testing.T, e *desktopEngine, child capturedDesktop, text string) string {
 	t.Helper()
+	var fixture map[string]any
+	if err := json.Unmarshal(desktopTitleFixture(t), &fixture); err != nil {
+		t.Fatal(err)
+	}
+	return startLaunchTitleSchema(t, e, child, text, titleFormat(fixture)["schema"])
+}
+
+func startLaunchTitleSchema(t *testing.T, e *desktopEngine, child capturedDesktop, text string, schema any) string {
+	t.Helper()
 	started := e.call("thread/start", map[string]any{
 		"model": "gpt-6-luna", "modelProvider": nil,
 		"allowProviderModelFallback": true, "cwd": child.Cwd,
@@ -53,15 +63,11 @@ func startLaunchTitle(t *testing.T, e *desktopEngine, child capturedDesktop, tex
 		t.Fatalf("title helper must use launch default without parent migration: %v", started["modelProvider"])
 	}
 	id := started["thread"].(map[string]any)["id"].(string)
-	var fixture map[string]any
-	if err := json.Unmarshal(desktopTitleFixture(t), &fixture); err != nil {
-		t.Fatal(err)
-	}
 	e.call("turn/start", map[string]any{
 		"threadId": id, "turnTrigger": "thread_title", "model": nil,
 		"permissions": ":read-only", "runtimeWorkspaceRoots": []any{},
 		"input":        []any{map[string]any{"type": "text", "text": text, "text_elements": []any{}}},
-		"outputSchema": titleFormat(fixture)["schema"],
+		"outputSchema": schema,
 	})
 	return id
 }
@@ -314,5 +320,54 @@ func TestDesktopNativeCandidateNamingIndependentOfPendingMainAndReview(t *testin
 				t.Fatal("unexpected retry, fallback, or extra work after naming")
 			}
 		})
+	}
+}
+
+// Desktop 26.1023.50603 sends this exact 60-character schema. Exercise the
+// public launch and real engine with synthetic context and owned upstreams.
+func TestDesktopNativeCandidateRoutesSixtyCharacterTitle(t *testing.T) {
+	var fixture map[string]any
+	if err := json.Unmarshal(desktopTitleFixture(t), &fixture); err != nil {
+		t.Fatal(err)
+	}
+	schema := titleFormat(fixture)["schema"].(map[string]any)
+	schema["properties"].(map[string]any)["title"].(map[string]any)["maxLength"] = float64(60)
+	const title = `{"title":"A descriptive title longer than thirty six characters","description":"Synthetic qualification title"}`
+	var calls atomic.Int32
+	e, child, stop := routedCandidateEngine(t, func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			w.WriteHeader(http.StatusUpgradeRequired)
+			return
+		}
+		calls.Add(1)
+		var body map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Error(err)
+			return
+		}
+		if body["model"] != "nvidia/Nemotron-3_5-Lightning" || !reflect.DeepEqual(titleFormat(body)["schema"], schema) {
+			t.Error("title model or native schema changed")
+		}
+		if body["tools"] != nil || body["instructions"] != nil {
+			t.Error("title gained tools or instructions")
+		}
+		for _, item := range body["input"].([]any) {
+			if item.(map[string]any)["type"] == "additional_tools" {
+				t.Error("title retained code tools")
+			}
+		}
+		emitFixtureModelResponse(w, fixtureMessage(title), "nvidia/Nemotron-3_5-Lightning")
+	}, func(w http.ResponseWriter, r *http.Request) {
+		t.Error("title reached native service")
+		w.WriteHeader(500)
+	})
+	defer stop()
+	defer e.close()
+	id := startLaunchTitleSchema(t, e, child, "Name this synthetic smoke check.", schema)
+	if got := finishLaunchTitle(t, e, id, "completed"); got != title {
+		t.Fatal("title result changed")
+	}
+	if calls.Load() != 1 {
+		t.Fatalf("naming requests=%d; want exactly one", calls.Load())
 	}
 }

@@ -206,8 +206,31 @@ def prepare(options):
             'scope': read(options.scope) if options.scope else None,
             'limits_note': 'Observer-visible routes only; native output tokens use observed usage when absent from request. Direct native histories are bounded by launch time only.'}
     save(run / 'plan.json', plan)
-    before = snapshot(plan); save(run / 'before.json', before)
-    print(json.dumps({'run': str(run), 'status': 'prepared', 'desktop_launched': False}))
+    deferred = getattr(options, 'defer_snapshot', False)
+    if deferred:
+        save(run/'workspace-setup.json', {'schema':'tofa-workspace-setup-v1',
+             'workspace':str(run/'workspace'), 'allocated_utc':utc(stamp())})
+    else:
+        before = snapshot(plan); save(run / 'before.json', before)
+    print(json.dumps({'run': str(run), 'status': 'workspace_setup_required' if deferred else 'prepared',
+                      'desktop_launched': False}))
+
+
+def freeze(run):
+    """Capture once, after human workspace setup in the ordinary client.
+
+    This never edits settings, refreshes an existing baseline or grants a pass.
+    Launch still compares its complete snapshot to this immutable baseline.
+    """
+    run = private_run(run)
+    if any((run/name).exists() for name in ('start.json','declaration.json','collection.json','launcher-process.json')):
+        raise ValueError('attempt_consumed_no_retry')
+    if (run/'before.json').exists(): raise ValueError('baseline_already_frozen')
+    setup = read(run/'workspace-setup.json')
+    if setup.get('schema') != 'tofa-workspace-setup-v1' or setup.get('workspace') != str(run/'workspace'):
+        raise ValueError('workspace_setup_record_invalid')
+    save(run/'before.json', snapshot(read(run/'plan.json')))
+    print(json.dumps({'run':str(run),'status':'prepared','desktop_launched':False}))
 
 
 def launch(run):
@@ -417,6 +440,9 @@ def main():
     p.add_argument('--seconds', type=int, choices=(600,900), default=600)
     p.add_argument('--requests', type=int, choices=range(1,81), default=12)
     p.add_argument('--output-tokens', type=int, choices=range(1,8193), default=4096)
+    p.add_argument('--defer-snapshot', action='store_true',
+                   help='Allocate the workspace only; freeze after human ordinary-client setup, before run.')
+    p = sub.add_parser('freeze'); p.add_argument('run', type=Path)
     p = sub.add_parser('run'); p.add_argument('run', type=Path)
     p = sub.add_parser('observe'); p.add_argument('run', type=Path)
     p.add_argument('--criterion', required=True); p.add_argument('--operator', required=True)
@@ -431,6 +457,7 @@ def main():
         p = sub.add_parser(action); p.add_argument('run', type=Path)
     options = parser.parse_args()
     if options.action == 'prepare': prepare(options)
+    elif options.action == 'freeze': freeze(options.run)
     elif options.action == 'run': launch(options.run)
     elif options.action == 'observe': observe(options)
     elif options.action == 'record': record(options)
