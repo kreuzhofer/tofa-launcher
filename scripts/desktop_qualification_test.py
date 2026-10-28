@@ -86,6 +86,40 @@ class QualificationTests(unittest.TestCase):
             'model_services':{'moonshotai/Kimi-K3':'token_factory'}, 'scope':None})
         return root, run, frozen
 
+    def test_catalog_churn_reaches_launcher_and_remains_in_snapshots(self):
+        import desktop_qualification_guide as guide
+        with tempfile.TemporaryDirectory() as temporary:
+            root, run, initial = self.refused_attempt(temporary)
+            before = {**initial, 'identity':{**initial['identity'], 'hashes':{
+                'catalog':'old-provider', 'native_catalog':'old-native', 'engine':'same'}}}
+            current = {**before, 'identity':{**before['identity'], 'hashes':{
+                'catalog':'new-provider', 'native_catalog':'new-native', 'engine':'same'}}}
+            (run/'before.json').write_text(json.dumps(before))
+            (root/'snapshot.json').write_text(json.dumps(current))
+            with patch.object(q, 'ROOT', root), contextlib.redirect_stdout(io.StringIO()): q.launch(run)
+            self.assertTrue((run/'launcher-process.json').exists())
+            self.assertEqual(q.read(run/'prelaunch.json'), current)
+            self.assertEqual(q.read(run/'before.json'), before)
+            self.assertEqual(q.read(run/'after.json'), current)
+            report = guide.summary(run)
+            self.assertEqual(report['exit_code'], 7, 'original fixture refusal must survive')
+            self.assertFalse(report['identity_equal'])
+            self.assertTrue(report['integration_identity_equal'])
+            self.assertEqual(report['integration_identity_drift'], [])
+            self.assertEqual(report['catalog_drift'], ['catalog', 'native_catalog'])
+            self.assertFalse(report['qualified'])
+
+    def test_catalog_churn_does_not_hide_other_prelaunch_drift(self):
+        for field in ('engine', 'runtime', 'plugins', 'skills', 'harness/collector.py', 'unknown'):
+            with self.subTest(field=field), tempfile.TemporaryDirectory() as temporary:
+                root, run, initial = self.refused_attempt(temporary)
+                current = {**initial, 'identity':{**initial['identity'], 'hashes':{
+                    'catalog':'new', 'native_catalog':'new', field:'changed'}}}
+                (root/'snapshot.json').write_text(json.dumps(current))
+                with patch.object(q, 'ROOT', root), contextlib.redirect_stdout(io.StringIO()):
+                    with self.assertRaisesRegex(ValueError, 'environment_drift'): q.launch(run)
+                self.assertFalse((run/'launcher-process.json').exists())
+
     def test_snapshot_failure_retains_original_launch_outcome(self):
         import desktop_qualification_guide as guide
         with tempfile.TemporaryDirectory() as temporary:
@@ -361,7 +395,7 @@ class QualificationTests(unittest.TestCase):
         from types import SimpleNamespace
         with tempfile.TemporaryDirectory() as temporary:
             root=Path(temporary);run=root/'attempt';run.mkdir(mode=0o700)
-            records={'before.json':{'identity':{'binary':'a'},'protected':{'auth':'x'}},'after.json':{'identity':{'binary':'a'},'protected':{'auth':'x'}},
+            records={'before.json':{'identity':{'binary':'a','hashes':{'catalog':'old','native_catalog':'old'}},'protected':{'auth':'x'}},'after.json':{'identity':{'binary':'a','hashes':{'catalog':'new','native_catalog':'new'}},'protected':{'auth':'x'}},
                      'declaration.json':{'case':'clean-exit','attempt':'attempt'},'start.json':{'started_utc':'start'},
                      'finish.json':{'finished_utc':'finish','stop':'operator_finished'},'process.json':{'launcher_pid':123},'requests.json':[],
                      'facts.json':{'raw':[],'history_before':{},'history_after':{}}}

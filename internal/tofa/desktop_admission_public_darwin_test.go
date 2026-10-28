@@ -2,10 +2,11 @@ package tofa_test
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"github.com/kreuzhofer/tofa-launcher/internal/tofa"
+	"io"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"strings"
@@ -245,7 +246,7 @@ func TestDesktopDeclaredCandidateEnforcesAdapterRequestBudget(t *testing.T) {
 	}
 }
 
-func TestDesktopDeclaredCandidateDetectsExactCatalogNumericDrift(t *testing.T) {
+func TestDesktopDeclaredCandidateRetainsCatalogNumericDriftWithoutBlocking(t *testing.T) {
 	bundle, capture := nativeCandidateFixture(t)
 	app, _ := adapterFixture(t, nil, nil)
 	observer := declaredCandidateObserver(t, app, bundle)
@@ -279,13 +280,47 @@ func TestDesktopDeclaredCandidateDetectsExactCatalogNumericDrift(t *testing.T) {
 	raw, _ = os.ReadFile(cache)
 	raw = bytes.Replace(raw, []byte(`9007199254740992`), []byte(`9007199254740993`), 1)
 	os.WriteFile(cache, raw, 0600)
-	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
-	defer cancel()
-	e = app.RunContext(ctx, []string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--native-account-candidate", "--evaluation-observer", observer})
-	if e == nil || !strings.Contains(e.Error(), "mismatched") {
-		t.Fatalf("numeric drift admitted: %v", e)
+	output.Reset()
+	app.Out = &output
+	e = app.Run([]string{"desktop-qualification", "snapshot", "--app-bundle", bundle, "--runtime-root", id.Runtime, "--harness-root", id.Harness, "--source-revision", strings.Repeat("a", 40)})
+	app.Out = old
+	if e != nil {
+		t.Fatal(e)
 	}
-	if _, e := os.Stat(capture); !os.IsNotExist(e) {
-		t.Fatal("drift started native fixture")
+	var current map[string]json.RawMessage
+	if e = json.Unmarshal(output.Bytes(), &current); e != nil {
+		t.Fatal(e)
 	}
+	if bytes.Equal(current["identity"], snapshot["identity"]) {
+		t.Fatal("catalog numeric change disappeared from provenance")
+	}
+	_, stop := liveDesktopFixture(t, app, bundle, capture, "--native-account-candidate", "--evaluation-observer", observer)
+	stop()
+}
+
+func TestDesktopDeclaredCandidateAllowsCatalogAndExplicitModelChange(t *testing.T) {
+	bundle, capture := nativeCandidateFixture(t)
+	app, _ := adapterFixture(t, nil, nil)
+	var refreshed atomic.Bool
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Header.Get("Authorization") != "Bearer fixture-secret" || r.URL.Query().Get("ai_project_id") != "fixture-project" {
+			t.Error("wrong provider credentials")
+		}
+		if r.URL.Path != "/models" {
+			t.Error("unexpected inference")
+			w.WriteHeader(500)
+			return
+		}
+		extra := ""
+		if refreshed.Load() {
+			extra = `,{"id":"new-unrelated-model"}`
+		}
+		io.WriteString(w, `{"data":[{"id":"moonshotai/Kimi-K3"},{"id":"zai-org/GLM-5.3"},{"id":"zai-org/GLM-5.3-Flash"},{"id":"nvidia/Nemotron-3_5-Lightning"}`+extra+`]}`)
+	}))
+	defer server.Close()
+	app.Endpoint = server.URL
+	observer := declaredCandidateObserver(t, app, bundle)
+	refreshed.Store(true)
+	_, stop := liveDesktopFixture(t, app, bundle, capture, "--model", "zai-org/GLM-5.3", "--native-account-candidate", "--evaluation-observer", observer)
+	stop()
 }

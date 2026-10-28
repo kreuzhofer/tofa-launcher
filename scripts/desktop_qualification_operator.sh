@@ -275,6 +275,8 @@ run_wizard() {
   stage "Prepare host Desktop"
   say "One clean-exit check on this Mac; candidate 372255f. No VM."
   say "Paid Kimi-K3; GLM-5.3-Flash Guardian; Lightning naming."
+  say "These are explicit selections for this attempt, not model-specific qualification requirements."
+  say "Catalog changes are recorded as provenance; integration and preservation checks still apply."
   say "Workspace setup happens before the baseline. Then 10 minutes from candidate launch, including observations; 8 requests, 4096 output tokens/request."
   say "One attempt only. No retries or model substitutions. Ctrl-C cancels and retains evidence."
   step "Save Desktop work. Note your current account, installed plugins and Code Review availability, then QUIT ChatGPT Desktop normally."

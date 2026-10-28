@@ -428,6 +428,70 @@ func TestDesktopAdmissionRejectsUnlinkedClaims(t *testing.T) {
 	}
 }
 
+func TestDesktopQualificationCatalogsAreProvenance(t *testing.T) {
+	path, id := qualificationFixture(t)
+	original, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	id.Hashes["catalog"] = strings.Repeat("d", 64)
+	id.Hashes["native_catalog"] = strings.Repeat("e", 64)
+	if _, err := readDesktopProof(path, id); err != nil {
+		t.Fatalf("catalog-only differences rejected full linked proof: %v", err)
+	}
+	// Admission must not erase provenance in the current snapshot or stored proof.
+	retained, err := os.ReadFile(path)
+	if err != nil || !bytes.Equal(original, retained) || id.Hashes["catalog"] == "" {
+		t.Fatal("provenance changed")
+	}
+	// Link a case with newer catalog provenance to unchanged raw snapshots and
+	// declaration. Their digest checks still run; only identity equality changes.
+	var proof desktopQualificationProof
+	if err := json.Unmarshal(original, &proof); err != nil {
+		t.Fatal(err)
+	}
+	ref := proof.Cases["repeat-launch"]
+	casePath := filepath.Join(filepath.Dir(path), ref.Path)
+	raw, err := os.ReadFile(casePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var record desktopQualificationCase
+	if err := json.Unmarshal(raw, &record); err != nil {
+		t.Fatal(err)
+	}
+	record.Identity.Hashes["catalog"] = strings.Repeat("f", 64)
+	raw, err = json.Marshal(record)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(casePath, raw, 0600); err != nil {
+		t.Fatal(err)
+	}
+	ref.SHA256 = digestBytes(raw)
+	proof.Cases["repeat-launch"] = ref
+	raw, err = json.Marshal(proof)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, raw, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := readDesktopProof(path, id); err != nil {
+		t.Fatalf("catalog change across linked receipts rejected: %v", err)
+	}
+
+	for _, key := range []string{"launcher", "engine", "runtime", "plugins", "skills", "harness/collector.py", "unknown"} {
+		t.Run(key, func(t *testing.T) {
+			changed := desktopIntegrationIdentity(id)
+			changed.Hashes[key] = strings.Repeat("f", 64)
+			if _, err := readDesktopProof(path, changed); err == nil {
+				t.Fatal("non-catalog drift admitted")
+			}
+		})
+	}
+}
+
 func TestDesktopAdmissionResourceInventoryPreservesBrokenLinks(t *testing.T) {
 	root := t.TempDir()
 	path := filepath.Join(root, "metadata")

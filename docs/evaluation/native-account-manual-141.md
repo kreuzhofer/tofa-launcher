@@ -1,11 +1,105 @@
 # Manual native-account qualification (#141)
 
-**Current status (2026-10-28): qualification remains open.** The guided
-`fb91537` GLM run completed the smoke response and normal exit, collected complete
-logs and closed both owned endpoints. Human account/plugin/review observations
-passed; identities and existing history bytes were preserved. Naming failed
-locally with HTTP 400. The protected configuration differed only by the new
-workspace's trust entry. Neither outcome is converted into a qualification pass.
+**Current status (2026-10-28): integration qualification remains open.** Candidate
+`efd74f8` completed clean-exit and repeat-launch observations. The repeat run
+completed main inference, automatic naming, history readability and normal exit;
+protected state and existing history bytes were preserved. Its only recorded
+identity difference was the Token Factory catalog fingerprint. The old evaluator
+classified that difference as blocking; the maintainer explicitly corrected that
+scope below. Existing receipts and reviews must remain unchanged, with any new
+assessment recorded separately. Remaining lifecycle cases are still pending.
+
+## Maintainer scope decision: integration, not model qualification
+
+The maintainer clarified on 2026-10-28 that #141 tests the overall integration into
+ChatGPT Desktop. Catalog churn and the identity of a particular main, Guardian or
+naming model are not independent qualification gates. Do not replace the full
+catalog gate with a selected-model fingerprint gate. Catalog/model information is
+provenance for interpreting a run, not a requirement that an external provider's
+inventory remain frozen.
+
+Judge the observed path: authorized launch, correct request-role/service routing,
+credential separation, functioning main/naming paths, native account and plugin
+eligibility, settings/skills/runtime/history preservation, and owned-process
+lifecycle/recovery. Keep these checks and the production guard intact. Model
+selection remains explicit; normal request validation and availability checks
+still apply when launching or submitting work. This decision does not authorize
+silent substitutions, ignored transport errors, incorrect routing, or fabricated
+observations. Guardian execution and other unexercised paths remain unproven.
+
+A model-specific delay, response-quality issue or punctuation discrepancy must be
+recorded separately and attributed from evidence; it is not automatically a
+Desktop preservation failure. This suite is not a model-capability benchmark.
+The clean-exit response's trailing period remains in its original evidence.
+
+The evaluator now compares integration identities with only `catalog` and
+`native_catalog` omitted from the comparison. Raw identities and their hashes
+remain in declarations, snapshots, checks and case records. This applies at
+candidate admission, installation monitoring, linked proof validation, collector
+prelaunch checks and recording. Unknown identity fields/hash categories remain
+strict. Request model identities are still checked against their actual receipts
+and declared routes; that is evidence integrity, not a fixed-model requirement
+across runs. No selected-model fingerprint gate has been introduced.
+
+Guidance summaries retain the original `identity_equal` and `identity_drift`
+fields and add `integration_identity_equal`, `integration_identity_drift` and
+`catalog_drift`. Repeat-launch predecessor checks should use the shared
+`identity_comparison` result's `integration_identity_equal`; full predecessor
+file digest bindings must still be checked. Protected-state and history checks
+remain separate and mandatory. Summaries never grant qualification.
+
+### Separate retained-evidence reassessment
+
+The immutable `efd74f8` clean-exit and repeat-launch receipts were reread under
+this scope. Their existing review digest bindings and source-file inventories
+were verified. New reports, with those inventories and evaluator source hashes,
+are stored privately outside `/tmp` at
+`.qualification/134-manual/reassessments/integration-scope-141-20261028/` in the
+main checkout. Neither the original receipts nor their reviews were rewritten.
+
+| Retained case | Integration observation | Separate provenance/output observation |
+| --- | --- | --- |
+| `clean-exit.124b34ac7d787f8d` | Observed pass for the recorded path | Exact smoke text still differs by a trailing period |
+| `repeat-launch.5fdfe556d4edba09` | Observed pass for the recorded path | Provider catalog changed; original blocking verdict retained |
+
+Both runs have completed main and naming requests, attributed account/plugin/
+review-eligibility observations, normal exit, closed owned routes, unchanged
+protected state and preserved existing history bytes. Repeat-launch also has a
+human history-readability observation and matching predecessor integration
+identity. Model IDs remain recorded. Catalog lists were not retained, so the
+exact added/removed IDs remain unknown; this does not block this assessment.
+Credential hashes match, but these smoke traces do not independently establish
+every credential-routing lane. Guardian execution, service switching, crash and
+recovery, ordinary-launch recovery, bridge update/uninstall and native previews
+remain unproven. These reports keep `qualified: false`.
+
+The reports describe the actual `efd74f8` runs; they do not transfer Desktop
+qualification to a newly built evaluator/launcher. The production guard and full
+lifecycle admission remain unchanged. Historical frozen binaries, collectors,
+private guides and invocation manifests are retained unchanged. Before any
+future wizard is offered, freeze the reviewed new candidate and generate a new
+versioned guide using the integration comparison for repeat baselines. Do not
+reuse the old guide's blanket identity check or patch its pinned candidate.
+No manual rerun is needed solely because the catalog changed, and no Desktop
+launch or manual rerun was performed for this correction.
+
+### Regression coverage
+
+The public-launch catalog regression first failed with declaration identity
+mismatch. Collector prelaunch and case-record regressions also failed on the
+old blanket comparisons. They now allow catalog churn while retaining both
+snapshots. Tests cover provider inventory changes with an explicit different
+available main selection, exact native-catalog numeric provenance, linked proof
+receipts across catalog changes, and rejection of engine/runtime/plugin/skill/
+harness/unknown identity drift. Existing credential, role/service routing,
+request-linkage, protected-state, history and lifecycle tests remain required.
+
+
+## Earlier fb91537 clean-exit observation
+
+The guided `fb91537` GLM run completed its smoke response and normal exit, but
+naming failed locally with HTTP 400 and the configuration differed by the new
+workspace trust entry. The following corrections produced `efd74f8`.
 
 ## Corrections after the clean-exit observation
 

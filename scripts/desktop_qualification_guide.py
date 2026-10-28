@@ -11,7 +11,7 @@ import sys
 import tarfile
 import time
 
-from desktop_qualification import private_run, read as private_read, save
+from desktop_qualification import private_run, read as private_read, save, integration_identity
 
 CANDIDATE_NAME = '372255f'
 HASHES = {'tofa': '7e74232c325b32b5f8c0c6ada314fdb05cc6191c5c1a05f01f0ec61678823b1f', 'source.tar': 'ef0e4738ed5ab65986512892bf460d6a4b3a34cceca1c0e08ec496e019a9f401'}
@@ -111,6 +111,17 @@ def identity_changes(before, after):
     return sorted(changed)
 
 
+def identity_comparison(before, after):
+    """Shared summary and repeat-baseline policy; does not grant qualification."""
+    left, right = integration_identity(before), integration_identity(after)
+    return {'identity_equal':before == after,
+            'identity_drift':identity_changes(before, after),
+            'integration_identity_equal':left == right,
+            'integration_identity_drift':identity_changes(left, right),
+            'catalog_drift':[key for key in ('catalog','native_catalog')
+                             if before.get('hashes',{}).get(key) != after.get('hashes',{}).get(key)]}
+
+
 def summary(run):
     before = read(run/'before.json') if (run/'before.json').exists() else None
     after = read(run/'after.json') if (run/'after.json').exists() else (
@@ -144,9 +155,9 @@ def summary(run):
         'exit_code':terminal.get('exit_code') if terminal else None,
         'process_exited_before_stop':terminal.get('process_exited_before_stop') if terminal else None,
         'observer_requests':terminal.get('observer_requests') if terminal else None,
-        'identity_equal':before['identity']==after['identity'] if before and after else None,
+        **(identity_comparison(before['identity'], after['identity']) if before and after else
+           {key:None for key in ('identity_equal','identity_drift','integration_identity_equal','integration_identity_drift','catalog_drift')}),
         'protected_equal':before['protected']==after['protected'] if before and after else None,
-        'identity_drift':identity_changes(before['identity'], after['identity']) if before and after else None,
         'protected_drift':changed(before['protected'], after['protected']) if before and after else None,
         'existing_history_bytes_preserved':history['existing_bytes_preserved'] if history else None,
         'history_drift':history['changed'] if history else None,

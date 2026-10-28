@@ -26,6 +26,20 @@ CASES = ('clean-exit', 'repeat-launch', 'launcher-crash', 'native-crash',
 COLLECTION_ERRORS = (OSError, ValueError, KeyError, subprocess.SubprocessError, http.client.HTTPException)
 
 
+def integration_identity(identity):
+    """Compare installation invariants without erasing catalog provenance."""
+    result = dict(identity)
+    if 'hashes' in result:
+        result['hashes'] = {key:value for key,value in result['hashes'].items()
+                            if key not in ('catalog', 'native_catalog')}
+    return result
+
+
+def integration_snapshot(snapshot):
+    # Preserve schema, protected state and any other snapshot metadata exactly.
+    return {**snapshot, 'identity':integration_identity(snapshot['identity'])}
+
+
 def digest(path):
     value = hashlib.sha256()
     with Path(path).open('rb') as stream:
@@ -112,7 +126,7 @@ def prepare_calibration(run, options, limits):
     plan={'launcher':str(options.launcher.resolve()),'app_bundle':str(options.app_bundle.resolve()),
           'runtime_root':str(options.runtime_root.resolve()),'source_revision':frozen['identity']['source_revision']}
     current=snapshot(plan)
-    if current['identity'] != frozen['identity']: raise ValueError('calibration_identity_drift')
+    if integration_identity(current['identity']) != integration_identity(frozen['identity']): raise ValueError('calibration_identity_drift')
     save(run/'before.json',current)
     now=stamp()
     save(run/'declaration.json',{'schema':'tofa-native-account-declaration-v1','attempt':run.name,
@@ -244,6 +258,7 @@ def launch(run):
         current = snapshot(plan)
         if current != before:
             save(run/'prelaunch.json', current)
+        if integration_snapshot(current) != integration_snapshot(before):
             raise ValueError('environment_drift_before_launch')
         phase = 'observer_setup'
         limits = {key: plan[key] for key in ('seconds', 'requests', 'output_tokens')}
@@ -407,7 +422,7 @@ def record(options):
         raise ValueError('unknown_machine_fact_fields')
     before, after = read(run/'before.json'), read(run/'after.json')
     declaration, start, finish = read(run/'declaration.json'), read(run/'start.json'), read(run/'finish.json')
-    if before['identity'] != after['identity']: raise ValueError('identity_drift')
+    if integration_identity(before['identity']) != integration_identity(after['identity']): raise ValueError('identity_drift')
     observations = [read(path) for path in sorted(run.glob('observation-*.json'))]
     value = {'schema':'tofa-native-account-case-v1','case':declaration['case'],
         'declaration':reference(run,run/'declaration.json'),'start':reference(run,run/'start.json'),

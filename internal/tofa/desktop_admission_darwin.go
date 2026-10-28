@@ -193,7 +193,7 @@ func readDesktopDeclaration(path string, id desktopAdmissionIdentity, seconds in
 	if d.Issued.After(now) || now.Sub(d.Issued) > 30*time.Minute || !d.Expires.After(now) || d.Expires.Sub(d.Issued) != time.Duration(seconds)*time.Second {
 		return nil, admissionError("declaration expired or invalid time window")
 	}
-	if !reflect.DeepEqual(d.Identity, id) {
+	if !desktopIntegrationIdentityEqual(d.Identity, id) {
 		return nil, admissionError("declaration identity mismatched (changed: " + desktopIdentityChanges(d.Identity, id) + ")")
 	}
 	if e := validateAdmissionScope(root, d); e != nil {
@@ -205,8 +205,29 @@ func readDesktopDeclaration(path string, id desktopAdmissionIdentity, seconds in
 	return &desktopAdmission{mode: "candidate", path: canonical, digest: digest, identity: id, declaration: d}, nil
 }
 
+// Catalogs describe the available models, not the installation being qualified.
+// Compare copies so declarations, snapshots and receipt hashes retain full provenance.
+// All other fields (including unknown hash keys) remain part of the gate.
+func desktopIntegrationIdentity(id desktopAdmissionIdentity) desktopAdmissionIdentity {
+	if id.Hashes != nil {
+		hashes := make(map[string]string, len(id.Hashes))
+		for key, value := range id.Hashes {
+			if key != "catalog" && key != "native_catalog" {
+				hashes[key] = value
+			}
+		}
+		id.Hashes = hashes
+	}
+	return id
+}
+
+func desktopIntegrationIdentityEqual(before, after desktopAdmissionIdentity) bool {
+	return reflect.DeepEqual(desktopIntegrationIdentity(before), desktopIntegrationIdentity(after))
+}
+
 // Only emit fixed category names, never paths, hashes or untrusted JSON keys.
 func desktopIdentityChanges(before, after desktopAdmissionIdentity) string {
+	before, after = desktopIntegrationIdentity(before), desktopIntegrationIdentity(after)
 	changed := []string{}
 	for _, field := range []struct{ name, before, after string }{
 		{"source", before.Source, after.Source}, {"home", before.Home, after.Home},
@@ -735,7 +756,7 @@ func (a *desktopAdmission) recheck(bundle desktopBundle, home, profile, bridge s
 	if e != nil {
 		return e
 	}
-	if !reflect.DeepEqual(current, a.identity) {
+	if !desktopIntegrationIdentityEqual(current, a.identity) {
 		return admissionError("installation drifted")
 	}
 	if a.mode == "qualified" {

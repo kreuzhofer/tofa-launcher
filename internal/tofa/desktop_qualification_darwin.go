@@ -158,7 +158,7 @@ func readDesktopProof(path string, id desktopAdmissionIdentity) (*desktopAdmissi
 	if e != nil {
 		return nil, e
 	}
-	if proof.Schema != desktopProofSchema || !reflect.DeepEqual(proof.Identity, id) || len(proof.Cases) != len(desktopQualificationCases) {
+	if proof.Schema != desktopProofSchema || !desktopIntegrationIdentityEqual(proof.Identity, id) || len(proof.Cases) != len(desktopQualificationCases) {
 		return nil, admissionError("coverage or identity incomplete")
 	}
 	canonical, e := privateEvidencePath(path, false)
@@ -190,7 +190,7 @@ func readDesktopProof(path string, id desktopAdmissionIdentity) (*desktopAdmissi
 	if e := readAdmissionReference(base, proof.Checks, &checks); e != nil {
 		return nil, e
 	}
-	if checks.Schema != "tofa-native-account-checks-v1" || !reflect.DeepEqual(checks.Identity, id) || checks.Baseline != "a91477481ff5fe4f0823731e35302d3794806660" {
+	if checks.Schema != "tofa-native-account-checks-v1" || !desktopIntegrationIdentityEqual(checks.Identity, id) || checks.Baseline != "a91477481ff5fe4f0823731e35302d3794806660" {
 		return nil, admissionError("review identity incomplete")
 	}
 	checksBase := filepath.Dir(filepath.Join(base, proof.Checks.Path))
@@ -221,14 +221,14 @@ func readDesktopProof(path string, id desktopAdmissionIdentity) (*desktopAdmissi
 }
 func validateDesktopCase(base string, r desktopQualificationCase, id desktopAdmissionIdentity, attempts map[string]bool) error {
 	criteria, known := desktopQualificationCases[r.Case]
-	if r.Schema != desktopCaseSchema || !known || !reflect.DeepEqual(r.Identity, id) || r.Started.IsZero() || r.Finished.Before(r.Started) || r.Finished.After(time.Now().Add(time.Minute)) {
+	if r.Schema != desktopCaseSchema || !known || !desktopIntegrationIdentityEqual(r.Identity, id) || r.Started.IsZero() || r.Finished.Before(r.Started) || r.Finished.After(time.Now().Add(time.Minute)) {
 		return admissionError("case identity invalid")
 	}
 	var d desktopCandidateDeclaration
 	if e := readAdmissionReference(base, r.Declaration, &d); e != nil {
 		return e
 	}
-	if d.Schema != desktopDeclarationSchema || d.Case != r.Case || !reflect.DeepEqual(d.Identity, id) || d.Attempt == "" || attempts[d.Attempt] || (d.Seconds != 600 && d.Seconds != 900) || d.Requests < 1 || d.Requests > 80 || d.Expires.Sub(d.Issued) != time.Duration(d.Seconds)*time.Second || r.Started.Before(d.Issued) || r.Finished.After(d.Expires) {
+	if d.Schema != desktopDeclarationSchema || d.Case != r.Case || !desktopIntegrationIdentityEqual(d.Identity, id) || d.Attempt == "" || attempts[d.Attempt] || (d.Seconds != 600 && d.Seconds != 900) || d.Requests < 1 || d.Requests > 80 || d.Expires.Sub(d.Issued) != time.Duration(d.Seconds)*time.Second || r.Started.Before(d.Issued) || r.Finished.After(d.Expires) {
 		return admissionError("case declaration mismatch or reused attempt")
 	}
 	if e := validateAdmissionScope(base, d); e != nil {
@@ -814,7 +814,7 @@ func validateDesktopReceipts(base string, r desktopQualificationCase) error {
 		if e := readAdmissionReference(base, item.ref, &snapshot); e != nil {
 			return e
 		}
-		if snapshot.Schema != "tofa-native-account-snapshot-v1" || !reflect.DeepEqual(snapshot.Identity, r.Identity) || !reflect.DeepEqual(snapshot.Protected, item.expected) {
+		if snapshot.Schema != "tofa-native-account-snapshot-v1" || !desktopIntegrationIdentityEqual(snapshot.Identity, r.Identity) || !reflect.DeepEqual(snapshot.Protected, item.expected) {
 			return admissionError("protected snapshot linkage mismatch")
 		}
 	}
