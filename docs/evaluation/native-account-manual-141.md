@@ -94,6 +94,17 @@ receipts across catalog changes, and rejection of engine/runtime/plugin/skill/
 harness/unknown identity drift. Existing credential, role/service routing,
 request-linkage, protected-state, history and lifecycle tests remain required.
 
+Validation of implementation commit `154ac98`: `go test -race ./...` and
+`go vet ./...` passed. Race-enabled public-launch/bundled-engine service switching,
+protocol/admission and naming-independence checks passed against owned local
+upstreams. All 104 focused Python qualification, guidance, observer, scope and
+shutdown tests passed; Bash syntax passed. An extra broad Python discovery run
+was interrupted because unrelated test scripts require command-line inputs; it
+is not counted as a pass. Standards and Spec reviews against `efd74f8` each
+reported zero findings. Durable validation logs and review summaries accompany
+the separate private reassessments. No actual Desktop UI launch, provider
+inference or manual rerun was performed.
+
 
 ## Earlier fb91537 clean-exit observation
 
