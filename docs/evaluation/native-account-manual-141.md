@@ -1,13 +1,113 @@
 # Manual native-account qualification (#141)
 
-**Current status (2026-10-28): integration qualification remains open.** Candidate
-`efd74f8` completed clean-exit and repeat-launch observations. The repeat run
-completed main inference, automatic naming, history readability and normal exit;
-protected state and existing history bytes were preserved. Its only recorded
-identity difference was the Token Factory catalog fingerprint. The old evaluator
-classified that difference as blocking; the maintainer explicitly corrected that
-scope below. Existing receipts and reviews must remain unchanged, with any new
-assessment recorded separately. Remaining lifecycle cases are still pending.
+**Current status (2026-11-10): integration qualification remains open.** The
+retained clean-exit, repeat-launch and scoped launcher-crash observations remain
+accepted for their recorded candidates. Ordinary recovery on November 9 worked
+functionally, but settings, plugin and skill preservation remain unqualified.
+The offline correction below adds skill-file evidence for future collection; it
+does not qualify a new candidate or change any historical receipt.
+
+## November 9 ordinary recovery: offline preservation diagnosis
+
+`ordinary-recovery.a9vi4y_n` recorded five positive human observations: account,
+plugins, Code Review eligibility, crash-run history and older history. The actual
+app and descendant bundled engine were identified, normal departure was observed,
+and the old route port refused connections before and after. Collection finished
+within 600 seconds. Credential hashes and existing history-prefix bytes matched.
+These functional results remain accepted; socket refusal does not establish
+credential rejection by a listening server.
+
+The November 10 offline assessment verified all 25 durable receipts against the
+prior review's digest inventory and against the original temporary copy. It
+recomputed these differences from the retained inventories:
+
+- Config leaf hashes changed only for
+  `mcp_servers.node_repl.env.BROWSER_USE_CODEX_APP_VERSION` and
+  `mcp_servers.node_repl.env.NODE_REPL_TRUSTED_SERVICES`.
+- Bundled browser, chrome, unified-computer-use and codex-app-tools cache entries
+  moved from `26.1027.30824` to `26.1027.61615`; the chrome `latest` link changed.
+  Curated Visualize `1.0.89` and its installation receipt appeared.
+- The local skills aggregate changed. Neither snapshot retained the per-file
+  skill entries. A later live tree cannot establish what changed during this run.
+
+The config/plugin changes are consistent with a native plugin refresh. This is
+an interpretation of recorded paths and hashes, **not attribution to a process**
+or proof that every change was harmless. All three preservation differences
+remain reported. Catalog changes remain provenance only. No generated-field,
+plugin-version or skill drift exclusion has been added. Recovery used an updated
+client; it does not retrospectively qualify the October 30 client binary.
+
+The separate private diagnosis is retained in the main checkout under
+`.qualification/134-manual/diagnostics/skill-evidence-141-20261110/`. Original run
+receipts, previous reviews, accepted outcomes and frozen candidates are unchanged.
+
+### Correction and compatibility
+
+The public `desktop-qualification snapshot` command now includes additive
+`skill_files` maps for `skills` (`<home>/skills`) and `agent_skills`
+(`dirname(<home>)/.agents/skills`). Entries are relative paths with file hashes,
+symlink metadata or the existing absent-root marker, never skill file contents.
+They are the exact entries used to compute each aggregate in the same traversal;
+there is no second scan that could silently disagree with that aggregate. This
+is still a sequential filesystem observation, not an atomic filesystem snapshot
+or evidence identifying the process responsible for a change.
+
+Existing hashing rules, including the existing bytecode/cache handling and
+symlink restrictions, remain unchanged. Plugin-packaged skills remain covered by
+the plugin inventory; these maps describe the two separate skill roots only.
+The collector already saves the entire snapshot in its immutable before/after
+receipts. The guide now reports added, removed and modified paths from those
+retained maps. Missing old inventories report `not_recorded`, never an empty
+proven difference or data reconstructed from the live machine. Summaries continue
+to say `qualified: false`.
+
+The updated proof reader accepts old aggregate-only receipts and validates any
+new skill detail against its recorded identity hashes. Older strict readers may
+reject the additive field: use the matching reviewed collector and candidate for
+new runs; do not rewrite old receipts or patch frozen binaries. Admission,
+credential isolation, routing, history, lifecycle, catalog/model provenance and
+the production guard retain their existing rules. No Desktop launch, manual
+rerun, provider request or shared settings/skill mutation was performed here.
+
+### Offline correction validation
+
+The public snapshot regression first failed with missing skill evidence; the
+retained-summary regression first failed with missing file-change reporting.
+Both pass after the correction. Focused Go admission/snapshot/qualification tests,
+all 40 Python collector/guide tests, the full `go test -race ./...` suite,
+`go vet ./...`, and operator Bash syntax passed. The default full Go suite skips
+installed-engine tests without their opt-in; those were checked separately below. Initial sandbox-only loopback bind failures were resolved by running the
+owned local fixtures with loopback permission. Standards and Spec reviews against
+`9928136` reported zero findings on each axis.
+
+Additional tests with the installed real bundled engine passed service switching,
+protocol/admission, naming independence and the observed title-schema contract.
+`TestDesktopNativeCandidateBundledEngineTurn` failed its two synthetic
+`path-negative-control` assertions: the engine did not expose the synthetic URL
+path token in websocket diagnostics, although the test expected disclosure.
+Both header-capability subtests passed. The same failures reproduce against an
+unchanged `9928136` archive with the same engine. This is retained as an unresolved
+baseline/test-engine compatibility result, not weakened, counted as a pass or
+attributed to this correction. No claim of complete installed-engine qualification
+is made. Private comparison logs and the engine digest accompany the diagnosis.
+
+### Remaining qualification matrix
+
+| Case | Retained result | Remaining work |
+| --- | --- | --- |
+| Clean exit | Scoped integration observation accepted for `efd74f8` (`clean-exit.124b34ac7d787f8d`); smoke punctuation remains separately recorded | Affected qualification for the next frozen candidate/client |
+| Repeat launch and history readability | Scoped integration observation accepted for `efd74f8` (`repeat-launch.5fdfe556d4edba09`) | Affected qualification for the next frozen candidate/client |
+| Launcher crash | Scoped observation accepted for `9928136` (`launcher-crash.cbfecaaa8a046312`); owned routes closed, Desktop survived, preservation checks passed | Reassess reuse against the next candidate/client; no automatic transfer |
+| Subsequent ordinary launch | November 9 functional recovery accepted, preservation unqualified (`ordinary-recovery.a9vi4y_n`) | Review the retained config/plugin deltas; historical skill detail is irrecoverable from these receipts. A future declared run can collect new evidence, not repair this run |
+| Native-client crash | Not qualified | Separate declared case |
+| Bridge update/interruption | Not qualified | Separate declared case |
+| Uninstall recovery | Not qualified | Separate declared case |
+
+The new source/harness requires review and a newly frozen kit before any future
+operator handoff. There is no manual rerun in this correction. Keep #141 open,
+retain the integration branch and production guard. Service switching, Guardian
+execution and naming coverage (#142), and runtime/native previews (#143), remain
+separate gates; this evidence does not establish them.
 
 ## Maintainer scope decision: integration, not model qualification
 
@@ -287,10 +387,12 @@ the observed file bytes, not SQLite metadata consistency, history UI readability
 or provider-routing semantics; those require the separate lifecycle/history
 checks. If collection is incomplete, missing evidence cannot become a pass.
 
-## Declared lifecycle sequence
+## Historical initial lifecycle plan
 
-Each case requires its own bounded declaration and explicit operator handoff.
-Only clean-exit is executable in this wizard. No crash, bridge installation,
+The following table records the initial `372255f` preparation, not current
+qualification status; use the November 10 matrix above. Each case requires its
+own bounded declaration and explicit operator handoff. Only clean-exit was
+executable in this wizard. No crash, bridge installation,
 uninstall or automatic chained launch is authorized by running it.
 
 | Case | Status / prerequisite |

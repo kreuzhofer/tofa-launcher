@@ -717,7 +717,8 @@ func (a *App) desktopQualification(ctx context.Context, s Store, args []string) 
 	if e != nil {
 		return e
 	}
-	id, e := desktopCompatibilityIdentity(bundle, home, profile, desktopBridgePath(a.Dir, bundle.engine), *runtimeRoot, *harness, *source, models)
+	skillFiles := map[string]map[string]string{}
+	id, e := collectDesktopCompatibilityIdentity(bundle, home, profile, desktopBridgePath(a.Dir, bundle.engine), *runtimeRoot, *harness, *source, models, skillFiles)
 	if e != nil {
 		return e
 	}
@@ -737,7 +738,7 @@ func (a *App) desktopQualification(ctx context.Context, s Store, args []string) 
 	for _, name := range []string{"plugins", "skills", "runtime"} {
 		state[name] = id.Hashes[name]
 	}
-	return json.NewEncoder(a.Out).Encode(map[string]any{"schema": "tofa-native-account-snapshot-v1", "identity": id, "protected": state})
+	return json.NewEncoder(a.Out).Encode(map[string]any{"schema": "tofa-native-account-snapshot-v1", "identity": id, "protected": state, "skill_files": skillFiles})
 }
 
 // Only concrete native content containers are traversed. Error flags are fatal;
@@ -807,12 +808,28 @@ func validateDesktopReceipts(base string, r desktopQualificationCase) error {
 		expected map[string]string
 	}{{r.BeforeSnapshot, r.Before}, {r.AfterSnapshot, r.After}} {
 		var snapshot struct {
-			Schema    string                   `json:"schema"`
-			Identity  desktopAdmissionIdentity `json:"identity"`
-			Protected map[string]string        `json:"protected"`
+			Schema     string                       `json:"schema"`
+			Identity   desktopAdmissionIdentity     `json:"identity"`
+			Protected  map[string]string            `json:"protected"`
+			SkillFiles map[string]map[string]string `json:"skill_files,omitempty"`
 		}
 		if e := readAdmissionReference(base, item.ref, &snapshot); e != nil {
 			return e
+		}
+		// Older receipts have no file detail. Preserve their validity without
+		// manufacturing historical entries; validate any supplied detail against
+		// the aggregate that was actually admitted.
+		if snapshot.SkillFiles != nil {
+			if len(snapshot.SkillFiles) != 2 {
+				return admissionError("skill inventory incomplete")
+			}
+			for _, name := range []string{"skills", "agent_skills"} {
+				entries, ok := snapshot.SkillFiles[name]
+				raw, e := json.Marshal(entries)
+				if !ok || entries == nil || e != nil || digestBytes(raw) != snapshot.Identity.Hashes[name] {
+					return admissionError("skill inventory linkage mismatch")
+				}
+			}
 		}
 		if snapshot.Schema != "tofa-native-account-snapshot-v1" || !desktopIntegrationIdentityEqual(snapshot.Identity, r.Identity) || !reflect.DeepEqual(snapshot.Protected, item.expected) {
 			return admissionError("protected snapshot linkage mismatch")

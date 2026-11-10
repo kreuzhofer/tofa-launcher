@@ -154,6 +154,11 @@ func qualificationFixture(t *testing.T) (string, desktopAdmissionIdentity) {
 	root, _ = filepath.EvalSymlinks(root)
 	t.Cleanup(func() { os.RemoveAll(root) })
 	id := desktopAdmissionIdentity{Source: strings.Repeat("a", 40), Home: "/owned/home", Profile: "/owned/profile", Runtime: filepath.Join(root, "runtime"), Harness: "/owned/harness", Hashes: map[string]string{"launcher": strings.Repeat("b", 64), "engine": strings.Repeat("c", 64)}}
+	skillFiles := map[string]map[string]string{"skills": {"example/SKILL.md": strings.Repeat("d", 64)}, "agent_skills": {".": "absent"}}
+	for name, entries := range skillFiles {
+		raw, _ := json.Marshal(entries)
+		id.Hashes[name] = digestBytes(raw)
+	}
 	os.Mkdir(id.Runtime, 0700)
 	write := func(base, name string, value any) desktopEvidenceRef {
 		raw, _ := json.Marshal(value)
@@ -245,7 +250,8 @@ func qualificationFixture(t *testing.T) (string, desktopAdmissionIdentity) {
 				r.Observations[i].Artifacts = map[string]string{"deck.pptx": r.Runtime.Artifacts["deck.pptx"].SHA256, "deck.pdf": r.Runtime.Artifacts["deck.pdf"].SHA256}
 			}
 		}
-		r.BeforeSnapshot = write(base, "before.json", map[string]any{"schema": "tofa-native-account-snapshot-v1", "identity": id, "protected": r.Before})
+		// Exercise additive file detail and legacy aggregate-only receipts together.
+		r.BeforeSnapshot = write(base, "before.json", map[string]any{"schema": "tofa-native-account-snapshot-v1", "identity": id, "protected": r.Before, "skill_files": skillFiles})
 		r.AfterSnapshot = write(base, "after.json", map[string]any{"schema": "tofa-native-account-snapshot-v1", "identity": id, "protected": r.After})
 		stopRef := write(base, "route-stop.json", map[string]any{"schema": "tofa-native-account-route-stop-v1", "attempt": name, "launcher_pid": 10, "endpoint": "http://127.0.0.1:4321", "observed_utc": now, "inference": map[string]any{"http_status": 401, "socket_closed": false}, "control": map[string]any{"http_status": 401, "socket_closed": false}})
 		r.RouteStop = &stopRef
@@ -662,5 +668,38 @@ func TestDesktopAdmissionNormalStopExitOneRequiresOwnedAcknowledgment(t *testing
 				t.Fatalf("admitted=%v want=%v error=%v", e == nil, test.want, e)
 			}
 		})
+	}
+}
+
+func TestDesktopAdmissionRejectsSkillDetailUnboundToAggregate(t *testing.T) {
+	path, id := qualificationFixture(t)
+	if _, err := readDesktopProof(path, id); err != nil {
+		t.Fatal(err)
+	}
+	base := filepath.Dir(path)
+	raw, _ := os.ReadFile(path)
+	var proof desktopQualificationProof
+	json.Unmarshal(raw, &proof)
+	ref := proof.Cases["clean-exit"]
+	casePath := filepath.Join(base, ref.Path)
+	raw, _ = os.ReadFile(casePath)
+	var record desktopQualificationCase
+	json.Unmarshal(raw, &record)
+	snapshotPath := filepath.Join(filepath.Dir(casePath), record.BeforeSnapshot.Path)
+	raw, _ = os.ReadFile(snapshotPath)
+	var snapshot map[string]any
+	json.Unmarshal(raw, &snapshot)
+	snapshot["skill_files"] = map[string]map[string]string{"skills": {}, "agent_skills": {".": "absent"}}
+	raw, _ = json.Marshal(snapshot)
+	os.WriteFile(snapshotPath, raw, 0600)
+	record.BeforeSnapshot.SHA256 = digestBytes(raw)
+	raw, _ = json.Marshal(record)
+	os.WriteFile(casePath, raw, 0600)
+	ref.SHA256 = digestBytes(raw)
+	proof.Cases["clean-exit"] = ref
+	raw, _ = json.Marshal(proof)
+	os.WriteFile(path, raw, 0600)
+	if _, err := readDesktopProof(path, id); err == nil || !strings.Contains(err.Error(), "skill inventory linkage mismatch") {
+		t.Fatalf("unbound detail should be rejected even with updated receipt digests: %v", err)
 	}
 }

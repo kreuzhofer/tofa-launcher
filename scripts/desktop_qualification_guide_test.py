@@ -20,6 +20,36 @@ class GuideTests(unittest.TestCase):
     def write(self, name, value):
         (self.run/name).write_text(json.dumps(value))
 
+    def test_skill_drift_reports_retained_files_without_attributing_cause(self):
+        before = {'identity':{'hashes':{'skills':'before','agent_skills':'agent-before'}},
+                  'protected':{'skills':'before'},
+                  'skill_files':{'skills':{'edit/SKILL.md':'old','remove/SKILL.md':'gone'},
+                                 'agent_skills':{'link':'link:old'}}}
+        after = {'identity':{'hashes':{'skills':'after','agent_skills':'agent-after'}},
+                 'protected':{'skills':'after'},
+                 'skill_files':{'skills':{'edit/SKILL.md':'new','add/SKILL.md':'added'},
+                                'agent_skills':{'link':'link:new'}}}
+        self.write('before.json', before)
+        self.write('after.json', after)
+        original = {p.name:p.read_bytes() for p in self.run.iterdir()}
+        report = guide.summary(self.run)
+        self.assertEqual(report['skill_file_changes']['skills'], {
+            'status':'recorded', 'added':['add/SKILL.md'],
+            'removed':['remove/SKILL.md'], 'modified':['edit/SKILL.md']})
+        self.assertEqual(report['skill_file_changes']['agent_skills'], {
+            'status':'recorded', 'added':[], 'removed':[], 'modified':['link']})
+        self.assertEqual(report['protected_drift'], ['skills'])
+        self.assertFalse(report['qualified'])
+        self.assertEqual(original, {p.name:p.read_bytes() for p in self.run.iterdir()})
+        # Historical aggregate-only receipts stay unknown, never reconstructed
+        # from the current installation or presented as an empty difference.
+        del before['skill_files']
+        self.write('before.json', before)
+        report = guide.summary(self.run)
+        self.assertEqual(report['skill_file_changes']['skills'], {'status':'not_recorded'})
+        self.assertEqual(report['protected_drift'], ['skills'])
+        self.assertFalse(report['qualified'])
+
     def test_deadline_rejects_input(self):
         self.write('declaration.json', {'expires_utc':'2020-01-01T00:00:00Z'})
         with self.assertRaisesRegex(ValueError, 'deadline'):

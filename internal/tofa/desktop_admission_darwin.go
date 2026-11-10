@@ -449,6 +449,16 @@ func hashAdmissionFile(path string) (string, error) {
 	return hex.EncodeToString(h.Sum(nil)), nil
 }
 func admissionTree(root, engine, bridge string, pluginFiles ...string) (string, error) {
+	entries, e := admissionTreeEntries(root, engine, bridge, pluginFiles...)
+	if e != nil {
+		return "", e
+	}
+	raw, _ := json.Marshal(entries)
+	return digestBytes(raw), nil
+}
+
+// Retain the entries from the same traversal that supplies the aggregate.
+func admissionTreeEntries(root, engine, bridge string, pluginFiles ...string) (map[string]string, error) {
 	entries := map[string]string{}
 	nativeMCP := map[string]bool{}
 	for _, path := range pluginFiles {
@@ -522,10 +532,9 @@ func admissionTree(root, engine, bridge string, pluginFiles ...string) (string, 
 		return nil
 	})
 	if e != nil {
-		return "", e
+		return nil, e
 	}
-	raw, _ := json.Marshal(entries)
-	return digestBytes(raw), nil
+	return entries, nil
 }
 
 // Inventory every installed version rather than inferring an active plugin from
@@ -588,6 +597,10 @@ func desktopCachedMCPFiles(home string) ([]string, error) {
 var qualificationHarnessFiles = []string{"desktop_qualification.py", "capability_observer.py", "capability_evaluation.py", "capability_actions.py", "presentation_calibration.py", "presentation_runtime.py", "presentation_smoke.py", "presentation_synthetic.py", "presentation_preview.py", "capability_runtime.py", "retained_mcp.py", "evaluation_proxy.py", "fixtures/presentation-smoke.mjs"}
 
 func desktopCompatibilityIdentity(bundle desktopBundle, home, profile, bridge, runtimeRoot, harness, source string, models []Model) (desktopAdmissionIdentity, error) {
+	return collectDesktopCompatibilityIdentity(bundle, home, profile, bridge, runtimeRoot, harness, source, models, nil)
+}
+
+func collectDesktopCompatibilityIdentity(bundle desktopBundle, home, profile, bridge, runtimeRoot, harness, source string, models []Model, skillFiles map[string]map[string]string) (desktopAdmissionIdentity, error) {
 	result := desktopAdmissionIdentity{Source: source, Home: home, Profile: profile, Runtime: runtimeRoot, Harness: harness, Hashes: map[string]string{}}
 	if len(source) != 40 {
 		return result, admissionError("requires frozen source revision")
@@ -646,11 +659,15 @@ func desktopCompatibilityIdentity(bundle desktopBundle, home, profile, bridge, r
 		return result, admissionError("saved bridge unavailable")
 	}
 	for name, path := range map[string]string{"plugins": filepath.Join(home, "plugins/cache"), "skills": filepath.Join(home, "skills"), "agent_skills": filepath.Join(filepath.Dir(home), ".agents/skills"), "runtime": runtimeRoot} {
-		hash, e := admissionTree(path, bundle.engine, bridge, pluginFiles...)
+		entries, e := admissionTreeEntries(path, bundle.engine, bridge, pluginFiles...)
 		if e != nil {
 			return result, e
 		}
-		result.Hashes[name] = hash
+		raw, _ := json.Marshal(entries)
+		result.Hashes[name] = digestBytes(raw)
+		if skillFiles != nil && (name == "skills" || name == "agent_skills") {
+			skillFiles[name] = entries
+		}
 	}
 	for _, name := range qualificationHarnessFiles {
 		hash, e := hashAdmissionFile(filepath.Join(harness, name))

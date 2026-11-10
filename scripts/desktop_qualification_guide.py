@@ -122,6 +122,22 @@ def identity_comparison(before, after):
                              if before.get('hashes',{}).get(key) != after.get('hashes',{}).get(key)]}
 
 
+def skill_file_changes(before, after):
+    """Diagnose retained entries only; missing historical evidence is unknown."""
+    result = {}
+    for name in ('skills', 'agent_skills'):
+        left = (before or {}).get('skill_files', {}).get(name)
+        right = (after or {}).get('skill_files', {}).get(name)
+        if left is None or right is None:
+            result[name] = {'status':'not_recorded'}
+            continue
+        result[name] = {'status':'recorded',
+                        'added':sorted(right.keys() - left.keys()),
+                        'removed':sorted(left.keys() - right.keys()),
+                        'modified':sorted(k for k in left.keys() & right.keys() if left[k] != right[k])}
+    return result
+
+
 def summary(run):
     before = read(run/'before.json') if (run/'before.json').exists() else None
     after = read(run/'after.json') if (run/'after.json').exists() else (
@@ -159,6 +175,7 @@ def summary(run):
            {key:None for key in ('identity_equal','identity_drift','integration_identity_equal','integration_identity_drift','catalog_drift')}),
         'protected_equal':before['protected']==after['protected'] if before and after else None,
         'protected_drift':changed(before['protected'], after['protected']) if before and after else None,
+        'skill_file_changes':skill_file_changes(before, after),
         'existing_history_bytes_preserved':history['existing_bytes_preserved'] if history else None,
         'history_drift':history['changed'] if history else None,
         'observations':[{k:read(p)[k] for k in ('criterion','outcome','method')}

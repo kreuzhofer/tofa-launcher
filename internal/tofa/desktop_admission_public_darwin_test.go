@@ -2,7 +2,9 @@ package tofa_test
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"github.com/kreuzhofer/tofa-launcher/internal/tofa"
 	"io"
 	"net/http"
@@ -323,4 +325,80 @@ func TestDesktopDeclaredCandidateAllowsCatalogAndExplicitModelChange(t *testing.
 	refreshed.Store(true)
 	_, stop := liveDesktopFixture(t, app, bundle, capture, "--model", "zai-org/GLM-5.3", "--native-account-candidate", "--evaluation-observer", observer)
 	stop()
+}
+
+// The public snapshot must retain the exact skill entries used for its aggregate,
+// so a later review can identify changes without consulting the live installation.
+func TestDesktopSnapshotRetainsSkillFiles(t *testing.T) {
+	bundle, _ := nativeCandidateFixture(t)
+	home, err := filepath.EvalSymlinks(os.Getenv("HOME"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("HOME", home)
+	app, _ := adapterFixture(t, nil, nil)
+	declaredCandidateObserver(t, app, bundle) // prepare owned runtime/catalog fixtures
+	runtimeRoot := filepath.Join(home, ".cache/codex-runtimes/owned-fixture")
+	harness, err := filepath.Abs("../../scripts")
+	if err != nil {
+		t.Fatal(err)
+	}
+	capture := func() map[string]json.RawMessage {
+		t.Helper()
+		var out bytes.Buffer
+		app.Out = &out
+		err := app.Run([]string{"desktop-qualification", "snapshot", "--app-bundle", bundle, "--runtime-root", runtimeRoot, "--harness-root", harness, "--source-revision", strings.Repeat("a", 40)})
+		if err != nil {
+			t.Fatal(err)
+		}
+		var result map[string]json.RawMessage
+		if err := json.Unmarshal(out.Bytes(), &result); err != nil {
+			t.Fatal(err)
+		}
+		return result
+	}
+	before := capture()
+	var absent map[string]map[string]string
+	if err := json.Unmarshal(before["skill_files"], &absent); err != nil {
+		t.Fatal("skill evidence missing:", err)
+	}
+	for _, name := range []string{"skills", "agent_skills"} {
+		if absent[name]["."] != "absent" {
+			t.Fatalf("missing root is not evidenced: %s %v", name, absent)
+		}
+	}
+	for _, root := range []string{filepath.Join(home, ".codex/skills"), filepath.Join(home, ".agents/skills")} {
+		if err := os.MkdirAll(filepath.Join(root, "example"), 0700); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(root, "example/SKILL.md"), []byte("private skill content"), 0600); err != nil {
+			t.Fatal(err)
+		}
+		if err := os.Symlink("example", filepath.Join(root, "current")); err != nil {
+			t.Fatal(err)
+		}
+	}
+	after := capture()
+	var files map[string]map[string]string
+	if err := json.Unmarshal(after["skill_files"], &files); err != nil {
+		t.Fatal(err)
+	}
+	var identity struct {
+		Hashes map[string]string `json:"hashes"`
+	}
+	if err := json.Unmarshal(after["identity"], &identity); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{"skills", "agent_skills"} {
+		if len(files[name]) != 2 || files[name]["example/SKILL.md"] != fmt.Sprintf("%x", sha256.Sum256([]byte("private skill content"))) || files[name]["current"] != "link:example" {
+			t.Fatalf("wrong retained entries: %s %v", name, files[name])
+		}
+		raw, _ := json.Marshal(files[name])
+		if fmt.Sprintf("%x", sha256.Sum256(raw)) != identity.Hashes[name] {
+			t.Fatalf("inventory not bound to %s aggregate", name)
+		}
+	}
+	if bytes.Contains(after["skill_files"], []byte("private skill content")) {
+		t.Fatal("skill contents disclosed")
+	}
 }
