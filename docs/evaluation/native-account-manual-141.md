@@ -1,5 +1,12 @@
 # Manual native-account qualification (#141)
 
+The agreed [Desktop release-readiness matrix](desktop-release-readiness.md) and
+[ADR 0007](../adr/0007-qualify-desktop-behaviour-across-compatible-updates.md) now
+define behaviour-specific evidence, ordinary-user admission and semantic
+preservation. They supersede blanket exact-installation/manual-fault requirements
+in historical sections below. Implementation of that broader admission policy
+remains outstanding at `eff3ce5`.
+
 **Current status (2026-11-10): integration qualification remains open.** The
 retained clean-exit, repeat-launch and scoped launcher-crash observations remain
 accepted for their recorded candidates. The latest `3afa725` clean-exit result is
@@ -53,10 +60,10 @@ shutdown and recovery; and compatibility with routine Desktop updates. Hashes
 identify what was tested. After an update, run fast compatibility checks and
 repeat only affected manual behaviours that those checks cannot establish.
 
-Next, map #141–#143's existing cases to release requirements, diagnostics and
-optional coverage, with explicit triggers for rechecking affected behaviour.
-That detailed acceptance matrix is follow-up work, not permission to accept an
-arbitrary changed engine using stale evidence.
+The agreed release-readiness matrix now maps #141–#143's cases to required
+behaviours, diagnostic evidence and separate work, with explicit update/retest
+triggers. Implement its admission contract separately; it is not permission to
+accept an arbitrary changed engine using stale evidence.
 No Desktop launch, manual rerun or provider inference is part of this correction.
 
 ### Plugin-policy correction validation

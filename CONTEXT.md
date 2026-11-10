@@ -59,3 +59,11 @@ yet been verified. Experimental status is shown explicitly. The desktop enables
 these choices by default; CLI selection requires explicit opt-in. Selection
 requires sufficient model metadata and a compatible client contract; it does not
 establish support.
+
+**Desktop integration qualification**:
+Evidence that TOFA's required Desktop behaviours work, including service routing,
+account continuity and recovery. It is distinct from model-quality certification.
+
+**Compatible target client**:
+An installed target client that satisfies the integration contracts TOFA needs.
+A different client version is not by itself evidence of incompatibility.
