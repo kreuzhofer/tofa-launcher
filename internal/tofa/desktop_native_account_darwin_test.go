@@ -328,16 +328,22 @@ for line in sys.stdin:
 		t.Fatal(err)
 	}
 	for _, fault := range []string{"handshake", "disconnect"} {
-		for _, secretLocation := range []string{"path-negative-control", "header"} {
+		for _, secretLocation := range []string{"url-path-probe", "header", "stderr-leak-control"} {
 			t.Run(fault+"/"+secretLocation, func(t *testing.T) {
 				var observed atomic.Bool
 				var headerReceived atomic.Bool
+				var intendedRequest atomic.Bool
+				expectedPath := "/responses"
+				if secretLocation == "url-path-probe" {
+					expectedPath = "/" + strings.Repeat("a", 64) + "/responses"
+				}
 				upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 					if r.Method != "GET" {
 						w.WriteHeader(503)
 						return
 					}
 					observed.Store(true)
+					intendedRequest.Store(r.URL.Path == expectedPath && strings.EqualFold(r.Header.Get("Upgrade"), "websocket"))
 					headerReceived.Store(r.Header.Get("X-TOFA-Launch") == route.InferenceCapability)
 					connection, _, err := w.(http.Hijacker).Hijack()
 					if err != nil {
@@ -352,13 +358,13 @@ for line in sys.stdin:
 				defer upstream.Close()
 				endpoint := upstream.URL
 				probeSecret := route.InferenceCapability
-				if secretLocation == "path-negative-control" {
+				if secretLocation == "url-path-probe" {
 					probeSecret = strings.Repeat("a", 64)
 					endpoint += "/" + probeSecret
 				}
 				overrides := append([]string{}, route.Overrides...)
 				overrides = append(overrides, `model="gpt-6-astra"`, `model_providers.tofa-native-router.supports_websockets=true`, "model_providers.tofa-native-router.base_url="+strconv.Quote(endpoint))
-				if secretLocation == "path-negative-control" {
+				if secretLocation == "url-path-probe" {
 					overrides = append(overrides, `model_providers.tofa-native-router.env_http_headers={}`)
 				}
 				direct := child
@@ -370,31 +376,64 @@ for line in sys.stdin:
 				}
 				direct.Env["CODEX_CLI_PATH"] = installed
 				direct.Env["TOFA_DESKTOP_INFERENCE"] = route.InferenceCapability
+				if secretLocation == "stderr-leak-control" {
+					// Exercise the actual child-stderr capture with a deliberate
+					// synthetic leak, independent of upstream diagnostic verbosity.
+					wrapper := filepath.Join(t.TempDir(), "diagnostic-leak-engine")
+					script := `#!/bin/sh
+printf 'synthetic diagnostic leak control: %s\n' "$TOFA_DESKTOP_INFERENCE" >&2
+exec "$TOFA_TEST_REAL_ENGINE" "$@"
+`
+					if err := os.WriteFile(wrapper, []byte(script), 0700); err != nil {
+						t.Fatal(err)
+					}
+					direct.Env["TOFA_TEST_REAL_ENGINE"] = installed
+					direct.Env["CODEX_CLI_PATH"] = wrapper
+				}
 				probe := openDesktopEngine(t, direct, overrides...)
 				started := probe.call("thread/start", map[string]any{"cwd": child.Cwd, "approvalPolicy": "never", "sandbox": "read-only"})
 				probe.call("turn/start", map[string]any{"threadId": started["thread"].(map[string]any)["id"], "input": []any{map[string]string{"type": "text", "text": "Synthetic local transport fault; no tools."}}})
 				deadline := time.Now().Add(10 * time.Second)
 				var diagnostics []byte
+				const faultDiagnostic = "failed to connect to Responses WebSocket"
 				for time.Now().Before(deadline) {
-					diagnostics, _ = os.ReadFile(probe.stderrPath)
-					if observed.Load() && strings.Contains(string(diagnostics), "responses_websocket") {
+					var err error
+					diagnostics, err = os.ReadFile(probe.stderrPath)
+					if err != nil {
+						t.Fatal(err)
+					}
+					if observed.Load() && strings.Contains(string(diagnostics), faultDiagnostic) {
 						break
 					}
 					time.Sleep(25 * time.Millisecond)
 				}
 				probe.close()
-				if !observed.Load() || !strings.Contains(string(diagnostics), "responses_websocket") {
-					t.Fatal("native websocket error trigger did not run")
+				// Read the completed capture, including diagnostics written while closing.
+				diagnostics, err := os.ReadFile(probe.stderrPath)
+				if err != nil {
+					t.Fatal(err)
 				}
 				leaked := strings.Contains(string(diagnostics), probeSecret)
-				if leaked != (secretLocation == "path-negative-control") {
-					t.Fatalf("unexpected secret disclosure outcome: leaked=%v", leaked)
+				// Sanitize before any assertion can fail, including the deliberate leak.
+				redact := strings.NewReplacer(probeSecret, "<REDACTED>", route.InferenceCapability, "<REDACTED>")
+				if err := os.WriteFile(probe.stderrPath, []byte(redact.Replace(string(diagnostics))), 0600); err != nil {
+					t.Fatal(err)
 				}
-				if secretLocation == "header" && !headerReceived.Load() {
-					t.Fatal("engine did not deliver header capability")
+				if !intendedRequest.Load() || !strings.Contains(string(diagnostics), faultDiagnostic) {
+					t.Fatal("intended native websocket error path did not run")
 				}
-				// Retain only sanitized error evidence even for the intentional negative control.
-				os.WriteFile(probe.stderrPath, []byte(strings.ReplaceAll(string(diagnostics), probeSecret, "<REDACTED>")), 0600)
+				if secretLocation == "url-path-probe" {
+					// URL logging is an engine observation, not the leak detector's
+					// negative control: newer diagnostics need not expose the URL.
+					t.Logf("synthetic URL path token present in diagnostics: %v", leaked)
+				} else {
+					if !headerReceived.Load() {
+						t.Fatal("engine did not deliver header capability")
+					}
+					if leaked != (secretLocation == "stderr-leak-control") {
+						t.Fatalf("unexpected secret disclosure outcome: leaked=%v", leaked)
+					}
+				}
 			})
 		}
 	}

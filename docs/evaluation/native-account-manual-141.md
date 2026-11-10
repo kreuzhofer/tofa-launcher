@@ -76,7 +76,8 @@ retained-summary regression first failed with missing file-change reporting.
 Both pass after the correction. Focused Go admission/snapshot/qualification tests,
 all 40 Python collector/guide tests, the full `go test -race ./...` suite,
 `go vet ./...`, and operator Bash syntax passed. The default full Go suite skips
-installed-engine tests without their opt-in; those were checked separately below. Initial sandbox-only loopback bind failures were resolved by running the
+installed-engine tests without their opt-in; those were checked separately below.
+Initial sandbox-only loopback bind failures were resolved by running the
 owned local fixtures with loopback permission. Standards and Spec reviews against
 `9928136` reported zero findings on each axis.
 
@@ -86,10 +87,46 @@ protocol/admission, naming independence and the observed title-schema contract.
 `path-negative-control` assertions: the engine did not expose the synthetic URL
 path token in websocket diagnostics, although the test expected disclosure.
 Both header-capability subtests passed. The same failures reproduce against an
-unchanged `9928136` archive with the same engine. This is retained as an unresolved
-baseline/test-engine compatibility result, not weakened, counted as a pass or
-attributed to this correction. No claim of complete installed-engine qualification
+unchanged `9928136` archive with the same engine. That run remains a failed baseline/test-engine compatibility result, never
+rewritten as a pass or attributed to the skill-evidence correction. The separate
+follow-up below resolves its diagnostic assumption. No claim of complete installed-engine qualification
 is made. Private comparison logs and the engine digest accompany the diagnosis.
+
+### Offline WebSocket diagnostic follow-up (November 10)
+
+The five-second failing subtest still exercised the intended error path. Owned
+server probes confirmed the synthetic-token URL and WebSocket upgrade for both
+handshake rejection and disconnect. Both initial and 500 ms delayed stderr reads
+showed `failed to connect to Responses WebSocket stage=Unknown`, with no URL or
+path token. The installed engine digest still matched the retained baseline
+comparison. The failure was the test's requirement that this engine echo a URL
+path token; it was not evidence of a lost request path or a leaked header token.
+We have not established which upstream release changed diagnostic formatting.
+
+The test-only correction retains URL logging as an observed property. Its new
+negative control uses an owned wrapper that writes the synthetic capability to
+child stderr before executing the same real engine. That establishes detector
+sensitivity through the actual stderr capture without depending on an upstream
+information leak. Ordinary header-token cases must still deliver the capability
+to the local server without exposing it in diagnostics. Every case now verifies
+the exact request path and WebSocket upgrade, waits for an actual connection-error
+message, reads the final capture after process termination and redacts synthetic
+tokens before outcome assertions. No sleep-based workaround remains.
+
+The new stderr control failed before the wrapper was added. All six corrected
+fault/control cases then passed. A separate mutation deliberately enabled the
+leaky wrapper in the normal header case: the test rejected it with `leaked=true`.
+The exact source bytes were restored afterward. Three repetitions of the full
+real-engine test under `-race` passed (six fault/control cases each), and
+`go vet ./internal/tofa` passed. The unrelated full suite was not repeated for
+this test-only change; its earlier result belongs to `8e36267`. Diagnostic
+instrumentation was removed. Results and mutation evidence are retained privately under
+`.qualification/134-manual/diagnostics/ws-diagnostic-control-141-20261110/`.
+
+Only tests and this report changed. Existing baseline failure logs and all #141
+receipts remain intact. No production guards, preservation gates, credential or
+routing behavior changed, and no actual Desktop launch or manual rerun occurred.
+Passing these isolated engine checks does not complete the lifecycle matrix.
 
 ### Remaining qualification matrix
 
