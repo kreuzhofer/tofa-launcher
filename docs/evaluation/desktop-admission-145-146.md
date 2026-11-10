@@ -38,6 +38,10 @@ facts; missing machine facts must remain missing.
 
 ## Remaining release work
 
+The [subsequent #141 evidence assessment](desktop-evidence-141.md) binds retained
+observations and executed checks, permits #142 preparation from the scoped safe
+baseline, and specifies the remaining ordinary-use/preservation observation.
+
 - #141: finish the semantic preservation decision for ordinary recovery and bind
   the accepted lifecycle/account/history scopes into release coverage. Do not
   restart unrelated cases because catalog, model or plugin-cache identities differ.

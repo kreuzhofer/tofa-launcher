@@ -1,5 +1,10 @@
 # Manual native-account qualification (#141)
 
+The [offline evidence assessment at b839fc4](desktop-evidence-141.md) records the
+current scoped reuse decisions, machine-assessor output and narrow remaining
+ordinary-recovery check. It establishes an adequate baseline to prepare #142;
+it does not close #141 or authorize a Desktop launch.
+
 The agreed [Desktop release-readiness matrix](desktop-release-readiness.md) and
 [ADR 0007](../adr/0007-qualify-desktop-behaviour-across-compatible-updates.md) now
 define behaviour-specific evidence, ordinary-user admission and semantic
