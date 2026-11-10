@@ -27,17 +27,25 @@ COLLECTION_ERRORS = (OSError, ValueError, KeyError, subprocess.SubprocessError, 
 
 
 def integration_identity(identity):
-    """Compare installation invariants without erasing catalog provenance."""
+    """Compare integration invariants without erasing catalog/plugin provenance."""
     result = dict(identity)
     if 'hashes' in result:
         result['hashes'] = {key:value for key,value in result['hashes'].items()
-                            if key not in ('catalog', 'native_catalog')}
+                            if key not in ('catalog', 'native_catalog', 'plugins')}
     return result
 
 
+def integration_protected(state):
+    return {key:value for key,value in state.items() if key != 'plugins'}
+
+
 def integration_snapshot(snapshot):
-    # Preserve schema, protected state and any other snapshot metadata exactly.
-    return {**snapshot, 'identity':integration_identity(snapshot['identity'])}
+    # Compare copies; retain complete original receipts, including cache detail.
+    result = {**snapshot, 'identity':integration_identity(snapshot['identity'])}
+    if 'protected' in result:
+        result['protected'] = integration_protected(result['protected'])
+    result.pop('plugin_files', None)
+    return result
 
 
 def digest(path):
@@ -440,6 +448,7 @@ def record(options):
     save(run/'export.json',{'schema':'tofa-native-account-export-v1','case':declaration['case'],
         'attempt':declaration['attempt'],'stop':finish['stop'],'qualified':False,
         'protected_equal':before['protected']==after['protected'],
+        'integration_protected_equal':integration_protected(before['protected'])==integration_protected(after['protected']),
         'observations':[{'criterion':o['criterion'],'method':o['method'],'outcome':o['outcome']} for o in observations],
         'next':'Validate immutable full evidence with the frozen launcher; fixture and native observations remain separate.'})
     print(json.dumps({'case_record':str(run/'case.json'),'qualified':False}))

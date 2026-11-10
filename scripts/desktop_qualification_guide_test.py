@@ -50,6 +50,29 @@ class GuideTests(unittest.TestCase):
         self.assertEqual(report['protected_drift'], ['skills'])
         self.assertFalse(report['qualified'])
 
+    def test_plugin_delta_preserves_gate_and_unknown_history(self):
+        before = {'identity':{'hashes':{'plugins':'before'}}, 'protected':{'plugins':'before'},
+                  'plugin_files':{'edit':'old','remove':'gone','link':'link:old'}}
+        after = {'identity':{'hashes':{'plugins':'after'}}, 'protected':{'plugins':'after'},
+                 'plugin_files':{'edit':'new','add':'added','link':'link:new'}}
+        self.write('before.json', before)
+        self.write('after.json', after)
+        original = {p.name:p.read_bytes() for p in self.run.iterdir()}
+        report = guide.summary(self.run)
+        self.assertEqual(report['plugin_file_changes'], {'status':'recorded', 'added':['add'],
+                         'removed':['remove'], 'modified':['edit','link']})
+        self.assertEqual(report['protected_drift'], ['plugins'])
+        self.assertTrue(report['integration_identity_equal'])
+        self.assertTrue(report['integration_protected_equal'])
+        self.assertFalse(report['qualified'])
+        self.assertEqual(original, {p.name:p.read_bytes() for p in self.run.iterdir()})
+        del before['plugin_files']
+        self.write('before.json', before)
+        report = guide.summary(self.run)
+        self.assertEqual(report['plugin_file_changes'], {'status':'not_recorded'})
+        self.assertEqual(report['protected_drift'], ['plugins'])
+        self.assertFalse(report['qualified'])
+
     def test_deadline_rejects_input(self):
         self.write('declaration.json', {'expires_utc':'2020-01-01T00:00:00Z'})
         with self.assertRaisesRegex(ValueError, 'deadline'):

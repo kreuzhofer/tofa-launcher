@@ -11,7 +11,7 @@ import sys
 import tarfile
 import time
 
-from desktop_qualification import private_run, read as private_read, save, integration_identity
+from desktop_qualification import private_run, read as private_read, save, integration_identity, integration_protected
 
 CANDIDATE_NAME = '372255f'
 HASHES = {'tofa': '7e74232c325b32b5f8c0c6ada314fdb05cc6191c5c1a05f01f0ec61678823b1f', 'source.tar': 'ef0e4738ed5ab65986512892bf460d6a4b3a34cceca1c0e08ec496e019a9f401'}
@@ -122,20 +122,20 @@ def identity_comparison(before, after):
                              if before.get('hashes',{}).get(key) != after.get('hashes',{}).get(key)]}
 
 
+def file_changes(left, right):
+    """Compare retained entries only; missing historical evidence is unknown."""
+    if left is None or right is None:
+        return {'status':'not_recorded'}
+    return {'status':'recorded',
+            'added':sorted(right.keys() - left.keys()),
+            'removed':sorted(left.keys() - right.keys()),
+            'modified':sorted(k for k in left.keys() & right.keys() if left[k] != right[k])}
+
+
 def skill_file_changes(before, after):
-    """Diagnose retained entries only; missing historical evidence is unknown."""
-    result = {}
-    for name in ('skills', 'agent_skills'):
-        left = (before or {}).get('skill_files', {}).get(name)
-        right = (after or {}).get('skill_files', {}).get(name)
-        if left is None or right is None:
-            result[name] = {'status':'not_recorded'}
-            continue
-        result[name] = {'status':'recorded',
-                        'added':sorted(right.keys() - left.keys()),
-                        'removed':sorted(left.keys() - right.keys()),
-                        'modified':sorted(k for k in left.keys() & right.keys() if left[k] != right[k])}
-    return result
+    return {name:file_changes((before or {}).get('skill_files', {}).get(name),
+                              (after or {}).get('skill_files', {}).get(name))
+            for name in ('skills', 'agent_skills')}
 
 
 def summary(run):
@@ -175,7 +175,10 @@ def summary(run):
            {key:None for key in ('identity_equal','identity_drift','integration_identity_equal','integration_identity_drift','catalog_drift')}),
         'protected_equal':before['protected']==after['protected'] if before and after else None,
         'protected_drift':changed(before['protected'], after['protected']) if before and after else None,
+        'integration_protected_equal':integration_protected(before['protected'])==integration_protected(after['protected']) if before and after else None,
+        'integration_protected_drift':changed(integration_protected(before['protected']), integration_protected(after['protected'])) if before and after else None,
         'skill_file_changes':skill_file_changes(before, after),
+        'plugin_file_changes':file_changes((before or {}).get('plugin_files'), (after or {}).get('plugin_files')),
         'existing_history_bytes_preserved':history['existing_bytes_preserved'] if history else None,
         'history_drift':history['changed'] if history else None,
         'observations':[{k:read(p)[k] for k in ('criterion','outcome','method')}

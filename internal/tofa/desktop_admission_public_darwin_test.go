@@ -329,7 +329,7 @@ func TestDesktopDeclaredCandidateAllowsCatalogAndExplicitModelChange(t *testing.
 
 // The public snapshot must retain the exact skill entries used for its aggregate,
 // so a later review can identify changes without consulting the live installation.
-func TestDesktopSnapshotRetainsSkillFiles(t *testing.T) {
+func TestDesktopSnapshotRetainsFileInventories(t *testing.T) {
 	bundle, _ := nativeCandidateFixture(t)
 	home, err := filepath.EvalSymlinks(os.Getenv("HOME"))
 	if err != nil {
@@ -358,6 +358,24 @@ func TestDesktopSnapshotRetainsSkillFiles(t *testing.T) {
 		return result
 	}
 	before := capture()
+	var pluginBefore map[string]string
+	if err := json.Unmarshal(before["plugin_files"], &pluginBefore); err != nil {
+		t.Fatal("plugin evidence missing:", err)
+	}
+	pluginRoot := filepath.Join(home, ".codex/plugins/cache")
+	if err := os.MkdirAll(filepath.Join(pluginRoot, "example"), 0700); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(pluginRoot, "example/private.txt"), []byte("private plugin content"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink("example", filepath.Join(pluginRoot, "current")); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink("missing", filepath.Join(pluginRoot, "stale")); err != nil {
+		t.Fatal(err)
+	}
+
 	var absent map[string]map[string]string
 	if err := json.Unmarshal(before["skill_files"], &absent); err != nil {
 		t.Fatal("skill evidence missing:", err)
@@ -398,6 +416,24 @@ func TestDesktopSnapshotRetainsSkillFiles(t *testing.T) {
 			t.Fatalf("inventory not bound to %s aggregate", name)
 		}
 	}
+	var plugins map[string]string
+	if err := json.Unmarshal(after["plugin_files"], &plugins); err != nil {
+		t.Fatal(err)
+	}
+	if plugins["example/private.txt"] != fmt.Sprintf("%x", sha256.Sum256([]byte("private plugin content"))) || plugins["current"] != "link:example" || plugins["stale"] != "dangling-link:missing" {
+		t.Fatal("wrong plugin entries", plugins)
+	}
+	if len(pluginBefore) != 1 || pluginBefore["."] != "absent" || len(plugins) != 3 {
+		t.Fatal("absent and populated plugin roots not evidenced")
+	}
+	raw, _ := json.Marshal(plugins)
+	if fmt.Sprintf("%x", sha256.Sum256(raw)) != identity.Hashes["plugins"] {
+		t.Fatal("plugin inventory not bound to aggregate")
+	}
+	if bytes.Contains(after["plugin_files"], []byte("private plugin content")) {
+		t.Fatal("plugin contents disclosed")
+	}
+
 	if bytes.Contains(after["skill_files"], []byte("private skill content")) {
 		t.Fatal("skill contents disclosed")
 	}

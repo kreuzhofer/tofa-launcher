@@ -159,6 +159,10 @@ func qualificationFixture(t *testing.T) (string, desktopAdmissionIdentity) {
 		raw, _ := json.Marshal(entries)
 		id.Hashes[name] = digestBytes(raw)
 	}
+	pluginFiles := map[string]string{"example/plugin.json": strings.Repeat("e", 64)}
+	pluginRaw, _ := json.Marshal(pluginFiles)
+	id.Hashes["plugins"] = digestBytes(pluginRaw)
+
 	os.Mkdir(id.Runtime, 0700)
 	write := func(base, name string, value any) desktopEvidenceRef {
 		raw, _ := json.Marshal(value)
@@ -251,7 +255,7 @@ func qualificationFixture(t *testing.T) (string, desktopAdmissionIdentity) {
 			}
 		}
 		// Exercise additive file detail and legacy aggregate-only receipts together.
-		r.BeforeSnapshot = write(base, "before.json", map[string]any{"schema": "tofa-native-account-snapshot-v1", "identity": id, "protected": r.Before, "skill_files": skillFiles})
+		r.BeforeSnapshot = write(base, "before.json", map[string]any{"schema": "tofa-native-account-snapshot-v1", "identity": id, "protected": r.Before, "skill_files": skillFiles, "plugin_files": pluginFiles})
 		r.AfterSnapshot = write(base, "after.json", map[string]any{"schema": "tofa-native-account-snapshot-v1", "identity": id, "protected": r.After})
 		stopRef := write(base, "route-stop.json", map[string]any{"schema": "tofa-native-account-route-stop-v1", "attempt": name, "launcher_pid": 10, "endpoint": "http://127.0.0.1:4321", "observed_utc": now, "inference": map[string]any{"http_status": 401, "socket_closed": false}, "control": map[string]any{"http_status": 401, "socket_closed": false}})
 		r.RouteStop = &stopRef
@@ -442,6 +446,7 @@ func TestDesktopQualificationCatalogsAreProvenance(t *testing.T) {
 	}
 	id.Hashes["catalog"] = strings.Repeat("d", 64)
 	id.Hashes["native_catalog"] = strings.Repeat("e", 64)
+	id.Hashes["plugins"] = strings.Repeat("f", 64)
 	if _, err := readDesktopProof(path, id); err != nil {
 		t.Fatalf("catalog-only differences rejected full linked proof: %v", err)
 	}
@@ -487,7 +492,7 @@ func TestDesktopQualificationCatalogsAreProvenance(t *testing.T) {
 		t.Fatalf("catalog change across linked receipts rejected: %v", err)
 	}
 
-	for _, key := range []string{"launcher", "engine", "runtime", "plugins", "skills", "harness/collector.py", "unknown"} {
+	for _, key := range []string{"launcher", "engine", "runtime", "skills", "harness/collector.py", "unknown"} {
 		t.Run(key, func(t *testing.T) {
 			changed := desktopIntegrationIdentity(id)
 			changed.Hashes[key] = strings.Repeat("f", 64)
@@ -671,35 +676,77 @@ func TestDesktopAdmissionNormalStopExitOneRequiresOwnedAcknowledgment(t *testing
 	}
 }
 
-func TestDesktopAdmissionRejectsSkillDetailUnboundToAggregate(t *testing.T) {
-	path, id := qualificationFixture(t)
-	if _, err := readDesktopProof(path, id); err != nil {
-		t.Fatal(err)
+func TestDesktopAdmissionRejectsFileDetailUnboundToAggregate(t *testing.T) {
+	for _, test := range []struct {
+		field   string
+		detail  any
+		message string
+	}{
+		{"skill_files", map[string]map[string]string{"skills": {}, "agent_skills": {".": "absent"}}, "skill inventory linkage mismatch"},
+		{"plugin_files", map[string]string{"invented": "hash"}, "plugin inventory linkage mismatch"},
+	} {
+		t.Run(test.field, func(t *testing.T) {
+			path, id := qualificationFixture(t)
+			if _, err := readDesktopProof(path, id); err != nil {
+				t.Fatal(err)
+			}
+			base := filepath.Dir(path)
+			raw, _ := os.ReadFile(path)
+			var proof desktopQualificationProof
+			json.Unmarshal(raw, &proof)
+			ref := proof.Cases["clean-exit"]
+			casePath := filepath.Join(base, ref.Path)
+			raw, _ = os.ReadFile(casePath)
+			var record desktopQualificationCase
+			json.Unmarshal(raw, &record)
+			snapshotPath := filepath.Join(filepath.Dir(casePath), record.BeforeSnapshot.Path)
+			raw, _ = os.ReadFile(snapshotPath)
+			var snapshot map[string]any
+			json.Unmarshal(raw, &snapshot)
+			snapshot[test.field] = test.detail
+			raw, _ = json.Marshal(snapshot)
+			os.WriteFile(snapshotPath, raw, 0600)
+			record.BeforeSnapshot.SHA256 = digestBytes(raw)
+			raw, _ = json.Marshal(record)
+			os.WriteFile(casePath, raw, 0600)
+			ref.SHA256 = digestBytes(raw)
+			proof.Cases["clean-exit"] = ref
+			raw, _ = json.Marshal(proof)
+			os.WriteFile(path, raw, 0600)
+			if _, err := readDesktopProof(path, id); err == nil || !strings.Contains(err.Error(), test.message) {
+				t.Fatalf("unbound detail should be rejected even with updated receipt digests: %v", err)
+			}
+		})
 	}
-	base := filepath.Dir(path)
-	raw, _ := os.ReadFile(path)
-	var proof desktopQualificationProof
-	json.Unmarshal(raw, &proof)
-	ref := proof.Cases["clean-exit"]
-	casePath := filepath.Join(base, ref.Path)
-	raw, _ = os.ReadFile(casePath)
-	var record desktopQualificationCase
-	json.Unmarshal(raw, &record)
-	snapshotPath := filepath.Join(filepath.Dir(casePath), record.BeforeSnapshot.Path)
-	raw, _ = os.ReadFile(snapshotPath)
-	var snapshot map[string]any
-	json.Unmarshal(raw, &snapshot)
-	snapshot["skill_files"] = map[string]map[string]string{"skills": {}, "agent_skills": {".": "absent"}}
-	raw, _ = json.Marshal(snapshot)
-	os.WriteFile(snapshotPath, raw, 0600)
-	record.BeforeSnapshot.SHA256 = digestBytes(raw)
-	raw, _ = json.Marshal(record)
-	os.WriteFile(casePath, raw, 0600)
-	ref.SHA256 = digestBytes(raw)
-	proof.Cases["clean-exit"] = ref
-	raw, _ = json.Marshal(proof)
-	os.WriteFile(path, raw, 0600)
-	if _, err := readDesktopProof(path, id); err == nil || !strings.Contains(err.Error(), "skill inventory linkage mismatch") {
-		t.Fatalf("unbound detail should be rejected even with updated receipt digests: %v", err)
+}
+
+func TestDesktopQualificationPluginDriftIsDiagnostic(t *testing.T) {
+	for _, field := range []string{"plugins", "config.toml", "auth.json", "managed_config.toml", "AGENTS.md", "skills", "runtime", "unknown"} {
+		t.Run(field, func(t *testing.T) {
+			path, id := qualificationFixture(t)
+			raw, _ := os.ReadFile(path)
+			var proof desktopQualificationProof
+			json.Unmarshal(raw, &proof)
+			ref := proof.Cases["clean-exit"]
+			casePath := filepath.Join(filepath.Dir(path), ref.Path)
+			raw, _ = os.ReadFile(casePath)
+			var record desktopQualificationCase
+			json.Unmarshal(raw, &record)
+			record.After[field] = strings.Repeat("f", 64)
+			afterPath := filepath.Join(filepath.Dir(casePath), record.AfterSnapshot.Path)
+			raw, _ = json.Marshal(map[string]any{"schema": "tofa-native-account-snapshot-v1", "identity": id, "protected": record.After})
+			os.WriteFile(afterPath, raw, 0600)
+			record.AfterSnapshot.SHA256 = digestBytes(raw)
+			raw, _ = json.Marshal(record)
+			os.WriteFile(casePath, raw, 0600)
+			ref.SHA256 = digestBytes(raw)
+			proof.Cases["clean-exit"] = ref
+			raw, _ = json.Marshal(proof)
+			os.WriteFile(path, raw, 0600)
+			_, err := readDesktopProof(path, id)
+			if (err == nil) != (field == "plugins") {
+				t.Fatalf("field=%s error=%v", field, err)
+			}
+		})
 	}
 }

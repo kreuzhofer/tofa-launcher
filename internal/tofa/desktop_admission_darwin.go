@@ -205,20 +205,34 @@ func readDesktopDeclaration(path string, id desktopAdmissionIdentity, seconds in
 	return &desktopAdmission{mode: "candidate", path: canonical, digest: digest, identity: id, declaration: d}, nil
 }
 
-// Catalogs describe the available models, not the installation being qualified.
+// Catalogs and the Desktop-managed plugin cache are diagnostic provenance.
 // Compare copies so declarations, snapshots and receipt hashes retain full provenance.
 // All other fields (including unknown hash keys) remain part of the gate.
 func desktopIntegrationIdentity(id desktopAdmissionIdentity) desktopAdmissionIdentity {
 	if id.Hashes != nil {
 		hashes := make(map[string]string, len(id.Hashes))
 		for key, value := range id.Hashes {
-			if key != "catalog" && key != "native_catalog" {
+			if key != "catalog" && key != "native_catalog" && key != "plugins" {
 				hashes[key] = value
 			}
 		}
 		id.Hashes = hashes
 	}
 	return id
+}
+
+// Keep the complete receipt; cache equality is not a preservation requirement.
+func desktopIntegrationProtected(state map[string]string) map[string]string {
+	if state == nil {
+		return nil
+	}
+	result := make(map[string]string, len(state))
+	for key, value := range state {
+		if key != "plugins" {
+			result[key] = value
+		}
+	}
+	return result
 }
 
 func desktopIntegrationIdentityEqual(before, after desktopAdmissionIdentity) bool {
@@ -600,7 +614,7 @@ func desktopCompatibilityIdentity(bundle desktopBundle, home, profile, bridge, r
 	return collectDesktopCompatibilityIdentity(bundle, home, profile, bridge, runtimeRoot, harness, source, models, nil)
 }
 
-func collectDesktopCompatibilityIdentity(bundle desktopBundle, home, profile, bridge, runtimeRoot, harness, source string, models []Model, skillFiles map[string]map[string]string) (desktopAdmissionIdentity, error) {
+func collectDesktopCompatibilityIdentity(bundle desktopBundle, home, profile, bridge, runtimeRoot, harness, source string, models []Model, fileInventories map[string]map[string]string) (desktopAdmissionIdentity, error) {
 	result := desktopAdmissionIdentity{Source: source, Home: home, Profile: profile, Runtime: runtimeRoot, Harness: harness, Hashes: map[string]string{}}
 	if len(source) != 40 {
 		return result, admissionError("requires frozen source revision")
@@ -665,8 +679,8 @@ func collectDesktopCompatibilityIdentity(bundle desktopBundle, home, profile, br
 		}
 		raw, _ := json.Marshal(entries)
 		result.Hashes[name] = digestBytes(raw)
-		if skillFiles != nil && (name == "skills" || name == "agent_skills") {
-			skillFiles[name] = entries
+		if fileInventories != nil && name != "runtime" {
+			fileInventories[name] = entries
 		}
 	}
 	for _, name := range qualificationHarnessFiles {

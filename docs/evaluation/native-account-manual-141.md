@@ -2,10 +2,78 @@
 
 **Current status (2026-11-10): integration qualification remains open.** The
 retained clean-exit, repeat-launch and scoped launcher-crash observations remain
-accepted for their recorded candidates. Ordinary recovery on November 9 worked
-functionally, but settings, plugin and skill preservation remain unqualified.
-The offline correction below adds skill-file evidence for future collection; it
-does not qualify a new candidate or change any historical receipt.
+accepted for their recorded candidates. The latest `3afa725` clean-exit result is
+accepted for that case under the revised plugin-cache policy below. Ordinary
+recovery on November 9 worked functionally; its settings and skill differences
+remain unresolved. Original receipts and earlier assessments are unchanged.
+
+## November 10: plugin-cache evidence and acceptance policy
+
+The maintainer explicitly dropped unchanged plugin-cache contents as a
+qualification requirement. Plugin hashes and file deltas are diagnostic
+provenance, like catalog/model identities; cache churn alone does not refuse a
+candidate launch or fail a qualification case. This supersedes the earlier cache
+equality requirement described in historical sections below. It does not waive
+functional plugin visibility, account/Code Review checks, settings or credential
+preservation, routing, history, lifecycle or the production guard. Plugin enablement
+in settings remains protected. Unknown identity/protected categories remain strict.
+App, engine and runtime compatibility rules are unchanged by this correction.
+
+`clean-exit.e84b8bc112ba9506` completed normally in 126 seconds with five positive
+human observations, successful main/naming responses and closed owned route
+sockets. Settings, credential hashes, runtime, both per-file skill inventories and
+existing history bytes were unchanged. Only the plugin aggregate differed.
+A separate reassessment accepts this scoped clean-exit result under the revised
+policy; it does not grant full qualification or transfer it to a new candidate.
+
+The original snapshot command computed but did not export plugin entries. The
+collector saved its complete output; neither the original nor durable run or its
+invocation retained a separate plugin-file inventory. Exact historical changes
+and their responsible process therefore remain unknown. No later live cache is
+used to invent them. The separate private diagnosis and reassessment live under
+`.qualification/134-manual/diagnostics/plugin-evidence-141-20261110/` and
+`.qualification/134-manual/reassessments/plugin-provenance-141-20261110/` in the
+main checkout.
+
+Future snapshots include additive `plugin_files`: relative paths mapped to file
+hashes, symlink metadata or the absent-root marker. These are the same entries
+used for the existing plugin aggregate, including its existing recognized native
+MCP executable-reference normalization. No new hash exclusions or file contents
+are introduced. The proof reader validates supplied detail against each receipt's
+own aggregate; legacy aggregate-only receipts remain readable. The guide reports
+file additions/removals/modifications or `not_recorded`. Original full identity
+and protected comparisons remain visible alongside integration comparisons that
+exclude cache equality. New readers must accompany new receipts; older strict
+readers may reject the additive detail. Frozen kits are not rewritten.
+
+The agreed release direction is normal operation, not an installation frozen at
+one version: launch/account/capability usability; intended-service routing and
+credential isolation; conversation/tool/approval/title/history behaviour; clean
+shutdown and recovery; and compatibility with routine Desktop updates. Hashes
+identify what was tested. After an update, run fast compatibility checks and
+repeat only affected manual behaviours that those checks cannot establish.
+
+Next, map #141–#143's existing cases to release requirements, diagnostics and
+optional coverage, with explicit triggers for rechecking affected behaviour.
+That detailed acceptance matrix is follow-up work, not permission to accept an
+arbitrary changed engine using stale evidence.
+No Desktop launch, manual rerun or provider inference is part of this correction.
+
+### Plugin-policy correction validation
+
+The public snapshot regression failed first with missing plugin evidence. The
+retained-summary regression failed first with missing plugin-file reporting.
+After the policy amendment, separate regressions failed because cache-only drift
+was still rejected by the proof reader and integration summary. These tests now
+pass, including controls that still reject other protected changes and plugin
+file detail unbound to its aggregate. Legacy aggregate-only receipts remain valid.
+
+All 42 Python collector/guide tests, focused Go snapshot/admission/proof tests,
+`go vet ./...`, Bash syntax and diff whitespace checks passed. Standards and Spec
+reviews against `3afa725` found zero issues on each axis. The full
+`go test -race ./...` suite passed (internal package: 568.732 seconds). These
+automated fixtures do not
+launch actual Desktop or establish new manual qualification.
 
 ## November 9 ordinary recovery: offline preservation diagnosis
 
@@ -132,10 +200,10 @@ Passing these isolated engine checks does not complete the lifecycle matrix.
 
 | Case | Retained result | Remaining work |
 | --- | --- | --- |
-| Clean exit | Scoped integration observation accepted for `efd74f8` (`clean-exit.124b34ac7d787f8d`); smoke punctuation remains separately recorded | Affected qualification for the next frozen candidate/client |
+| Clean exit | `3afa725` (`clean-exit.e84b8bc112ba9506`) accepted under the revised plugin policy: exact smoke response, normal exit, functional and remaining preservation checks passed. Earlier `efd74f8` observation retained | Assess affected coverage for the next candidate/client; cache churn alone needs no repeat |
 | Repeat launch and history readability | Scoped integration observation accepted for `efd74f8` (`repeat-launch.5fdfe556d4edba09`) | Affected qualification for the next frozen candidate/client |
 | Launcher crash | Scoped observation accepted for `9928136` (`launcher-crash.cbfecaaa8a046312`); owned routes closed, Desktop survived, preservation checks passed | Reassess reuse against the next candidate/client; no automatic transfer |
-| Subsequent ordinary launch | November 9 functional recovery accepted, preservation unqualified (`ordinary-recovery.a9vi4y_n`) | Review the retained config/plugin deltas; historical skill detail is irrecoverable from these receipts. A future declared run can collect new evidence, not repair this run |
+| Subsequent ordinary launch | November 9 functional recovery accepted, preservation unqualified (`ordinary-recovery.a9vi4y_n`) | Review the retained config/skill differences; plugin cache changes are diagnostic. Historical skill detail is irrecoverable from these receipts. A future declared run can collect new evidence, not repair this run |
 | Native-client crash | Not qualified | Separate declared case |
 | Bridge update/interruption | Not qualified | Separate declared case |
 | Uninstall recovery | Not qualified | Separate declared case |

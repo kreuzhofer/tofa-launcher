@@ -270,12 +270,14 @@ func validateDesktopCase(base string, r desktopQualificationCase, id desktopAdmi
 	if e := validateDesktopReceipts(base, r); e != nil {
 		return e
 	}
-	if len(r.Before) < 8 || !reflect.DeepEqual(r.Before, r.After) {
+	if len(r.Before) < 8 || !reflect.DeepEqual(desktopIntegrationProtected(r.Before), desktopIntegrationProtected(r.After)) {
 		return admissionError("case protected state changed")
 	}
 	for _, key := range []string{"config.toml", "auth.json", "managed_config.toml", "AGENTS.md", "AGENTS.override.md", "plugins", "skills", "runtime"} {
-		if v, ok := r.Before[key]; !ok || v != "absent" && !validDigest(v) {
-			return admissionError("protected category missing")
+		for _, state := range []map[string]string{r.Before, r.After} {
+			if v, ok := state[key]; !ok || v != "absent" && !validDigest(v) {
+				return admissionError("protected category missing")
+			}
 		}
 	}
 	for thread, history := range r.HistoryBefore {
@@ -717,8 +719,8 @@ func (a *App) desktopQualification(ctx context.Context, s Store, args []string) 
 	if e != nil {
 		return e
 	}
-	skillFiles := map[string]map[string]string{}
-	id, e := collectDesktopCompatibilityIdentity(bundle, home, profile, desktopBridgePath(a.Dir, bundle.engine), *runtimeRoot, *harness, *source, models, skillFiles)
+	fileInventories := map[string]map[string]string{}
+	id, e := collectDesktopCompatibilityIdentity(bundle, home, profile, desktopBridgePath(a.Dir, bundle.engine), *runtimeRoot, *harness, *source, models, fileInventories)
 	if e != nil {
 		return e
 	}
@@ -738,7 +740,11 @@ func (a *App) desktopQualification(ctx context.Context, s Store, args []string) 
 	for _, name := range []string{"plugins", "skills", "runtime"} {
 		state[name] = id.Hashes[name]
 	}
-	return json.NewEncoder(a.Out).Encode(map[string]any{"schema": "tofa-native-account-snapshot-v1", "identity": id, "protected": state, "skill_files": skillFiles})
+	return json.NewEncoder(a.Out).Encode(map[string]any{
+		"schema": "tofa-native-account-snapshot-v1", "identity": id, "protected": state,
+		"skill_files":  map[string]map[string]string{"skills": fileInventories["skills"], "agent_skills": fileInventories["agent_skills"]},
+		"plugin_files": fileInventories["plugins"],
+	})
 }
 
 // Only concrete native content containers are traversed. Error flags are fatal;
@@ -808,10 +814,11 @@ func validateDesktopReceipts(base string, r desktopQualificationCase) error {
 		expected map[string]string
 	}{{r.BeforeSnapshot, r.Before}, {r.AfterSnapshot, r.After}} {
 		var snapshot struct {
-			Schema     string                       `json:"schema"`
-			Identity   desktopAdmissionIdentity     `json:"identity"`
-			Protected  map[string]string            `json:"protected"`
-			SkillFiles map[string]map[string]string `json:"skill_files,omitempty"`
+			Schema      string                       `json:"schema"`
+			Identity    desktopAdmissionIdentity     `json:"identity"`
+			Protected   map[string]string            `json:"protected"`
+			SkillFiles  map[string]map[string]string `json:"skill_files,omitempty"`
+			PluginFiles map[string]string            `json:"plugin_files,omitempty"`
 		}
 		if e := readAdmissionReference(base, item.ref, &snapshot); e != nil {
 			return e
@@ -829,6 +836,12 @@ func validateDesktopReceipts(base string, r desktopQualificationCase) error {
 				if !ok || entries == nil || e != nil || digestBytes(raw) != snapshot.Identity.Hashes[name] {
 					return admissionError("skill inventory linkage mismatch")
 				}
+			}
+		}
+		if snapshot.PluginFiles != nil {
+			raw, e := json.Marshal(snapshot.PluginFiles)
+			if e != nil || digestBytes(raw) != snapshot.Identity.Hashes["plugins"] {
+				return admissionError("plugin inventory linkage mismatch")
 			}
 		}
 		if snapshot.Schema != "tofa-native-account-snapshot-v1" || !desktopIntegrationIdentityEqual(snapshot.Identity, r.Identity) || !reflect.DeepEqual(snapshot.Protected, item.expected) {

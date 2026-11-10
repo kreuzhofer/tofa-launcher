@@ -109,8 +109,36 @@ class QualificationTests(unittest.TestCase):
             self.assertEqual(report['catalog_drift'], ['catalog', 'native_catalog'])
             self.assertFalse(report['qualified'])
 
+    def test_plugin_churn_reaches_launcher_and_remains_in_snapshots(self):
+        import desktop_qualification_guide as guide
+        with tempfile.TemporaryDirectory() as temporary:
+            root, run, initial = self.refused_attempt(temporary)
+            before = {**initial, 'identity':{**initial['identity'], 'hashes':{
+                'plugins':'old', 'engine':'same'}}}
+            current = {**before, 'identity':{**before['identity'], 'hashes':{
+                'plugins':'new', 'engine':'same'}}}
+            before.update(protected={**before['protected'], 'plugins':'old'}, plugin_files={'one':'old'})
+            current.update(protected={**current['protected'], 'plugins':'new'}, plugin_files={'two':'new'})
+            (run/'before.json').write_text(json.dumps(before))
+            (root/'snapshot.json').write_text(json.dumps(current))
+            with patch.object(q, 'ROOT', root), contextlib.redirect_stdout(io.StringIO()): q.launch(run)
+            self.assertTrue((run/'launcher-process.json').exists())
+            self.assertEqual(q.read(run/'prelaunch.json'), current)
+            self.assertEqual(q.read(run/'before.json'), before)
+            self.assertEqual(q.read(run/'after.json'), current)
+            report = guide.summary(run)
+            self.assertEqual(report['exit_code'], 7, 'original fixture refusal must survive')
+            self.assertFalse(report['identity_equal'])
+            self.assertTrue(report['integration_identity_equal'])
+            self.assertEqual(report['integration_identity_drift'], [])
+            self.assertEqual(report['protected_drift'], ['plugins'])
+            self.assertFalse(report['protected_equal'])
+            self.assertTrue(report['integration_protected_equal'])
+            self.assertEqual(report['plugin_file_changes']['added'], ['two'])
+            self.assertFalse(report['qualified'])
+
     def test_catalog_churn_does_not_hide_other_prelaunch_drift(self):
-        for field in ('engine', 'runtime', 'plugins', 'skills', 'harness/collector.py', 'unknown'):
+        for field in ('engine', 'runtime', 'skills', 'harness/collector.py', 'unknown'):
             with self.subTest(field=field), tempfile.TemporaryDirectory() as temporary:
                 root, run, initial = self.refused_attempt(temporary)
                 current = {**initial, 'identity':{**initial['identity'], 'hashes':{
