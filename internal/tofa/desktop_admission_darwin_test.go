@@ -153,7 +153,7 @@ func qualificationFixture(t *testing.T) (string, desktopAdmissionIdentity) {
 	}
 	root, _ = filepath.EvalSymlinks(root)
 	t.Cleanup(func() { os.RemoveAll(root) })
-	id := desktopAdmissionIdentity{Source: strings.Repeat("a", 40), Home: "/owned/home", Profile: "/owned/profile", Runtime: filepath.Join(root, "runtime"), Harness: "/owned/harness", Hashes: map[string]string{"launcher": strings.Repeat("b", 64), "engine": strings.Repeat("c", 64)}}
+	id := desktopAdmissionIdentity{Source: strings.Repeat("a", 40), Home: "/owned/home", Profile: "/owned/profile", Runtime: filepath.Join(root, "runtime"), Harness: "/owned/harness", Hashes: map[string]string{"launcher": strings.Repeat("b", 64), "engine": strings.Repeat("c", 64), "application": strings.Repeat("d", 64), "application_info": strings.Repeat("e", 64)}}
 	skillFiles := map[string]map[string]string{"skills": {"example/SKILL.md": strings.Repeat("d", 64)}, "agent_skills": {".": "absent"}}
 	for name, entries := range skillFiles {
 		raw, _ := json.Marshal(entries)

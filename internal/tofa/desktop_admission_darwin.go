@@ -257,11 +257,33 @@ func desktopIdentityChanges(before, after desktopAdmissionIdentity) string {
 			changed = append(changed, name)
 		}
 	}
-	for _, name := range qualificationHarnessFiles {
-		if before.Hashes["harness/"+name] != after.Hashes["harness/"+name] {
-			changed = append(changed, "harness")
-			break
+	known := map[string]bool{}
+	for _, name := range []string{"launcher", "engine", "application", "application_info", "application_archive", "native_transport", "plugins", "skills", "agent_skills", "runtime", "native_catalog", "catalog"} {
+		known[name] = true
+	}
+	harness, unknown := false, false
+	keys := map[string]bool{}
+	for name := range before.Hashes {
+		keys[name] = true
+	}
+	for name := range after.Hashes {
+		keys[name] = true
+	}
+	for name := range keys {
+		if before.Hashes[name] == after.Hashes[name] || known[name] {
+			continue
 		}
+		if strings.HasPrefix(name, "harness/") {
+			harness = true
+		} else {
+			unknown = true
+		}
+	}
+	if harness {
+		changed = append(changed, "harness")
+	}
+	if unknown {
+		changed = append(changed, "identity metadata")
 	}
 	if len(changed) == 0 {
 		return "identity metadata"

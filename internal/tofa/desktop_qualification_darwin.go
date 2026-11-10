@@ -684,6 +684,9 @@ func validateDesktopRuntimeEvidence(base string, r desktopQualificationCase) err
 // Read-only collection entry point. No app launch, inference, installation or
 // credential mutation. The catalog is read with the existing configured service.
 func (a *App) desktopQualification(ctx context.Context, s Store, args []string) error {
+	if len(args) > 0 && args[0] == "assess" {
+		return a.desktopAssessment(args[1:])
+	}
 	if len(args) == 0 || (args[0] != "snapshot" && args[0] != "verify") {
 		return errors.New("use desktop-qualification snapshot --app-bundle PATH --runtime-root PATH --harness-root PATH --source-revision SHA")
 	}
