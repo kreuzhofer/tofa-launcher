@@ -795,3 +795,25 @@ Final validation passed on macOS 26.6.2 arm64 / Go 1.27.1 with ChatGPT
 
 The two separate installed Codex CLI inference/tool-review opt-ins were not enabled.
 Cross-builds do not establish native Linux/Windows runtime qualification.
+
+### Local compatibility diagnostic
+
+`tofa desktop-compatibility [--app-bundle PATH]` checks a discovered macOS ARM64
+installation without launching Desktop, registering routes, installing a bridge,
+or requiring private maintainer evidence. Quit Desktop first. The command checks
+minimum versions/layout, ordinary profile ownership, existing ChatGPT sign-in,
+managed policy, provider ownership, process-local routing overrides and secret
+exclusion configuration. It uses the real bundled engine's read-only APIs; helper
+logs/state are temporary and bundled skill installation is suppressed.
+
+On success it emits `tofa-desktop-compatibility-v1` JSON with current executable
+hashes and the checks actually performed. Missing or unsupported prerequisites
+return an actionable error and a nonzero exit. Different compatible versions,
+installation locations, models, catalogs and plugin caches are not hash-equality
+gates. No model catalog or inference request is sent by this command.
+
+This is a point-in-time local prerequisite check, not release qualification or a
+launch authorization token. It does not establish native UI usability, model
+availability, routing turns, reviews or previews. Launch retains its existing
+checks and production protection; the ordinary native-account route remains
+pending #143 qualification. A saved diagnostic cannot bypass those checks.

@@ -32,9 +32,8 @@ func acquireDesktopLease(profile string) (*os.File, error) {
 	if err := os.MkdirAll(profile, 0700); err != nil {
 		return nil, err
 	}
-	info, err := os.Lstat(profile)
-	if err != nil || !info.IsDir() {
-		return nil, errors.New("ordinary desktop profile must be a real directory; resolve the profile path before launching")
+	if err := inspectDesktopProfile(profile); err != nil {
+		return nil, err
 	}
 	fd, err := syscall.Open(filepath.Join(profile, ".tofa-launch.lock"), syscall.O_CREAT|syscall.O_RDWR|syscall.O_NOFOLLOW|syscall.O_CLOEXEC, 0600)
 	if err != nil {
@@ -164,11 +163,39 @@ func (client *desktopConfigClient) call(method string, params any) (map[string]a
 		if len(response.Error) > 0 && string(response.Error) != "null" {
 			return nil, fmt.Errorf("ordinary engine rejected %s or a competing configuration edit; resolve the conflict and relaunch", method)
 		}
+		// Unknown/missing protocol shapes are not an unrestricted policy.
+		switch method {
+		case "config/read":
+			config, ok := response.Result["config"].(map[string]any)
+			if !ok {
+				return nil, errors.New("ordinary engine did not supply the required configuration contract")
+			}
+			if value := config["model_providers"]; value != nil {
+				if _, ok := value.(map[string]any); !ok {
+					return nil, errors.New("ordinary engine supplied unsupported provider configuration")
+				}
+			}
+		case "configRequirements/read":
+			value, present := response.Result["requirements"]
+			if !present {
+				return nil, errors.New("ordinary engine did not supply the required managed-policy contract")
+			}
+			if value != nil {
+				if _, ok := value.(map[string]any); !ok {
+					return nil, errors.New("ordinary engine supplied unsupported managed policy")
+				}
+			}
+		}
 		return response.Result, nil
 	}
 }
 
 func (client *desktopConfigClient) inspect(workspace string, nativeCandidate bool, admissions ...*desktopAdmission) (string, []any, error) {
+	return client.inspectConfiguration(workspace, nativeCandidate, selectedDesktopAdmission(admissions).permitsPlugins())
+}
+
+// Diagnostics inspect provider ownership without granting admission or applying edits.
+func (client *desktopConfigClient) inspectConfiguration(workspace string, nativeCandidate, allowPlugins bool) (string, []any, error) {
 	result, err := client.call("configRequirements/read", map[string]any{})
 	if err != nil {
 		return "", nil, err
@@ -187,7 +214,7 @@ func (client *desktopConfigClient) inspect(workspace string, nativeCandidate boo
 		if !ok {
 			return "", nil, errors.New("could not inspect native plugin configuration; Desktop launch cancelled")
 		}
-		if _, configured := plugins["code-review@openai-bundled"]; configured && !selectedDesktopAdmission(admissions).permitsPlugins() {
+		if _, configured := plugins["code-review@openai-bundled"]; configured && !allowPlugins {
 			return "", nil, errDesktopPluginRemoval
 		}
 	}
@@ -366,4 +393,40 @@ func checkDesktopRequirements(requirements map[string]any) error {
 		}
 	}
 	return nil
+}
+
+// Inspect without creating a profile/lease. A diagnostic is only a point-in-time
+// refusal check; real launch still acquires and retains its durable lease.
+func inspectDesktopProfile(profile string) error {
+	info, err := os.Lstat(profile)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil || !info.IsDir() {
+		return errors.New("ordinary desktop profile must be a real directory; resolve the profile path before launching")
+	}
+	return nil
+}
+func checkDesktopDiagnosticOwnership(ctx context.Context, profile string) error {
+	if err := inspectDesktopProfile(profile); err != nil {
+		return err
+	}
+	fd, err := syscall.Open(filepath.Join(profile, ".tofa-launch.lock"), syscall.O_RDONLY|syscall.O_NOFOLLOW|syscall.O_CLOEXEC|syscall.O_NONBLOCK, 0)
+	if err == nil {
+		file := os.NewFile(uintptr(fd), "desktop-diagnostic-lease")
+		defer file.Close()
+		info, e := file.Stat()
+		if e != nil || !info.Mode().IsRegular() {
+			return errors.New("ordinary desktop launcher lease is not a regular file; resolve ownership before launching")
+		}
+		if e = syscall.Flock(fd, syscall.LOCK_EX|syscall.LOCK_NB); e != nil {
+			return errors.New("another tofa launch owns the ordinary desktop profile; wait for it to exit before checking compatibility")
+		}
+	} else if !errors.Is(err, syscall.ENOENT) {
+		return errors.New("could not inspect ordinary desktop launcher lease; resolve ownership before launching")
+	}
+	if err := refuseDesktopOwner(profile); err != nil {
+		return err
+	}
+	return refuseDesktopProcesses(ctx, profile)
 }

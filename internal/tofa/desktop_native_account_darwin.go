@@ -66,6 +66,19 @@ func checkDesktopNativeAccount(ctx context.Context, engine, home, profile, works
 	if account["type"] != "chatgpt" || result["requiresOpenaiAuth"] != true {
 		return errors.New("native-account routing requires an existing ChatGPT sign-in; sign in through ordinary Desktop before qualifying TOFA")
 	}
+	// Confirm the process-local provider contract actually took effect. Account
+	// presence alone cannot establish that this engine honours routing overrides.
+	result, err = client.call("config/read", map[string]any{"cwd": workspace})
+	if err != nil {
+		return err
+	}
+	config = result["config"].(map[string]any)
+	providers, _ := config["model_providers"].(map[string]any)
+	provider, _ := providers[nativeDesktopProvider].(map[string]any)
+	headers, _ := provider["env_http_headers"].(map[string]any)
+	if config["model_provider"] != nativeDesktopProvider || provider["base_url"] != "http://127.0.0.1:0" || provider["wire_api"] != "responses" || provider["requires_openai_auth"] != true || provider["supports_websockets"] != false || headers[nativeDesktopHeader] != nativeDesktopInferenceEnv || provider["request_max_retries"] != float64(0) || provider["stream_max_retries"] != float64(0) {
+		return errors.New("ordinary engine did not honour required native routing overrides; update the client before using TOFA")
+	}
 	return nil
 }
 
@@ -82,7 +95,10 @@ func desktopSecretExclusions(ctx context.Context, engine, home, profile, workspa
 		return "", err
 	}
 	config, _ := result["config"].(map[string]any)
-	policy, _ := config["shell_environment_policy"].(map[string]any)
+	policy, ok := config["shell_environment_policy"].(map[string]any)
+	if config["shell_environment_policy"] != nil && !ok {
+		return "", errors.New("unsupported shell environment policy; preserve existing exclusions and update the client")
+	}
 	excluded := []string{}
 	if policy["exclude"] != nil {
 		values, ok := policy["exclude"].([]any)

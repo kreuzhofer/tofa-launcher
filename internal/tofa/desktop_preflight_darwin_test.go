@@ -1,6 +1,7 @@
 package tofa_test
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"encoding/json"
@@ -21,7 +22,7 @@ import (
 // skills. This uses the public launch entry point and actual app-server startup;
 // the Desktop executable is a fixture and must never be reached.
 func TestDesktopNativePreflightPreservesOtherEngineSkills(t *testing.T) {
-	for _, scenario := range []string{"signed-out", "account-verified", "provider-conflict", "routing-check"} {
+	for _, scenario := range []string{"signed-out", "account-verified", "provider-conflict", "routing-check", "compatibility"} {
 		t.Run(scenario, func(t *testing.T) { testDesktopPreflightPreservation(t, scenario) })
 	}
 }
@@ -56,7 +57,7 @@ func testDesktopPreflightPreservation(t *testing.T, scenario string) {
 	seed.close()
 	want := "ChatGPT sign-in"
 	var auth []byte
-	if scenario == "account-verified" || scenario == "routing-check" {
+	if scenario == "account-verified" || scenario == "routing-check" || scenario == "compatibility" {
 		// The native account parser receives synthetic tokens only. Any attempted
 		// account discovery is confined to this owned server, never a live account.
 		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -118,7 +119,7 @@ func testDesktopPreflightPreservation(t *testing.T, scenario string) {
 	if controlSkills[".system/.codex-system-skills.marker"] == "" {
 		t.Fatal("ordinary target engine did not install its system skills")
 	}
-	if controlSkills[".system/.codex-system-skills.marker"] == before[".system/.codex-system-skills.marker"] {
+	if controlSkills[".system/.codex-system-skills.marker"] == before[".system/.codex-system-skills.marker"] && scenario != "compatibility" {
 		t.Skip("selected engines have identical system skills; choose a distinct fixture engine")
 	}
 	engine := filepath.Join(bundle, "Contents/Resources/codex")
@@ -161,9 +162,24 @@ func testDesktopPreflightPreservation(t *testing.T, scenario string) {
 	app, _ := adapterFixture(t, nil, nil)
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
-	err := app.RunContext(ctx, []string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--native-account-candidate", "--evaluation-observer", nativeCandidateObserver(t)})
-	if err == nil || !strings.Contains(err.Error(), want) {
-		t.Fatalf("expected %q refusal, got %v", want, err)
+	var output bytes.Buffer
+	app.Out = &output
+	if scenario == "compatibility" {
+		err := app.RunContext(ctx, []string{"desktop-compatibility", "--app-bundle", bundle})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !strings.Contains(output.String(), `"status":"compatible"`) {
+			t.Fatal("missing compatibility result")
+		}
+		if strings.Contains(output.String(), "synthetic-access") || strings.Contains(output.String(), "synthetic-account") {
+			t.Fatal("private account data in report")
+		}
+	} else {
+		err := app.RunContext(ctx, []string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--native-account-candidate", "--evaluation-observer", nativeCandidateObserver(t)})
+		if err == nil || !strings.Contains(err.Error(), want) {
+			t.Fatalf("expected %q refusal, got %v", want, err)
+		}
 	}
 	if _, err := os.Stat(capture); !os.IsNotExist(err) {
 		t.Fatal("account preflight launched Desktop")
