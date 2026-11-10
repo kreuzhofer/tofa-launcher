@@ -134,7 +134,12 @@ run omitted the second-engine variable and its preflight skips are retained.
 A wrong receipt digest in a copied assessment plan produced a failed row and
 incomplete coverage, confirming integrity failures are not silently accepted.
 
-Full race-suite/vet results and independent Standards/Spec review are recorded
-with the final validation receipt. Private artifacts are not published with this
-document. This evidence-only change adds no new production behaviour or duplicate
-test seam; it runs the existing agreed public boundaries.
+The full `go test -json -race -count=1 ./...` suite passed (core package:
+425.144 seconds), as did `go vet ./...` and diff whitespace checks. The default
+suite skipped 86 opt-in tests/subtests; the separate installed-engine run passed
+53 tests/subtests in 96.157 seconds. These counts do not claim unexecuted coverage.
+Independent Standards and Spec reviews each found zero issues and independently
+checked the receipt bindings and assessor result. Final validation and review
+receipts are durable. Private artifacts are not published with this document.
+This evidence-only change adds no new production behaviour or duplicate test
+seam; it runs the existing agreed public boundaries.
