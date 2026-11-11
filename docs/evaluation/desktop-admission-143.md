@@ -84,7 +84,8 @@ model comparison is not required to repeat accepted integration observations.
 | Campaign / attempt set | `130-native-admission-01`; preserve all preceding attempts separately |
 | Candidate | Integration branch `fix/134-plugin-inventory`, admission commit `9a99ad3` plus its reviewed corrections; final SHA and binary digest pending freeze after tests/review |
 | Client / platform | Actual host ChatGPT Desktop Codex mode, macOS ARM64; capture discovered app/engine identities at preparation |
-| Ordered cells | 1: Kimi-K3 / case 03; 2: Kimi-K3 / case 04; 3: GLM-5.3 / case 03; 4: GLM-5.3 / case 04 |
+| Required cells | Kimi-K3 / case 03; Kimi-K3 / case 04; GLM-5.3 / case 03; GLM-5.3 / case 04 |
+| Execution order | Randomize the two-model order when freezing the declaration; record the seed, method and resulting order before any launch. Run case 03 then case 04 within each model; do not reorder after observing outcomes |
 | Main IDs | `moonshotai/Kimi-K3`, `zai-org/GLM-5.3`; availability pending non-launch catalog check; unavailable selection blocks its cell, no substitute |
 | Guardian / naming | `zai-org/GLM-5.3-Flash` / `nvidia/Nemotron-3_5-Lightning`, checked independently |
 | Prompts | Existing case 03 implicit pitch-deck request; existing case 04 same request with explicit installed-skill instruction; record corpus and prompt digests at freeze |
