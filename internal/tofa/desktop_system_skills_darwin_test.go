@@ -122,6 +122,12 @@ func TestDesktopDeclaredCandidateRealGeneratedSystemSkills(t *testing.T) {
 	trees := []string{}
 	markers := []string{}
 	for _, engine := range []string{installed, other} {
+		// Installed CLI entry points may be symlinks. Like the contract
+		// generator, bind the receipt to the resolved regular executable.
+		engine, err := filepath.EvalSymlinks(engine)
+		if err != nil {
+			t.Fatal(err)
+		}
 		home := t.TempDir()
 		os.WriteFile(filepath.Join(home, "config.toml"), []byte("cli_auth_credentials_store=\"file\"\n"), 0600)
 		process := openDesktopEngine(t, capturedDesktop{Cwd: home, Env: map[string]string{"PATH": os.Getenv("PATH"), "HOME": os.Getenv("HOME"), "CODEX_HOME": home, "CODEX_CLI_PATH": engine}})
