@@ -154,6 +154,7 @@ if 'app-server' in sys.argv:
         req = json.loads(line)
         if 'id' not in req: continue
         result = {}
+        if req['method'] == 'account/read' and MODE != 'signed-out': result = {'account':{'type':'chatgpt'},'requiresOpenaiAuth':True}
         if req['method'] == 'config/read':
             text=config_path.read_text() if config_path.exists() else ''
             result={'config':config_response(), 'layers':[{'name':{'type':'user','file':str(config_path)}, 'version':'sha256:'+hashlib.sha256(text.encode()).hexdigest()}]}
@@ -218,8 +219,11 @@ if MODE == 'shell-commands':
     result = subprocess.run(['/bin/zsh', '-ilc', 'printf "%%s|%%s" "$STARTUP_ENV" "$STARTUP_RC"'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
     pathlib.Path(CAPTURE+'.commands').write_bytes(result.stdout)
 if MODE == 'http':
+    request=urllib.request.Request(os.environ['TOFA_DESKTOP_CONTEXT']+'/desktop-launch',headers={'Authorization':'Bearer '+os.environ['TOFA_API_KEY']})
+    with urllib.request.urlopen(request) as response: current_route=json.load(response)
+    inference=current_route['InferenceCapability']
     results = []
-    for model, key in [('gpt-5.6-luna', os.environ['TOFA_API_KEY']), ('moonshotai/Kimi-K3', 'wrong'), ('moonshotai/Kimi-K3', os.environ['TOFA_API_KEY'])]:
+    for model, key in [('gpt-5.6-luna', inference), ('moonshotai/Kimi-K3', 'wrong'), ('moonshotai/Kimi-K3', inference)]:
         req = urllib.request.Request(setting('base_url') + '/responses', data=json.dumps({'model': model, 'stream': True, 'input': []}).encode(), headers={'Authorization':'Bearer '+key, 'Content-Type':'application/json'})
         try:
             with urllib.request.urlopen(req) as res: results.append({'status':res.status, 'body':res.read().decode()})
@@ -531,7 +535,7 @@ func TestDesktopRejectsAuxiliaryModelsAndStreamsSelectedModel(t *testing.T) {
 	if requests != 1 || len(results) != 3 || results[0].Status != 400 || results[1].Status != 401 || results[2].Status != 200 || !strings.Contains(results[2].Body, "fixture streamed") {
 		t.Fatalf("request gate failed: %d upstream requests; %s", requests, data)
 	}
-	if !strings.Contains(output.String(), "unsupported model") {
+	if !strings.Contains(output.String(), "selected model is unavailable in this launch catalog") {
 		t.Fatal("auxiliary failure not surfaced in terminal")
 	}
 }
@@ -1329,6 +1333,7 @@ while IFS= read -r line; do
     esac
     case "$line" in
         *'"method":"initialize"'*) result='{}' ;;
+        *'"method":"account/read"'*) result='{"account":{"type":"chatgpt"},"requiresOpenaiAuth":true}' ;;
         *'"method":"configRequirements/read"'*) result='{"requirements":null}' ;;
         *'"method":"config/read"'*) result='{"config":{},"layers":[{"name":{"type":"user"},"version":"fixture"}]}' ;;
         *) exit 98 ;;
@@ -1341,7 +1346,7 @@ done
 	}
 	// A real filesystem write failure while copying the bridge. The limit is
 	// scoped to this child process; neither the test runner nor user files change.
-	command := exec.Command("/bin/sh", "-c", `ulimit -f 1; trap '' XFSZ; exec "$@"`, "fixture", executable, "--test-desktop-launch", dir, "launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified")
+	command := exec.Command("/bin/sh", "-c", `ulimit -f 1; trap '' XFSZ; exec "$@"`, "fixture", executable, "--test-desktop-launch", dir, "launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified", "--evaluation-observer", legacyPluginObserver(t))
 	command.Env = append(os.Environ(), "TOFA_TEST_ENDPOINT="+app.Endpoint)
 	output, err := command.CombinedOutput()
 	if err == nil || !strings.Contains(string(output), "file too large") {
@@ -1630,9 +1635,11 @@ func TestDesktopPreservesFreshNativeCatalog(t *testing.T) {
 		if len(child.Catalog.Models) != 6 {
 			t.Fatalf("native choices lost: got %d descriptors, want native plus Token Factory", len(child.Catalog.Models))
 		}
-		var got, want any
+		var got, want map[string]any
 		json.Unmarshal(child.Catalog.Models[0], &got)
 		json.Unmarshal([]byte(native), &want)
+		want["display_name"] = want["display_name"].(string) + " (ChatGPT)"
+		want["description"] = "ChatGPT native inference; "
 		if !reflect.DeepEqual(got, want) {
 			t.Fatal("effective native descriptor changed or became stale")
 		}
@@ -1643,7 +1650,7 @@ func TestDesktopPreservesFreshNativeCatalog(t *testing.T) {
 				break
 			}
 		}
-		if descriptor["slug"] != "moonshotai/Kimi-K3" || descriptor["display_name"] != "Kimi-K3 (TF Experimental)" {
+		if descriptor["slug"] != "moonshotai/Kimi-K3" || descriptor["display_name"] != "Kimi-K3 (Token Factory · Experimental)" {
 			t.Fatalf("missing qualified Token Factory choice: %v", descriptor["slug"])
 		}
 	}
@@ -1666,12 +1673,9 @@ func desktopLifecycleWithholdsInferenceUntilOwnershipQualified(t *testing.T, nat
 		t.Fatal(err)
 	}
 	status, err := os.ReadFile(capture + ".pending")
-	want := "503"
-	// The candidate's control capability cannot authorize inference, even
-	// before the ready gate. It has not received an inference capability yet.
-	if native {
-		want = "401"
-	}
+	// Both ordinary and candidate signed-in routes reject control credentials
+	// for inference before readiness; no inference capability has been issued.
+	want := "401"
 	if err != nil || string(status) != want {
 		t.Fatalf("unqualified inference was not refused: %s %v", status, err)
 	}

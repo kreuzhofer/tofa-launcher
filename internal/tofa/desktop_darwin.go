@@ -183,7 +183,9 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 		return err
 	}
 	defer finishEvaluation()
-	a.nativeAccountRoute = options.nativeAccountCandidate || options.nativeAccountProof != ""
+	// Ordinary launches use the signed-in route. The explicit v1 evaluation
+	// observer retains its historical route for reproducible old diagnostics.
+	a.nativeAccountRoute = a.evaluation == nil || options.nativeAccountCandidate || options.nativeAccountProof != ""
 	if options.nativeAccountCandidate && (a.evaluation == nil || a.evaluation.Version != 2) {
 		return errors.New("native-account candidate requires evaluation observer version 2 with isolated authorization")
 	}
@@ -408,6 +410,12 @@ func (a *App) launchDesktop(ctx context.Context, s Store, args []string) (result
 		}
 		if options.nativeAccountProof != "" {
 			fmt.Fprintln(a.Out, "Native-account route admitted against matching lifecycle, signed-in routing and runtime-preview evidence. Model capability and release readiness remain separate.")
+		}
+		if admission != nil && admission.mode == "local" {
+			fmt.Fprintln(a.Out, "Native-account route admitted by current sign-in, ownership, configuration and routing checks. Compatibility is checked on each launch; no private qualification kit is required.")
+		}
+		if a.nativeAccountRoute {
+			fmt.Fprintln(a.Out, "If a routed conversation keeps reconnecting in ordinary Desktop, stop reconnecting, quit Desktop, launch through TOFA and reopen the same conversation. Ordinary Desktop may bypass the TOFA bridge and cannot display a TOFA recovery message. Do not change models to migrate providers.")
 		}
 		fmt.Fprintln(a.Out, "Native model catalog resolved and merged for this launch. Relaunch after account or catalog changes; only the announced automatic-title contract has an auxiliary route through Token Factory.")
 		fmt.Fprintf(a.Out, "Automatic review for all eligible Token Factory conversations uses %s through Token Factory. The engine retains approval decisions, policy and execution gates; native reviewers are unchanged.\n", *guardian)

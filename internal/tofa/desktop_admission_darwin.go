@@ -324,10 +324,16 @@ func (a *desktopAdmission) consume(now time.Time) error {
 	return nil
 }
 func (a *desktopAdmission) permitsPlugins() bool {
-	return a != nil && (a.mode == "candidate" && a.consumed || a.mode == "qualified")
+	return a != nil && (a.mode == "candidate" && a.consumed || a.mode == "qualified" || a.mode == "local" && len(a.identity.Hashes) == 4 && a.protected != nil)
 }
 func (a *desktopAdmission) checkFile() error {
 	if a == nil {
+		return nil
+	}
+	if a.mode == "local" {
+		if !a.permitsPlugins() {
+			return errors.New("incomplete local Desktop admission")
+		}
 		return nil
 	}
 	var raw json.RawMessage
@@ -815,17 +821,24 @@ func (a *desktopAdmission) recheck(bundle desktopBundle, home, profile, bridge s
 	}
 	owner, e := readDesktopBridge(bridge)
 	if e != nil || owner.Engine != bundle.engine || owner.SHA256 != a.identity.Hashes["launcher"] {
-		return admissionError("owned bridge drifted")
+		return a.startupDrift("owned bridge")
 	}
-	current, e := desktopCompatibilityIdentity(bundle, home, profile, bridge, a.identity.Runtime, a.identity.Harness, a.identity.Source, models)
+	var current desktopAdmissionIdentity
+	if a.mode == "local" {
+		current, e = desktopLocalIdentity(bundle, home, profile)
+	} else {
+		current, e = desktopCompatibilityIdentity(bundle, home, profile, bridge, a.identity.Runtime, a.identity.Harness, a.identity.Source, models)
+	}
 	if e != nil {
 		return e
 	}
-	if e := bindDesktopSystemSkills(&current, a.identity.SystemSkills, nil); e != nil {
-		return e
+	if a.mode != "local" {
+		if e := bindDesktopSystemSkills(&current, a.identity.SystemSkills, nil); e != nil {
+			return e
+		}
 	}
 	if !desktopIntegrationIdentityEqual(current, a.identity) {
-		return admissionError("installation drifted")
+		return a.startupDrift("installation")
 	}
 	if a.mode == "qualified" {
 		if _, e := readDesktopProof(a.path, current); e != nil {
@@ -837,7 +850,7 @@ func (a *desktopAdmission) recheck(bundle desktopBundle, home, profile, bridge s
 		return e
 	}
 	if !reflect.DeepEqual(a.protected, state) {
-		return admissionError("protected state drifted")
+		return a.startupDrift("protected state")
 	}
 	return nil
 }
@@ -852,6 +865,17 @@ func resolveDesktopAdmission(ctx context.Context, options launchOptions, observe
 		candidate = true
 	}
 	if path == "" {
+		if observer == nil {
+			identity, err := desktopLocalIdentity(bundle, home, profile)
+			if err != nil {
+				return nil, err
+			}
+			protected, err := desktopProtectedSnapshot(home, bundle.engine, bridge)
+			if err != nil {
+				return nil, err
+			}
+			return &desktopAdmission{mode: "local", identity: identity, protected: protected}, nil
+		}
 		return nil, nil
 	}
 	// First strict decoding uses the mode's complete schema, then binds its paths

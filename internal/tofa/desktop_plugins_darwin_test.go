@@ -1,6 +1,7 @@
 package tofa_test
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -35,7 +36,7 @@ func TestDesktopRefusesProviderTransitionThatRemovesInstalledPlugin(t *testing.T
 				t.Fatal(err)
 			}
 			app, _ := adapterFixture(t, nil, nil)
-			err = app.Run([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"})
+			err = app.Run([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified", "--evaluation-observer", legacyPluginObserver(t)})
 			if err == nil || !strings.Contains(err.Error(), "code-review@openai-bundled") || !strings.Contains(err.Error(), "startup blocked") {
 				t.Errorf("unsafe provider transition was not explicitly refused: %v", err)
 			}
@@ -77,7 +78,7 @@ func TestDesktopPreservesConfiguredPluginWhenCacheIsMissing(t *testing.T) {
 				t.Fatal(err)
 			}
 			app, _ := adapterFixture(t, nil, nil)
-			err = app.Run([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"})
+			err = app.Run([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified", "--evaluation-observer", legacyPluginObserver(t)})
 			if err == nil || !strings.Contains(err.Error(), "code-review@openai-bundled") {
 				t.Errorf("configured plugin was not protected: %v", err)
 			}
@@ -92,4 +93,19 @@ func TestDesktopPreservesConfiguredPluginWhenCacheIsMissing(t *testing.T) {
 			}
 		})
 	}
+}
+
+// Retain the unsafe historical-route guard for explicit v1 evaluation only.
+// Ordinary signed-in admission is covered by TestDesktopNormalLaunchWithoutQualificationKit.
+func legacyPluginObserver(t *testing.T) string {
+	t.Helper()
+	path := filepath.Join(t.TempDir(), "observer.json")
+	raw, err := json.Marshal(map[string]any{"version": 1, "endpoint": "http://127.0.0.1:1", "secret": "synthetic-control-secret", "seconds": 900})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, raw, 0600); err != nil {
+		t.Fatal(err)
+	}
+	return path
 }

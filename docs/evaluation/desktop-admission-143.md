@@ -1,0 +1,78 @@
+# Normal Desktop admission and retained evidence (#143)
+
+This change enables the previously qualified native-account route through normal
+`tofa launch codex-desktop` in integration source builds. It does not publish a
+release or certify a model. The public startup boundary requires current native
+sign-in, supported policy/configuration contracts, exclusive ownership, isolated
+inference/control authorization and verified routing overrides. Failed checks
+refuse the launch; there is no fallback to the historical custom-provider route.
+
+A launch records the current launcher, engine, app executable and bundle metadata,
+then rechecks them and protected settings during startup. These checks bind this
+startup to the installation it probed. They do not compare installations against a
+maintainer's private source, home, runtime, harness, plugin cache or model catalog.
+The model picker still checks current availability and required metadata. Active
+routing and credentials stay process-scoped; inactive owned provider entries
+support existing history. Shared settings are never restored from a snapshot.
+
+Explicit historical candidate/proof commands retain their original receipt
+validation. The explicit version-1 evaluation route retains its old plugin guard.
+Neither historical proofs nor the behaviour assessor's output become a normal
+user prerequisite. A diagnostic result alone cannot authorize a future launch.
+
+## Behaviour-specific reuse
+
+The change from `9c5d3bc` affects admission and disclosure, not service routing,
+review dispatch, naming, bridge execution, tool transport, history storage, loader
+invocation or native rendering. Retained observations apply to those unchanged
+behaviours. Automated normal-entry-point tests exercise the newly admitted path;
+installed-engine tests separately check actual protocol and tool behaviour.
+
+Seven recent independent reviews and 267 original receipt bindings were rechecked
+without changing the originals. Earlier account/lifecycle evidence remains bound
+by the November 10 assessment in [#141's evidence report](desktop-evidence-141.md).
+The following is a release assessment, not a rewritten historical case result or
+an invented complete machine qualification file.
+
+| Behaviour | Evidence reused and reason | Limits |
+| --- | --- | --- |
+| Native account, plugins, Code Review eligibility, normal exit | Accepted `3afa725` clean exit and current startup/ownership/policy tests; admission now selects the same native-account route | Fixture sign-in responses do not establish account UI; the retained human observation does |
+| Repeat launch, history readability and crashes | Accepted `efd74f8` and `9928136` scopes, supplemented by real-engine lifecycle/history tests; storage and bridge lifecycle unchanged | Does not claim every historical fault was manually repeated |
+| Visible service selection and same-thread context | `service-switching.81a930919206127f`: TF → native → TF, three completed turns and visible selection; dispatcher unchanged | No review execution inferred from these smoke turns |
+| Routed cross-launch history/tool continuation | `history-resume.e2506ffd3acb779b`: recorded TF selection survives another launch default, context retained, bounded tool completes | Existing title visibility is not a new naming execution |
+| Existing native history | `native-history-seed.91atr_ph` recovered native turn and `history-resume.d011310d5cb3424f` continuation; provider stays native under TF launch default | Original seed collection remains incomplete; independent transcript evidence establishes only its recorded scope |
+| Review destination and execution | `review-routing.915fd65e00347bff`: native and Guardian origins bound to allow decisions before tool execution; real-engine negative controls cover deny, cancellation, unknown origins and pending service changes | Smoke answers alone do not prove review; native policy/execution gates remain authoritative |
+| Naming | Human-visible new TF/native titles in switching/review attempts, plus installed-engine naming across conversation categories | Title transport does not invent an unavailable parent association; errors remain independent of Main |
+| Ordinary native use and routed recovery | Recovered ordinary native seed/continuation; `ordinary-recovery.pre9innp` preserves protected state and history; documented relaunch workaround | Reconnect guidance observation remains failed, accepted as a limitation. No new native turn is claimed from its unchanged transcript |
+| Runtime and native previews | `runtime-preview.5f5c33f6763b5750`: actual loader, supplied versions, validated synthetic PPTX/PDF and both human-opened previews | Not deck quality, implicit skill discovery or live naming qualification |
+| Preservation | Original semantic reviews retain exact authorized workspace-trust changes and captured native-generated skill contracts; new local checks and negative controls retain security gates | Old unexplained differences in `ordinary-recovery.a9vi4y_n` remain unexplained. They are not attributed to a specific file or waived as cache churn |
+
+Catalog/model/plugin-cache identities remain provenance. Credentials, routing,
+permissions, personal settings and history remain required checks. Current
+sufficient observations establish current behaviour independently of older
+incomplete attempts; they do not convert those attempts into passes.
+
+## Ordinary Desktop limitation
+
+Opening Desktop directly may bypass the bridge and reconnect forever to the
+inactive route without a TOFA-specific message. The maintainer accepted that
+limitation for the experimental prerelease. TOFA now prints the recovery steps:
+stop reconnecting, quit Desktop, launch through TOFA and reopen the same
+conversation. Do not change models to migrate providers. No app patch, persistent
+credential or recovery daemon is introduced.
+
+## Comparison decision
+
+**Revise #130's declaration before resuming.** Do not reuse its old exact-catalog
+or exact-installation admission gates or automatically replay failed attempts.
+Keep all previous outcomes. The next declaration should name the reviewed source
+candidate, record current client/runtime identities, select available models
+explicitly, retain implicit-discovery case 03 and explicit-skill case 04 as
+separate cells, and record runtime/artifact/native-preview/naming outcomes
+independently. Keep the separately agreed 900-second, 80-request, 8192-output-token
+limits for each comparison cell, no automatic retries or substitutions, and the
+established temporary and durable evidence locations.
+
+This document proposes the next declaration; it launches nothing. #130 remains
+open, as do campaign/adoption decisions #119/#120 and wider release #106. A new
+model comparison is not required to repeat accepted integration observations.

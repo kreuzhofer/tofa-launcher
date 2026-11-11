@@ -35,7 +35,7 @@ func nativeCandidateObserver(t *testing.T) string {
 }
 
 func TestDesktopNativeCandidateRequiresSignedInAccountBeforeStartup(t *testing.T) {
-	bundle, capture := desktopFixture(t, "ignore")
+	bundle, capture := desktopFixture(t, "signed-out")
 	app, _ := adapterFixture(t, nil, nil)
 	err := app.Run([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--native-account-candidate", "--evaluation-observer", nativeCandidateObserver(t)})
 	if err == nil || !strings.Contains(err.Error(), "ChatGPT sign-in") {
@@ -55,17 +55,7 @@ func nativeCandidateFixture(t *testing.T, modes ...string) (string, string) {
 	if len(modes) != 0 {
 		mode = modes[0]
 	}
-	bundle, capture := desktopFixture(t, mode)
-	engine := filepath.Join(bundle, "Contents/Resources/codex")
-	raw, err := os.ReadFile(engine)
-	if err != nil {
-		t.Fatal(err)
-	}
-	script := strings.Replace(string(raw), "        if req['method'] == 'config/read':", "        if req['method'] == 'account/read': result = {'account':{'type':'chatgpt'},'requiresOpenaiAuth':True}\n        if req['method'] == 'config/read':", 1)
-	if err := os.WriteFile(engine, []byte(script), 0700); err != nil {
-		t.Fatal(err)
-	}
-	return bundle, capture
+	return desktopFixture(t, mode)
 }
 
 func TestDesktopNativeCandidateIsolatesInferenceAndControl(t *testing.T) {
@@ -179,6 +169,15 @@ func candidateProxyObserver(t *testing.T) string {
 }
 
 func TestDesktopNativeCandidateBundledEngineTurn(t *testing.T) {
+	testDesktopSignedInBundledEngineTurn(t, true)
+}
+
+func TestDesktopNormalBundledEngineTurn(t *testing.T) {
+	testDesktopSignedInBundledEngineTurn(t, false)
+}
+
+func testDesktopSignedInBundledEngineTurn(t *testing.T, candidate bool) {
+	t.Helper()
 	installed := os.Getenv("TOFA_TEST_DESKTOP_ENGINE")
 	if installed == "" {
 		t.Skip("set TOFA_TEST_DESKTOP_ENGINE")
@@ -226,7 +225,11 @@ func TestDesktopNativeCandidateBundledEngineTurn(t *testing.T) {
 		w.Header().Set("Content-Type", "text/event-stream")
 		w.Write([]byte("event: response.completed\ndata: {\"type\":\"response.completed\",\"response\":{\"id\":\"fixture\",\"status\":\"completed\",\"output\":[],\"usage\":{\"input_tokens\":1,\"output_tokens\":0,\"total_tokens\":1}}}\n\n"))
 	}, nil)
-	child, stop := liveDesktopFixture(t, app, bundle, capture, "--native-account-candidate", "--evaluation-observer", actualCandidateObserver(t))
+	var flags []string
+	if candidate {
+		flags = []string{"--native-account-candidate", "--evaluation-observer", actualCandidateObserver(t)}
+	}
+	child, stop := liveDesktopFixture(t, app, bundle, capture, flags...)
 	defer stop()
 	// Fake account preflight is separate from this actual-engine transport fixture.
 	// Signed-in account preservation is verified independently, without inference.

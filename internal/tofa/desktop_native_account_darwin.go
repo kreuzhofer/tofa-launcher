@@ -10,7 +10,7 @@ import (
 )
 
 // Stable identity for NEW routed conversations; never replaces either openai or
-// nebius-tofa in existing history. This candidate remains qualification-only.
+// nebius-tofa in existing history.
 const nativeDesktopProvider = "tofa-native-router"
 const nativeDesktopHeader = "X-TOFA-Launch"
 const nativeDesktopInferenceEnv = "TOFA_DESKTOP_INFERENCE"
@@ -38,7 +38,7 @@ func checkDesktopNativeAccount(ctx context.Context, engine, home, profile, works
 		effective, _ := config["config"].(map[string]any)
 		providers, _ := effective["model_providers"].(map[string]any)
 		if provider := providers[nativeDesktopProvider]; provider != nil && !ownedDesktopProvider(provider, inactiveNativeDesktopProvider) {
-			err = errors.New("native-account routing provider conflicts with an existing definition; preserve it and resolve ownership before qualification")
+			err = errors.New("native-account routing provider conflicts with an existing definition; preserve it and resolve ownership before launching")
 		}
 	}
 	if err == nil {
@@ -60,11 +60,11 @@ func checkDesktopNativeAccount(ctx context.Context, engine, home, profile, works
 	defer client.close()
 	result, err := client.call("account/read", map[string]any{"refreshToken": false})
 	if err != nil {
-		return errors.New("existing ChatGPT sign-in could not be verified; open ordinary Desktop and sign in before qualifying TOFA")
+		return errors.New("existing ChatGPT sign-in could not be verified; open ordinary Desktop and sign in before launching through TOFA")
 	}
 	account, _ := result["account"].(map[string]any)
 	if account["type"] != "chatgpt" || result["requiresOpenaiAuth"] != true {
-		return errors.New("native-account routing requires an existing ChatGPT sign-in; sign in through ordinary Desktop before qualifying TOFA")
+		return errors.New("native-account routing requires an existing ChatGPT sign-in; sign in through ordinary Desktop before launching through TOFA")
 	}
 	// Confirm the process-local provider contract actually took effect. Account
 	// presence alone cannot establish that this engine honours routing overrides.

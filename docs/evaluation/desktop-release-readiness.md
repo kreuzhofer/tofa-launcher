@@ -168,7 +168,10 @@ production guard is unchanged.
   Selected installed-engine tests have separate November 10 evidence; the default
   full suite does not execute all installed-engine paths.
 
-At this baseline, production admission still requires all 12 cases against one
+The subsequent [#143 admission and reuse assessment](desktop-admission-143.md)
+records normal-user enablement and the accepted scopes without rewriting receipts.
+
+At the earlier policy baseline, production admission required all 12 cases against one
 installation identity, including local source/harness/home/profile paths. Normal
 launch still uses the legacy guarded route unless candidate/proof activation is
 provided. Removing those coupling requirements is implementation work, not an
@@ -196,9 +199,9 @@ production guard until the replacement passes the relevant requirements.
   per-user proof prerequisites. All required #141/#142 behaviours still need
   adequate evidence before route enablement; no partial feature mode is implied.
 
-Next: translate the changed acceptance into the existing tickets' implementation
-and evidence tasks, starting with the admission/evidence contract rather than a
-new manual wizard. Tests and implementation follow separately.
+The subsequent implementation and validation are tracked in the
+[#143 admission assessment](desktop-admission-143.md). Remaining release packaging
+and the revised #130 comparison declaration are separate decisions.
 
 ## Operator and evidence constraints
 

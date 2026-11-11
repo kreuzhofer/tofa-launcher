@@ -26,7 +26,10 @@ Claude, other desktop modes and browser OAuth remain outside the current scope.
 
 Maintainers continuing the experimental native-account qualification should use
 the [manual qualification guide](docs/evaluation/native-account-manual-141.md).
-Its candidate is separate from the published release and remains unqualified.
+Integration source builds now use native-account admission with fresh local
+checks, without private qualification files. See the
+[release evidence and limits](docs/evaluation/desktop-admission-143.md).
+This work remains separate from published releases and model-quality claims.
 
 ## Installation
 

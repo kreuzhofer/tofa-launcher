@@ -71,20 +71,29 @@ main/Guardian outcomes, naming limits, timings, shared costs and promotion prove
 Main/Guardian support labels cover the pinned headless bundled-engine baseline,
 not comprehensive Electron UI or release qualification. See the [offline selection evidence](evaluation/desktop-selection-2026-09-28.md).
 
-### Bundled code-review plugin preservation
+### Native account and plugin preservation
 
-Adapted startup is blocked when the ordinary home contains the bundled
-`code-review` cache or the native configuration contains
-`code-review@openai-bundled`, including a disabled entry. The installed native app
-can remove this plugin when provider authentication changes; ordinary startup
-can install it again. The launcher refuses before replacing its retained bridge
-or starting Desktop, and rechecks before releasing native startup. The check
-discovers the ordinary home and does not depend on an installed plugin version.
+Current integration source builds require an existing ChatGPT sign-in in ordinary
+Desktop, as well as Token Factory credentials in TOFA. Ordinary launch uses the
+native-account router after checking the installed client's account, policy,
+configuration, ownership and routing contracts. It does not require a private
+qualification kit, fixed runtime version or a maintainer's home directory.
+Compatible client updates are checked again at launch; cache/catalog changes alone
+are not admission failures. Selected models still require compatible metadata.
 
-The error leaves ordinary Desktop available. Do not delete or disable the plugin
-to get past it. This is a preservation guard, not a native reconciliation fix;
-authentication, plugin eligibility and shared configuration are unchanged.
-See [the diagnosis and remaining implementation scope](evaluation/desktop-plugin-preservation-130.md).
+Code Review remains installed and eligible under the native account. TOFA does
+not delete, disable or restore plugins. New routed conversations support explicit
+service selection; existing native and legacy histories retain their providers.
+Active endpoints and separate inference/control credentials are process-scoped.
+Only owned inactive provider metadata remains for history. CLI defaults and
+unrelated settings remain unchanged. Historical candidate/proof commands retain
+their original evidence validation; the explicit legacy v1 evaluation route
+retains its plugin-removal guard.
+
+Automatic-title context, including native GPT context, is sent to Token Factory
+during this launch, using the fixed naming model independently of main and
+Guardian. Native main and native review requests keep their native destination.
+See the [admission and evidence assessment](evaluation/desktop-admission-143.md).
 
 ### Switching launch modes and recovering a conversation
 
@@ -94,10 +103,10 @@ See [the diagnosis and remaining implementation scope](evaluation/desktop-plugin
 2. Quit the owned app and wait for the launcher to exit before opening the app
    normally. Both modes use the same history; no import or synchronization is
    needed. Opening the app while the launcher is active does not change modes.
-3. Ordinary mode can display Token Factory history, but cannot send through Token
-   Factory. An unavailable-provider or missing-launch-credential error requires
-   a fresh tofa launch. Changing the picker to GPT/Astra does not migrate the
-   conversation to OpenAI.
+3. Ordinary mode can display routed history but cannot use its inactive TOFA
+   endpoint. Desktop can keep reconnecting indefinitely without a TOFA-specific
+   message. Stop reconnecting, quit Desktop, launch through TOFA and reopen the
+   same conversation. Do not change models to try to migrate providers.
 4. Quit the ordinary app, rerun the launch command, reopen the **same conversation**
    with any default main. Its recorded main is retained if available. Continue there;
    creating a replacement conversation is not the recovery procedure.
