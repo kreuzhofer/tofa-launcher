@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"testing"
 )
 
@@ -23,15 +22,7 @@ func TestDesktopPicker(t *testing.T) {
 		t.Fatal(err)
 	}
 	bundle, capture := desktopFixture(t, "controlled")
-	if installed := os.Getenv("TOFA_TEST_DESKTOP_ENGINE"); installed != "" {
-		engine := filepath.Join(bundle, "Contents/Resources/codex")
-		if err := os.Remove(engine); err != nil {
-			t.Fatal(err)
-		}
-		if err := os.Symlink(installed, engine); err != nil {
-			t.Fatal(err)
-		}
-	}
+
 	command := exec.Command("python3", "scripts/desktop_picker_test.py", "-v")
 	command.Dir = "../.."
 	command.Env = append(os.Environ(), "FIXTURE_DESKTOP_BUNDLE="+bundle, "FIXTURE_DESKTOP_CAPTURE="+capture)

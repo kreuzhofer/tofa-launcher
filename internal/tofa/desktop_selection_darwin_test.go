@@ -122,12 +122,12 @@ func TestDesktopNamingAndGuardianLanesRemainScoped(t *testing.T) {
 	app, output := adapterFixture(t, func(w http.ResponseWriter, r *http.Request) { upstream.Add(1); io.WriteString(w, "ok") }, nil)
 	child, stop := liveDesktopFixture(t, app, bundle, capture, "--model", "deepseek-ai/DeepSeek-V4.1-Flash")
 	for _, tc := range []struct{ name, body, want string }{
-		{"malformed model", `{"model":"deepseek-ai/DeepSeek-V4.1-Flash","model":123,"input":[]}`, "invalid model"},
+		{"malformed model", `{"model":"deepseek-ai/DeepSeek-V4.1-Flash","model":123,"input":[]}`, "ambiguous or invalid request object"},
 		{"changed review", strings.Replace(strings.Replace(guardianRequestFixture(), "moonshotai/Kimi-K3", "zai-org/GLM-5.3-Flash", 1), `"strict":false`, `"strict":true`, 1), "unsupported"},
 		{"wrong reviewer", guardianRequestFixture(), "unsupported Guardian"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], child.Env["TOFA_API_KEY"], tc.body)
+			response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], desktopInferenceToken(t, child), tc.body)
 			body, _ := io.ReadAll(response.Body)
 			response.Body.Close()
 			if response.StatusCode != 400 || !strings.Contains(string(body), tc.want) {
@@ -141,7 +141,7 @@ func TestDesktopNamingAndGuardianLanesRemainScoped(t *testing.T) {
 			t.Fatal(err)
 		}
 		body = []byte(strings.Replace(string(body), `"model": "gpt-6-luna"`, `"model": "`+model+`"`, 1))
-		response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], child.Env["TOFA_API_KEY"], string(body))
+		response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], desktopInferenceToken(t, child), string(body))
 		data, _ := io.ReadAll(response.Body)
 		response.Body.Close()
 		if response.StatusCode != 400 || !strings.Contains(string(data), "automatic title generation is unavailable") {
@@ -164,7 +164,7 @@ func TestDesktopRejectsChangedReviewEvenWhenItTargetsMain(t *testing.T) {
 			for _, change := range [][2]string{{`"strict":false`, `"strict":true`}, {`"name":"view_image"`, `"name":"new_review_tool"`}, {`"outcome"`, `"new_outcome"`}} {
 				body := strings.ReplaceAll(guardianRequestFixture(), "moonshotai/Kimi-K3", "zai-org/GLM-5.3-Flash")
 				body = strings.ReplaceAll(body, change[0], change[1])
-				response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], child.Env["TOFA_API_KEY"], body)
+				response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], desktopInferenceToken(t, child), body)
 				data, _ := io.ReadAll(response.Body)
 				response.Body.Close()
 				if response.StatusCode != 400 || !strings.Contains(string(data), "unsupported desktop approval review") {
@@ -192,7 +192,7 @@ func TestDesktopMainStructuredOutcomeRemainsAnOrdinaryRequest(t *testing.T) {
 		io.WriteString(w, "ok")
 	}, nil)
 	child, stop := liveDesktopFixture(t, app, bundle, capture, "--model", "zai-org/GLM-5.3-Flash")
-	response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], child.Env["TOFA_API_KEY"], body)
+	response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], desktopInferenceToken(t, child), body)
 	response.Body.Close()
 	stop()
 	if response.StatusCode != 200 || calls.Load() != 1 {
@@ -214,17 +214,14 @@ func TestDesktopUnavailableMainExplainsRecovery(t *testing.T) {
 	defer server.Close()
 	app.Endpoint = server.URL
 	child, stop := liveDesktopFixture(t, app, bundle, capture, "--model", "deepseek-ai/DeepSeek-V4.1-Flash")
-	for _, model := range []string{"zai-org/GLM-5.3", "fixture-model", "gpt-6-astra"} {
-		response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], child.Env["TOFA_API_KEY"], `{"model":"`+model+`","input":[]}`)
+	for _, model := range []string{"zai-org/GLM-5.3", "fixture-model", "gpt-no-longer-installed"} {
+		response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], desktopInferenceToken(t, child), `{"model":"`+model+`","input":[]}`)
 		body, err := io.ReadAll(response.Body)
 		response.Body.Close()
 		if err != nil || response.StatusCode != http.StatusBadRequest || calls.Load() != 0 {
 			t.Fatalf("unavailable model escaped: %d %s", response.StatusCode, body)
 		}
-		if model != "zai-org/GLM-5.3" && (!strings.Contains(string(body), "missing bundled model metadata") || !strings.Contains(string(body), "select an available model")) {
-			t.Errorf("missing incompatible-model recovery: %s", body)
-		}
-		if model == "zai-org/GLM-5.3" && !strings.Contains(string(body), "unavailable in this launch's project catalog") {
+		if !strings.Contains(string(body), "selected model is unavailable in this launch catalog") || !strings.Contains(string(body), "select an available model") {
 			t.Fatalf("missing recovery instructions: %s", body)
 		}
 	}
@@ -265,7 +262,7 @@ func desktopRecordedMainRoundTrip(t *testing.T, recorded string) {
 	}, nil)
 	var id string
 	for index, main := range []string{recorded, "deepseek-ai/DeepSeek-V4.1-Flash", recorded} {
-		child, stop := liveDesktopFixture(t, app, bundle, capture, "--model", main)
+		child, stop := liveDesktopFixture(t, app, bundle, capture, "--evaluation-observer", legacyProxyObserver(t), "--model", main)
 		e := openDesktopEngine(t, child)
 		var thread map[string]any
 		if index == 0 {

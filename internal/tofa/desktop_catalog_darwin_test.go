@@ -371,7 +371,7 @@ func TestDesktopBundledEnginePreservesNativeConversations(t *testing.T) {
 		tofaRequests.Add(1)
 		respond(w)
 	}, nil)
-	child, stop := liveDesktopFixture(t, app, bundle, capture)
+	child, stop := liveDesktopFixture(t, app, bundle, capture, "--evaluation-observer", legacyProxyObserver(t))
 	if err := os.WriteFile(filepath.Join(child.Env["CODEX_HOME"], "auth.json"), []byte(`{"OPENAI_API_KEY":"synthetic-native"}`), 0600); err != nil {
 		t.Fatal(err)
 	}

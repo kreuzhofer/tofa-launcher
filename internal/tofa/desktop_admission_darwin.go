@@ -324,7 +324,7 @@ func (a *desktopAdmission) consume(now time.Time) error {
 	return nil
 }
 func (a *desktopAdmission) permitsPlugins() bool {
-	return a != nil && (a.mode == "candidate" && a.consumed || a.mode == "qualified" || a.mode == "local" && len(a.identity.Hashes) == 4 && a.protected != nil)
+	return a != nil && (a.mode == "candidate" && a.consumed || a.mode == "qualified" || a.localReady())
 }
 func (a *desktopAdmission) checkFile() error {
 	if a == nil {

@@ -174,9 +174,9 @@ func desktopHistoryRoundTrip(t *testing.T, failure, model string) {
 	var child capturedDesktop
 	var stop func()
 	if failure == "abrupt death" {
-		child, stop = executableDesktopFixture(t, app, bundle, capture, "--model", model)
+		child, stop = executableDesktopFixture(t, app, bundle, capture, "--evaluation-observer", legacyProxyObserver(t), "--model", model)
 	} else {
-		child, stop = liveDesktopFixture(t, app, bundle, capture, "--model", model)
+		child, stop = liveDesktopFixture(t, app, bundle, capture, "--evaluation-observer", legacyProxyObserver(t), "--model", model)
 	}
 	firstRoute, firstKey := child.Env["TOFA_DESKTOP_CONTEXT"], child.Env["TOFA_API_KEY"]
 	e = openDesktopEngine(t, child)
@@ -265,7 +265,7 @@ func desktopHistoryRoundTrip(t *testing.T, failure, model string) {
 			t.Fatal(err)
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		err := app.RunContext(ctx, []string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", model, "--allow-unverified"})
+		err := app.RunContext(ctx, []string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", model, "--allow-unverified", "--evaluation-observer", legacyProxyObserver(t)})
 		cancel()
 		if err == nil || !strings.Contains(err.Error(), "exit status 17") {
 			t.Fatalf("startup failure was not surfaced: %v", err)
@@ -354,7 +354,7 @@ func desktopHistoryRoundTrip(t *testing.T, failure, model string) {
 			t.Fatal(err)
 		}
 
-		child, stop = liveDesktopFixture(t, app, bundle, capture, "--model", model)
+		child, stop = liveDesktopFixture(t, app, bundle, capture, "--evaluation-observer", legacyProxyObserver(t), "--model", model)
 		if child.Env["TOFA_DESKTOP_CONTEXT"] == firstRoute || child.Env["TOFA_API_KEY"] == firstKey {
 			t.Fatal("history recovery reused stale inference access")
 		}

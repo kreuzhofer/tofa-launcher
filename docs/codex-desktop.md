@@ -824,12 +824,12 @@ gates. No model catalog or inference request is sent by this command.
 This is a point-in-time local prerequisite check, not release qualification or a
 launch authorization token. It does not establish native UI usability, model
 availability, routing turns, reviews or previews. Launch retains its existing
-checks and production protection; the ordinary native-account route remains
-pending #143 qualification. A saved diagnostic cannot bypass those checks.
+checks and protection through normal native-account admission. A saved diagnostic
+cannot bypass those checks; normal launch repeats them against current state.
 
 ## Native-account prerelease: ordinary Desktop reconnect limitation
 
-The native-account candidate has an accepted limitation when Desktop is opened
+The native-account route has an accepted limitation when Desktop is opened
 directly, without TOFA: existing routed conversations may keep showing
 “Reconnecting” instead of a TOFA-specific error. The application can launch its
 bundled engine directly, bypassing the bridge that supplies that error.
@@ -838,6 +838,7 @@ Stop the reconnecting turn, quit Desktop, launch through TOFA, and reopen the
 same conversation. Do not click Retry repeatedly or change models to migrate its
 provider. Ordinary native conversations and saved history must remain usable.
 This documented limitation does not permit credential leakage, silent service
-fallback or history/settings damage. It does not enable the candidate route or
-claim that its remaining preview and release checks passed. See the
+fallback or history/settings damage. Normal-route enablement and retained scoped
+preview evidence are recorded separately in the [#143 assessment](evaluation/desktop-admission-143.md).
+This limitation does not certify a model or publish a release. See the
 [accepted release boundary](evaluation/desktop-release-readiness.md#accepted-ordinary-desktop-limitation--november-11-2026).

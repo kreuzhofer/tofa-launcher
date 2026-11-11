@@ -1743,3 +1743,27 @@ func TestDesktopOwnerExitPreventsSharedConfigurationWrite(t *testing.T) {
 		t.Fatalf("modified shared configuration after desktop exit: %v", readErr)
 	}
 }
+
+// Obtain inference authorization through the same authenticated control boundary
+// as the bridge. Positive request tests must never reuse the control bearer.
+func desktopInferenceToken(t *testing.T, child capturedDesktop) string {
+	t.Helper()
+	request, err := http.NewRequest("GET", child.Env["TOFA_DESKTOP_CONTEXT"]+"/desktop-launch", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.Header.Set("Authorization", "Bearer "+child.Env["TOFA_API_KEY"])
+	response, err := http.DefaultClient.Do(request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer response.Body.Close()
+	var route struct{ InferenceCapability string }
+	if err := json.NewDecoder(response.Body).Decode(&route); err != nil {
+		t.Fatal(err)
+	}
+	if response.StatusCode != http.StatusOK || route.InferenceCapability == "" || route.InferenceCapability == child.Env["TOFA_API_KEY"] {
+		t.Fatal("distinct inference authorization unavailable")
+	}
+	return route.InferenceCapability
+}

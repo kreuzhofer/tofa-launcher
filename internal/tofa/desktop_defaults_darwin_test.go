@@ -42,7 +42,7 @@ func TestDesktopDefaultSelectionPreservesCLIDefault(t *testing.T) {
 	}
 	assertCLI("before desktop")
 	app, _ := adapterFixture(t, nil, nil)
-	child, stop := liveDesktopFixture(t, app, bundle, capture, "--model", "deepseek-ai/DeepSeek-V4.1-Flash")
+	child, stop := liveDesktopFixture(t, app, bundle, capture, "--evaluation-observer", legacyProxyObserver(t), "--model", "deepseek-ai/DeepSeek-V4.1-Flash")
 	assertCLI("after desktop startup")
 	desktop := openDesktopEngine(t, child)
 	before, err := os.ReadFile(filepath.Join(home, "config.toml"))
@@ -102,7 +102,7 @@ func TestDesktopModelDefaultWritesRejectPartialOrStaleChanges(t *testing.T) {
 		t.Fatal(err)
 	}
 	app, _ := adapterFixture(t, nil, nil)
-	child, stop := liveDesktopFixture(t, app, bundle, capture, "--model", "deepseek-ai/DeepSeek-V4.1-Flash")
+	child, stop := liveDesktopFixture(t, app, bundle, capture, "--evaluation-observer", legacyProxyObserver(t), "--model", "deepseek-ai/DeepSeek-V4.1-Flash")
 	e := openDesktopEngine(t, child)
 	path := filepath.Join(child.Env["CODEX_HOME"], "config.toml")
 	before, err := os.ReadFile(path)

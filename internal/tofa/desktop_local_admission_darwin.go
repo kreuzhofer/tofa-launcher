@@ -36,3 +36,15 @@ func (a *desktopAdmission) startupDrift(component string) error {
 	}
 	return admissionError(component + " drifted")
 }
+
+func (a *desktopAdmission) localReady() bool {
+	if a.mode != "local" || a.protected == nil {
+		return false
+	}
+	for _, name := range []string{"launcher", "engine", "application", "application_info"} {
+		if !validDigest(a.identity.Hashes[name]) {
+			return false
+		}
+	}
+	return true
+}
