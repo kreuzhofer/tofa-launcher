@@ -360,6 +360,13 @@ class DeclaredScope:
             text = json.dumps(body['input'], ensure_ascii=False)
             contexts = []
             for state in self.states:
+                # Desktop may request a title before sending the first main turn.
+                # Recognize only the declared fresh-thread opening prompt; naming
+                # cannot bind the thread, advance turns, or establish review origin.
+                if state['thread_id'] is None:
+                    prompt = state['declaration']['turns'][0]['prompt']
+                    if json.dumps(prompt, ensure_ascii=False)[1:-1] in text:
+                        contexts.append({'prompt_sha256': hashed(prompt)['sha256'], 'main_observed': False})
                 for entry in state['turns'].values():
                     turn = state['declaration']['turns'][entry['index']]
                     if json.dumps(turn['prompt'], ensure_ascii=False)[1:-1] in text:

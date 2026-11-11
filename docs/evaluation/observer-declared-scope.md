@@ -82,8 +82,23 @@ The title request does not provide verified parent identity. Its record says
 `parent_unverified: true`, `main_observed: false` and records the hash as
 `intended_ui_thread_sha256`, never as a verified request parent. Actual UI/native
 trace association is separate required qualification evidence. Titles for
-routed threads require a previously admitted Main prompt, and also retain
-`parent_unverified: true`. Timing or prompt matching does not establish parentage.
+routed threads match a previously admitted Main prompt or, before a fresh thread
+has bound, its exact predeclared opening prompt. Desktop can request naming
+before sending that first Main request. In the latter case the title records
+`main_observed: false`; it neither binds the thread nor advances its sequence nor
+establishes review origin. Unobserved later turns and resumed-thread tasks still
+require Main admission (or a separate explicit title-only declaration). All
+routed titles retain `parent_unverified: true`. Timing or prompt matching does
+not establish parentage.
+
+The first #142 switching attempt exposed this ordering: the recognized title
+contained the declared opening prompt but arrived before Main, so the Observer
+stopped with `scope_title_context_unobserved`. The original failed receipt is
+retained as an infrastructure failure, not reassessed as a switching pass.
+Offline replay reproduces the rejection before the correction and accepts the
+same title afterward without claiming Main or parent observation. HTTP-boundary
+regressions cover title-first then Main, unrelated/future title rejection and
+rejection of reviews without an admitted Main origin.
 
 ## Owned shutdown
 

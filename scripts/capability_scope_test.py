@@ -201,12 +201,48 @@ class DeclaredScopeTests(unittest.TestCase):
                 self.send(observer, body, 403 if name == 'undeclared-context' else 400)
                 self.assertFalse(any(r[0] == '/responses' for r in seen))
 
-    def test_routed_title_requires_admitted_main_and_review_keeps_original_turn(self):
+    def test_initial_title_can_precede_main_without_binding_thread_or_review(self):
         helper = boundary_tests.SplitAuthorizationTests()
         with self.boundary() as (observer, seen, registration):
             helper.register(observer, registration)
-            self.send(observer, self.title('Remember scoped lighthouse.'), 403)
-            self.assertFalse(any(r[0] == '/responses' for r in seen))
+            self.send(observer, self.title('Remember scoped lighthouse.'))
+            scope = observer.records[0]['scope']
+            self.assertFalse(scope['main_observed'])
+            self.assertTrue(scope['parent_unverified'])
+            self.assertEqual(scope['contexts'], [{
+                'prompt_sha256': hashed('Remember scoped lighthouse.')['sha256'], 'main_observed': False}])
+            self.assertEqual(observer.records[0]['routed_model'], NAMING_MODEL)
+            self.assertEqual(observer.review_origins, {})
+            state = json.loads((observer.run / 'scope-state.json').read_text())
+            self.assertIsNone(state['threads'][0]['thread_id'])
+            self.assertEqual(state['threads'][0]['admitted_turns'], 0)
+            self.send(observer, self.body(observer, 'moonshotai/Kimi-K3', 'Remember scoped lighthouse.'))
+            self.assertEqual(observer.records[1]['scope']['turn_index'], 0)
+            self.send(observer, self.title('Remember scoped lighthouse.'))
+            self.assertTrue(observer.records[2]['scope']['main_observed'])
+            self.assertEqual(len([r for r in seen if r[0] == '/responses']), 3)
+
+    def test_pre_main_title_does_not_admit_unrelated_or_future_context(self):
+        helper = boundary_tests.SplitAuthorizationTests()
+        for prompt in ('Unrelated private task.', 'Recall scoped lighthouse.', 'Finish scoped lighthouse.'):
+            with self.subTest(prompt=prompt), self.boundary() as (observer, seen, registration):
+                helper.register(observer, registration)
+                self.send(observer, self.title(prompt), 403)
+                self.assertFalse(any(r[0] == '/responses' for r in seen))
+                self.assertEqual(observer.reason, 'scope_mismatch')
+
+    def test_pre_main_title_does_not_authorize_review(self):
+        helper = boundary_tests.SplitAuthorizationTests()
+        with self.boundary() as (observer, seen, registration):
+            helper.register(observer, registration)
+            self.send(observer, self.title('Remember scoped lighthouse.'))
+            review = boundary_tests.BoundaryTests.developer_review()
+            review['client_metadata'].update({'x-codex-parent-thread-id': 'thread-1', 'parent_turn_id': 'turn-1'})
+            self.send(observer, review, 400)
+            self.assertEqual(len([r for r in seen if r[0] == '/responses']), 1)
+
+    def test_routed_review_keeps_original_turn_and_title_records_observed_main(self):
+        helper = boundary_tests.SplitAuthorizationTests()
         with self.boundary() as (observer, seen, registration):
             helper.register(observer, registration)
             first = self.body(observer, 'moonshotai/Kimi-K3', 'Remember scoped lighthouse.')
