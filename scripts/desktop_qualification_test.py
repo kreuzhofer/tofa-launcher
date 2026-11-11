@@ -28,6 +28,35 @@ class QualificationTests(unittest.TestCase):
         with contextlib.redirect_stdout(output): q.prepare(options)
         return Path(json.loads(output.getvalue())['run'])
 
+    def test_verified_generated_refresh_reaches_launch_and_retains_raw_files(self):
+        import hashlib
+        with tempfile.TemporaryDirectory() as temporary:
+            root,run,initial=self.refused_attempt(temporary)
+            versions=[]
+            for version in ('old','new'):
+                files={'.system/generated.md':version, 'personal/SKILL.md':'unchanged'}
+                versions.append((files,hashlib.sha256(json.dumps(files,sort_keys=True,separators=(',',':')).encode()).hexdigest()))
+            evidence={'path':str(root/'contract.json'),'sha256':'c'*64,'accepted_skills_sha256':sorted(v[1] for v in versions)}
+            snapshots=[]
+            for files,digest in versions:
+                snapshots.append({**initial,'identity':{**initial['identity'],'hashes':{'skills':digest},'system_skills':evidence},
+                    'protected':{'skills':digest},'skill_files':{'skills':files,'agent_skills':{}}})
+            (run/'before.json').write_text(json.dumps(snapshots[0]))
+            (root/'snapshot.json').write_text(json.dumps(snapshots[1]))
+            with patch.object(q,'ROOT',root), contextlib.redirect_stdout(io.StringIO()):q.launch(run)
+            self.assertEqual(q.read(run/'finish.json')['stop'],'launch_failed')
+            self.assertTrue((run/'launcher-process.json').exists())
+            self.assertEqual(q.read(run/'before.json'),snapshots[0])
+            self.assertEqual(q.read(run/'after.json'),snapshots[1])
+            import desktop_qualification_guide as guide
+            report=guide.summary(run)
+            self.assertFalse(report['protected_equal'])
+            self.assertTrue(report['integration_protected_equal'])
+            changed=json.loads(json.dumps(snapshots[1]));changed['skill_files']['skills']['personal/SKILL.md']='changed'
+            self.assertNotEqual(q.integration_snapshot(snapshots[0]),q.integration_snapshot(changed))
+            changed['identity']['hashes']['skills']='f'*64
+            self.assertNotEqual(q.integration_identity(snapshots[0]['identity']),q.integration_identity(changed['identity']))
+
     def test_workspace_setup_precedes_immutable_baseline(self):
         with tempfile.TemporaryDirectory() as temporary:
             root, unused, initial=self.refused_attempt(temporary)

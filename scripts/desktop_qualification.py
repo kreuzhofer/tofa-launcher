@@ -26,24 +26,41 @@ CASES = ('clean-exit', 'repeat-launch', 'launcher-crash', 'native-crash',
 COLLECTION_ERRORS = (OSError, ValueError, KeyError, subprocess.SubprocessError, http.client.HTTPException)
 
 
+def system_skills_digest(value, identity):
+    evidence = (identity or {}).get('system_skills')
+    if evidence and value in evidence['accepted_skills_sha256']:
+        return hashlib.sha256(json.dumps(evidence['accepted_skills_sha256'],separators=(',',':')).encode()).hexdigest()
+    return value
+
+
 def integration_identity(identity):
     """Compare integration invariants without erasing catalog/plugin provenance."""
     result = dict(identity)
+    if result.get('system_skills'):
+        result['system_skills'] = {**result['system_skills'], 'path':''}
     if 'hashes' in result:
         result['hashes'] = {key:value for key,value in result['hashes'].items()
                             if key not in ('catalog', 'native_catalog', 'plugins')}
+    if 'skills' in result.get('hashes', {}):
+        result['hashes']['skills'] = system_skills_digest(result['hashes']['skills'], identity)
     return result
 
 
-def integration_protected(state):
-    return {key:value for key,value in state.items() if key != 'plugins'}
+def integration_protected(state, identity=None):
+    return {key:system_skills_digest(value, identity) if key == 'skills' else value
+            for key,value in state.items() if key != 'plugins'}
 
 
 def integration_snapshot(snapshot):
     # Compare copies; retain complete original receipts, including cache detail.
     result = {**snapshot, 'identity':integration_identity(snapshot['identity'])}
     if 'protected' in result:
-        result['protected'] = integration_protected(result['protected'])
+        result['protected'] = integration_protected(result['protected'], snapshot['identity'])
+    evidence = snapshot['identity'].get('system_skills')
+    if evidence and snapshot['identity'].get('hashes', {}).get('skills') in evidence['accepted_skills_sha256']:
+        result['skill_files'] = dict(snapshot['skill_files'])
+        result['skill_files']['skills'] = {k:v for k,v in snapshot['skill_files']['skills'].items()
+                                          if not k.startswith('.system/')}
     result.pop('plugin_files', None)
     return result
 
@@ -104,6 +121,7 @@ def snapshot(plan):
     command = [plan['launcher'], 'desktop-qualification', 'snapshot', '--app-bundle', plan['app_bundle'],
                '--runtime-root', plan['runtime_root'], '--harness-root', str(Path(__file__).resolve().parent),
                '--source-revision', plan['source_revision']]
+    if plan.get('system_skills_contract'): command += ['--system-skills-contract', plan['system_skills_contract']]
     result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=180)
     if result.returncode: raise ValueError('snapshot_failed_private_stderr_not_published')
     return json.loads(result.stdout, object_pairs_hook=unique)
@@ -227,6 +245,9 @@ def prepare(options):
             'model_services': read(options.model_services),
             'scope': read(options.scope) if options.scope else None,
             'limits_note': 'Observer-visible routes only; native output tokens use observed usage when absent from request. Direct native histories are bounded by launch time only.'}
+    if getattr(options, 'system_skills_contract', None):
+        save(run/'system-skills.json', read(options.system_skills_contract))
+        plan['system_skills_contract'] = str(run/'system-skills.json')
     save(run / 'plan.json', plan)
     deferred = getattr(options, 'defer_snapshot', False)
     if deferred:
@@ -437,6 +458,7 @@ def record(options):
         'before_snapshot':reference(run,run/'before.json'),'after_snapshot':reference(run,run/'after.json'),
         'process_receipt':reference(run,run/'process.json'),'finish_receipt':reference(run,run/'finish.json'),
         'requests':reference(run,run/'requests.json'),
+        **({'system_skills_contract':reference(run,run/'system-skills.json')} if before['identity'].get('system_skills') else {}),
         **({'route_stop':reference(run,run/'route-stop.json')} if (run/'route-stop.json').exists() else {}),
         **({'external_action':reference(run,run/'external-action.json')} if (run/'external-action.json').exists() else {}),
         'identity':before['identity'],'started_utc':start['started_utc'],
@@ -448,7 +470,7 @@ def record(options):
     save(run/'export.json',{'schema':'tofa-native-account-export-v1','case':declaration['case'],
         'attempt':declaration['attempt'],'stop':finish['stop'],'qualified':False,
         'protected_equal':before['protected']==after['protected'],
-        'integration_protected_equal':integration_protected(before['protected'])==integration_protected(after['protected']),
+        'integration_protected_equal':integration_protected(before['protected'],before['identity'])==integration_protected(after['protected'],after['identity']),
         'observations':[{'criterion':o['criterion'],'method':o['method'],'outcome':o['outcome']} for o in observations],
         'next':'Validate immutable full evidence with the frozen launcher; fixture and native observations remain separate.'})
     print(json.dumps({'case_record':str(run/'case.json'),'qualified':False}))
@@ -458,6 +480,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__); sub = parser.add_subparsers(dest='action', required=True)
     p = sub.add_parser('prepare')
     for name in ('launcher', 'app-bundle', 'runtime-root', 'model-services'): p.add_argument('--' + name, type=Path, required=True)
+    p.add_argument('--system-skills-contract', type=Path)
     p.add_argument('--scope', type=Path); p.add_argument('--prompt'); p.add_argument('--source-revision', required=True)
     p.add_argument('--case', choices=CASES, required=True); p.add_argument('--model', required=True)
     p.add_argument('--guardian', default='zai-org/GLM-5.3-Flash')

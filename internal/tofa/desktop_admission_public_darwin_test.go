@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-func declaredCandidateObserver(t *testing.T, app *tofa.App, bundle string) string {
+func declaredCandidateObserver(t *testing.T, app *tofa.App, bundle string, snapshotOptions ...string) string {
 	t.Helper()
 	home := filepath.Join(os.Getenv("HOME"), ".codex")
 	os.MkdirAll(home, 0700)
@@ -46,7 +46,7 @@ func declaredCandidateObserver(t *testing.T, app *tofa.App, bundle string) strin
 	var output bytes.Buffer
 	previous := app.Out
 	app.Out = &output
-	err = app.Run([]string{"desktop-qualification", "snapshot", "--app-bundle", bundle, "--runtime-root", runtimeRoot, "--harness-root", harness, "--source-revision", strings.Repeat("a", 40)})
+	err = app.Run(append([]string{"desktop-qualification", "snapshot", "--app-bundle", bundle, "--runtime-root", runtimeRoot, "--harness-root", harness, "--source-revision", strings.Repeat("a", 40)}, snapshotOptions...))
 	app.Out = previous
 	if err != nil {
 		t.Fatal(err)

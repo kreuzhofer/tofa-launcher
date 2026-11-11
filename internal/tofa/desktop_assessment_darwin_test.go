@@ -434,3 +434,68 @@ func TestDesktopAssessmentRejectsFilteredParentCoverage(t *testing.T) {
 		t.Fatal("partial run counted as full security coverage")
 	}
 }
+
+func TestDesktopAssessmentRetainsGeneratedSkillsAfterSourceUpdate(t *testing.T) {
+	root, plan := assessmentFixture(t)
+	base := filepath.Join(root, "clean-exit")
+	raw, _ := os.ReadFile(filepath.Join(base, "case.json"))
+	var record desktopQualificationCase
+	json.Unmarshal(raw, &record)
+	files := map[string]map[string]string{"skills": {"example/SKILL.md": strings.Repeat("d", 64), ".system/.codex-system-skills.marker": strings.Repeat("1", 64), ".system/SKILL.md": strings.Repeat("2", 64)}, "agent_skills": {".": "absent"}}
+	engine := filepath.Join(root, "source-engine")
+	os.WriteFile(engine, []byte("original engine"), 0700)
+	contract := map[string]any{"schema": "tofa-generated-system-skills-v1", "sources": []any{map[string]any{"engine": engine, "engine_sha256": digestBytes([]byte("original engine")), "version": "original", "files": map[string]string{".system/.codex-system-skills.marker": strings.Repeat("1", 64), ".system/SKILL.md": strings.Repeat("2", 64)}}}}
+	ref := assessmentWrite(t, base, "system-skills.json", contract)
+	record.SystemSkillsContract = &ref
+	id := record.Identity
+	raw, _ = json.Marshal(files["skills"])
+	id.Hashes["skills"] = digestBytes(raw)
+	if e := bindDesktopSystemSkills(&id, &desktopSystemSkills{Path: filepath.Join(base, ref.Path)}, files["skills"]); e != nil {
+		t.Fatal(e)
+	}
+	record.Identity = id
+	record.Before["skills"] = id.Hashes["skills"]
+	record.After["skills"] = id.Hashes["skills"]
+	var declaration map[string]any
+	raw, _ = os.ReadFile(filepath.Join(base, record.Declaration.Path))
+	json.Unmarshal(raw, &declaration)
+	declaration["identity"] = id
+	record.Declaration = assessmentWrite(t, base, record.Declaration.Path, declaration)
+	var start map[string]any
+	raw, _ = os.ReadFile(filepath.Join(base, record.Start.Path))
+	json.Unmarshal(raw, &start)
+	start["declaration_sha256"] = record.Declaration.SHA256
+	record.Start = assessmentWrite(t, base, record.Start.Path, start)
+	for _, pair := range []struct {
+		ref   *desktopEvidenceRef
+		state map[string]string
+	}{{&record.BeforeSnapshot, record.Before}, {&record.AfterSnapshot, record.After}} {
+		var snapshot map[string]any
+		raw, _ = os.ReadFile(filepath.Join(base, pair.ref.Path))
+		json.Unmarshal(raw, &snapshot)
+		snapshot["identity"] = id
+		snapshot["skill_files"] = files
+		snapshot["protected"] = pair.state
+		*pair.ref = assessmentWrite(t, base, pair.ref.Path, snapshot)
+	}
+	caseRef := assessmentWrite(t, root, "clean-exit/case.json", record)
+	plan["target"] = id
+	plan["behaviours"] = map[string]any{"account-capabilities": map[string]any{"case": caseRef}}
+	os.WriteFile(engine, []byte("updated engine"), 0700)
+	result, e := runAssessment(t, root, plan)
+	if e != nil {
+		t.Fatal(e)
+	}
+	row := result["behaviours"].(map[string]any)["account-capabilities"].(map[string]any)
+	if row["status"] != "established" {
+		t.Fatalf("intact original evidence failed after engine update: %v", row)
+	}
+	os.WriteFile(filepath.Join(base, ref.Path), []byte("tampered contract"), 0600)
+	result, e = runAssessment(t, root, plan)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if result["behaviours"].(map[string]any)["account-capabilities"].(map[string]any)["status"] != "failed" {
+		t.Fatal("changed historical contract accepted")
+	}
+}

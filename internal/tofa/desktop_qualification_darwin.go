@@ -43,14 +43,15 @@ type desktopReviewResult struct {
 	Report     desktopEvidenceRef `json:"report"`
 }
 type desktopQualificationCase struct {
-	Schema      string                   `json:"schema"`
-	Case        string                   `json:"case"`
-	Declaration desktopEvidenceRef       `json:"declaration"`
-	Start       desktopEvidenceRef       `json:"start"`
-	Identity    desktopAdmissionIdentity `json:"identity"`
-	Started     time.Time                `json:"started_utc"`
-	Finished    time.Time                `json:"finished_utc"`
-	Stop        string                   `json:"stop"`
+	SystemSkillsContract *desktopEvidenceRef      `json:"system_skills_contract,omitempty"`
+	Schema               string                   `json:"schema"`
+	Case                 string                   `json:"case"`
+	Declaration          desktopEvidenceRef       `json:"declaration"`
+	Start                desktopEvidenceRef       `json:"start"`
+	Identity             desktopAdmissionIdentity `json:"identity"`
+	Started              time.Time                `json:"started_utc"`
+	Finished             time.Time                `json:"finished_utc"`
+	Stop                 string                   `json:"stop"`
 	// Raw receipts stay private. They are immutable references, not provider secrets.
 	Raw            []desktopEvidenceRef          `json:"raw"`
 	BeforeSnapshot desktopEvidenceRef            `json:"before_snapshot"`
@@ -270,7 +271,7 @@ func validateDesktopCase(base string, r desktopQualificationCase, id desktopAdmi
 	if e := validateDesktopReceipts(base, r); e != nil {
 		return e
 	}
-	if len(r.Before) < 8 || !reflect.DeepEqual(desktopIntegrationProtected(r.Before), desktopIntegrationProtected(r.After)) {
+	if len(r.Before) < 8 || !reflect.DeepEqual(desktopIntegrationProtected(r.Before, r.Identity.SystemSkills), desktopIntegrationProtected(r.After, r.Identity.SystemSkills)) {
 		return admissionError("case protected state changed")
 	}
 	for _, key := range []string{"config.toml", "auth.json", "managed_config.toml", "AGENTS.md", "AGENTS.override.md", "plugins", "skills", "runtime"} {
@@ -696,6 +697,7 @@ func (a *App) desktopQualification(ctx context.Context, s Store, args []string) 
 	harness := flags.String("harness-root", "", "")
 	source := flags.String("source-revision", "", "")
 	proofPath := flags.String("proof", "", "")
+	systemContract := flags.String("system-skills-contract", "", "")
 	if e := flags.Parse(args[1:]); e != nil {
 		return e
 	}
@@ -726,6 +728,11 @@ func (a *App) desktopQualification(ctx context.Context, s Store, args []string) 
 	id, e := collectDesktopCompatibilityIdentity(bundle, home, profile, desktopBridgePath(a.Dir, bundle.engine), *runtimeRoot, *harness, *source, models, fileInventories)
 	if e != nil {
 		return e
+	}
+	if *systemContract != "" {
+		if e := bindDesktopSystemSkills(&id, &desktopSystemSkills{Path: *systemContract}, fileInventories["skills"]); e != nil {
+			return e
+		}
 	}
 	if args[0] == "verify" {
 		if *proofPath == "" {
@@ -839,6 +846,26 @@ func validateDesktopReceipts(base string, r desktopQualificationCase) error {
 				if !ok || entries == nil || e != nil || digestBytes(raw) != snapshot.Identity.Hashes[name] {
 					return admissionError("skill inventory linkage mismatch")
 				}
+			}
+		}
+		if snapshot.Identity.SystemSkills != nil {
+			if snapshot.SkillFiles == nil {
+				return admissionError("generated skills require per-file evidence")
+			}
+			if r.SystemSkillsContract == nil || r.SystemSkillsContract.SHA256 != snapshot.Identity.SystemSkills.SHA256 {
+				return admissionError("generated skills contract receipt missing")
+			}
+			if e := readAdmissionReference(base, *r.SystemSkillsContract, nil); e != nil {
+				return e
+			}
+			ref := *snapshot.Identity.SystemSkills
+			ref.Path = filepath.Join(base, r.SystemSkillsContract.Path)
+			checked := snapshot.Identity
+			if e := bindDesktopSystemSkillsEvidence(&checked, &ref, snapshot.SkillFiles["skills"], false); e != nil {
+				return e
+			}
+			if !desktopIntegrationIdentityEqual(checked, snapshot.Identity) {
+				return admissionError("generated skills evidence linkage mismatch")
 			}
 		}
 		if snapshot.PluginFiles != nil {

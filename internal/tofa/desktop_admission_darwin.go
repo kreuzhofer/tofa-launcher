@@ -48,12 +48,13 @@ var desktopQualificationCases = map[string][]string{
 // Source is build provenance, not the commit containing subsequently published
 // evidence. Hashes bind the actual bytes and all relevant installed resources.
 type desktopAdmissionIdentity struct {
-	Source  string            `json:"source_revision"`
-	Home    string            `json:"home"`
-	Profile string            `json:"profile"`
-	Runtime string            `json:"runtime_root"`
-	Harness string            `json:"harness_root"`
-	Hashes  map[string]string `json:"hashes"`
+	SystemSkills *desktopSystemSkills `json:"system_skills,omitempty"`
+	Source       string               `json:"source_revision"`
+	Home         string               `json:"home"`
+	Profile      string               `json:"profile"`
+	Runtime      string               `json:"runtime_root"`
+	Harness      string               `json:"harness_root"`
+	Hashes       map[string]string    `json:"hashes"`
 }
 type desktopCandidateDeclaration struct {
 	Schema      string                   `json:"schema"`
@@ -209,11 +210,19 @@ func readDesktopDeclaration(path string, id desktopAdmissionIdentity, seconds in
 // Compare copies so declarations, snapshots and receipt hashes retain full provenance.
 // All other fields (including unknown hash keys) remain part of the gate.
 func desktopIntegrationIdentity(id desktopAdmissionIdentity) desktopAdmissionIdentity {
+	if id.SystemSkills != nil {
+		copy := *id.SystemSkills
+		copy.Path = ""
+		id.SystemSkills = &copy
+	}
 	if id.Hashes != nil {
 		hashes := make(map[string]string, len(id.Hashes))
 		for key, value := range id.Hashes {
 			if key != "catalog" && key != "native_catalog" && key != "plugins" {
 				hashes[key] = value
+				if key == "skills" {
+					hashes[key] = systemSkillsDigest(value, id.SystemSkills)
+				}
 			}
 		}
 		id.Hashes = hashes
@@ -222,7 +231,7 @@ func desktopIntegrationIdentity(id desktopAdmissionIdentity) desktopAdmissionIde
 }
 
 // Keep the complete receipt; cache equality is not a preservation requirement.
-func desktopIntegrationProtected(state map[string]string) map[string]string {
+func desktopIntegrationProtected(state map[string]string, evidence ...*desktopSystemSkills) map[string]string {
 	if state == nil {
 		return nil
 	}
@@ -230,6 +239,9 @@ func desktopIntegrationProtected(state map[string]string) map[string]string {
 	for key, value := range state {
 		if key != "plugins" {
 			result[key] = value
+			if key == "skills" && len(evidence) == 1 {
+				result[key] = systemSkillsDigest(value, evidence[0])
+			}
 		}
 	}
 	return result
@@ -809,6 +821,9 @@ func (a *desktopAdmission) recheck(bundle desktopBundle, home, profile, bridge s
 	if e != nil {
 		return e
 	}
+	if e := bindDesktopSystemSkills(&current, a.identity.SystemSkills, nil); e != nil {
+		return e
+	}
 	if !desktopIntegrationIdentityEqual(current, a.identity) {
 		return admissionError("installation drifted")
 	}
@@ -857,6 +872,9 @@ func resolveDesktopAdmission(ctx context.Context, options launchOptions, observe
 	}
 	current, e := desktopCompatibilityIdentity(bundle, home, profile, bridge, id.Runtime, id.Harness, id.Source, models)
 	if e != nil {
+		return nil, e
+	}
+	if e := bindDesktopSystemSkills(&current, id.SystemSkills, nil); e != nil {
 		return nil, e
 	}
 	var a *desktopAdmission
