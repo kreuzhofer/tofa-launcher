@@ -12,6 +12,14 @@ import (
 )
 
 func TestDesktopNativeCandidateDeclaredObserverSwitching(t *testing.T) {
+	testDesktopNativeCandidateDeclaredObserverSwitching(t, "")
+}
+
+func TestDesktopNativeCandidateDeclaredObserverSwitchingPastedNewline(t *testing.T) {
+	testDesktopNativeCandidateDeclaredObserverSwitching(t, "\n")
+}
+
+func testDesktopNativeCandidateDeclaredObserverSwitching(t *testing.T, terminal string) {
 	var mu sync.Mutex
 	var sequence []string
 	var config string
@@ -82,7 +90,7 @@ func TestDesktopNativeCandidateDeclaredObserverSwitching(t *testing.T) {
 		if i > 0 {
 			e.call("thread/settings/update", map[string]any{"threadId": id, "model": model})
 		}
-		e.turnText(id, "completed", prompts[i])
+		e.turnText(id, "completed", prompts[i]+terminal)
 	}
 	saved := e.call("thread/read", map[string]any{"threadId": id, "includeTurns": true})["thread"].(map[string]any)
 	if saved["id"] != id || len(saved["turns"].([]any)) != 3 {

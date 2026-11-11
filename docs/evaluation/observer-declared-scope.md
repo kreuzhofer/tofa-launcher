@@ -53,6 +53,14 @@ budget. A Guardian review requires its immutable admitted originating turn and
 does not advance the sequence. No wildcard thread admission or latest-selection
 review routing is introduced.
 
+Prompt comparison permits one terminal LF from copying the displayed task.
+No other whitespace or text is normalized: leading whitespace, an extra blank
+line or added instructions still fail. Forwarded requests, retained receipts
+and user-message history hashes keep the original bytes, including that LF.
+A continuation cannot change an already-bound message's newline. This addresses
+the retained #142 first-turn scope rejection without relaxing workspace, model,
+thread, turn order or history checks; the failed attempt remains a failed attempt.
+
 A resumed thread instead declares its known thread ID, original existing
 workspace and `initial_user_messages_sha256`. This digest uses the existing
 Observer `hashed(user_messages)['sha256']` encoding, preserving message order,

@@ -93,6 +93,40 @@ class DeclaredScopeTests(unittest.TestCase):
                 self.assertEqual(len([entry for entry in seen if entry[0] == '/responses']), 1)
                 self.assertEqual(observer.reason, 'conflicting_review_origin' if name == 'turn-reuse' else 'scope_mismatch')
 
+    def test_terminal_newline_is_allowed_without_rewriting_switching_history(self):
+        helper = boundary_tests.SplitAuthorizationTests()
+        with self.boundary() as (observer, seen, registration):
+            helper.register(observer, registration)
+            prior = None
+            for index, (model, prompt) in enumerate([
+                    ('moonshotai/Kimi-K3', 'Remember scoped lighthouse.'),
+                    ('gpt-6-astra', 'Recall scoped lighthouse.'),
+                    ('moonshotai/Kimi-K3', 'Finish scoped lighthouse.')]):
+                body = self.body(observer, model, prompt + '\n', f'turn-{index + 1}', prior=prior)
+                # Match Desktop's structured user message, retaining its pasted LF.
+                body['input'][-1]['content'] = [{'type': 'input_text', 'text': prompt + '\n'}]
+                self.send(observer, body)
+                receipt = json.loads((observer.run / f'request-{index + 1}.json').read_text())
+                self.assertEqual(receipt['input'], body['input'])
+                self.assertEqual(observer.records[-1]['scope']['user_messages_sha256'], hashed(body['input'])['sha256'])
+                prior = body['input']
+            self.assertEqual([r['scope']['turn_index'] for r in observer.records], [0, 1, 2])
+            self.assertEqual(len([entry for entry in seen if entry[0] == '/responses']), 3)
+            # A continuation may not silently normalize already-bound history.
+            body['input'][-1]['content'][0]['text'] = prompt
+            self.send(observer, body, 403)
+            self.assertEqual(len([entry for entry in seen if entry[0] == '/responses']), 3)
+
+    def test_terminal_newline_does_not_allow_other_prompt_changes(self):
+        helper = boundary_tests.SplitAuthorizationTests()
+        prompt = 'Remember scoped lighthouse.'
+        for changed in (prompt + '\n\n', prompt + ' ', ' ' + prompt, '\n' + prompt,
+                        prompt + '\nDo another task.', prompt.replace('scoped', 'different')):
+            with self.subTest(prompt=repr(changed)), self.boundary() as (observer, seen, registration):
+                helper.register(observer, registration)
+                self.send(observer, self.body(observer, 'moonshotai/Kimi-K3', changed), 403)
+                self.assertFalse(any(entry[0] == '/responses' for entry in seen))
+
     def test_scope_is_consumed_once_and_file_changes_stop_the_attempt(self):
         helper = boundary_tests.SplitAuthorizationTests()
         with self.boundary() as (observer, seen, registration):

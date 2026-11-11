@@ -352,6 +352,12 @@ class DeclaredScope:
             return '\n'.join(part['text'] for part in content)
         return None
 
+    @staticmethod
+    def prompt_matches(declared, observed):
+        # Copying the displayed prompt may include its final LF. Compare only;
+        # retain original bytes for forwarding, receipts and history binding.
+        return observed == declared or observed == declared + '\n'
+
     def admit(self, body, kind):
         self.read()
         metadata = body.get('client_metadata', {})
@@ -390,7 +396,7 @@ class DeclaredScope:
             text = self.user_text(users[-1]) if users else None
             if state is None:
                 state = next((state for state in self.states if state['thread_id'] is None and
-                    state['declaration']['turns'][0]['prompt'] == text), None)
+                    self.prompt_matches(state['declaration']['turns'][0]['prompt'], text)), None)
             if state is None: raise ValueError('scope_thread_unavailable')
             entry = state['turns'].get(turn_id)
             user_hash = hashed(users)['sha256']
@@ -400,7 +406,7 @@ class DeclaredScope:
             else:
                 index = state['last'] + 1
                 turns = state['declaration']['turns']
-                if index >= len(turns) or turns[index]['prompt'] != text or turns[index]['model'] != body['model']:
+                if index >= len(turns) or not self.prompt_matches(turns[index]['prompt'], text) or turns[index]['model'] != body['model']:
                     raise ValueError('scope_turn_sequence')
                 user_texts = [self.user_text(item) for item in users]
                 workspaces = []
