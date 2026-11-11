@@ -106,6 +106,34 @@ func TestDesktopUsesAuthenticatedNativeCatalog(t *testing.T) {
 			if err := os.WriteFile(filepath.Join(bundle, "Contents/Resources/native-discovery.json"), spec, 0600); err != nil {
 				t.Fatal(err)
 			}
+			// Sign in the disposable profile before the launch preservation
+			// baseline. Discovery must not manufacture credentials/settings.
+			home := filepath.Join(os.Getenv("HOME"), ".codex")
+			if err := os.MkdirAll(home, 0700); err != nil {
+				t.Fatal(err)
+			}
+			writeJSON := func(name string, value any) {
+				t.Helper()
+				raw, err := json.Marshal(value)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if err := os.WriteFile(filepath.Join(home, name), raw, 0600); err != nil {
+					t.Fatal(err)
+				}
+			}
+			writeJSON("auth.json", auth)
+			if cache, ok := discovery["cache"]; ok {
+				writeJSON("models_cache.json", cache)
+			}
+			config := "cli_auth_credentials_store=\"file\"\nopenai_base_url=" + fmt.Sprintf("%q", server.URL) + "\n"
+			if static {
+				writeJSON("static-models.json", discovery["catalog"])
+				config += "model_catalog_json=" + fmt.Sprintf("%q", filepath.Join(home, "static-models.json")) + "\n"
+			}
+			if err := os.WriteFile(filepath.Join(home, "config.toml"), []byte(config), 0600); err != nil {
+				t.Fatal(err)
+			}
 			app, _ := adapterFixture(t, nil, nil)
 			err = app.Run([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"})
 			if static {
@@ -164,7 +192,14 @@ func TestDesktopUsesAuthenticatedNativeCatalog(t *testing.T) {
 			if err := json.Unmarshal(raw, &child); err != nil {
 				t.Fatal(err)
 			}
-			if len(child.Catalog.Models) != 6 || !reflect.DeepEqual(child.Catalog.Models[0], descriptor) {
+			wantDescriptor := make(map[string]any, len(descriptor))
+			for key, value := range descriptor {
+				wantDescriptor[key] = value
+			}
+			wantDescriptor["display_name"] = "Native account choice (ChatGPT)"
+			description, _ := descriptor["description"].(string)
+			wantDescriptor["description"] = "ChatGPT native inference; " + description
+			if len(child.Catalog.Models) != 6 || !reflect.DeepEqual(child.Catalog.Models[0], wantDescriptor) {
 				t.Fatal("effective account catalog replaced with bundled choices or altered")
 			}
 			raw, err = os.ReadFile(filepath.Join(child.Env["CODEX_HOME"], "auth.json"))

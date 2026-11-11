@@ -41,7 +41,7 @@ func TestDesktopBundledEngineKeepsReasoningSeparate(t *testing.T) {
 		}
 		emitReasoningFixture(w)
 	}, nil)
-	child, stop := liveDesktopFixture(t, app, bundle, capture, "--model", "zai-org/GLM-5.3")
+	child, stop := liveDesktopFixture(t, app, bundle, capture, "--model", "zai-org/GLM-5.3", "--evaluation-observer", legacyProxyObserver(t))
 	defer stop()
 	e := openDesktopEngine(t, child)
 	defer e.close()
