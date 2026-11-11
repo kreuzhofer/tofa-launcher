@@ -817,3 +817,18 @@ launch authorization token. It does not establish native UI usability, model
 availability, routing turns, reviews or previews. Launch retains its existing
 checks and production protection; the ordinary native-account route remains
 pending #143 qualification. A saved diagnostic cannot bypass those checks.
+
+## Native-account prerelease: ordinary Desktop reconnect limitation
+
+The native-account candidate has an accepted limitation when Desktop is opened
+directly, without TOFA: existing routed conversations may keep showing
+“Reconnecting” instead of a TOFA-specific error. The application can launch its
+bundled engine directly, bypassing the bridge that supplies that error.
+
+Stop the reconnecting turn, quit Desktop, launch through TOFA, and reopen the
+same conversation. Do not click Retry repeatedly or change models to migrate its
+provider. Ordinary native conversations and saved history must remain usable.
+This documented limitation does not permit credential leakage, silent service
+fallback or history/settings damage. It does not enable the candidate route or
+claim that its remaining preview and release checks passed. See the
+[accepted release boundary](evaluation/desktop-release-readiness.md#accepted-ordinary-desktop-limitation--november-11-2026).

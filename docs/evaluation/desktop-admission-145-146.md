@@ -71,3 +71,13 @@ collector-only changes, unknown identity changes, failed/skipped/filtered checks
 and the distinction between artifacts and native previews. Actual installed-engine
 history continuation and every lifecycle fault subcase passed. These executions
 are recorded separately from the default suite, which skips opt-in engine tests.
+
+## November 11 recovery scope amendment
+
+The maintainer accepted ordinary Desktop's direct-engine reconnect limitation.
+The absence of an automatic TOFA relaunch message is no longer a prerelease gate;
+TOFA disclosure/documentation must provide the recovery steps. This does not
+turn a failed observation into a pass or excuse unknown security-sensitive
+preservation changes. Apply the [amended matrix](desktop-release-readiness.md)
+when assembling behaviour evidence; preserve all other admission checks and the
+production guard. No repeat of the same reconnect observation is required.

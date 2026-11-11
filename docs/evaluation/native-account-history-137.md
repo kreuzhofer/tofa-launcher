@@ -50,3 +50,15 @@ behavior. If ordinary Desktop bypasses the bridge and retains this reconnect
 behavior, the ordinary-launch acceptance criterion remains unmet and needs a
 supported fix or an explicit product decision. Keep the production guard and
 release/adoption gates closed; do not silently substitute a weaker criterion.
+
+## November 11 product decision
+
+Actual ordinary Desktop selected the bundled engine directly and reproduced the
+reconnect behaviour above. The maintainer explicitly accepted this limitation
+for the experimental prerelease: documented TOFA relaunch instructions replace
+the requirement for an automatic TOFA-specific message inside ordinary Desktop.
+The [release matrix](desktop-release-readiness.md#accepted-ordinary-desktop-limitation--november-11-2026)
+records the exact scope. Original failed probes and receipts remain unchanged;
+credential separation, no silent fallback, readable history and native use are
+still required. Do not schedule another manual run solely to re-observe the
+accepted reconnect limitation.

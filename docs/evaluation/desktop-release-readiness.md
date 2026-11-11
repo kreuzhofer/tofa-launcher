@@ -42,7 +42,7 @@ invent historical attribution to obtain a pass.
 | Service selection and credentials | Picker identifies service; native/Token Factory requests use the intended service and credentials; capabilities remain local; invalid/expired authorization rejected; no silent fallback | Installed-engine routing and leak controls plus actual selection and continuation |
 | Conversations, tools and approvals | Turns and tool continuations work; Guardian/native reviews follow originating work; allow/deny/cancel decisions are enforced; switching does not redirect pending work | Public-launch/real-engine tests plus representative actual Desktop workflow |
 | Naming | Agreed launch-wide TOFA policy and disclosure work; title failure remains separate from main work | Engine contract and error tests plus actual generated title visibility |
-| History and recovery | Existing history remains readable; resume preserves context/selection; ordinary launch retains native use and gives documented relaunch guidance for unavailable routed work | Automated history/lifecycle tests plus actual history and ordinary recovery observations |
+| History and recovery | Existing history remains readable; resume preserves context/selection; ordinary launch retains native use; TOFA documents relaunch guidance for unavailable routed work (accepted in-app reconnect limitation below) | Automated history/lifecycle tests plus actual history and ordinary recovery observations |
 | Shutdown and faults | Clean exit, launcher/native failure, bridge replacement interruption and uninstall leave recoverable owned state without unintended user-state changes | Automated real launcher/engine fault coverage where sufficient; actual Desktop checks only for recovery behaviour it cannot establish |
 | Presentation integration | Installed skill discovers and calls the actual loader; supplied runtime produces valid owned synthetic artifacts; both correct native previews open | Runtime/engine tests plus actual loader evidence and PPTX/PDF preview observations |
 | Updated clients | Required contracts work; affected behaviours are checked; unaffected evidence is reused with a recorded reason | Installed-engine compatibility checks and targeted actual Desktop observation |
@@ -53,6 +53,31 @@ must not bypass approvals, leak credentials, lose history or silently reroute.
 A provider outage or unavailable selected model is not by itself evidence of a
 TOFA defect; retain the failed attempt and its attribution. Missing critical
 coverage is not a pass.
+
+## Accepted ordinary-Desktop limitation — November 11, 2026
+
+The maintainer explicitly accepted the observed reconnect limitation for the next
+experimental prerelease. Opening Desktop directly can select its bundled engine
+rather than TOFA's bridge. A routed conversation then retries its inactive local
+endpoint without displaying TOFA-specific relaunch guidance. This is a known
+limitation, not a passing actionable-error observation, and it does not by itself
+block this prerelease or require another identical recovery run.
+
+TOFA's launch disclosure and troubleshooting documentation must explain: routed
+conversations require launching through TOFA. In ordinary Desktop, stop the
+reconnecting turn, quit Desktop, launch through TOFA and reopen the same
+conversation. Do not change models to attempt provider migration. Automatic
+TOFA-specific wording inside directly opened Desktop is no longer required.
+
+Native use and readable history remain required. No silent service fallback,
+credential leakage, unintended user-state change or history damage is permitted.
+Preserve route-expiry and authorization checks. Do not patch Desktop, persist
+credentials, introduce a recovery daemon or use shared-config restoration to
+avoid this limitation. Failed and incomplete receipts remain unchanged; review
+accepted facts separately without manufacturing a successful finish or new turn.
+Historical preservation differences remain unknown where evidence is absent.
+The production guard, preview qualification and remaining release work are
+unchanged. The launch-disclosure implementation must be checked before enablement.
 
 ## Diagnostic evidence and separate work
 
