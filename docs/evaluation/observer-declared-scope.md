@@ -71,6 +71,17 @@ this scope check does not prove filesystem preservation in another workspace.
 The user-message digest likewise does not prove complete assistant/tool history
 continuity. Qualification must separately inspect the native history evidence.
 
+For the first resumed turn only, Desktop may append one repeated user-context
+message with the exact text
+`<external_codex_apps_open_page>{"page_id":null}</external_codex_apps_open_page>`.
+The original prefix must still match its declared digest, and the appended
+message must match one already in that prefix apart from its valid message ID.
+No other envelope fields or content are normalized. A selected page,
+additional message, changed/reordered history or other context is rejected.
+The scope receipt records `initial_history_match` as `exact` or
+`repeated_null_page_context`. Forwarding and the new accepted history hash retain
+all original request bytes; subsequent turns and continuations stay exact.
+
 Private `scope-state.json` records bound thread IDs, progress and the latest
 user-message digest to prepare a later explicit resume declaration. Request
 records contain hashes and declared labels, not raw prompts or thread IDs.

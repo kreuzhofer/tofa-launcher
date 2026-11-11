@@ -358,6 +358,21 @@ class DeclaredScope:
         # retain original bytes for forwarding, receipts and history binding.
         return observed == declared or observed == declared + '\n'
 
+    @classmethod
+    def repeated_null_page_context(cls, users, expected):
+        # Desktop can append this identical, empty page-selection context on
+        # resume with a fresh message ID. Require the entire original prefix;
+        # do not normalize other context, selected pages, or user instructions.
+        def message(item):
+            if (set(item) - {'type', 'id', 'role', 'content'} or item.get('type', 'message') != 'message' or
+                    'id' in item and not cls.identifier(item['id'])):
+                return None
+            return {key: value for key, value in item.items() if key != 'id'}
+        return (len(users) > 1 and cls.user_text(users[-1]) ==
+                '<external_codex_apps_open_page>{"page_id":null}</external_codex_apps_open_page>' and
+                message(users[-1]) is not None and message(users[-1]) in [message(item) for item in users[:-1]] and
+                hashed(users[:-1])['sha256'] == expected)
+
     def admit(self, body, kind):
         self.read()
         metadata = body.get('client_metadata', {})
@@ -421,16 +436,21 @@ class DeclaredScope:
                     previous = next(entry for entry in state['turns'].values() if entry['index'] == index - 1)
                     if preceding != previous['users']: raise ValueError('scope_history_changed')
                 elif state['declaration']['thread_id'] is not None:
-                    if preceding != state['declaration']['initial_user_messages_sha256']: raise ValueError('scope_initial_history_changed')
+                    expected = state['declaration']['initial_user_messages_sha256']
+                    if preceding != expected and not self.repeated_null_page_context(users[:-1], expected):
+                        raise ValueError('scope_initial_history_changed')
                 elif any(item.get('role') == 'assistant' or item.get('type') in
                         ('function_call', 'function_call_output', 'custom_tool_call', 'custom_tool_call_output') for item in body['input']):
                     raise ValueError('scope_new_thread_has_history')
                 state['thread_id'], state['last'] = thread, index
                 entry = {'index': index, 'users': user_hash, 'model': body['model']}
+                if index == 0 and state['declaration']['thread_id'] is not None:
+                    entry['initial_history_match'] = ('exact' if preceding == expected else 'repeated_null_page_context')
                 state['turns'][turn_id] = entry
         return dict(base, label=state['declaration']['label'], turn_index=entry['index'],
                     thread_sha256=hashed(thread)['sha256'], turn_sha256=hashed(turn_id)['sha256'],
-                    user_messages_sha256=entry['users'])
+                    user_messages_sha256=entry['users'],
+                    **({'initial_history_match': entry['initial_history_match']} if 'initial_history_match' in entry else {}))
 
     def persist(self):
         threads = []
