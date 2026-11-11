@@ -214,7 +214,12 @@ func assertExpiredDesktopContext(t *testing.T, child capturedDesktop, explanatio
 
 func waitDesktopPIDStopped(t *testing.T, pid int) {
 	t.Helper()
-	deadline := time.Now().Add(5 * time.Second)
+	waitDesktopPIDStoppedWithin(t, pid, 5*time.Second)
+}
+
+func waitDesktopPIDStoppedWithin(t *testing.T, pid int, timeout time.Duration) {
+	t.Helper()
+	deadline := time.Now().Add(timeout)
 	for syscall.Kill(pid, 0) == nil {
 		if time.Now().After(deadline) {
 			t.Fatal("owned desktop survived fixture shutdown")

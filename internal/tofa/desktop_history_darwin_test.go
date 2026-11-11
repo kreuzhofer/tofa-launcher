@@ -240,7 +240,10 @@ func desktopHistoryRoundTrip(t *testing.T, failure, model string) {
 		if err := syscall.Kill(pid, syscall.SIGKILL); err != nil {
 			t.Fatal(err)
 		}
-		waitDesktopPIDStopped(t, desktopPID)
+		// The engine-loss monitor grants five seconds for native quit, then
+		// up to two seconds for termination. Keep the assertion bounded while
+		// allowing both phases and the monitor's polling interval.
+		waitDesktopPIDStoppedWithin(t, desktopPID, 10*time.Second)
 	case "adapter failure":
 		if err := (<-listening).Close(); err != nil {
 			t.Fatal(err)

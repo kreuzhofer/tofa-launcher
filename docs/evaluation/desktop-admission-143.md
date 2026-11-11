@@ -105,3 +105,10 @@ refusal; the parser now accepts the complete observed new form as well as the
 old one, rejecting incomplete or changed diagnostics. This applies to catalog
 semantics, including legacy evaluation tests. It does not relax normal Desktop's
 separate `account/read` ChatGPT sign-in requirement or add API-key native admission.
+
+The legacy engine-loss regression also had a conflicting deadline: its
+five-second process-exit assertion expired at the end of the launcher's existing
+five-second native-quit grace, before the two-second termination allowance. Only
+that assertion now allows ten seconds, including polling. Both installed-engine
+cases pass with shutdown, stale-route rejection, history preservation and resumed
+tool execution still asserted. Production shutdown timing is unchanged.
