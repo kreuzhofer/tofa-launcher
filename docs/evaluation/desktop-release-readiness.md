@@ -177,3 +177,6 @@ runs and durable copies outside `/tmp`. Separately declared 900-second compariso
 budgets remain separate. Preserve failed/incomplete attempts and raw private
 receipts; publish only sanitized findings. This interview launches no Desktop,
 runs no inference and changes no shared account/settings/skill state.
+
+Collector maintenance and regression coverage are recorded in
+[presentation collector regressions](presentation-collector-regressions.md).

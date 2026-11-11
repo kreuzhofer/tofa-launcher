@@ -17,15 +17,11 @@ from urllib.parse import quote
 
 from capability_evaluation import digest, save, version, launcher_seconds
 from capability_observer import LoopbackServer, Observer
-from capability_runtime import protected, executable_versions, PROVIDERS, loader_tools, desktop_identity, harness_identity, catalog_tools, smoke_execution, read_object
-from evaluation_proxy import fixture_response, message
-from presentation_runtime import from_loader_output, inventory
+from capability_runtime import protected, executable_versions, PROVIDERS, desktop_identity, harness_identity, read_object
+from presentation_responder import PresentationResponder
+from presentation_runtime import inventory
 from retained_mcp import retained_policy, LIFECYCLE
 from presentation_synthetic import SyntheticObserver
-
-
-def tools(body):
-    return [(namespace, tool.get('name')) for namespace, tool in catalog_tools(body)]
 
 
 def thread_identity(client, log, home, workspace, started):
@@ -93,51 +89,11 @@ def main():
     (run / 'prompt.txt').write_text(prompt + '\n')
     raw_before = protected(options.codex_home, options.skill, options.runtime_root)
     before = protected(options.codex_home, options.skill, options.runtime_root, retained_mcp=policy) if policy else raw_before
-    state = {'loader_name': None, 'runtime': None, 'calls': 0, 'failure': None}
+    responder = PresentationResponder(run, expected, options.skill.resolve())
+    state = responder.state
     started = time.time()
     observed_versions = {}
-    def synthetic_response(body):
-        state['calls'] += 1
-        save(run / ('model-request-' + str(state['calls']) + '.json'), body)
-        outputs = {item.get('call_id'): item.get('output') for item in body.get('input', []) if item.get('type') == 'function_call_output'}
-        names = tools(body)
-        if body['model'] == 'nvidia/Nemotron-3_5-Lightning':
-            item = message(json.dumps({'title': 'Supplied runtime smoke', 'description': 'Synthetic native runtime check'}))
-        elif 'runtime-loader' not in outputs:
-            name = 'mcp__' + provider_name + '__load_workspace_dependencies'
-            if not loader_tools(body, provider_name):
-                state['failure'] = 'required_actual_client_loader_missing'
-                item = message('Runtime loader unavailable. No artifact was created.')
-            else:
-                state['loader_name'] = name
-                item = {'id': 'fc_runtime', 'type': 'function_call', 'name': 'load_workspace_dependencies',
-                        'namespace': 'mcp__' + provider_name,
-                        'call_id': 'runtime-loader', 'status': 'completed', 'arguments': '{}'}
-        elif 'runtime-smoke' not in outputs:
-            output = outputs['runtime-loader']; save(run / 'loader-result.json', output)
-            try:
-                state['runtime'] = from_loader_output(output, provider_name)
-                if state['runtime'] != expected: raise ValueError('returned_runtime_drift')
-                command = shlex.join([sys.executable, str(Path(__file__).with_name('presentation_smoke.py')),
-                    '--workspace', str(workspace), '--skill', str(options.skill.resolve()),
-                    '--provider', provider_name, '--loader-result', str(run / 'loader-result.json')])
-                executors = [(namespace, name) for namespace, name in names if name == 'exec_command']
-                if len(executors) != 1: raise ValueError('actual_client_exec_tool_missing')
-                item = {'id': 'fc_smoke', 'type': 'function_call', 'name': executors[0][1],
-                    'call_id': 'runtime-smoke', 'status': 'completed',
-                    'arguments': json.dumps({'cmd': command, 'login': False, 'yield_time_ms': 30000, 'max_output_tokens': 2000})}
-                if executors[0][0]: item['namespace'] = executors[0][0]
-            except (OSError, ValueError):
-                state['failure'] = 'loader_result_unqualified'; item = message('Runtime qualification stopped.')
-        else:
-            save(run / 'smoke-result.json', outputs['runtime-smoke'])
-            try:
-                smoke_execution(outputs['runtime-smoke'], workspace)
-                item = message('[Deck](' + str(workspace / 'output/deck.pptx') + ') [PDF](' + str(workspace / 'output/deck.pdf') + ')')
-            except (OSError, ValueError):
-                state['failure'] = 'presentation_smoke_failed'
-                item = message('The supplied-runtime smoke failed. No delivery was qualified.')
-        return fixture_response(item, body['model'])
+    synthetic_response = responder.respond
 
     class Provider(http.server.BaseHTTPRequestHandler):
         def log_message(self, *unused): pass
@@ -223,7 +179,7 @@ def main():
         state['failure'] = 'operator_cancelled'
         termination = 'operator_cancelled'
     except (OSError, ValueError, subprocess.SubprocessError):
-        state['failure'] = 'actual_client_launch_failed'
+        state['failure'] = state['failure'] or 'actual_client_launch_failed'
     finally:
         provider.shutdown(); provider.server_close()
     if state['runtime']:

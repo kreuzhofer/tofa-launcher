@@ -9,7 +9,7 @@ import re
 import platform
 from xml.parsers.expat import ExpatError
 
-from presentation_runtime import from_loader_output, inventory, sha256
+from presentation_runtime import from_loader_output, inventory, sha256, check_node_version
 
 PROVIDERS = {'cli': 'tofa_presentation_runtime', 'desktop': 'codex_app'}
 
@@ -18,7 +18,7 @@ def harness_identity():
     directory = Path(__file__).parent
     names = ('presentation_calibration.py', 'presentation_runtime.py', 'presentation_smoke.py',
         'capability_runtime.py', 'presentation_preview.py', 'capability_observer.py',
-        'capability_actions.py', 'capability_evaluation.py', 'evaluation_proxy.py', 'retained_mcp.py', 'presentation_synthetic.py')
+        'capability_actions.py', 'capability_evaluation.py', 'evaluation_proxy.py', 'retained_mcp.py', 'presentation_synthetic.py', 'presentation_responder.py')
     return {path.name: sha256(path) for path in [*(directory / name for name in names),
         directory / 'fixtures/presentation-smoke.mjs',
         directory.parent / 'docs/evaluation/evidence/presentation-runtime-126-127/retained-mcp-lifecycle.json']}
@@ -60,8 +60,8 @@ def executable_versions(runtime, workspace):
         if result.returncode or not output or len(output) > 4096:
             raise ValueError('supplied_executable_version_failed')
         versions[name] = {'sha256': sha256(command[0]), 'version': output}
-    if versions['node']['version'] != runtime['declared_versions']['node'] or (
-            versions['python']['version'] != 'Python ' + runtime['declared_versions']['python']):
+    check_node_version(runtime['declared_versions']['node'], versions['node']['version'])
+    if versions['python']['version'] != 'Python ' + runtime['declared_versions']['python']:
         raise ValueError('supplied_executable_version_mismatch')
     return versions
 
@@ -223,8 +223,8 @@ def qualify(path, *, client, client_identity, home, skill, application_identity=
     for name, identity in versions.items():
         if not isinstance(identity, dict) or identity.get('sha256') != runtime['hashes'][name] or not identity.get('version'):
             raise ValueError('qualification_executable_identity_mismatch')
-    if versions['node']['version'] != runtime['declared_versions']['node'] or (
-            versions['python']['version'] != 'Python ' + runtime['declared_versions']['python']):
+    check_node_version(runtime['declared_versions']['node'], versions['node']['version'])
+    if versions['python']['version'] != 'Python ' + runtime['declared_versions']['python']:
         raise ValueError('qualification_executable_version_mismatch')
     requests = sorted(run.glob('model-request-*.json'))
     observed_call = False
