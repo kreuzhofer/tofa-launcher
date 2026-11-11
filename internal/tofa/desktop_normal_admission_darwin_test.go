@@ -147,3 +147,47 @@ func TestDesktopNormalAdmissionRechecksCurrentContracts(t *testing.T) {
 		})
 	}
 }
+
+// The installed engine changed this diagnostic without changing its API-key
+// catalog semantics. Accept only the observed complete form; unknown auth output
+// remains a refusal. API-key status never replaces normal ChatGPT sign-in.
+func TestDesktopAPIKeyCatalogDiagnosticCompatibility(t *testing.T) {
+	for _, diagnostic := range []struct {
+		name, message string
+		accepted      bool
+	}{
+		{"current", "API key configured - syntheti***ative\nAuthentication is checked when you send a request.", true},
+		{"incomplete", "API key configured - syntheti***ative", false},
+		{"changed", "API key configured - syntheti***ative\nUnexpected authentication policy", false},
+	} {
+		t.Run(diagnostic.name, func(t *testing.T) {
+			bundle, capture := desktopFixture(t, "normal")
+			engine := filepath.Join(bundle, "Contents/Resources/codex")
+			raw, err := os.ReadFile(engine)
+			if err != nil {
+				t.Fatal(err)
+			}
+			message, err := json.Marshal(diagnostic.message)
+			if err != nil {
+				t.Fatal(err)
+			}
+			patch := "if sys.argv[1:] == ['login', 'status']:\n    print(" + string(message) + ")\n    sys.exit(0)\nif '--version' in sys.argv:"
+			raw = bytes.Replace(raw, []byte("if '--version' in sys.argv:"), []byte(patch), 1)
+			if err := os.WriteFile(engine, raw, 0700); err != nil {
+				t.Fatal(err)
+			}
+			app, _ := adapterFixture(t, nil, nil)
+			err = app.Run([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--evaluation-observer", legacyProxyObserver(t)})
+			if diagnostic.accepted {
+				if err != nil {
+					t.Fatal(err)
+				}
+				if _, err := os.Stat(capture); err != nil {
+					t.Fatal("accepted diagnostic did not reach launch")
+				}
+			} else if err == nil || !strings.Contains(err.Error(), "native catalog authentication") {
+				t.Fatalf("unrecognized diagnostic admitted: %v", err)
+			}
+		})
+	}
+}

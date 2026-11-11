@@ -91,7 +91,10 @@ func checkDesktopCatalogFreshness(ctx context.Context, bundle desktopBundle, hom
 	if errors.As(err, &exit) && exit.ExitCode() == 1 && message == "Not logged in" {
 		return nil // Bundled metadata is the engine's normal unauthenticated catalog.
 	}
-	if err == nil && strings.HasPrefix(message, "Logged in using an API key") {
+	apiKeyDiagnostic := strings.HasPrefix(message, "Logged in using an API key") ||
+		(strings.HasPrefix(message, "API key configured - ") && strings.Count(message, "\n") == 1 &&
+			strings.HasSuffix(message, "\nAuthentication is checked when you send a request."))
+	if err == nil && apiKeyDiagnostic {
 		return nil // This engine's debug command does not enable API-key discovery.
 	}
 	if err != nil || message != "Logged in using ChatGPT" {

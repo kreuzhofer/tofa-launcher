@@ -1030,7 +1030,7 @@ func TestDesktopBundledEngineOverridesAtAppServerBoundary(t *testing.T) {
 		w.Header().Set("Content-Type", "text/event-stream")
 		fmt.Fprint(w, "event: response.created\ndata: {\"type\":\"response.created\",\"response\":{\"id\":\"resp_fixture\",\"status\":\"in_progress\",\"output\":[]}}\n\nevent: response.completed\ndata: {\"type\":\"response.completed\",\"response\":{\"id\":\"resp_fixture\",\"status\":\"completed\",\"output\":[],\"usage\":{\"input_tokens\":1,\"output_tokens\":0,\"total_tokens\":1}}}\n\n")
 	}, nil)
-	child, _ := liveDesktopFixture(t, app, bundle, capture)
+	child, _ := liveDesktopFixture(t, app, bundle, capture, "--evaluation-observer", legacyProxyObserver(t))
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 	engine = child.Env["CODEX_CLI_PATH"]

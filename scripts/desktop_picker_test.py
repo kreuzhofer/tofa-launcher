@@ -316,6 +316,11 @@ class DesktopPickerTests(PickerFixture):
         self.read_until('Status: ' + ('supported' if guardian == GLM else 'experimental'))
         # Account preflight belongs to the signed-in fixture; protocol/tool
         # execution below uses the real engine with synthetic credentials only.
+        deadline = time.monotonic() + 10
+        marker = pathlib.Path(str(self.capture) + '.pid')
+        while not marker.exists() or not marker.read_text().strip():
+            self.assertLess(time.monotonic(), deadline, 'fixture worker not ready')
+            time.sleep(0.02)
         bundled = pathlib.Path(os.environ['FIXTURE_DESKTOP_BUNDLE']) / 'Contents/Resources/codex'
         original = bundled.read_bytes()
         bundled.unlink()
@@ -325,9 +330,11 @@ class DesktopPickerTests(PickerFixture):
             bundled.write_bytes(original)
             bundled.chmod(0o700)
         self.addCleanup(restore_fixture)
+        diagnostics = (self.home / 'engine-stderr.log').open('w+b')
+        self.addCleanup(diagnostics.close)
         engine = subprocess.Popen([child['env']['CODEX_CLI_PATH'], 'app-server',
                                    '-c', 'features.shell_snapshot=false', '-c', 'features.plugins=false'], env=child['env'], cwd=child['cwd'],
-                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=diagnostics)
         messages = queue.Queue()
         def read():
             for line in engine.stdout:
@@ -351,7 +358,12 @@ class DesktopPickerTests(PickerFixture):
             request_id += 1
             send(dict(id=request_id, method=method, params=params))
             while True:
-                message = messages.get(timeout=15)
+                try:
+                    message = messages.get(timeout=15)
+                except queue.Empty:
+                    diagnostics.seek(0)
+                    self.fail('engine response missing; exit=%s; stderr=%s' %
+                              (engine.poll(), diagnostics.read(4096).decode(errors='replace')))
                 if message.get('id') == request_id:
                     self.assertNotIn('error', message)
                     return message['result']

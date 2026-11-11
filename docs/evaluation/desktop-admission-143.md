@@ -94,3 +94,14 @@ model comparison is not required to repeat accepted integration observations.
 | Storage | `/tmp/tofa-presentation-validation/runs/130-native-admission-01`; durable private copy under `.qualification/134-manual/evidence/130-native-admission-01` |
 | Scores | Task/skill use, actual loader/runtime, owned file integrity, reference syntax, visible PPTX/PDF previews, repetition/recovery and independent naming outcome |
 | Start prerequisite | Reviewed/frozen candidate and non-launch preflights, then a separately issued human guide; this draft does not start any attempt |
+
+## Compatibility correction discovered during execution
+
+The installed engine's API-key `login status` diagnostic now uses two lines:
+`API key configured - …` followed by `Authentication is checked when you send a
+request.` The catalog freshness check previously recognized only the older
+`Logged in using an API key…` form. A public-launch regression reproduced the
+refusal; the parser now accepts the complete observed new form as well as the
+old one, rejecting incomplete or changed diagnostics. This applies to catalog
+semantics, including legacy evaluation tests. It does not relax normal Desktop's
+separate `account/read` ChatGPT sign-in requirement or add API-key native admission.
