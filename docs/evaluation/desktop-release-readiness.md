@@ -121,6 +121,37 @@ are opt-in and must be recorded separately from the default full suite.
 
 ## Accepted evidence and remaining work
 
+### November 11 runtime and native-preview observation
+
+The scoped synthetic runtime check on executable candidate `9c5d3bc` is accepted.
+The actual Desktop trace contains the namespaced `codex_app` loader call with
+empty arguments, its returned supplied-runtime paths, and the completed artifact
+command in the same conversation turn. Node reported `v24.22.1` for package
+`24.22.1-cua.1`; Python reported `3.12.14`. The one-slide PPTX and one-page PDF
+passed artifact validation, and the maintainer recorded opening both correct
+native previews. Desktop quit normally and both owned route sockets closed.
+
+Independent review verified 79 retained files against their originals and 1,925
+existing history prefixes. The only semantic configuration change was the new
+test workspace trust entry, explicitly accepted by the maintainer in the guide;
+removing that entry in memory reproduced the exact pre-run normalized digest.
+Other managed settings and credentials were preserved. Plugin-cache and captured
+native-generated skill refreshes follow the existing policy.
+
+The preceding collector failure remains failed. Its correction is covered by
+[permanent collector regressions](presentation-collector-regressions.md), committed
+separately as `7da020a`; that source promotion did not change this run's frozen
+executable or guide. Private raw receipts remain outside tracked documents.
+
+This accepts actual-loader execution, synthetic artifact generation and native
+preview visibility only. It does not certify model quality, implicit skill
+discovery, live naming or approval execution. Those retain separate evidence.
+Do not repeat this observation solely to package the release. Final admission,
+behaviour-specific evidence reuse and release review remain required; the
+production guard is unchanged.
+
+### Earlier baseline and retained obligations
+
 - `3afa725` clean exit is accepted under the revised plugin-cache policy: exact
   smoke response, normal exit, account/plugin/Code Review observations, main and
   title success, and remaining preservation checks passed.
