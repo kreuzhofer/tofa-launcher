@@ -91,7 +91,10 @@ func checkDesktopCatalogFreshness(ctx context.Context, bundle desktopBundle, hom
 	if errors.As(err, &exit) && exit.ExitCode() == 1 && message == "Not logged in" {
 		return nil // Bundled metadata is the engine's normal unauthenticated catalog.
 	}
-	if err == nil && strings.HasPrefix(message, "Logged in using an API key") {
+	apiKeyDiagnostic := strings.HasPrefix(message, "Logged in using an API key") ||
+		(strings.HasPrefix(message, "API key configured - ") && strings.Count(message, "\n") == 1 &&
+			strings.HasSuffix(message, "\nAuthentication is checked when you send a request."))
+	if err == nil && apiKeyDiagnostic {
 		return nil // This engine's debug command does not enable API-key discovery.
 	}
 	if err != nil || message != "Logged in using ChatGPT" {
@@ -170,4 +173,60 @@ func desktopCatalogOutput(command *exec.Cmd) ([]byte, error) {
 		return nil, errors.New("native model catalog discovery failed; check native engine configuration and catalog connectivity, then relaunch")
 	}
 	return data, nil
+}
+
+// Freeze explicit destinations from independently validated catalogs. Label only
+// supported display fields; preserve all native capability/reviewer metadata.
+func prepareServiceCatalog(path string, tokenFactory []string) (map[string]inferenceService, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	var catalog struct {
+		Models []map[string]any `json:"models"`
+	}
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	decoder.UseNumber() // Preserve unknown numeric descriptor fields exactly.
+	if decoder.Decode(&catalog) != nil || len(catalog.Models) == 0 {
+		return nil, errors.New("invalid service catalog")
+	}
+	tf := make(map[string]bool)
+	for _, model := range tokenFactory {
+		tf[model] = true
+	}
+	services := make(map[string]inferenceService)
+	for _, entry := range catalog.Models {
+		id, ok := entry["slug"].(string)
+		if !ok || !validText(id, 256) || services[id] != "" {
+			return nil, errors.New("ambiguous model service identity")
+		}
+		name, ok := entry["display_name"].(string)
+		if entry["display_name"] == nil || (ok && name == "") {
+			name, ok = id, true
+		}
+		if !ok || len(name) > 512 || strings.ContainsAny(name, "\r\n\t") {
+			return nil, errors.New("missing destination display metadata")
+		}
+		if tf[id] {
+			services[id] = tokenFactoryService
+			name = strings.ReplaceAll(name, " (TF Experimental)", " (Token Factory · Experimental)")
+			if !strings.Contains(name, "Token Factory") {
+				name += " (Token Factory)"
+			}
+		} else {
+			services[id] = nativeInferenceService
+			name += " (ChatGPT)"
+			description, _ := entry["description"].(string)
+			entry["description"] = "ChatGPT native inference; " + description
+		}
+		entry["display_name"] = name
+	}
+	data, err = json.Marshal(catalog)
+	if err != nil {
+		return nil, err
+	}
+	if err = os.WriteFile(path, data, 0600); err != nil {
+		return nil, err
+	}
+	return services, nil
 }

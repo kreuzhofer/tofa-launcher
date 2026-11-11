@@ -1,0 +1,145 @@
+# Declared multi-turn Observer scope
+
+The optional `tofa-observer-scope-v1` declaration supports bounded qualification
+of routed service switching and resumed histories. It does not change ordinary
+launch behavior or the existing single-prompt Observer contract. This is a
+prerequisite for #142 collection, not actual Desktop qualification evidence.
+
+The collector creates private `scope.json` inside the attempt root before launch,
+then supplies its exact raw-byte SHA-256 and the same attempt identifier to
+`Observer(..., scope_declaration=path, scope_sha256=digest, scope_attempt=attempt)`.
+The native-account admission declaration binds this digest separately. The
+Observer consumes the declaration once by exclusively creating
+`scope-consumed.json`, before it listens. Registration must use the existing v2
+split control/inference authorization. Credentials, strict role contracts,
+request/byte/deadline limits, native usage validation and approval enforcement
+remain in effect.
+
+Example private declaration (paths and identifiers are illustrative):
+
+```json
+{
+  "schema": "tofa-observer-scope-v1",
+  "attempt": "declared-attempt",
+  "root": "/private/tmp/tofa-presentation-validation/runs/declared-attempt",
+  "threads": [{
+    "label": "switch",
+    "thread_id": null,
+    "workspace": "/private/tmp/tofa-presentation-validation/runs/declared-attempt/workspace",
+    "initial_user_messages_sha256": null,
+    "turns": [
+      {"model": "moonshotai/Kimi-K3", "service": "token_factory", "prompt": "Remember the declared synthetic value."},
+      {"model": "gpt-6-astra", "service": "native", "prompt": "Recall the declared synthetic value."}
+    ]
+  }],
+  "titles": []
+}
+```
+
+Declarations reject unknown/duplicate fields, mismatched root/attempt/digest,
+non-private or symlink files, unknown services/models, duplicate prompts and
+unbounded sequences. Limits are eight threads, sixteen total declared Main
+turns, eight title-only contexts and 16 KiB per prompt. A declaration is at most
+1 MiB. Every admitted request rechecks file privacy and exact bytes.
+
+A new thread uses an owned workspace and binds its actual request thread ID only
+on the first exact declared prompt. Workspace matching resolves an exact whole-path user context or the
+engine’s explicit `<cwd>` field, including macOS `/tmp` aliases; path substrings
+do not match. Each subsequent task requires the next
+prompt, selected model, a new turn ID and exactly the prior accepted user-message
+list. Tool continuations and engine-originated retries remain within the same
+thread/turn/model and accepted user-message list; all consume the normal request
+budget. A Guardian review requires its immutable admitted originating turn and
+does not advance the sequence. No wildcard thread admission or latest-selection
+review routing is introduced.
+
+Prompt comparison permits one terminal LF from copying the displayed task.
+No other whitespace or text is normalized: leading whitespace, an extra blank
+line or added instructions still fail. Forwarded requests, retained receipts
+and user-message history hashes keep the original bytes, including that LF.
+A continuation cannot change an already-bound message's newline. This addresses
+the retained #142 first-turn scope rejection without relaxing workspace, model,
+thread, turn order or history checks; the failed attempt remains a failed attempt.
+
+A resumed thread instead declares its known thread ID, original existing
+workspace and `initial_user_messages_sha256`. This digest uses the existing
+Observer `hashed(user_messages)['sha256']` encoding, preserving message order,
+roles and content representation. The first new task must carry precisely that
+user-message prefix. The Observer does not move, rewrite or create files in the
+old workspace. Its action watcher still covers only the owned `run/workspace`;
+this scope check does not prove filesystem preservation in another workspace.
+The user-message digest likewise does not prove complete assistant/tool history
+continuity. Qualification must separately inspect the native history evidence.
+
+For the first resumed turn only, Desktop may append one repeated user-context
+message with the exact text
+`<external_codex_apps_open_page>{"page_id":null}</external_codex_apps_open_page>`.
+The original prefix must still match its declared digest, and the appended
+message must match one already in that prefix apart from its valid message ID.
+No other envelope fields or content are normalized. A selected page,
+additional message, changed/reordered history or other context is rejected.
+The scope receipt records `initial_history_match` as `exact` or
+`repeated_null_page_context`. Forwarding and the new accepted history hash retain
+all original request bytes; subsequent turns and continuations stay exact.
+
+Private `scope-state.json` records bound thread IDs, progress and the latest
+user-message digest to prepare a later explicit resume declaration. Request
+records contain hashes and declared labels, not raw prompts or thread IDs.
+These private files must not be published without review.
+
+## Direct-native histories and naming
+
+Preserved direct-native Main requests intentionally bypass the Observer. They
+are not counted or qualified by its routed Main observations. For launch-wide
+Token Factory naming of such a history, an optional `titles` entry can declare
+`{"thread_id":"intended-ui-case-thread", "prompt":"Exact unique synthetic task."}`.
+A titles-only declaration has an empty `threads` list. It authorizes no Main or
+Guardian traffic. Only the existing strict recognized native title contract
+containing the exact declared prompt is admitted.
+
+The title request does not provide verified parent identity. Its record says
+`parent_unverified: true`, `main_observed: false` and records the hash as
+`intended_ui_thread_sha256`, never as a verified request parent. Actual UI/native
+trace association is separate required qualification evidence. Titles for
+routed threads match a previously admitted Main prompt or, before a fresh thread
+has bound, its exact predeclared opening prompt. Desktop can request naming
+before sending that first Main request. In the latter case the title records
+`main_observed: false`; it neither binds the thread nor advances its sequence nor
+establishes review origin. Unobserved later turns and resumed-thread tasks still
+require Main admission (or a separate explicit title-only declaration). All
+routed titles retain `parent_unverified: true`. Timing or prompt matching does
+not establish parentage.
+
+The first #142 switching attempt exposed this ordering: the recognized title
+contained the declared opening prompt but arrived before Main, so the Observer
+stopped with `scope_title_context_unobserved`. The original failed receipt is
+retained as an infrastructure failure, not reassessed as a switching pass.
+Offline replay reproduces the rejection before the correction and accepts the
+same title afterward without claiming Main or parent observation. HTTP-boundary
+regressions cover title-first then Main, unrelated/future title rejection and
+rejection of reviews without an admitted Main origin.
+
+## Owned shutdown
+
+Observer exit stops accepting connections, closes all owned accepted sockets
+(including incomplete unauthenticated headers), and joins its request handlers
+before final persistence returns. A regression holds a usage-failure handler in
+its owned stop request after the client has disconnected. Exit must wait for
+that handler's final diagnostic write, rather than race temporary-root cleanup.
+No cleanup errors are ignored and no arbitrary delay is used to hide writes.
+Socket registration and cancellation checks are atomic, but network writes run
+outside the Observer lock. Cancellation shuts down registered sockets before it
+acknowledges completion; a released stalled send cannot reconnect automatically.
+A separate owned send-barrier regression covers this upload cancellation case.
+
+The scope and shutdown tests use owned loopback HTTP upstreams and synthetic
+credentials. They do not launch Desktop, contact a provider, or prove account,
+plugin, preview or real-history preservation. Those remain the actual Desktop
+qualification gates in #141–#143.
+
+A public-launch test also drives the real bundled engine through the actual
+Python Observer and owned local upstreams: Token Factory → native GPT (one tool
+continuation) → Token Factory. It checks exact scope indices, separated
+credentials, retained thread identity and assistant/tool context. This protocol
+fixture uses synthetic credentials and disables plugins only in its owned
+profile; it is not an actual signed-in Desktop or plugin-preservation pass.

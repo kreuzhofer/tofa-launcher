@@ -73,15 +73,6 @@ if sys.argv[1:] in [['debug', 'models'], ['debug', 'models', '--bundled'], ['log
     if discovery.exists():
         spec = json.loads(discovery.read_text())
         home = pathlib.Path(os.environ['CODEX_HOME'])
-        if not (home / 'auth.json').exists():
-            (home / 'auth.json').write_text(json.dumps(spec['auth']))
-            if 'cache' in spec: (home / 'models_cache.json').write_text(json.dumps(spec['cache']))
-            (home / 'config.toml').write_text('cli_auth_credentials_store="file"\nopenai_base_url='+json.dumps(spec['endpoint'])+'\n')
-            if 'catalog' in spec:
-                catalog = home / 'static-models.json'
-                catalog.write_text(json.dumps(spec['catalog']))
-                with (home / 'config.toml').open('a') as config:
-                    config.write('model_catalog_json='+json.dumps(str(catalog))+'\n')
         sys.exit(subprocess.run([spec['engine'], *sys.argv[1:]], cwd=home).returncode)
 if sys.argv[1:] == ['login', 'status']:
     print('Not logged in', file=sys.stderr)
@@ -131,7 +122,7 @@ def overrides(args):
 def apply_overrides(values, args):
     for override in args:
         key,value=override.split('=',1)
-        values[key.strip()]=json.loads(value.strip())
+        values[key.strip()]=json.loads(value.strip().replace('"=', '":'))
 values = parse_config(config_text)
 apply_overrides(values, overrides(sys.argv))
 def setting(key):
@@ -141,6 +132,10 @@ def config_response():
     result['model_providers']={}
     provider={k.removeprefix('model_providers.nebius-tofa.'):v for k,v in values.items() if k.startswith('model_providers.nebius-tofa.')}
     if provider: result['model_providers']['nebius-tofa']=provider
+    router={k.removeprefix('model_providers.tofa-native-router.'):v for k,v in values.items() if k.startswith('model_providers.tofa-native-router.')}
+    if router: result['model_providers']['tofa-native-router']=router
+    policy={k.removeprefix('shell_environment_policy.'):v for k,v in values.items() if k.startswith('shell_environment_policy.')}
+    if policy: result['shell_environment_policy']=policy
     return result
 if 'app-server' in sys.argv:
     if MODE == 'slow-preflight' and not pathlib.Path(CAPTURE+'.resume').exists():
@@ -150,6 +145,7 @@ if 'app-server' in sys.argv:
         req = json.loads(line)
         if 'id' not in req: continue
         result = {}
+        if req['method'] == 'account/read' and MODE != 'signed-out': result = {'account':{'type':'chatgpt'},'requiresOpenaiAuth':True}
         if req['method'] == 'config/read':
             text=config_path.read_text() if config_path.exists() else ''
             result={'config':config_response(), 'layers':[{'name':{'type':'user','file':str(config_path)}, 'version':'sha256:'+hashlib.sha256(text.encode()).hexdigest()}]}
@@ -160,8 +156,9 @@ if 'app-server' in sys.argv:
             text=config_path.read_text() if config_path.exists() else ''
             if req['params']['expectedVersion'] != 'sha256:'+hashlib.sha256(text.encode()).hexdigest():
                 print(json.dumps({'id':req['id'],'error':{'message':'configuration changed'}}),flush=True); continue
-            provider=req['params']['edits'][0]['value']
-            config_path.write_text(text+'\n[model_providers.nebius-tofa]\n'+''.join(k+' = '+json.dumps(v)+'\n' for k,v in provider.items()))
+            for edit in req['params']['edits']:
+                text+='\n['+edit['keyPath']+']\n'+''.join(k+' = '+json.dumps(v)+'\n' for k,v in edit['value'].items())
+            config_path.write_text(text)
         print(json.dumps({'id': req['id'], 'result': result}), flush=True)
     sys.exit(0)
 profile=pathlib.Path(os.environ['CODEX_ELECTRON_USER_DATA_PATH'])
@@ -213,8 +210,11 @@ if MODE == 'shell-commands':
     result = subprocess.run(['/bin/zsh', '-ilc', 'printf "%%s|%%s" "$STARTUP_ENV" "$STARTUP_RC"'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
     pathlib.Path(CAPTURE+'.commands').write_bytes(result.stdout)
 if MODE == 'http':
+    request=urllib.request.Request(os.environ['TOFA_DESKTOP_CONTEXT']+'/desktop-launch',headers={'Authorization':'Bearer '+os.environ['TOFA_API_KEY']})
+    with urllib.request.urlopen(request) as response: current_route=json.load(response)
+    inference=current_route['InferenceCapability']
     results = []
-    for model, key in [('gpt-5.6-luna', os.environ['TOFA_API_KEY']), ('moonshotai/Kimi-K3', 'wrong'), ('moonshotai/Kimi-K3', os.environ['TOFA_API_KEY'])]:
+    for model, key in [('gpt-5.6-luna', inference), ('moonshotai/Kimi-K3', 'wrong'), ('moonshotai/Kimi-K3', inference)]:
         req = urllib.request.Request(setting('base_url') + '/responses', data=json.dumps({'model': model, 'stream': True, 'input': []}).encode(), headers={'Authorization':'Bearer '+key, 'Content-Type':'application/json'})
         try:
             with urllib.request.urlopen(req) as res: results.append({'status':res.status, 'body':res.read().decode()})
@@ -526,7 +526,7 @@ func TestDesktopRejectsAuxiliaryModelsAndStreamsSelectedModel(t *testing.T) {
 	if requests != 1 || len(results) != 3 || results[0].Status != 400 || results[1].Status != 401 || results[2].Status != 200 || !strings.Contains(results[2].Body, "fixture streamed") {
 		t.Fatalf("request gate failed: %d upstream requests; %s", requests, data)
 	}
-	if !strings.Contains(output.String(), "unsupported model") {
+	if !strings.Contains(output.String(), "selected model is unavailable in this launch catalog") {
 		t.Fatal("auxiliary failure not surfaced in terminal")
 	}
 }
@@ -795,11 +795,19 @@ func TestDesktopOwnershipLossPreventsSharedConfigurationWrite(t *testing.T) {
 }
 
 func TestDesktopPreservesCompetingConfigurationEdits(t *testing.T) {
+	desktopLifecyclePreservesCompetingConfigurationEdits(t, false)
+}
+
+func TestDesktopNativeCandidatePreservesCompetingConfigurationEdits(t *testing.T) {
+	desktopLifecyclePreservesCompetingConfigurationEdits(t, true)
+}
+
+func desktopLifecyclePreservesCompetingConfigurationEdits(t *testing.T, native bool) {
 	for _, mode := range []string{"config-conflict", "edit-config"} {
 		t.Run(mode, func(t *testing.T) {
-			bundle, _ := desktopFixture(t, mode)
+			bundle, _ := fixtureDesktopLifecycle(t, native, mode)
 			app, _ := adapterFixture(t, nil, nil)
-			err := app.Run([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"})
+			err := app.Run(append([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}, desktopLifecycleSelection(t, native)...))
 			data, readErr := os.ReadFile(filepath.Join(os.Getenv("HOME"), ".codex/config.toml"))
 			if readErr != nil {
 				t.Fatal(readErr)
@@ -816,10 +824,18 @@ func TestDesktopPreservesCompetingConfigurationEdits(t *testing.T) {
 }
 
 func TestDesktopSerializesCompetingLaunchesBeforeNativeStartup(t *testing.T) {
-	bundle, capture := desktopFixture(t, "slow-preflight")
+	desktopLifecycleSerializesCompetingLaunchesBeforeNativeStartup(t, false)
+}
+
+func TestDesktopNativeCandidateSerializesCompetingLaunchesBeforeNativeStartup(t *testing.T) {
+	desktopLifecycleSerializesCompetingLaunchesBeforeNativeStartup(t, true)
+}
+
+func desktopLifecycleSerializesCompetingLaunchesBeforeNativeStartup(t *testing.T, native bool) {
+	bundle, capture := fixtureDesktopLifecycle(t, native, "slow-preflight")
 	first, _ := adapterFixture(t, nil, nil)
 	second, _ := adapterFixture(t, nil, nil)
-	args := []string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}
+	args := append([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}, desktopLifecycleSelection(t, native)...)
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	done := make(chan error, 1)
@@ -900,7 +916,7 @@ func TestDesktopInstalledEngineOfflineRouting(t *testing.T) {
 		t.Fatal(err)
 	}
 	app, _ := adapterFixture(t, nil, nil)
-	if err := app.Run([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}); err != nil {
+	if err := app.Run([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified", "--evaluation-observer", legacyProxyObserver(t)}); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -1005,7 +1021,7 @@ func TestDesktopBundledEngineOverridesAtAppServerBoundary(t *testing.T) {
 		w.Header().Set("Content-Type", "text/event-stream")
 		fmt.Fprint(w, "event: response.created\ndata: {\"type\":\"response.created\",\"response\":{\"id\":\"resp_fixture\",\"status\":\"in_progress\",\"output\":[]}}\n\nevent: response.completed\ndata: {\"type\":\"response.completed\",\"response\":{\"id\":\"resp_fixture\",\"status\":\"completed\",\"output\":[],\"usage\":{\"input_tokens\":1,\"output_tokens\":0,\"total_tokens\":1}}}\n\n")
 	}, nil)
-	child, _ := liveDesktopFixture(t, app, bundle, capture)
+	child, _ := liveDesktopFixture(t, app, bundle, capture, "--evaluation-observer", legacyProxyObserver(t))
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
 	engine = child.Env["CODEX_CLI_PATH"]
@@ -1292,14 +1308,36 @@ func TestDesktopBridgePartialInstallationCleansUp(t *testing.T) {
 	}
 	dir := app.Dir
 	// This test must reach bridge copying, not Python/Xcode startup writes under
-	// the tiny file-size limit. Only the version probe can precede that copy.
+	// the tiny file-size limit. Serve the read-only preservation preflight using
+	// shell builtins so the actual bridge copy remains the failing filesystem IO.
 	engine := filepath.Join(bundle, "Contents/Resources/codex")
-	if err := os.WriteFile(engine, []byte("#!/bin/sh\n[ \"$1\" = --version ] || exit 97\nprintf 'codex-cli 0.155.0-alpha.16.4\\n'\n"), 0700); err != nil {
+	probe := `#!/bin/sh
+if [ "$1" = --version ]; then
+    printf 'codex-cli 0.155.0-alpha.16.4\n'
+    exit 0
+fi
+[ "$1" = app-server ] || exit 97
+while IFS= read -r line; do
+    case "$line" in
+        *'"id":'*) id=${line#*\"id\":}; id=${id%%,*} ;;
+        *) continue ;;
+    esac
+    case "$line" in
+        *'"method":"initialize"'*) result='{}' ;;
+        *'"method":"account/read"'*) result='{"account":{"type":"chatgpt"},"requiresOpenaiAuth":true}' ;;
+        *'"method":"configRequirements/read"'*) result='{"requirements":null}' ;;
+        *'"method":"config/read"'*) result='{"config":{},"layers":[{"name":{"type":"user"},"version":"fixture"}]}' ;;
+        *) exit 98 ;;
+    esac
+    printf '{"id":%s,"result":%s}\n' "$id" "$result"
+done
+`
+	if err := os.WriteFile(engine, []byte(probe), 0700); err != nil {
 		t.Fatal(err)
 	}
 	// A real filesystem write failure while copying the bridge. The limit is
 	// scoped to this child process; neither the test runner nor user files change.
-	command := exec.Command("/bin/sh", "-c", `ulimit -f 1; trap '' XFSZ; exec "$@"`, "fixture", executable, "--test-desktop-launch", dir, "launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified")
+	command := exec.Command("/bin/sh", "-c", `ulimit -f 1; trap '' XFSZ; exec "$@"`, "fixture", executable, "--test-desktop-launch", dir, "launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified", "--evaluation-observer", legacyPluginObserver(t))
 	command.Env = append(os.Environ(), "TOFA_TEST_ENDPOINT="+app.Endpoint)
 	output, err := command.CombinedOutput()
 	if err == nil || !strings.Contains(string(output), "file too large") {
@@ -1312,11 +1350,20 @@ func TestDesktopBridgePartialInstallationCleansUp(t *testing.T) {
 }
 
 func TestDesktopEngineExitStopsOwnedApp(t *testing.T) {
-	bundle, capture := desktopFixture(t, "engine-exit")
+	desktopLifecycleEngineExitStopsOwnedApp(t, false)
+}
+
+func TestDesktopNativeCandidateEngineExitStopsOwnedApp(t *testing.T) {
+	desktopLifecycleEngineExitStopsOwnedApp(t, true)
+}
+
+func desktopLifecycleEngineExitStopsOwnedApp(t *testing.T, native bool) {
+	bundle, capture := fixtureDesktopLifecycle(t, native, "engine-exit")
 	app, _ := adapterFixture(t, nil, nil)
-	ctx, cancel := context.WithTimeout(context.Background(), 6*time.Second)
+	// Allow startup plus the bounded native-quit window and owned cleanup.
+	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
 	defer cancel()
-	err := app.RunContext(ctx, []string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"})
+	err := app.RunContext(ctx, append([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}, desktopLifecycleSelection(t, native)...))
 	if err == nil || !strings.Contains(err.Error(), "app-server exited") {
 		t.Fatalf("engine loss not detected: %v", err)
 	}
@@ -1324,11 +1371,49 @@ func TestDesktopEngineExitStopsOwnedApp(t *testing.T) {
 }
 
 func TestDesktopAllowsEngineFirstGracefulShutdown(t *testing.T) {
-	bundle, capture := desktopFixture(t, "graceful-engine-first")
+	desktopLifecycleAllowsEngineFirstGracefulShutdown(t, false)
+}
+
+func TestDesktopNativeCandidateAllowsEngineFirstGracefulShutdown(t *testing.T) {
+	desktopLifecycleAllowsEngineFirstGracefulShutdown(t, true)
+}
+
+func TestDesktopNativeCandidateAllowsSlowEngineFirstGracefulShutdown(t *testing.T) {
+	bundle, capture := fixtureDesktopLifecycle(t, true, "graceful-engine-first")
+	// A normal native quit can finish its renderer/profile teardown after the
+	// acknowledged app-server has exited. Exercise that process ordering through
+	// the public launch entry point, without changing any launcher internals.
+	application := filepath.Join(bundle, "Contents/MacOS/ChatGPT")
+	raw, err := os.ReadFile(application)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Count(string(raw), "time.sleep(0.8)") != 1 {
+		t.Fatal("expected exactly one native shutdown delay in fixture")
+	}
+	raw = []byte(strings.Replace(string(raw), "time.sleep(0.8)", "time.sleep(3)", 1))
+	if err := os.WriteFile(application, raw, 0700); err != nil {
+		t.Fatal(err)
+	}
+	app, _ := adapterFixture(t, nil, nil)
+	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
+	defer cancel()
+	err = app.RunContext(ctx, append([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}, desktopLifecycleSelection(t, true)...))
+	if err != nil {
+		t.Fatalf("normal quit was classified as engine loss: %v", err)
+	}
+	if _, err := os.Stat(capture + ".graceful-exit"); err != nil {
+		t.Fatalf("native quit was interrupted: %v", err)
+	}
+	assertDesktopWorkerStopped(t, capture)
+}
+
+func desktopLifecycleAllowsEngineFirstGracefulShutdown(t *testing.T, native bool) {
+	bundle, capture := fixtureDesktopLifecycle(t, native, "graceful-engine-first")
 	app, _ := adapterFixture(t, nil, nil)
 	ctx, cancel := context.WithTimeout(context.Background(), 6*time.Second)
 	defer cancel()
-	if err := app.RunContext(ctx, []string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}); err != nil {
+	if err := app.RunContext(ctx, append([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}, desktopLifecycleSelection(t, native)...)); err != nil {
 		t.Fatalf("graceful desktop shutdown was interrupted: %v", err)
 	}
 	if _, err := os.Stat(capture + ".graceful-exit"); err != nil {
@@ -1373,9 +1458,17 @@ func assertDesktopWorkerStopped(t *testing.T, capture string) {
 }
 
 func TestDesktopCancellationClosesOwnedProcessesAndAdapter(t *testing.T) {
+	desktopLifecycleCancellationClosesOwnedProcessesAndAdapter(t, false)
+}
+
+func TestDesktopNativeCandidateCancellationClosesOwnedProcessesAndAdapter(t *testing.T) {
+	desktopLifecycleCancellationClosesOwnedProcessesAndAdapter(t, true)
+}
+
+func desktopLifecycleCancellationClosesOwnedProcessesAndAdapter(t *testing.T, native bool) {
 	for _, cause := range []string{"interrupt", "adapter failure"} {
 		t.Run(cause, func(t *testing.T) {
-			bundle, capture := desktopFixture(t, "ignore")
+			bundle, capture := fixtureDesktopLifecycle(t, native, "ignore")
 			app, _ := adapterFixture(t, nil, nil)
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
@@ -1389,7 +1482,7 @@ func TestDesktopCancellationClosesOwnedProcessesAndAdapter(t *testing.T) {
 			}
 			done := make(chan error, 1)
 			go func() {
-				done <- app.RunContext(ctx, []string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"})
+				done <- app.RunContext(ctx, append([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}, desktopLifecycleSelection(t, native)...))
 			}()
 			deadline := time.Now().Add(5 * time.Second)
 			for {
@@ -1533,9 +1626,11 @@ func TestDesktopPreservesFreshNativeCatalog(t *testing.T) {
 		if len(child.Catalog.Models) != 6 {
 			t.Fatalf("native choices lost: got %d descriptors, want native plus Token Factory", len(child.Catalog.Models))
 		}
-		var got, want any
+		var got, want map[string]any
 		json.Unmarshal(child.Catalog.Models[0], &got)
 		json.Unmarshal([]byte(native), &want)
+		want["display_name"] = want["display_name"].(string) + " (ChatGPT)"
+		want["description"] = "ChatGPT native inference; "
 		if !reflect.DeepEqual(got, want) {
 			t.Fatal("effective native descriptor changed or became stale")
 		}
@@ -1546,22 +1641,33 @@ func TestDesktopPreservesFreshNativeCatalog(t *testing.T) {
 				break
 			}
 		}
-		if descriptor["slug"] != "moonshotai/Kimi-K3" || descriptor["display_name"] != "Kimi-K3 (TF Experimental)" {
+		if descriptor["slug"] != "moonshotai/Kimi-K3" || descriptor["display_name"] != "Kimi-K3 (Token Factory · Experimental)" {
 			t.Fatalf("missing qualified Token Factory choice: %v", descriptor["slug"])
 		}
 	}
 }
 
 func TestDesktopWithholdsInferenceUntilOwnershipQualified(t *testing.T) {
-	bundle, capture := desktopFixture(t, "before-ownership")
+	desktopLifecycleWithholdsInferenceUntilOwnershipQualified(t, false)
+}
+
+func TestDesktopNativeCandidateWithholdsInferenceUntilOwnershipQualified(t *testing.T) {
+	desktopLifecycleWithholdsInferenceUntilOwnershipQualified(t, true)
+}
+
+func desktopLifecycleWithholdsInferenceUntilOwnershipQualified(t *testing.T, native bool) {
+	bundle, capture := fixtureDesktopLifecycle(t, native, "before-ownership")
 	app, _ := adapterFixture(t, func(http.ResponseWriter, *http.Request) {
 		t.Error("inference reached upstream before ownership qualification")
 	}, nil)
-	if err := app.Run([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}); err != nil {
+	if err := app.Run(append([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"}, desktopLifecycleSelection(t, native)...)); err != nil {
 		t.Fatal(err)
 	}
 	status, err := os.ReadFile(capture + ".pending")
-	if err != nil || string(status) != "503" {
+	// Both ordinary and candidate signed-in routes reject control credentials
+	// for inference before readiness; no inference capability has been issued.
+	want := "401"
+	if err != nil || string(status) != want {
 		t.Fatalf("unqualified inference was not refused: %s %v", status, err)
 	}
 }
@@ -1627,4 +1733,28 @@ func TestDesktopOwnerExitPreventsSharedConfigurationWrite(t *testing.T) {
 	if readErr != nil || string(after) != string(before) {
 		t.Fatalf("modified shared configuration after desktop exit: %v", readErr)
 	}
+}
+
+// Obtain inference authorization through the same authenticated control boundary
+// as the bridge. Positive request tests must never reuse the control bearer.
+func desktopInferenceToken(t *testing.T, child capturedDesktop) string {
+	t.Helper()
+	request, err := http.NewRequest("GET", child.Env["TOFA_DESKTOP_CONTEXT"]+"/desktop-launch", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	request.Header.Set("Authorization", "Bearer "+child.Env["TOFA_API_KEY"])
+	response, err := http.DefaultClient.Do(request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer response.Body.Close()
+	var route struct{ InferenceCapability string }
+	if err := json.NewDecoder(response.Body).Decode(&route); err != nil {
+		t.Fatal(err)
+	}
+	if response.StatusCode != http.StatusOK || route.InferenceCapability == "" || route.InferenceCapability == child.Env["TOFA_API_KEY"] {
+		t.Fatal("distinct inference authorization unavailable")
+	}
+	return route.InferenceCapability
 }

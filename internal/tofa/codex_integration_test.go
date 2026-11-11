@@ -449,7 +449,11 @@ func fixtureMessage(text string) map[string]any {
 }
 
 func emitFixtureResponse(writer http.ResponseWriter, item map[string]any) {
-	response := map[string]any{"id": "resp_review_fixture", "object": "response", "status": "completed", "model": "moonshotai/Kimi-K3", "output": []any{item}, "usage": map[string]int{"input_tokens": 10, "output_tokens": 2, "total_tokens": 12}}
+	emitFixtureModelResponse(writer, item, "moonshotai/Kimi-K3")
+}
+
+func emitFixtureModelResponse(writer http.ResponseWriter, item map[string]any, model string) {
+	response := map[string]any{"id": "resp_review_fixture", "object": "response", "status": "completed", "model": model, "output": []any{item}, "usage": map[string]int{"input_tokens": 10, "output_tokens": 2, "total_tokens": 12}}
 	writer.Header().Set("Content-Type", "text/event-stream")
 	emit := func(name string, body map[string]any) {
 		body["type"] = name

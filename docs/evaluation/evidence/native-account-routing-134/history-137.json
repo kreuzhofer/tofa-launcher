@@ -1,0 +1,38 @@
+{
+  "schema": "tofa-native-history-fixture-v1",
+  "ticket": 137,
+  "status": "fixture_verified_with_open_ordinary_desktop_gap",
+  "boundary": "public launcher, owned fake Desktop shell/account preflight, real bundled engine, owned loopback upstreams",
+  "installed_desktop_launched": false,
+  "real_provider_inference": false,
+  "engine_version": "codex-cli 0.162.0-alpha.17.2",
+  "engine_sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+  "verified": [
+    "new routed history retains provider, selected model, title, tool exchange and prior cross-service context under a different launch default",
+    "legacy nebius-tofa and native openai identities/routes survive repeated launches",
+    "unavailable recorded models remain recorded and fail without upstream fallback",
+    "owned inactive metadata has no secret, active endpoint, env_key or default-model write",
+    "stale endpoints, unknown fields and competing version changes are rejected without overwriting user edits",
+    "missing owned metadata is recreated through the existing version-checked native configuration boundary",
+    "ordinary saved bridge produces native missing-variable error with actionable TOFA relaunch guidance",
+    "ordinary direct engine retains readable history and forwards no inference during a bounded unavailable-route observation"
+  ],
+  "engine_contract_probes": {
+    "persistent_env_key": "missing variable blocks native auth; populated synthetic variable replaces native bearer even with requires_openai_auth=true",
+    "provider_table_override": "does not remove a persisted env_key",
+    "empty_env_key_override": "reports a missing empty-name environment variable",
+    "missing_env_http_header": "silently omitted; actual engine inference still succeeds",
+    "ordinary_direct_engine": {
+      "error_message": "Reconnecting... waiting for network",
+      "error_details": "Connection failed: error sending request",
+      "will_retry": true,
+      "provider_request_max_retries": 0,
+      "provider_stream_max_retries": 0,
+      "retained_failed_probe": "whole history test reached its 90-second deadline while waiting on the final direct inactive turn",
+      "final_observation": "one-second bounded observation followed by explicit turn cancellation; no owned upstream requests",
+      "actionable_guidance_verified": false
+    }
+  },
+  "qualification_blocker": "Actual ordinary Desktop must retain readable history and show actionable TOFA relaunch guidance. Saved-bridge fixture success does not satisfy this if ordinary Desktop selects the bundled engine directly. The observed direct-engine reconnect behavior is unresolved; #137 and #134 are not fully accepted by this evidence.",
+  "probe_limitation": "An earlier direct-engine exploratory fixture omitted the local model catalog and made synthetic-credential model-discovery requests rejected with HTTP 401. No real credentials or inference were used. Final fixtures pin the bundled catalog. Failed probes remain local."
+}

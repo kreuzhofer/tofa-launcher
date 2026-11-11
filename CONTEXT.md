@@ -19,6 +19,10 @@ The Nebius inference service that supplies models to target clients launched by
 this tool.
 _Avoid_: Local model runtime
 
+**Native account**:
+The target client's signed-in account with its own service, distinct from the
+Token Factory credentials used for inference through the launcher.
+
 **Direct connection**:
 A target client's inference connection straight to Token Factory, without a
 launcher-provided request adapter.
@@ -55,3 +59,11 @@ yet been verified. Experimental status is shown explicitly. The desktop enables
 these choices by default; CLI selection requires explicit opt-in. Selection
 requires sufficient model metadata and a compatible client contract; it does not
 establish support.
+
+**Desktop integration qualification**:
+Evidence that TOFA's required Desktop behaviours work, including service routing,
+account continuity and recovery. It is distinct from model-quality certification.
+
+**Compatible target client**:
+An installed target client that satisfies the integration contracts TOFA needs.
+A different client version is not by itself evidence of incompatibility.

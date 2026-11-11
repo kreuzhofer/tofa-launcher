@@ -1,0 +1,53 @@
+{
+  "schema": "tofa-native-account-readonly-134-v1",
+  "status": "passed",
+  "method": [
+    "initialize",
+    "account/read",
+    "config/read"
+  ],
+  "refresh_token": false,
+  "production_provider": "tofa-native-router",
+  "cases": {
+    "ordinary_before": {
+      "account_type": "chatgpt",
+      "requires_openai_auth": true,
+      "effective_provider": null,
+      "loopback_override_observed": false,
+      "alternate_model_observed": false,
+      "code_review_configured": true
+    },
+    "candidate_provider": {
+      "account_type": "chatgpt",
+      "requires_openai_auth": true,
+      "effective_provider": "tofa-native-router",
+      "loopback_override_observed": false,
+      "alternate_model_observed": true,
+      "code_review_configured": true
+    },
+    "ordinary_after": {
+      "account_type": "chatgpt",
+      "requires_openai_auth": true,
+      "effective_provider": null,
+      "loopback_override_observed": false,
+      "alternate_model_observed": false,
+      "code_review_configured": true
+    }
+  },
+  "desktop_started": false,
+  "inference_rpc_count": 0,
+  "network_scope": "native account discovery only; no user prompt or turn submitted",
+  "protected_writes": "denied by child sandbox",
+  "engine_sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28",
+  "probe_sha256": "11d39040ba7c9a1bd4d48a1b2b934bec31732310185d281530ae8405fdf6173a",
+  "limit": "read-only engine configuration proof; not launcher or signed-in inference qualification",
+  "checks": {
+    "ordinary_signed_in": true,
+    "candidate_retains_account": true,
+    "candidate_requires_native_auth": true,
+    "candidate_provider_selected": true,
+    "candidate_alternate_main_selected": true,
+    "ordinary_after_identical": true
+  },
+  "protected_state_preserved": true
+}

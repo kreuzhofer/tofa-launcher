@@ -10,6 +10,10 @@ import (
 // The desktop independently parses JSON and validates title and description.
 const desktopTitleSchema = `{"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","properties":{"title":{"type":"string","minLength":1,"maxLength":36},"description":{"type":"string","minLength":1}},"required":["title","description"],"additionalProperties":false}`
 
+// Captured from Desktop 26.1023.50603. Only Luna 6 has demonstrated this
+// extended title limit; preserve its schema unchanged for native validation.
+const desktopLuna6TitleSchema = `{"$schema":"https://json-schema.org/draft/2020-12/schema","type":"object","properties":{"title":{"type":"string","minLength":1,"maxLength":60},"description":{"type":"string","minLength":1}},"required":["title","description"],"additionalProperties":false}`
+
 const desktopNamingModel = "nvidia/Nemotron-3_5-Lightning"
 
 func isDesktopTitle(metadataJSON json.RawMessage) bool {
@@ -39,7 +43,7 @@ func routeDesktopTitle(body []byte) ([]byte, bool, error) {
 	}
 	_, _, valid := desktopTitleFormat(payload)
 	unsupported := errors.New("automatic title generation is unavailable: unsupported desktop title contract; request was not sent upstream")
-	if !valid || len(payload["tools"]) != 0 || len(payload["instructions"]) != 0 {
+	if !valid || !desktopTitleRole(payload["client_metadata"]) || len(payload["tools"]) != 0 || len(payload["instructions"]) != 0 {
 		return nil, false, unsupported
 	}
 	var input []json.RawMessage
@@ -73,6 +77,31 @@ func routeDesktopTitle(body []byte) ([]byte, bool, error) {
 	payload["model"], _ = json.Marshal(desktopNamingModel)
 	result, err := json.Marshal(payload)
 	return result, true, err
+}
+
+// The Luna model and title markers never authorize a review, compaction, or
+// another auxiliary role. Parent identity is deliberately not used for naming.
+func desktopTitleRole(raw json.RawMessage) bool {
+	metadata, err := routingObject(raw)
+	if err != nil {
+		return false
+	}
+	var subagent, encoded string
+	if value, exists := metadata["x-openai-subagent"]; exists && (json.Unmarshal(value, &subagent) != nil || subagent != "") {
+		return false
+	}
+	if json.Unmarshal(metadata["x-codex-turn-metadata"], &encoded) != nil {
+		return false
+	}
+	turn, err := routingObject([]byte(encoded))
+	if err != nil {
+		return false
+	}
+	var kind string
+	if value, exists := turn["request_kind"]; exists && json.Unmarshal(value, &kind) != nil {
+		return false
+	}
+	return kind == "" || kind == "turn"
 }
 
 func desktopTitleCodeTools(raw json.RawMessage, model string) bool {
@@ -123,12 +152,19 @@ func desktopTitleFormat(payload map[string]json.RawMessage) (map[string]json.Raw
 	var schema, expected any
 	json.Unmarshal(format["schema"], &schema)
 	json.Unmarshal([]byte(desktopTitleSchema), &expected)
+	knownSchema := reflect.DeepEqual(schema, expected)
+	var model string
+	json.Unmarshal(payload["model"], &model)
+	if model == "gpt-6-luna" {
+		json.Unmarshal([]byte(desktopLuna6TitleSchema), &expected)
+		knownSchema = knownSchema || reflect.DeepEqual(schema, expected)
+	}
 	var kind, name, choice string
 	var strict *bool
 	json.Unmarshal(format["type"], &kind)
 	json.Unmarshal(format["name"], &name)
 	json.Unmarshal(payload["tool_choice"], &choice)
-	valid := reflect.DeepEqual(schema, expected) && len(format) == 4 && kind == "json_schema" && name == "codex_output_schema" && json.Unmarshal(format["strict"], &strict) == nil && strict != nil && *strict && choice == "auto"
+	valid := knownSchema && len(format) == 4 && kind == "json_schema" && name == "codex_output_schema" && json.Unmarshal(format["strict"], &strict) == nil && strict != nil && *strict && choice == "auto"
 	return textOptions, schema, valid
 }
 

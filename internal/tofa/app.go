@@ -26,13 +26,15 @@ type App struct {
 	Dir     string
 	Vault   Vault
 	// Endpoint and HTTP exist for local protocol tests. The CLI never overrides the endpoint.
-	Endpoint   string
-	HTTP       *http.Client
-	Listen     func(network, address string) (net.Listener, error)
-	RunClient  func(args, env []string) error
-	Prompt     func(label string, secret bool) (string, error)
-	Uninstall  func(purge bool) error
-	evaluation *evaluationObserver
+	Endpoint              string
+	HTTP                  *http.Client
+	Listen                func(network, address string) (net.Listener, error)
+	RunClient             func(args, env []string) error
+	Prompt                func(label string, secret bool) (string, error)
+	Uninstall             func(purge bool) error
+	evaluation            *evaluationObserver
+	nativeAccountRoute    bool
+	qualificationRequests int
 }
 
 const help = `tofa — Token Factory launcher (prototype)
@@ -43,6 +45,7 @@ const help = `tofa — Token Factory launcher (prototype)
   tofa models [--project-id ID]              List available models
   tofa launch codex [--model ID] [--guardian-model ID] [--project-id ID] [--allow-unverified] [--direct] [-- ARGS]
   tofa launch codex-desktop [--model ID] [--guardian-model ID] [--project-id ID] [--allow-unverified] [--app-bundle PATH]
+  tofa desktop-compatibility [--app-bundle PATH] Check local Desktop contracts; no launch
   tofa doctor                               Check local prerequisites; no inference
   tofa uninstall [--purge]                   Remove installation; optionally saved data
   tofa --version
@@ -138,6 +141,10 @@ func (a *App) RunContext(ctx context.Context, args []string) error {
 		}
 		fmt.Fprintln(a.Out, `{"version":1,"platform":"macos","observer":"per-launch"}`)
 		return nil
+	case "desktop-compatibility":
+		return a.desktopCompatibility(ctx, args[1:])
+	case "desktop-qualification":
+		return a.desktopQualification(ctx, s, args[1:])
 	case "desktop-lifecycle":
 		return a.desktopLifecycle(ctx, args[1:])
 	case "auth":

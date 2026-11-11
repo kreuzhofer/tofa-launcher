@@ -314,9 +314,27 @@ class DesktopPickerTests(PickerFixture):
         os.write(self.master, b'\x1b[B\x1b[A' + main.encode() + b'\r')
         child = self.launched()
         self.read_until('Status: ' + ('supported' if guardian == GLM else 'experimental'))
+        # Account preflight belongs to the signed-in fixture; protocol/tool
+        # execution below uses the real engine with synthetic credentials only.
+        deadline = time.monotonic() + 10
+        marker = pathlib.Path(str(self.capture) + '.pid')
+        while not marker.exists() or not marker.read_text().strip():
+            self.assertLess(time.monotonic(), deadline, 'fixture worker not ready')
+            time.sleep(0.02)
+        bundled = pathlib.Path(os.environ['FIXTURE_DESKTOP_BUNDLE']) / 'Contents/Resources/codex'
+        original = bundled.read_bytes()
+        bundled.unlink()
+        bundled.symlink_to(os.environ['TOFA_TEST_DESKTOP_ENGINE'])
+        def restore_fixture():
+            bundled.unlink()
+            bundled.write_bytes(original)
+            bundled.chmod(0o700)
+        self.addCleanup(restore_fixture)
+        diagnostics = (self.home / 'engine-stderr.log').open('w+b')
+        self.addCleanup(diagnostics.close)
         engine = subprocess.Popen([child['env']['CODEX_CLI_PATH'], 'app-server',
-                                   '-c', 'features.shell_snapshot=false'], env=child['env'], cwd=child['cwd'],
-                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+                                   '-c', 'features.shell_snapshot=false', '-c', 'features.plugins=false'], env=child['env'], cwd=child['cwd'],
+                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=diagnostics)
         messages = queue.Queue()
         def read():
             for line in engine.stdout:
@@ -340,7 +358,12 @@ class DesktopPickerTests(PickerFixture):
             request_id += 1
             send(dict(id=request_id, method=method, params=params))
             while True:
-                message = messages.get(timeout=15)
+                try:
+                    message = messages.get(timeout=15)
+                except queue.Empty:
+                    diagnostics.seek(0)
+                    self.fail('engine response missing; exit=%s; stderr=%s' %
+                              (engine.poll(), diagnostics.read(4096).decode(errors='replace')))
                 if message.get('id') == request_id:
                     self.assertNotIn('error', message)
                     return message['result']
@@ -350,7 +373,7 @@ class DesktopPickerTests(PickerFixture):
         result = call('thread/start', dict(cwd=child['cwd'], approvalPolicy='on-request',
                                           approvalsReviewer='auto_review', sandbox='read-only'))
         self.assertEqual(result['model'], main)
-        self.assertEqual(result['modelProvider'], 'nebius-tofa')
+        self.assertEqual(result['modelProvider'], 'tofa-native-router')
         self.assertEqual(result['approvalPolicy'], 'on-request')
         self.assertEqual(result['approvalsReviewer'], 'auto_review')
         thread_id = result['thread']['id']
@@ -406,9 +429,14 @@ class DesktopPickerTests(PickerFixture):
         selected = next(m for m in child['catalog']['models'] if m['slug'] == KIMI)
         self.assertEqual(selected['auto_review_model_override'], GLM)
         self.read_until('Main: ' + KIMI)
+        control = urllib.request.Request(child['env']['TOFA_DESKTOP_CONTEXT'] + '/desktop-launch',
+                    headers={'Authorization': 'Bearer ' + child['key']})
+        with urllib.request.urlopen(control) as response:
+            inference = json.load(response)['InferenceCapability']
+        self.assertNotEqual(inference, child['key'])
         request = urllib.request.Request(child['env']['TOFA_DESKTOP_CONTEXT'] + '/responses',
                     json.dumps({'model': KIMI, 'input': []}).encode(),
-                    {'Authorization': 'Bearer ' + child['key'], 'Content-Type': 'application/json'})
+                    {'Authorization': 'Bearer ' + inference, 'Content-Type': 'application/json'})
         with urllib.request.urlopen(request) as response:
             self.assertEqual(response.status, 200)
         self.assertEqual(self.requests[-1][2]['model'], KIMI)

@@ -1,0 +1,53 @@
+{
+  "schema": "tofa-guardian-contract-diagnosis-v1",
+  "baseline_revision": "a91477481ff5fe4f0823731e35302d3794806660",
+  "engine": {
+    "version": "codex-cli 0.162.0-alpha.17.2",
+    "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28"
+  },
+  "scope": "Owned fake profiles, local upstreams, and installed bundled engine; no Desktop launch, shared credentials, or live model inference.",
+  "red": {
+    "test": "TestDesktopBundledEngineAutomaticApproval/allow",
+    "result": "unexpected review count: got 0, want 1",
+    "native_tool_result": "Automatic approval review failed: request adapter: unsupported desktop approval review contract; request was not sent upstream",
+    "execution": "not executed"
+  },
+  "observed_contract": {
+    "instructions": "omitted or null",
+    "policy_location": "leading developer input message with input_text content",
+    "tool_choice": "auto",
+    "inspection_tools": [
+      "exec_command",
+      "write_stdin",
+      "view_image"
+    ],
+    "assessment_schema": "unchanged native non-strict schema requiring outcome",
+    "origin_metadata": [
+      "x-openai-subagent=guardian",
+      "x-codex-parent-thread-id",
+      "parent_turn_id"
+    ]
+  },
+  "fix": "Recognize developer-policy reviews only with intact policy content, explicit Guardian origin metadata, and existing strict schema/tool/choice checks. Preserve input and metadata. Add Kimi final-answer guidance separately; retain non-Kimi constrained decoding.",
+  "cause_limit": "The executable identity is unchanged. Evidence establishes the observed request contract, not an engine upgrade as its cause.",
+  "validation": {
+    "result": "passed",
+    "race_enabled": true,
+    "package": "internal/tofa",
+    "elapsed_seconds": 145.899,
+    "selected_tests": "TestAdapter.*(Guardian|KimiConstrainedTools)|TestDesktopBundledEngine(AutomaticApproval|ResumeUsesLaunchGuardian)|TestDesktopRejectsChangedReviewEvenWhenItTargetsMain",
+    "coverage": [
+      "legacy and developer-input policy preservation",
+      "omitted/null instructions with exact metadata retention",
+      "malformed policy/metadata rejected before upstream",
+      "allow/deny and unchanged command execution assertions",
+      "Kimi inspection and distinct Guardian",
+      "invalid assessment/provider error nonexecution",
+      "native cancellation and 90-second deadline",
+      "resumed thread uses launch Guardian",
+      "changed review cannot enter Main lane"
+    ],
+    "native_provider_failure_attempts_observed": 12,
+    "limits": "Owned headless engine integration only; no actual Desktop or signed-in inference qualification."
+  }
+}

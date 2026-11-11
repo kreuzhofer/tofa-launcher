@@ -104,7 +104,7 @@ func TestDesktopBundledEngineAutomaticApproval(t *testing.T) {
 					emitFixtureResponse(w, fixtureMessage("Fixture complete."))
 				}
 			}, nil)
-			child, stop := liveDesktopFixture(t, app, bundle, capture, "--model", "deepseek-ai/DeepSeek-V4.1-Flash", "--guardian-model", scenario.guardian)
+			child, stop := liveDesktopFixture(t, app, bundle, capture, "--evaluation-observer", legacyProxyObserver(t), "--model", "deepseek-ai/DeepSeek-V4.1-Flash", "--guardian-model", scenario.guardian)
 			e := openDesktopEngine(t, child)
 			started := e.call("thread/start", map[string]any{
 				"cwd": child.Cwd, "approvalPolicy": "on-request", "approvalsReviewer": "auto_review", "sandbox": "read-only",
@@ -232,7 +232,7 @@ func TestDesktopBundledEngineResumeUsesLaunchGuardian(t *testing.T) {
 	var id string
 	for _, selected := range []string{"moonshotai/Kimi-K3", "zai-org/GLM-5.3-Flash"} {
 		guardian.Store(selected)
-		child, stop := liveDesktopFixture(t, app, bundle, capture, "--model", "deepseek-ai/DeepSeek-V4.1-Flash", "--guardian-model", selected)
+		child, stop := liveDesktopFixture(t, app, bundle, capture, "--evaluation-observer", legacyProxyObserver(t), "--model", "deepseek-ai/DeepSeek-V4.1-Flash", "--guardian-model", selected)
 		e := openDesktopEngine(t, child)
 		if id == "" {
 			started := e.call("thread/start", map[string]any{"cwd": child.Cwd, "approvalPolicy": "on-request", "approvalsReviewer": "auto_review", "sandbox": "read-only"})

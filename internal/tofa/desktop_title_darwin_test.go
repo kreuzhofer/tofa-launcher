@@ -65,7 +65,7 @@ func TestDesktopPreservesRoutedTitleContractAndFailures(t *testing.T) {
 						io.WriteString(w, tc.response)
 					}, nil)
 					child, stop := liveDesktopFixture(t, app, bundle, capture)
-					response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], child.Env["TOFA_API_KEY"], string(body))
+					response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], desktopInferenceToken(t, child), string(body))
 					raw, err := io.ReadAll(response.Body)
 					response.Body.Close()
 					if err != nil || response.StatusCode != tc.status || string(raw) != tc.response {
@@ -111,9 +111,12 @@ func TestDesktopRejectsChangedNativeTitleContracts(t *testing.T) {
 		"mismatched trigger":         func(p map[string]any) { titleSource(t, p, "thread_title", "composer") },
 		"schema":                     func(p map[string]any) { titleFormat(p)["schema"].(map[string]any)["required"] = []string{"title"} },
 		"non-strict":                 func(p map[string]any) { titleFormat(p)["strict"] = false },
-		"schema name":                func(p map[string]any) { titleFormat(p)["name"] = "other" },
-		"format extension":           func(p map[string]any) { titleFormat(p)["future"] = true },
-		"forced tool":                func(p map[string]any) { p["tool_choice"] = "required" },
+		"unobserved old-model title limit": func(p map[string]any) {
+			titleFormat(p)["schema"].(map[string]any)["properties"].(map[string]any)["title"].(map[string]any)["maxLength"] = 60
+		},
+		"schema name":      func(p map[string]any) { titleFormat(p)["name"] = "other" },
+		"format extension": func(p map[string]any) { titleFormat(p)["future"] = true },
+		"forced tool":      func(p map[string]any) { p["tool_choice"] = "required" },
 	} {
 		t.Run(name, func(t *testing.T) {
 			p := nativeTitleFixture(t)
@@ -122,10 +125,15 @@ func TestDesktopRejectsChangedNativeTitleContracts(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], child.Env["TOFA_API_KEY"], string(body))
+			response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], desktopInferenceToken(t, child), string(body))
 			raw, err := io.ReadAll(response.Body)
 			response.Body.Close()
-			if err != nil || response.StatusCode != 400 || !strings.Contains(string(raw), "request was not sent upstream") {
+			want := "request was not sent upstream"
+			switch name {
+			case "missing source", "main turn", "summary", "mismatched trigger":
+				want = "selected model is unavailable in this launch catalog"
+			}
+			if err != nil || response.StatusCode != 400 || !strings.Contains(string(raw), want) {
 				t.Fatalf("missing local rejection: %d %s %v", response.StatusCode, raw, err)
 			}
 		})
@@ -158,10 +166,17 @@ func TestDesktopTitleFailureRequiresBothSourceMarkers(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], child.Env["TOFA_API_KEY"], string(body))
+			response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], desktopInferenceToken(t, child), string(body))
 			raw, err := io.ReadAll(response.Body)
 			response.Body.Close()
-			if err != nil || response.StatusCode != 400 || !strings.Contains(string(raw), "request was not sent upstream") {
+			want := "selected model is unavailable in this launch catalog"
+			if tc.title {
+				want = "request was not sent upstream"
+			}
+			if tc.name == "malformed" {
+				want = "invalid or ambiguous turn metadata"
+			}
+			if err != nil || response.StatusCode != 400 || !strings.Contains(string(raw), want) {
 				t.Fatalf("missing explicit local rejection: status=%d body=%s error=%v", response.StatusCode, raw, err)
 			}
 			if strings.Contains(string(raw), "automatic title generation is unavailable") != tc.title {
@@ -187,6 +202,23 @@ func TestDesktopRejectsChangedLuna6TitleContracts(t *testing.T) {
 		"main turn":                    func(p map[string]any) { titleSource(t, p, "user", "composer") },
 		"mismatched trigger":           func(p map[string]any) { titleSource(t, p, "thread_title", "composer") },
 		"changed schema":               func(p map[string]any) { titleFormat(p)["schema"].(map[string]any)["required"] = []string{"title"} },
+		"unobserved title limit": func(p map[string]any) {
+			titleFormat(p)["schema"].(map[string]any)["properties"].(map[string]any)["title"].(map[string]any)["maxLength"] = 61
+		},
+		"60-character schema with extra property": func(p map[string]any) {
+			schema := titleFormat(p)["schema"].(map[string]any)
+			schema["properties"].(map[string]any)["title"].(map[string]any)["maxLength"] = 60
+			schema["additionalProperties"] = true
+		},
+		"compaction despite title markers": func(p map[string]any) {
+			p["client_metadata"].(map[string]any)["x-codex-turn-metadata"] = `{"thread_source":"thread_title","turn_trigger":"thread_title","request_kind":"compaction"}`
+		},
+		"unknown request kind": func(p map[string]any) {
+			p["client_metadata"].(map[string]any)["x-codex-turn-metadata"] = `{"thread_source":"thread_title","turn_trigger":"thread_title","request_kind":"future_auxiliary"}`
+		},
+		"Guardian marker despite title markers": func(p map[string]any) {
+			p["client_metadata"].(map[string]any)["x-openai-subagent"] = "guardian"
+		},
 		"extra namespace": func(p map[string]any) {
 			item := p["input"].([]any)[0].(map[string]any)
 			item["tools"] = append(item["tools"].([]any), map[string]any{"type": "namespace", "name": "unknown", "tools": []any{}})
@@ -219,10 +251,14 @@ func TestDesktopRejectsChangedLuna6TitleContracts(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], child.Env["TOFA_API_KEY"], string(body))
+			response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], desktopInferenceToken(t, child), string(body))
 			result, err := io.ReadAll(response.Body)
 			response.Body.Close()
-			if err != nil || response.StatusCode != 400 || !strings.Contains(string(result), "request was not sent upstream") {
+			want := "request was not sent upstream"
+			if name == "mismatched trigger" || name == "main turn" {
+				want = "selected model is unavailable in this launch catalog"
+			}
+			if err != nil || response.StatusCode != 400 || !strings.Contains(string(result), want) {
 				t.Fatalf("missing local rejection: %d %s %v", response.StatusCode, result, err)
 			}
 		})
@@ -265,7 +301,7 @@ func TestDesktopBundledEngineRoutesAutomaticTitleToLightning(t *testing.T) {
 				}
 				emitFixtureResponse(w, fixtureMessage(title))
 			}, nil)
-			child, stop := liveDesktopFixture(t, app, bundle, capture, "--model", "zai-org/GLM-5.3")
+			child, stop := liveDesktopFixture(t, app, bundle, capture, "--evaluation-observer", legacyProxyObserver(t), "--model", "zai-org/GLM-5.3")
 			e := openDesktopEngine(t, child)
 			started := e.call("thread/start", map[string]any{
 				"model": model, "modelProvider": nil,

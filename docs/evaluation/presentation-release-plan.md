@@ -1,9 +1,24 @@
 # Presentation evaluation to release
 
-Status: runtime implementation merged in #131; #126/#127 are closed. Current native
-qualification passed. Both focused live-model loader diagnostics failed before
-invocation. A headless provider comparison isolates a namespace-schema compatibility
-gap: both tested models call the flat function but neither calls its namespaced form.
+Status: runtime and namespace implementations merged; #126–#129 are closed.
+The latest #130 attempt stopped when a title timeout was followed by a client
+disconnect. A local reproduction exposes an evaluator bug: title cancellation
+stopped concurrent main work and closed the owned Desktop. The scoped correction
+passes local regressions; native requalification and remaining comparison work
+are pending. See [the current diagnosis](presentation-title-cancellation-130.md).
+The accepted build-20398 baseline passed clean/crash/repeat-launch checks, but
+ordinary restart restored a plugin excluded during adapted startup. Native
+provider-dependent plugin reconciliation now blocks protected-state preservation;
+the manual smoke and comparison wrappers remain stopped. See the
+[preservation evidence](evidence/presentation-runtime-126-127/desktop-plugin-preservation-20398.json).
+The integration branch now refuses affected launches before native startup or
+bridge installation. Its [guard and remaining native implementation scope](desktop-plugin-preservation-130.md)
+protect the profile; they do not unblock the comparison. The installed launcher
+and retained bridge have not been replaced.
+The [2026-10-14 Ollama source comparison](../research/ollama-desktop-provider-routing-2026-10-14.md)
+identifies native-provider routing as an alternative to investigate before
+requiring a native app correction or changing the shared-profile requirement.
+This research has not qualified that alternative or lifted the guard.
 Model capability and release readiness remain unqualified.
 The maintainer approved the three phases below on 2026-10-13. Cost is not a
 constraint; experimental bounds and separate outcomes remain part of the method.
@@ -51,8 +66,9 @@ an unplanned model. Broader campaign work is not silently reduced to these four 
 ## Continuity rules
 
 The integration branch is `feat/126-127-presentation-runtime` in the existing
-qualification checkout. Retain it until the review gate passes. Latest qualified
-production code is `630f523`; evidence checkpoint `c5431df`. The production binary
+qualification checkout. It remains retained after merge. Current implementation
+is `2fd66e4`; the unchanged namespace launcher uses Go source `deb5ac9`. Earlier
+production code `630f523` and checkpoint `c5431df` remain historical. The binary
 hash is recorded in the native and lifecycle evidence; documentation-only commits
 do not imply a different binary. New executable or harness bytes require checking
 which proofs have become stale before launch.
@@ -85,6 +101,17 @@ stable release are distinct actions. User authorization to implement/merge these
 runtime tickets is not a waiver of #119/#120/#106 or native-platform release gates.
 
 ## Current next action
+
+The title-cancellation correction has zero Standards/Spec findings at `472bba0`.
+The latest smoke run passed previews but failed identity preservation because the
+Desktop app updated mid-run. Startup of build20398 then explicitly removed the
+old bundled code-review plugin. Await the maintainer’s baseline decision before
+continuing lifecycle/native qualification or another model comparison.
+The comparison command is paused; preserve the interrupted attempt and all prior
+outcomes. Any further model retry needs its own explicit declaration. The original
+three remaining cells stay pending. No release is published.
+
+## Earlier checkpoints
 
 PR #131 merged as `de74659b4f0b458236fc0e4ffc6b59db65029645` after all
 macOS/Linux/Windows and artifact checks passed. The maintainer explicitly approved

@@ -162,13 +162,13 @@ func runDesktopBridge(args []string) error {
 				merged = append(merged, "-c", value)
 			}
 			args = append(merged, args[end:]...)
-			return runDesktopSettingsBridge(owner.Engine, args, env, route.Home)
+			return runDesktopSettingsBridge(owner.Engine, args, env, route.Home, route.InferenceCapability)
 		}
 	} else {
 		// An ordinary invocation must not revive inactive Token Factory metadata
 		// using a bearer inherited from an earlier launch.
 		env = slices.DeleteFunc(env, func(entry string) bool {
-			return strings.HasPrefix(entry, "TOFA_API_KEY=") || strings.HasPrefix(entry, "TOFA_DESKTOP_INACTIVE=")
+			return strings.HasPrefix(entry, "TOFA_API_KEY=") || strings.HasPrefix(entry, "TOFA_DESKTOP_INACTIVE=") || strings.HasPrefix(entry, nativeDesktopInferenceEnv+"=")
 		})
 		// Saved ordinary references survive known bundle layout changes. Keep the
 		// recorded identity immutable; active launches use their own current bridge.
@@ -183,6 +183,40 @@ func runDesktopBridge(args []string) error {
 			}
 			engine = bundle.engine
 			fmt.Fprintln(os.Stderr, "tofa: desktop engine moved; saved reference now uses the compatible engine in the same app bundle")
+		}
+
+		if desktopAppServerIndex(args) >= 0 {
+			workspace, err := os.Getwd()
+			if err != nil {
+				return err
+			}
+			root, err := os.MkdirTemp(filepath.Dir(path), "ordinary-provider-check-")
+			if err != nil {
+				return errors.New("could not inspect ordinary routed-history metadata; relaunch through tofa")
+			}
+			home := os.Getenv("CODEX_HOME")
+			if home == "" {
+				userHome, err := os.UserHomeDir()
+				if err != nil {
+					os.RemoveAll(root)
+					return err
+				}
+				home = filepath.Join(userHome, ".codex")
+			}
+			end := len(args)
+			if separator := slices.Index(args, "--"); separator >= 0 {
+				end = separator
+			}
+			overrides, inspectErr := ordinaryNativeDesktopOverrides(engine, home, workspace, root, args[:end])
+			os.RemoveAll(root)
+			if inspectErr != nil {
+				return inspectErr
+			}
+			merged := append([]string{}, args[:end]...)
+			for _, override := range overrides {
+				merged = append(merged, "-c", override)
+			}
+			args = append(merged, args[end:]...)
 		}
 	}
 	if err := syscall.Exec(engine, append([]string{engine}, args...), env); err != nil {

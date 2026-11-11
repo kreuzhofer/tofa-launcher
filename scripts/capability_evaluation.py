@@ -160,7 +160,8 @@ def preflight(options):
     report = dict(schema='tofa-capability-v1', run_id=run_id, cell_id=fingerprint(cell), cell=cell,
         status='ready', blockers=[], started_utc=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
         limits=case['limits'], requests=[], observations=[],
-        controls={'parallel_tool_calls': False, 'repetition_stop': 5,
+        controls={'catalog_policy': getattr(options, 'catalog_policy', 'exact'),
+                  'parallel_tool_calls': False, 'repetition_stop': 5,
                   'diagnostic_tool_calls': 3 if options.case == '07' else None,
                   'request_body_bytes': 16 * 1024 * 1024, 'event_bytes': 32 * 1024 * 1024,
                   'response_bytes': 64 * 1024 * 1024, 'workspace_observation_bytes': 128 * 1024 * 1024,
@@ -266,12 +267,25 @@ def preflight(options):
         try:
             previous = json.loads((Path(options.compare_with) / 'result.json').read_text())
             if (not isinstance(previous, dict) or previous.get('schema') != report['schema'] or
-                    not isinstance(previous.get('provenance'), dict)):
+                    not isinstance(previous.get('provenance'), dict) or
+                    not isinstance(previous.get('controls', {}), dict)):
                 raise ValueError('invalid_comparison')
             compared = ('launcher', 'codex', 'desktop', 'os', 'settings', 'skills', 'python', 'node', 'shell',
                         'environment_sha256', 'catalog_sha256', 'guardian', 'harness_sha256', 'corpus_sha256', 'method',
                         'presentation_runtime')
             report['drift'] = [key for key in compared if previous['provenance'].get(key) != report['provenance'].get(key)]
+            policy = report['controls']['catalog_policy']
+            if previous.get('controls', {}).get('catalog_policy', 'exact') != policy:
+                report['drift'].append('catalog_policy')
+            if 'catalog_sha256' in report['drift']:
+                report['catalog_change'] = {'policy': policy,
+                    'before': previous['provenance'].get('catalog_sha256'),
+                    'after': report['provenance'].get('catalog_sha256')}
+                # Every preflight still requires the selected main, Guardian and
+                # Desktop naming model. An explicitly declared policy can allow
+                # other catalog IDs to change without weakening local checks.
+                if policy == 'selected-models' and 'catalog_policy' not in report['drift']:
+                    report['drift'].remove('catalog_sha256')
             if report['drift']: report['blockers'].append('environment_drift')
         except (OSError, ValueError, UnicodeError):
             report['blockers'].append('comparison_unavailable')
@@ -347,6 +361,8 @@ def finish_report(run, report, observer, code, preserved):
     infra = any(value.startswith(('unsupported_', 'unmatched_', 'workspace_', 'scope_', 'presentation_runtime_')) or
                 value in ('stream_failure', 'upstream_http_error', 'response_incomplete',
                           'instruction_variant_missing', 'diagnostic_capture_failure') for value in failures)
+    infra = infra or any(r.get('role') == 'auxiliary_title' and r.get('failure') == 'client_disconnected'
+                         for r in observer.records)
     completed = any(r.get('completed') and r.get('final_answer') and r.get('role') == 'main' for r in observer.records)
     if not preserved:
         report['blockers'].append('protected_settings_changed')
@@ -517,6 +533,8 @@ def main():
     prepare.add_argument('--skill-root', action='append')
     prepare.add_argument('--codex-home', default=os.environ.get('CODEX_HOME', str(Path.home() / '.codex')))
     prepare.add_argument('--compare-with')
+    prepare.add_argument('--catalog-policy', choices=('exact', 'selected-models'), default='exact',
+                         help='exact catalog by default; selected-models records catalog changes but requires selected roles')
     prepare.add_argument('--presentation-qualification', type=Path,
                          help='retained actual-client runtime evidence; never a tool-presence bypass')
     live = commands.add_parser('run', parents=[prepare], add_help=False)

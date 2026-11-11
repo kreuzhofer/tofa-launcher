@@ -195,7 +195,7 @@ func TestDesktopEngineRetainsDirectNativeParent(t *testing.T) {
 	for {
 		ancestry, err := os.ReadFile(capture + ".ancestry")
 		pid, pidErr := os.ReadFile(capture + ".pid")
-		if err == nil && pidErr == nil {
+		if err == nil && pidErr == nil && len(pid) > 0 {
 			var observed struct {
 				PID    int
 				Parent int

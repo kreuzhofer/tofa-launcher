@@ -1,0 +1,67 @@
+{
+  "schema": "tofa-native-account-review-evidence-v1",
+  "issue": 138,
+  "spec": 134,
+  "scope": "Public TOFA launch, installed bundled engine, owned loopback providers and isolated fixture homes",
+  "engine": {
+    "version": "codex-cli 0.162.0-alpha.17.2",
+    "sha256": "0d5ac7aae20c4eda6242428d5e218c55ba96d8763fda2a271088ff37104b9d28"
+  },
+  "origin_contract": {
+    "main": [
+      "client_metadata.thread_id",
+      "client_metadata.turn_id"
+    ],
+    "review": [
+      "client_metadata.x-openai-subagent=guardian",
+      "client_metadata.x-codex-parent-thread-id",
+      "client_metadata.parent_turn_id"
+    ],
+    "consistency": "Repeated encoded thread/turn/role fields must agree; duplicate review JSON fields are rejected",
+    "binding": "Immutable originating inference service per thread and turn, bounded to 4096 retained entries per launch",
+    "token_factory": "Configured Guardian, including an explicit override",
+    "native": "Reviewer selected by actual engine and validated against launch native catalog; no assumed reviewer model",
+    "native_policy_shape": "Leading developer additional_tools/functions inspection inventory followed by developer policy and exact approval schema; original native request bytes forwarded",
+    "observer": "Actual Python Observer independently records Main origins, recognizes measured review contracts and counts every forwarded engine review attempt"
+  },
+  "observed_behavior": [
+    "Token Factory allow and deny enforce execution outcomes through native approval engine",
+    "Native allow after inspection and native deny enforce execution outcomes",
+    "Pending review remains on originating service through Main selection changes and another concurrent conversation",
+    "Native inspection continuation dispatched after selection change retains original native review service",
+    "Subsequent Main turn follows explicitly changed selection",
+    "Missing, unobserved, conflicting or malformed origin/role/policy/inventory/schema metadata cannot execute an action",
+    "Unavailable Guardian and upstream503 do not substitute a reviewer or bypass execution gates",
+    "503 triggers engine-originated review retries; the adapter adds none; actual Observer request budget2 forwards only Main1 plus review1 then stops",
+    "Review credentials remain service-specific and launch inference authorization never reaches either upstream",
+    "Inference capability and legacy inference bearer cannot invoke review cancellation control",
+    "Cancellation control503 returns explicit RPC failure and terminates the owned engine before pending approval can authorize execution",
+    "Ordinary direct-native openai history resumes, interrupts and continues without entering candidate native routing; concurrent routed work remains available"
+  ],
+  "cancellation_regression": {
+    "red": "An actual native review remained connected after parent turn/interrupt, then a late allow executed the owned marker command despite the parent reporting interrupted",
+    "fix": "Existing settings relay acknowledges exact thread+turn invalidation using independent control authorization before forwarding turn/interrupt. Origin cancellation synchronously invalidates bound review contexts. Cancelled origin tombstones cannot revive through late Main or review requests",
+    "green": "Both Token Factory and native pending review cancellation prevent execution; late native allow on disconnected review cannot create the marker; no policy result is rewritten",
+    "direct_native": "Unknown exact IDs receive bounded tombstones and ordinary native interrupt is forwarded unchanged; direct native history is not reclassified as routed work"
+  },
+  "qualification_limits": [
+    "Synthetic local upstreams and fake credentials; no live provider or paid inference",
+    "No installed Desktop launch, sign-in mutation, shared settings write, plugin mutation or preview qualification",
+    "Actual Desktop account/plugin preservation and native preview gates remain separate",
+    "Production guard and integration-branch restriction remain active",
+    "If independent cancellation control is unavailable, the relay fails closed by terminating its owned engine even for an unseen direct-native turn; absence of adapter provenance is not treated as proof of native service",
+    "Owned protocol fixtures explicitly disable plugin initialization using features.plugins=false; they do not qualify plugin preservation. An earlier run raced a background plugins-clone writer during cleanup; external marketplace discovery may have occurred without real credentials. Production and actual Desktop qualification keep plugins enabled"
+  ],
+  "status": "passed_fixture_only",
+  "production_guard_retained": true,
+  "validation": {
+    "affected_protocol_race_seconds": 155.458,
+    "broader_regression_seconds": 317.63,
+    "broader_regression_note": "All behavioral assertions passed; one background plugin-clone TempDir cleanup failed. Fixture-only plugin initialization disabled and entire affected protocol suite rerun successfully. Original failure retained.",
+    "python_observer_and_synthetic_tests": 50,
+    "python_observer_and_synthetic_seconds": 95.303,
+    "go_vet": "passed",
+    "diff_check": "passed",
+    "live_desktop_qualification": "pending_separate_gate"
+  }
+}

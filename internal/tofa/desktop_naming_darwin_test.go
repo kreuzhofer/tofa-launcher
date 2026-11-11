@@ -36,7 +36,7 @@ func TestDesktopNamesWithIndependentLightningAcrossMains(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], child.Env["TOFA_API_KEY"], string(body))
+			response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], desktopInferenceToken(t, child), string(body))
 			got, err := io.ReadAll(response.Body)
 			response.Body.Close()
 			stop()
@@ -73,7 +73,7 @@ func TestDesktopNamingCompletesWhileMainStreams(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	request, _ := http.NewRequestWithContext(ctx, http.MethodPost, child.Env["TOFA_DESKTOP_CONTEXT"]+"/responses", strings.NewReader(`{"model":"zai-org/GLM-5.3","input":[]}`))
-	request.Header.Set("Authorization", "Bearer "+child.Env["TOFA_API_KEY"])
+	request.Header.Set("Authorization", "Bearer "+desktopInferenceToken(t, child))
 	request.Header.Set("Content-Type", "application/json")
 	main, err := (&http.Client{Timeout: 5 * time.Second}).Do(request)
 	if err != nil {
@@ -81,7 +81,7 @@ func TestDesktopNamingCompletesWhileMainStreams(t *testing.T) {
 	}
 	defer main.Body.Close()
 	body, _ := os.ReadFile("testdata/desktop-luna6-title-request.json")
-	title := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], child.Env["TOFA_API_KEY"], string(body))
+	title := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], desktopInferenceToken(t, child), string(body))
 	data, err := io.ReadAll(title.Body)
 	title.Body.Close()
 	if err != nil || title.StatusCode != http.StatusOK || !strings.Contains(string(data), "Independent title") {
@@ -117,7 +117,7 @@ func TestDesktopNamingDeadlineCancelsUpstream(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
 	request, _ := http.NewRequestWithContext(ctx, http.MethodPost, child.Env["TOFA_DESKTOP_CONTEXT"]+"/responses", strings.NewReader(string(body)))
-	request.Header.Set("Authorization", "Bearer "+child.Env["TOFA_API_KEY"])
+	request.Header.Set("Authorization", "Bearer "+desktopInferenceToken(t, child))
 	request.Header.Set("Content-Type", "application/json")
 	response, err := http.DefaultClient.Do(request)
 	if err != nil {
@@ -162,13 +162,13 @@ func TestDesktopUnavailableNamingDoesNotFallBackOrBlockMain(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], child.Env["TOFA_API_KEY"], string(body))
+	response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], desktopInferenceToken(t, child), string(body))
 	data, _ := io.ReadAll(response.Body)
 	response.Body.Close()
 	if response.StatusCode != http.StatusBadRequest || !strings.Contains(string(data), "naming model nvidia/Nemotron-3_5-Lightning is unavailable") {
 		t.Errorf("missing explicit naming failure: %d %s", response.StatusCode, data)
 	}
-	response = adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], child.Env["TOFA_API_KEY"], `{"model":"zai-org/GLM-5.3","input":[]}`)
+	response = adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], desktopInferenceToken(t, child), `{"model":"zai-org/GLM-5.3","input":[]}`)
 	response.Body.Close()
 	stop()
 	if response.StatusCode != http.StatusOK || calls.Load() != 1 {
@@ -202,7 +202,7 @@ func TestDesktopLightningUsesToolFreeStructuredNaming(t *testing.T) {
 	p["include"] = []string{"reasoning.encrypted_content"}
 	p["prompt_cache_key"] = "synthetic-title-cache"
 	raw, _ := json.Marshal(p)
-	response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], child.Env["TOFA_API_KEY"], string(raw))
+	response := adapterRequest(t, child.Env["TOFA_DESKTOP_CONTEXT"], desktopInferenceToken(t, child), string(raw))
 	data, _ := io.ReadAll(response.Body)
 	response.Body.Close()
 	stop()

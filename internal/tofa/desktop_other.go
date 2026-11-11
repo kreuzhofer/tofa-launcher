@@ -22,3 +22,11 @@ func runDesktopBridge([]string) error {
 func (a *App) desktopLifecycle(context.Context, []string) error {
 	return errors.New("desktop installed lifecycle requires macOS")
 }
+
+func (a *App) desktopQualification(context.Context, Store, []string) error {
+	return errors.New("Desktop qualification requires macOS")
+}
+
+func (a *App) desktopCompatibility(context.Context, []string) error {
+	return errors.New("Desktop compatibility requires macOS arm64")
+}

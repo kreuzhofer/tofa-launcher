@@ -174,9 +174,9 @@ func desktopHistoryRoundTrip(t *testing.T, failure, model string) {
 	var child capturedDesktop
 	var stop func()
 	if failure == "abrupt death" {
-		child, stop = executableDesktopFixture(t, app, bundle, capture, "--model", model)
+		child, stop = executableDesktopFixture(t, app, bundle, capture, "--evaluation-observer", legacyProxyObserver(t), "--model", model)
 	} else {
-		child, stop = liveDesktopFixture(t, app, bundle, capture, "--model", model)
+		child, stop = liveDesktopFixture(t, app, bundle, capture, "--evaluation-observer", legacyProxyObserver(t), "--model", model)
 	}
 	firstRoute, firstKey := child.Env["TOFA_DESKTOP_CONTEXT"], child.Env["TOFA_API_KEY"]
 	e = openDesktopEngine(t, child)
@@ -240,7 +240,10 @@ func desktopHistoryRoundTrip(t *testing.T, failure, model string) {
 		if err := syscall.Kill(pid, syscall.SIGKILL); err != nil {
 			t.Fatal(err)
 		}
-		waitDesktopPIDStopped(t, desktopPID)
+		// The engine-loss monitor grants five seconds for native quit, then
+		// up to two seconds for termination. Keep the assertion bounded while
+		// allowing both phases and the monitor's polling interval.
+		waitDesktopPIDStoppedWithin(t, desktopPID, 10*time.Second)
 	case "adapter failure":
 		if err := (<-listening).Close(); err != nil {
 			t.Fatal(err)
@@ -265,7 +268,7 @@ func desktopHistoryRoundTrip(t *testing.T, failure, model string) {
 			t.Fatal(err)
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		err := app.RunContext(ctx, []string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", model, "--allow-unverified"})
+		err := app.RunContext(ctx, []string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", model, "--allow-unverified", "--evaluation-observer", legacyProxyObserver(t)})
 		cancel()
 		if err == nil || !strings.Contains(err.Error(), "exit status 17") {
 			t.Fatalf("startup failure was not surfaced: %v", err)
@@ -354,7 +357,7 @@ func desktopHistoryRoundTrip(t *testing.T, failure, model string) {
 			t.Fatal(err)
 		}
 
-		child, stop = liveDesktopFixture(t, app, bundle, capture, "--model", model)
+		child, stop = liveDesktopFixture(t, app, bundle, capture, "--evaluation-observer", legacyProxyObserver(t), "--model", model)
 		if child.Env["TOFA_DESKTOP_CONTEXT"] == firstRoute || child.Env["TOFA_API_KEY"] == firstKey {
 			t.Fatal("history recovery reused stale inference access")
 		}

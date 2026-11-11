@@ -32,9 +32,8 @@ func acquireDesktopLease(profile string) (*os.File, error) {
 	if err := os.MkdirAll(profile, 0700); err != nil {
 		return nil, err
 	}
-	info, err := os.Lstat(profile)
-	if err != nil || !info.IsDir() {
-		return nil, errors.New("ordinary desktop profile must be a real directory; resolve the profile path before launching")
+	if err := inspectDesktopProfile(profile); err != nil {
+		return nil, err
 	}
 	fd, err := syscall.Open(filepath.Join(profile, ".tofa-launch.lock"), syscall.O_CREAT|syscall.O_RDWR|syscall.O_NOFOLLOW|syscall.O_CLOEXEC, 0600)
 	if err != nil {
@@ -64,6 +63,35 @@ var inactiveDesktopProvider = map[string]any{
 	"request_max_retries": float64(0), "stream_max_retries": float64(0),
 }
 
+// Deliberately omit env_key here. The engine gives it precedence over native
+// account authorization even when requires_openai_auth is true, and process
+// configuration overrides cannot remove it. The ordinary saved bridge adds the
+// unavailable sentinel only to its own invocation, after validating ownership.
+var inactiveNativeDesktopProvider = map[string]any{
+	"name": "TOFA native-account router", "base_url": "http://127.0.0.1:0",
+	"wire_api": "responses", "env_key_instructions": "TOFA routing is unavailable in ordinary mode. Relaunch through tofa with any default main model, then reopen this conversation.",
+	"requires_openai_auth": false, "supports_websockets": false,
+	"request_max_retries": float64(0), "stream_max_retries": float64(0),
+}
+
+func ownedDesktopProvider(raw any, expected map[string]any) bool {
+	settings, ok := raw.(map[string]any)
+	if !ok {
+		return false
+	}
+	clean := map[string]any{}
+	for key, value := range settings {
+		if value == nil || (key == "supports_standalone_web_search" && value == false) {
+			continue
+		}
+		clean[key] = value
+	}
+	if expected["env_key"] == "TOFA_DESKTOP_INACTIVE" && (clean["env_key_instructions"] == legacyDesktopRecovery || clean["env_key_instructions"] == selectedMainDesktopRecovery) {
+		clean["env_key_instructions"] = expected["env_key_instructions"]
+	}
+	return reflect.DeepEqual(clean, expected)
+}
+
 // The engine owns TOML parsing, policy discovery and version-checked edits.
 // Only its public configuration API is used; no credentials or history are read.
 type desktopConfigClient struct {
@@ -74,8 +102,15 @@ type desktopConfigClient struct {
 	id      int
 }
 
-func openDesktopConfig(ctx context.Context, engine, home, profile, workspace, runtimeDir string) (*desktopConfigClient, error) {
-	command := exec.CommandContext(ctx, engine, "app-server", "-c", "log_dir="+strconv.Quote(filepath.Join(runtimeDir, "logs")), "-c", "sqlite_home="+strconv.Quote(filepath.Join(runtimeDir, "state")))
+func openDesktopConfig(ctx context.Context, engine, home, profile, workspace, runtimeDir string, overrides ...string) (*desktopConfigClient, error) {
+	// Configuration helpers never run turns or load skill instructions. Suppress
+	// native system-skill installation only in this helper, keeping the real home
+	// for account and managed policy resolution. Never persist or forward this
+	// override to the Desktop conversation engine.
+	command := exec.CommandContext(ctx, engine, "app-server", "-c", "log_dir="+strconv.Quote(filepath.Join(runtimeDir, "logs")), "-c", "sqlite_home="+strconv.Quote(filepath.Join(runtimeDir, "state")), "-c", "skills.bundled.enabled=false")
+	for _, value := range overrides {
+		command.Args = append(command.Args, "-c", value)
+	}
 	command.Env, command.Dir = desktopEnv(home, profile, ""), workspace
 	input, err := command.StdinPipe()
 	if err != nil {
@@ -128,44 +163,80 @@ func (client *desktopConfigClient) call(method string, params any) (map[string]a
 		if len(response.Error) > 0 && string(response.Error) != "null" {
 			return nil, fmt.Errorf("ordinary engine rejected %s or a competing configuration edit; resolve the conflict and relaunch", method)
 		}
+		// Unknown/missing protocol shapes are not an unrestricted policy.
+		switch method {
+		case "config/read":
+			config, ok := response.Result["config"].(map[string]any)
+			if !ok {
+				return nil, errors.New("ordinary engine did not supply the required configuration contract")
+			}
+			if value := config["model_providers"]; value != nil {
+				if _, ok := value.(map[string]any); !ok {
+					return nil, errors.New("ordinary engine supplied unsupported provider configuration")
+				}
+			}
+		case "configRequirements/read":
+			value, present := response.Result["requirements"]
+			if !present {
+				return nil, errors.New("ordinary engine did not supply the required managed-policy contract")
+			}
+			if value != nil {
+				if _, ok := value.(map[string]any); !ok {
+					return nil, errors.New("ordinary engine supplied unsupported managed policy")
+				}
+			}
+		}
 		return response.Result, nil
 	}
 }
 
-func (client *desktopConfigClient) inspect(workspace string) (string, bool, error) {
+func (client *desktopConfigClient) inspect(workspace string, nativeCandidate bool, admissions ...*desktopAdmission) (string, []any, error) {
+	return client.inspectConfiguration(workspace, nativeCandidate, selectedDesktopAdmission(admissions).permitsPlugins())
+}
+
+// Diagnostics inspect provider ownership without granting admission or applying edits.
+func (client *desktopConfigClient) inspectConfiguration(workspace string, nativeCandidate, allowPlugins bool) (string, []any, error) {
 	result, err := client.call("configRequirements/read", map[string]any{})
 	if err != nil {
-		return "", false, err
+		return "", nil, err
 	}
 	requirements, _ := result["requirements"].(map[string]any)
 	if err := checkDesktopRequirements(requirements); err != nil {
-		return "", false, err
+		return "", nil, err
 	}
 	result, err = client.call("config/read", map[string]any{"includeLayers": true, "cwd": workspace})
 	if err != nil {
-		return "", false, err
+		return "", nil, err
 	}
 	config, _ := result["config"].(map[string]any)
-	providers, _ := config["model_providers"].(map[string]any)
-	provider, present := providers["nebius-tofa"]
-	if present {
-		settings, ok := provider.(map[string]any)
+	if raw := config["plugins"]; raw != nil {
+		plugins, ok := raw.(map[string]any)
 		if !ok {
-			return "", false, errors.New("conflicting user-owned nebius-tofa provider; resolve it before launching")
+			return "", nil, errors.New("could not inspect native plugin configuration; Desktop launch cancelled")
 		}
-		clean := map[string]any{}
-		for key, value := range settings {
-			if value == nil || (key == "supports_standalone_web_search" && value == false) {
-				continue
+		if _, configured := plugins["code-review@openai-bundled"]; configured && !allowPlugins {
+			return "", nil, errDesktopPluginRemoval
+		}
+	}
+	providers, _ := config["model_providers"].(map[string]any)
+	entries := []struct {
+		id       string
+		settings map[string]any
+	}{{"nebius-tofa", inactiveDesktopProvider}}
+	if nativeCandidate {
+		entries = append(entries, struct {
+			id       string
+			settings map[string]any
+		}{nativeDesktopProvider, inactiveNativeDesktopProvider})
+	}
+	var edits []any
+	for _, entry := range entries {
+		if provider, present := providers[entry.id]; present {
+			if !ownedDesktopProvider(provider, entry.settings) {
+				return "", nil, fmt.Errorf("conflicting user-owned %s provider; preserve or rename that integration before launching", entry.id)
 			}
-			clean[key] = value
-		}
-		// Keep the exact legacy owned entry compatible without changing user settings.
-		if clean["env_key_instructions"] == legacyDesktopRecovery || clean["env_key_instructions"] == selectedMainDesktopRecovery {
-			clean["env_key_instructions"] = inactiveDesktopProvider["env_key_instructions"]
-		}
-		if !reflect.DeepEqual(clean, inactiveDesktopProvider) {
-			return "", false, errors.New("conflicting user-owned nebius-tofa provider; preserve or rename that integration before launching")
+		} else {
+			edits = append(edits, map[string]any{"keyPath": "model_providers." + entry.id, "value": entry.settings, "mergeStrategy": "replace"})
 		}
 	}
 	layers, _ := result["layers"].([]any)
@@ -175,14 +246,17 @@ func (client *desktopConfigClient) inspect(workspace string) (string, bool, erro
 		if name["type"] == "user" {
 			version, _ := layer["version"].(string)
 			if version != "" {
-				return version, present, nil
+				return version, edits, nil
 			}
 		}
 	}
-	return "", false, errors.New("ordinary engine did not supply a user configuration version; launch cancelled")
+	return "", nil, errors.New("ordinary engine did not supply a user configuration version; launch cancelled")
 }
 
-func integrateDesktopProvider(ctx context.Context, engine, home, profile, workspace, runtimeDir string, ownerPID int) error {
+func integrateDesktopProvider(ctx context.Context, engine, home, profile, workspace, runtimeDir string, ownerPID int, nativeCandidate bool, admissions ...*desktopAdmission) error {
+	if err := checkDesktopPluginAdmission(home, selectedDesktopAdmission(admissions)); err != nil {
+		return err
+	}
 	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 	client, err := openDesktopConfig(ctx, engine, home, profile, workspace, runtimeDir)
@@ -190,15 +264,32 @@ func integrateDesktopProvider(ctx context.Context, engine, home, profile, worksp
 		return err
 	}
 	defer client.close()
-	version, present, err := client.inspect(workspace)
-	if err != nil || present || ownerPID == 0 {
+	version, edits, err := client.inspect(workspace, nativeCandidate, selectedDesktopAdmission(admissions))
+	if err != nil || len(edits) == 0 || ownerPID == 0 {
 		return err
 	}
 	if !desktopOwnsNativeProfile(profile, ownerPID) {
 		return errors.New("desktop native profile ownership lost before integration; owned launch cancelled")
 	}
-	_, err = client.call("config/batchWrite", map[string]any{"filePath": nil, "expectedVersion": version, "reloadUserConfig": true, "edits": []any{map[string]any{"keyPath": "model_providers.nebius-tofa", "value": inactiveDesktopProvider, "mergeStrategy": "replace"}}})
+	_, err = client.call("config/batchWrite", map[string]any{"filePath": nil, "expectedVersion": version, "reloadUserConfig": true, "edits": edits})
 	return err
+}
+
+// Native bundled-plugin reconciliation removes code-review when adapted routing
+// makes ChatGPT authentication unavailable. It deletes cached files before its
+// engine uninstall request, so the settings relay cannot preserve them. Refuse
+// that transition without changing eligibility or restoring shared snapshots.
+var errDesktopPluginRemoval = errors.New("code-review@openai-bundled is installed or configured; adapted routing can make Desktop remove it. Adapted Desktop startup blocked to preserve ordinary settings; ordinary Desktop remains available. A native plugin-preservation fix is required")
+
+func refuseDesktopPluginRemoval(home string) error {
+	_, err := os.Lstat(filepath.Join(home, "plugins", "cache", "openai-bundled", "code-review"))
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil {
+		return errors.New("could not inspect bundled code-review plugin state; Desktop launch cancelled")
+	}
+	return errDesktopPluginRemoval
 }
 
 func desktopOwnsNativeProfile(profile string, pid int) bool {
@@ -302,4 +393,40 @@ func checkDesktopRequirements(requirements map[string]any) error {
 		}
 	}
 	return nil
+}
+
+// Inspect without creating a profile/lease. A diagnostic is only a point-in-time
+// refusal check; real launch still acquires and retains its durable lease.
+func inspectDesktopProfile(profile string) error {
+	info, err := os.Lstat(profile)
+	if errors.Is(err, os.ErrNotExist) {
+		return nil
+	}
+	if err != nil || !info.IsDir() {
+		return errors.New("ordinary desktop profile must be a real directory; resolve the profile path before launching")
+	}
+	return nil
+}
+func checkDesktopDiagnosticOwnership(ctx context.Context, profile string) error {
+	if err := inspectDesktopProfile(profile); err != nil {
+		return err
+	}
+	fd, err := syscall.Open(filepath.Join(profile, ".tofa-launch.lock"), syscall.O_RDONLY|syscall.O_NOFOLLOW|syscall.O_CLOEXEC|syscall.O_NONBLOCK, 0)
+	if err == nil {
+		file := os.NewFile(uintptr(fd), "desktop-diagnostic-lease")
+		defer file.Close()
+		info, e := file.Stat()
+		if e != nil || !info.Mode().IsRegular() {
+			return errors.New("ordinary desktop launcher lease is not a regular file; resolve ownership before launching")
+		}
+		if e = syscall.Flock(fd, syscall.LOCK_EX|syscall.LOCK_NB); e != nil {
+			return errors.New("another tofa launch owns the ordinary desktop profile; wait for it to exit before checking compatibility")
+		}
+	} else if !errors.Is(err, syscall.ENOENT) {
+		return errors.New("could not inspect ordinary desktop launcher lease; resolve ownership before launching")
+	}
+	if err := refuseDesktopOwner(profile); err != nil {
+		return err
+	}
+	return refuseDesktopProcesses(ctx, profile)
 }

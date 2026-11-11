@@ -71,6 +71,30 @@ main/Guardian outcomes, naming limits, timings, shared costs and promotion prove
 Main/Guardian support labels cover the pinned headless bundled-engine baseline,
 not comprehensive Electron UI or release qualification. See the [offline selection evidence](evaluation/desktop-selection-2026-09-28.md).
 
+### Native account and plugin preservation
+
+Current integration source builds require an existing ChatGPT sign-in in ordinary
+Desktop, as well as Token Factory credentials in TOFA. Ordinary launch uses the
+native-account router after checking the installed client's account, policy,
+configuration, ownership and routing contracts. It does not require a private
+qualification kit, fixed runtime version or a maintainer's home directory.
+Compatible client updates are checked again at launch; cache/catalog changes alone
+are not admission failures. Selected models still require compatible metadata.
+
+Code Review remains installed and eligible under the native account. TOFA does
+not delete, disable or restore plugins. New routed conversations support explicit
+service selection; existing native and legacy histories retain their providers.
+Active endpoints and separate inference/control credentials are process-scoped.
+Only owned inactive provider metadata remains for history. CLI defaults and
+unrelated settings remain unchanged. Historical candidate/proof commands retain
+their original evidence validation; the explicit legacy v1 evaluation route
+retains its plugin-removal guard.
+
+Automatic-title context, including native GPT context, is sent to Token Factory
+during this launch, using the fixed naming model independently of main and
+Guardian. Native main and native review requests keep their native destination.
+See the [admission and evidence assessment](evaluation/desktop-admission-143.md).
+
 ### Switching launch modes and recovering a conversation
 
 1. Quit the ordinary desktop, then run the command above from your workspace.
@@ -79,10 +103,10 @@ not comprehensive Electron UI or release qualification. See the [offline selecti
 2. Quit the owned app and wait for the launcher to exit before opening the app
    normally. Both modes use the same history; no import or synchronization is
    needed. Opening the app while the launcher is active does not change modes.
-3. Ordinary mode can display Token Factory history, but cannot send through Token
-   Factory. An unavailable-provider or missing-launch-credential error requires
-   a fresh tofa launch. Changing the picker to GPT/Astra does not migrate the
-   conversation to OpenAI.
+3. Ordinary mode can display routed history but cannot use its inactive TOFA
+   endpoint. Desktop can keep reconnecting indefinitely without a TOFA-specific
+   message. Stop reconnecting, quit Desktop, launch through TOFA and reopen the
+   same conversation. Do not change models to try to migrate providers.
 4. Quit the ordinary app, rerun the launch command, reopen the **same conversation**
    with any default main. Its recorded main is retained if available. Continue there;
    creating a replacement conversation is not the recovery procedure.
@@ -501,6 +525,12 @@ launcher announces this policy. Main, Guardian, native
 catalog descriptors and CLI title routing remain unchanged. There is no naming
 picker, configurable fallback, or automatic substitution.
 
+The guarded native-account candidate extends this policy to all automatic titles
+in the launch, including native GPT title context sent to Token Factory. Startup
+announces that destination. Saved native Main conversations remain direct; the
+separate title helper uses the launch default. The [#139 fixture evidence](evaluation/launch-wide-naming-139.md)
+does not replace actual Desktop title-visibility and preservation qualification.
+
 The naming model must appear in the project's launch-time catalog and have
 compatible dedicated provider metadata. If unavailable, naming fails explicitly
 while main conversations remain usable. Changed title contracts and upstream
@@ -774,3 +804,41 @@ Final validation passed on macOS 26.6.2 arm64 / Go 1.27.1 with ChatGPT
 
 The two separate installed Codex CLI inference/tool-review opt-ins were not enabled.
 Cross-builds do not establish native Linux/Windows runtime qualification.
+
+### Local compatibility diagnostic
+
+`tofa desktop-compatibility [--app-bundle PATH]` checks a discovered macOS ARM64
+installation without launching Desktop, registering routes, installing a bridge,
+or requiring private maintainer evidence. Quit Desktop first. The command checks
+minimum versions/layout, ordinary profile ownership, existing ChatGPT sign-in,
+managed policy, provider ownership, process-local routing overrides and secret
+exclusion configuration. It uses the real bundled engine's read-only APIs; helper
+logs/state are temporary and bundled skill installation is suppressed.
+
+On success it emits `tofa-desktop-compatibility-v1` JSON with current executable
+hashes and the checks actually performed. Missing or unsupported prerequisites
+return an actionable error and a nonzero exit. Different compatible versions,
+installation locations, models, catalogs and plugin caches are not hash-equality
+gates. No model catalog or inference request is sent by this command.
+
+This is a point-in-time local prerequisite check, not release qualification or a
+launch authorization token. It does not establish native UI usability, model
+availability, routing turns, reviews or previews. Launch retains its existing
+checks and protection through normal native-account admission. A saved diagnostic
+cannot bypass those checks; normal launch repeats them against current state.
+
+## Native-account prerelease: ordinary Desktop reconnect limitation
+
+The native-account route has an accepted limitation when Desktop is opened
+directly, without TOFA: existing routed conversations may keep showing
+“Reconnecting” instead of a TOFA-specific error. The application can launch its
+bundled engine directly, bypassing the bridge that supplies that error.
+
+Stop the reconnecting turn, quit Desktop, launch through TOFA, and reopen the
+same conversation. Do not click Retry repeatedly or change models to migrate its
+provider. Ordinary native conversations and saved history must remain usable.
+This documented limitation does not permit credential leakage, silent service
+fallback or history/settings damage. Normal-route enablement and retained scoped
+preview evidence are recorded separately in the [#143 assessment](evaluation/desktop-admission-143.md).
+This limitation does not certify a model or publish a release. See the
+[accepted release boundary](evaluation/desktop-release-readiness.md#accepted-ordinary-desktop-limitation--november-11-2026).

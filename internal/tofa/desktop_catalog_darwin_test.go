@@ -20,12 +20,13 @@ import (
 
 // Public app-server protocol driver. Responses and notifications share stdout.
 type desktopEngine struct {
-	t       *testing.T
-	command *exec.Cmd
-	input   io.WriteCloser
-	encoder *json.Encoder
-	decoder *json.Decoder
-	id      int
+	t          *testing.T
+	command    *exec.Cmd
+	input      io.WriteCloser
+	encoder    *json.Encoder
+	decoder    *json.Decoder
+	id         int
+	stderrPath string
 }
 
 func TestDesktopUsesAuthenticatedNativeCatalog(t *testing.T) {
@@ -105,6 +106,34 @@ func TestDesktopUsesAuthenticatedNativeCatalog(t *testing.T) {
 			if err := os.WriteFile(filepath.Join(bundle, "Contents/Resources/native-discovery.json"), spec, 0600); err != nil {
 				t.Fatal(err)
 			}
+			// Sign in the disposable profile before the launch preservation
+			// baseline. Discovery must not manufacture credentials/settings.
+			home := filepath.Join(os.Getenv("HOME"), ".codex")
+			if err := os.MkdirAll(home, 0700); err != nil {
+				t.Fatal(err)
+			}
+			writeJSON := func(name string, value any) {
+				t.Helper()
+				raw, err := json.Marshal(value)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if err := os.WriteFile(filepath.Join(home, name), raw, 0600); err != nil {
+					t.Fatal(err)
+				}
+			}
+			writeJSON("auth.json", auth)
+			if cache, ok := discovery["cache"]; ok {
+				writeJSON("models_cache.json", cache)
+			}
+			config := "cli_auth_credentials_store=\"file\"\nopenai_base_url=" + fmt.Sprintf("%q", server.URL) + "\n"
+			if static {
+				writeJSON("static-models.json", discovery["catalog"])
+				config += "model_catalog_json=" + fmt.Sprintf("%q", filepath.Join(home, "static-models.json")) + "\n"
+			}
+			if err := os.WriteFile(filepath.Join(home, "config.toml"), []byte(config), 0600); err != nil {
+				t.Fatal(err)
+			}
 			app, _ := adapterFixture(t, nil, nil)
 			err = app.Run([]string{"launch", "codex-desktop", "--app-bundle", bundle, "--model", "moonshotai/Kimi-K3", "--allow-unverified"})
 			if static {
@@ -163,7 +192,14 @@ func TestDesktopUsesAuthenticatedNativeCatalog(t *testing.T) {
 			if err := json.Unmarshal(raw, &child); err != nil {
 				t.Fatal(err)
 			}
-			if len(child.Catalog.Models) != 6 || !reflect.DeepEqual(child.Catalog.Models[0], descriptor) {
+			wantDescriptor := make(map[string]any, len(descriptor))
+			for key, value := range descriptor {
+				wantDescriptor[key] = value
+			}
+			wantDescriptor["display_name"] = "Native account choice (ChatGPT)"
+			description, _ := descriptor["description"].(string)
+			wantDescriptor["description"] = "ChatGPT native inference; " + description
+			if len(child.Catalog.Models) != 6 || !reflect.DeepEqual(child.Catalog.Models[0], wantDescriptor) {
 				t.Fatal("effective account catalog replaced with bundled choices or altered")
 			}
 			raw, err = os.ReadFile(filepath.Join(child.Env["CODEX_HOME"], "auth.json"))
@@ -238,6 +274,13 @@ func openDesktopEngine(t *testing.T, child capturedDesktop, overrides ...string)
 		args = append(args, "-c", override)
 	}
 	command := exec.CommandContext(ctx, child.Env["CODEX_CLI_PATH"], args...)
+	stderrPath := filepath.Join(t.TempDir(), "engine.stderr")
+	stderr, err := os.Create(stderrPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { stderr.Close() })
+	command.Stderr = stderr
 	command.Dir = child.Cwd
 	for key, value := range child.Env {
 		command.Env = append(command.Env, key+"="+value)
@@ -253,7 +296,7 @@ func openDesktopEngine(t *testing.T, child capturedDesktop, overrides ...string)
 	if err := command.Start(); err != nil {
 		t.Fatal(err)
 	}
-	e := &desktopEngine{t: t, command: command, input: input, encoder: json.NewEncoder(input), decoder: json.NewDecoder(output)}
+	e := &desktopEngine{t: t, stderrPath: stderrPath, command: command, input: input, encoder: json.NewEncoder(input), decoder: json.NewDecoder(output)}
 	t.Cleanup(e.close)
 	e.call("initialize", map[string]any{"clientInfo": map[string]string{"name": "tofa_catalog_fixture", "version": "1"}, "capabilities": map[string]bool{"experimentalApi": true}})
 	if err := e.encoder.Encode(map[string]any{"method": "initialized"}); err != nil {
@@ -363,7 +406,7 @@ func TestDesktopBundledEnginePreservesNativeConversations(t *testing.T) {
 		tofaRequests.Add(1)
 		respond(w)
 	}, nil)
-	child, stop := liveDesktopFixture(t, app, bundle, capture)
+	child, stop := liveDesktopFixture(t, app, bundle, capture, "--evaluation-observer", legacyProxyObserver(t))
 	if err := os.WriteFile(filepath.Join(child.Env["CODEX_HOME"], "auth.json"), []byte(`{"OPENAI_API_KEY":"synthetic-native"}`), 0600); err != nil {
 		t.Fatal(err)
 	}

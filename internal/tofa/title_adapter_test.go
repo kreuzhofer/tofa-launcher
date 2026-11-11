@@ -39,7 +39,7 @@ func TestCLIDoesNotRouteNativeDesktopTitle(t *testing.T) {
 				return nil
 			})
 			runAdapted(t, app)
-			if strings.Contains(output.String(), "Automatic title routing:") {
+			if strings.Contains(output.String(), "Automatic title routing:") || strings.Contains(output.String(), "Automatic-title context") {
 				t.Fatal("CLI announced a desktop-only route")
 			}
 		})

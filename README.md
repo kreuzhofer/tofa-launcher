@@ -24,6 +24,13 @@ supported boundary, including explicit naming and compaction limitations.
 Historical CLI evidence remains in the [rc2 report](docs/releases/v0.1.0-rc.2.md).
 Claude, other desktop modes and browser OAuth remain outside the current scope.
 
+Maintainers continuing the experimental native-account qualification should use
+the [manual qualification guide](docs/evaluation/native-account-manual-141.md).
+Integration source builds now use native-account admission with fresh local
+checks, without private qualification files. See the
+[release evidence and limits](docs/evaluation/desktop-admission-143.md).
+This work remains separate from published releases and model-quality claims.
+
 ## Installation
 
 The commands below install the **latest stable release** without a version
@@ -330,8 +337,8 @@ a generated title and its preservation across ordinary/tofa relaunches. This
 remains experimental.
 
 The default route is announced before launch. Each launch binds its own
-`127.0.0.1` port and gives Codex a random local bearer token through `TOFA_API_KEY`.
-The saved Nebius key stays in the launcher, which forwards only to the fixed Token
+`127.0.0.1` port. Desktop uses separate random control and inference capabilities;
+CLI uses its scoped adapter bearer token. The saved Nebius key stays in the launcher, which forwards only to the fixed Token
 Factory endpoint and selected project. The adapter accepts only `POST /responses`,
 limits bodies to 16 MiB, streams responses, propagates cancellation and does not
 retry requests or follow redirects. The launcher sets provider request/stream

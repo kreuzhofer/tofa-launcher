@@ -38,9 +38,9 @@ func TestDesktopCatalogOffersAllEligibleModelsRegardlessOfDefault(t *testing.T) 
 			for id, name := range map[string]string{
 				"deepseek-ai/DeepSeek-V4.1-Flash":   "DeepSeek V4.1 Flash (Token Factory)",
 				"zai-org/GLM-5.3":                   "GLM-5.3 (Token Factory)",
-				"zai-org/GLM-5.3-Flash":             "GLM-5.3-Flash (TF Experimental)",
-				"moonshotai/Kimi-K3":                "Kimi-K3 (TF Experimental)",
-				"nvidia/Nemotron-3-Ultra-550b-a55b": "Nemotron 3 Ultra (TF Experimental)",
+				"zai-org/GLM-5.3-Flash":             "GLM-5.3-Flash (Token Factory · Experimental)",
+				"moonshotai/Kimi-K3":                "Kimi-K3 (Token Factory · Experimental)",
+				"nvidia/Nemotron-3-Ultra-550b-a55b": "Nemotron 3 Ultra (Token Factory · Experimental)",
 			} {
 				entry := entries[id]
 				if entry == nil {
@@ -80,7 +80,7 @@ func TestDesktopBundledEngineContextPressureFailsWithoutReplacingHistory(t *test
 		calls.Add(1)
 		emitFixtureResponse(w, fixtureMessage("Preserved response before context pressure."))
 	}, nil)
-	child, stop := liveDesktopFixture(t, app, bundle, capture, "--model", "deepseek-ai/DeepSeek-V4.1-Flash")
+	child, stop := liveDesktopFixture(t, app, bundle, capture, "--evaluation-observer", legacyProxyObserver(t), "--model", "deepseek-ai/DeepSeek-V4.1-Flash")
 	e := openDesktopEngine(t, child)
 	started := e.call("thread/start", map[string]any{"cwd": child.Cwd, "approvalPolicy": "never", "sandbox": "read-only"})
 	id := started["thread"].(map[string]any)["id"].(string)
@@ -149,7 +149,7 @@ func TestDesktopBundledEngineTextOnlySwitchPreservesImageHistory(t *testing.T) {
 		mu.Unlock()
 		emitFixtureResponse(w, fixtureMessage("Synthetic image history response."))
 	}, nil)
-	child, stop := liveDesktopFixture(t, app, bundle, capture, "--model", "deepseek-ai/DeepSeek-V4.1-Flash")
+	child, stop := liveDesktopFixture(t, app, bundle, capture, "--evaluation-observer", legacyProxyObserver(t), "--model", "deepseek-ai/DeepSeek-V4.1-Flash")
 	e := openDesktopEngine(t, child)
 	thread := e.call("thread/start", map[string]any{"cwd": child.Cwd, "approvalPolicy": "never", "sandbox": "read-only"})
 	id := thread["thread"].(map[string]any)["id"].(string)
@@ -233,7 +233,7 @@ func TestDesktopBundledEngineRecoversInterruptedAndUnavailableSelections(t *test
 			t.Errorf("unexpected upstream model: %s", request.Model)
 		}
 	}, nil)
-	child, stop := liveDesktopFixture(t, app, bundle, capture, "--model", "deepseek-ai/DeepSeek-V4.1-Flash")
+	child, stop := liveDesktopFixture(t, app, bundle, capture, "--evaluation-observer", legacyProxyObserver(t), "--model", "deepseek-ai/DeepSeek-V4.1-Flash")
 	e := openDesktopEngine(t, child)
 	thread := e.call("thread/start", map[string]any{"cwd": child.Cwd, "approvalPolicy": "never", "sandbox": "read-only"})
 	id := thread["thread"].(map[string]any)["id"].(string)
@@ -329,7 +329,7 @@ func TestDesktopBundledEngineSwitchesAndResumesConversationModels(t *testing.T) 
 	}, nil)
 	const initial = "deepseek-ai/DeepSeek-V4.1-Flash"
 	const selected = "zai-org/GLM-5.3-Flash"
-	child, stop := liveDesktopFixture(t, app, bundle, capture, "--model", initial, "--allow-unverified=false")
+	child, stop := liveDesktopFixture(t, app, bundle, capture, "--evaluation-observer", legacyProxyObserver(t), "--model", initial, "--allow-unverified=false")
 	e := openDesktopEngine(t, child)
 	start := e.call("thread/start", map[string]any{"cwd": child.Cwd, "approvalPolicy": "never", "sandbox": "read-only"})
 	id := start["thread"].(map[string]any)["id"].(string)
@@ -349,7 +349,7 @@ func TestDesktopBundledEngineSwitchesAndResumesConversationModels(t *testing.T) 
 	if err := os.Remove(capture); err != nil {
 		t.Fatal(err)
 	}
-	child, stop = liveDesktopFixture(t, app, bundle, capture, "--model", "zai-org/GLM-5.3", "--allow-unverified=false")
+	child, stop = liveDesktopFixture(t, app, bundle, capture, "--evaluation-observer", legacyProxyObserver(t), "--model", "zai-org/GLM-5.3", "--allow-unverified=false")
 	e = openDesktopEngine(t, child)
 	resumed := e.call("thread/resume", map[string]any{"threadId": id, "model": nil, "modelProvider": nil})
 	if resumed["model"] != selected || resumed["modelProvider"] != "nebius-tofa" {

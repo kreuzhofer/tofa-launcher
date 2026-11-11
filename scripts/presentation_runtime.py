@@ -87,6 +87,13 @@ def instructions(runtime):
         '- Override binaries: `' + paths['bin'] + '`'])
 
 
+def check_node_version(declared, observed):
+    """Keep bundle package revision distinct from Node's own version output."""
+    match = re.fullmatch(r'v?(\d+\.\d+\.\d+)(?:-cua\.\d+)?', declared)
+    if not match or observed != 'v' + match[1]:
+        raise ValueError('node_runtime_version_mismatch')
+
+
 def from_loader_output(output, provider):
     """Validate the returned text against the actual bundle, for either owning provider."""
     if provider not in (PROVIDER, 'codex_app'):
