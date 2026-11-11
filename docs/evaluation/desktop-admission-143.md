@@ -112,3 +112,36 @@ five-second native-quit grace, before the two-second termination allowance. Only
 that assertion now allows ten seconds, including polling. Both installed-engine
 cases pass with shutdown, stale-route rejection, history preservation and resumed
 tool execution still asserted. Production shutdown timing is unchanged.
+
+## Executed validation and review
+
+The installed Desktop engine was `codex-cli 0.166.0-alpha.5.1`; the mixed-engine
+checks also used the discovered standalone `codex-cli 0.167.1` executable. All
+engine work used disposable profiles and owned local upstreams, without launching
+the actual Desktop application or performing paid inference.
+
+- The normal/candidate installed-engine race selection passed 149 test/subtest
+  events. The subsequent broad installed-engine race run passed 840 events and
+  exposed stale authenticated-catalog setup and two signed-out legacy fixtures.
+  That failed run remains retained. Corrective race reruns passed all 18 selected
+  events, including authentication/freshness controls and both legacy fixtures.
+- The catalog fixture now signs its synthetic profile in before the preservation
+  baseline. Discovery cannot create credentials or settings. Legacy tests select
+  the historical route explicitly; normal signed-in coverage remains separate.
+- All five actual mixed-engine preflight scenarios passed. The generated-skill
+  receipt test initially rejected a symlink entry point; resolving the discovered
+  executable, as the real generator does, made it pass alongside the unchanged
+  nonregular-source rejection control. Production receipt validation is unchanged.
+- 81 offline skill-contract, collector, guidance, scope and synthetic-response
+  tests passed, plus eight workflow/publication tests. Skill-contract tests now
+  run through explicit unittest discovery in CI. Direct file execution ran zero
+  tests and is excluded from the pass counts. Vet and diff checks passed.
+- Independent Standards and Spec reviews of the unpublished integration diff
+  from `2c1de54`, and each subsequent correction, found no blocking issue.
+
+The ordinary full race suite and platform CI remain required merge gates; their
+final results are recorded on [PR #144](https://github.com/kreuzhofer/tofa-launcher/pull/144).
+Installed-engine checks are reported separately from default-suite opt-in skips.
+The broader run's ten skipped events included actual Desktop/CLI opt-ins and the
+separate mixed-engine selection subsequently executed above. No skipped case is
+reported as passed, and no automated result manufactures a human UI observation.
