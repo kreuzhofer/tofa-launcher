@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -43,7 +44,7 @@ func TestDesktopDeclaredCandidateVerifiedSystemSkills(t *testing.T) {
 			}
 			variants := []any{}
 			for _, v := range []string{"one", "two"} {
-				variants = append(variants, map[string]any{"engine": engine, "engine_sha256": fmt.Sprintf("%x", sha256.Sum256(raw)), "version": "fixture-" + v, "files": map[string]string{".system/.codex-system-skills.marker": hash("version-" + v), ".system/openai-docs/SKILL.md": hash("bundled-" + v)}})
+				variants = append(variants, map[string]any{"engine": engine, "engine_sha256": fmt.Sprintf("%x", sha256.Sum256(raw)), "version": "codex-cli fixture-" + v, "files": map[string]string{".system/.codex-system-skills.marker": hash("version-" + v), ".system/openai-docs/SKILL.md": hash("bundled-" + v)}})
 			}
 			contract := filepath.Join(dir, "contract.json")
 			raw, _ = json.Marshal(map[string]any{"schema": "tofa-generated-system-skills-v1", "sources": variants})
@@ -136,7 +137,11 @@ func TestDesktopDeclaredCandidateRealGeneratedSystemSkills(t *testing.T) {
 		if e != nil {
 			t.Fatal(e)
 		}
-		sources = append(sources, map[string]any{"engine": engine, "engine_sha256": fmt.Sprintf("%x", sha256.Sum256(raw)), "version": "actual-engine-fixture", "files": files})
+		version, e := exec.Command(engine, "--version").Output()
+		if e != nil {
+			t.Fatal(e)
+		}
+		sources = append(sources, map[string]any{"engine": engine, "engine_sha256": fmt.Sprintf("%x", sha256.Sum256(raw)), "version": strings.TrimSpace(string(version)), "files": files})
 	}
 	if markers[0] == markers[1] {
 		t.Skip("engines have identical system inventories")

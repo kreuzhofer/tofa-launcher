@@ -91,7 +91,9 @@ func bindDesktopSystemSkillsEvidence(id *desktopAdmissionIdentity, ref *desktopS
 	matched := false
 	accepted := map[string]bool{}
 	for _, source := range contract.Sources {
-		if !filepath.IsAbs(source.Engine) || !validDigest(source.SHA256) || !validText(source.Version, 256) || len(source.Files) < 2 || len(source.Files) > 4096 {
+		// Native --version emits a printable label, not a whitespace-free ID.
+		version := strings.ReplaceAll(source.Version, " ", "")
+		if !filepath.IsAbs(source.Engine) || !validDigest(source.SHA256) || !validText(version, 256) || len(source.Version) > 256 || len(source.Files) < 2 || len(source.Files) > 4096 {
 			return admissionError("system skills source invalid")
 		}
 		if live {
