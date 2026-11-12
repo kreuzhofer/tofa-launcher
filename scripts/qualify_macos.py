@@ -183,6 +183,13 @@ def save_report(reports, evidence):
              f"Codex: {evidence['client'].get('version', 'unknown')}", f"Backend: {evidence['backend']}", "",
              "| Stage | Outcome |", "| --- | --- |"]
     lines.extend(f"| {stage['name']} | {stage['status']} |" for stage in evidence["stages"])
+    if "qualification_scope" in evidence:
+        lines.extend(["", "Scope: `" + evidence["qualification_scope"] + "`"])
+        if evidence["qualification_scope"] == "preserve_lifecycle":
+            lines.append("Destructive purge was not run; removed-state fields do not establish a purge result.")
+    if "retained_state" in evidence:
+        lines.extend(["", "Retained state:"])
+        lines.extend(f"- {name}: {value}" for name, value in evidence["retained_state"].items())
     for group in ("preservation", "cleanup"):
         lines.extend(["", group.capitalize() + ":"])
         lines.extend(f"- {name}: {value}" for name, value in evidence[group].items())

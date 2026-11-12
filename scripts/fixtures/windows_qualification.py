@@ -81,6 +81,8 @@ def vault_exists():
         return ctypes.string_at(credential.CredentialBlob, credential.CredentialBlobSize) == b"PRIVATE_KEY"
     finally:
         api.CredFree(pointer)
+if args == ["__vault_check"]:
+    sys.exit(0 if vault_exists() else 1)
 if args == ["__vault_cleanup"]:
     vault_delete(); sys.exit()
 if args == ["--version"]:
@@ -139,4 +141,12 @@ threading.Thread(target=server.serve_forever, daemon=True).start()
 os.environ["TOFA_API_KEY"] = "PRIVATE_LOCAL_TOKEN"
 provider = "model_providers.nebius-tofa={base_url=" + json.dumps("http://127.0.0.1:" + str(server.server_port)) + "}"
 code = subprocess.call(["codex.exe", "-c", provider] + args[args.index("--") + 1:])
-server.shutdown(); server.server_close(); sys.exit(code)
+server.shutdown(); server.server_close()
+if mode in ("saved_config_changed", "saved_credential_changed"):
+    counter = root / (mode + '.count')
+    count = int(counter.read_text()) + 1 if counter.exists() else 1
+    counter.write_text(str(count))
+    if count == 4:
+        if mode == "saved_config_changed": (config / "config.yml").write_text("changed after live")
+        else: (config / "credentials.yml").write_text("CHANGED_KEY")
+sys.exit(code)

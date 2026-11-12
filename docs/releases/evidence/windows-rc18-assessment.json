@@ -1,0 +1,120 @@
+{
+  "candidate": "v0.1.0-rc.18",
+  "source_runner": "319ee8123c7fe734708353501d23db15683ea3a9",
+  "binary_sha256": "8630723a7e28f908334499812f0f97931a918ed14854194a056b471821b44d72",
+  "verdict": "functional_and_preserve_lifecycle_passed; destructive_purge_not_run",
+  "platform": "Windows 11 Pro build 26200 ARM64",
+  "client": "Codex CLI 0.160.1 ARM64 explicitly selected",
+  "main": "moonshotai/Kimi-K3",
+  "guardian": "zai-org/GLM-5.3-Flash",
+  "passed": [
+    "published_asset_identity",
+    "install_repeat_and_fresh_process_discovery",
+    "onboarding_vault_storage",
+    "relative_workspace_read_write",
+    "outside_workspace_write_denied",
+    "streaming_and_tool_results_before_and_after_reinstall",
+    "same_session_coding_continuation_before_and_after_reinstall",
+    "independently_verified_output_fixtures",
+    "guardian_allow_and_deny_before_and_after_reinstall",
+    "preserve_uninstall_with_completed_helpers",
+    "same_binary_reinstall_and_saved_login_reuse",
+    "ordinary_existing_files_and_settings_preserved",
+    "saved_user_machine_execution_policy_preserved",
+    "owned_session_cleanup_and_successful_process_exits"
+  ],
+  "not_run": [
+    "destructive_purge: user explicitly requires active credentials/configuration retained",
+    "Desktop launch",
+    "stable promotion"
+  ],
+  "limits": {
+    "requests_per_live_phase": 12,
+    "output_tokens_per_request": 4096,
+    "coding_seconds": 180,
+    "guardian_seconds": 120
+  },
+  "successful_phase_paid_requests": [
+    10,
+    7
+  ],
+  "failed_attempt_paid_requests": [
+    12,
+    12,
+    12,
+    0
+  ],
+  "all_attempt_paid_requests": 53,
+  "retained_credentials_active": true,
+  "original_receipts_unchanged": true,
+  "remaining_limitations": [
+    "Default CLI 0.162.0 sandbox setup failed in separate preflight; not qualified or replaced.",
+    "Original full runner failed; success assembled from explicitly separate corrected-workspace and preserve-only phases using unchanged published bytes and frozen test modules.",
+    "No model support promotion; GLM failures and unavailable DeepSeek launch retained.",
+    "Destructive-purge coverage is not claimed."
+  ],
+  "original_pre_run_files_and_saved_policies_preserved": true,
+  "intentional_owned_installation_path_entry_retained": true,
+  "schema": "tofa-public-windows-rc18-assessment-v1",
+  "assessment_sha256": "cb1b7b6fb172cb2a677132af5aa6b28ef2da6fba16ab16e21111a0e9b48491ec",
+  "original_receipt_count_verified": 56,
+  "receipt_sha256": {
+    "windows-rc18-01/windows-rc18-01.json": "03a0cb6a598a3c6aaf4f49f44e070949e83cb217b345a590a43e1cfca4482fe8",
+    "windows-rc18-retry-01/result.json": "89d40ccf77cf5f957352ba62ae9931b060c882b7158e56081370380c23ef2dda",
+    "windows-rc18-retry-02/result.json": "5e89f2f04a154e710914fb4735d51bc194eec4816bc2634decccaa5a82601562",
+    "windows-rc18-retry-03/result.json": "b4d3aea221163319dbd81517eca52afac1629ef7723333a9881f2f9b481a0cad",
+    "windows-rc18-retry-04/result.json": "1e4b46125d960fe38fa399d0a72b880452bb0164d8bb12a1e808b27326cb8ecf",
+    "windows-rc18-saved-login-05/result.json": "b6bfaea221a52dacacefec3fcce271ca3b616c0670df1bf8709cdc9c0181cf98",
+    "windows-rc18-preserve-reinstall/result.json": "2cae7a5668c50a03165e23505cca9cae019068daf33d00821e3530856288425c",
+    "artifact-check.json": "e45d457b3613a6dd54778d2c577c245700db53b35ae9d95c4fd1f0ef737b2acb",
+    "install-checks.json": "e326510d32eaf7c2ccbc44abcac3e8dc524afa52ea40f750af065692034d1b36",
+    "offline.json": "c1c9044bb168b9866eb91c44059dd31aeec94cdeec3cdf8524b9285850ee77ae"
+  },
+  "windows_desktop_refusal": {
+    "exit_code": 1,
+    "message": [
+      "tofa: experimental codex-desktop requires the tested macOS arm64 application; use launch codex for the CLI"
+    ],
+    "native_pe_machine": 43620
+  },
+  "cleanup_coverage": {
+    "native_arm64_frozen_installer_synthetic_file_credentials": "passed (retained windows_test.ps1)",
+    "canonical_rc18_windows_amd64_actual_candidate_helper_and_synthetic_vault": "passed (canonical CI 43193550374; supplementary to ARM64)",
+    "active_windows_rc18_vault_purge": "not_run; preserve working login",
+    "ordinary_credentials_purged": false,
+    "uninstaller_product_change_required": false
+  },
+  "tooling_validation": {
+    "commit": "cf8d91a",
+    "native_no_inference_checks": {
+      "installation_ownership": true,
+      "model_admission": true,
+      "cwd": true,
+      "relative_read": true,
+      "relative_write": true,
+      "python": true,
+      "outside_write_denied": true,
+      "engine_closed": true
+    },
+    "native_preservation": {
+      "ordinary_preserved": true,
+      "paths_preserved": true,
+      "saved_policy_preserved": true,
+      "saved_config_preserved": true,
+      "saved_credentials_active": true
+    },
+    "probe_receipt_sha256": "792d1fca0075c0428ff81dcf7bc1248a3e2072ebad211845bc1d2b1555a568cf",
+    "preservation_receipt_sha256": "46ca4571bc46d63aa860c607fee0054d21e1c05f9a3f1eaca5260eeb6678ead9",
+    "ci": "https://github.com/kreuzhofer/tofa-launcher/actions/runs/43240837484",
+    "ci_status": "success",
+    "ci_jobs": {
+      "artifacts": "success",
+      "native (windows-latest)": "success",
+      "native (macos-latest)": "success",
+      "native (ubuntu-latest)": "success",
+      "publish": "skipped"
+    },
+    "disposable_windows_admission_tests": 7,
+    "disposable_windows_lifecycle_tests": 21
+  }
+}

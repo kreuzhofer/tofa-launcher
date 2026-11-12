@@ -22,7 +22,7 @@ def run(options, root):
     budget = root / 'budget.json'
     request_limit = None if getattr(options, 'no_request_limit', False) else 12
     budget.write_text(json.dumps({'used': 0, 'maximum': request_limit}))
-    names = ('TOFA_EVAL_BUDGET', 'TOFA_EVAL_CASE', 'TOFA_EVAL_MODEL', 'TOFA_EVAL_GUARDIAN_MODEL')
+    names = ('TOFA_EVAL_BUDGET', 'TOFA_EVAL_CASE', 'TOFA_EVAL_MODEL', 'TOFA_EVAL_GUARDIAN_MODEL', 'PATH')
     before = {name: os.environ.get(name) for name in names}
     os.environ.update(TOFA_EVAL_BUDGET=str(budget), TOFA_EVAL_CASE='coding',
                       TOFA_EVAL_MODEL=options.model, TOFA_EVAL_GUARDIAN_MODEL=options.guardian_model)
@@ -34,6 +34,16 @@ def run(options, root):
         if os.name == 'nt':
             import windows_sandbox_state
             native_state = windows_sandbox_state.NativeState(root)
+            # Expose the interpreter used by this run only to its process tree.
+            os.environ['PATH'] = str(Path(sys.executable).parent) + os.pathsep + os.environ.get('PATH', '')
+            if native_state.home is not None:
+                import windows_qualification_preflight
+                admission = SimpleNamespace(**vars(options))
+                admission.native_home = native_state.home
+                report['preflight'] = windows_qualification_preflight.measure(admission, root)
+                if not report['preflight']['passed']:
+                    report['failure'] = 'windows_preflight_failed'
+                    return report
         coding_root = root / 'coding'; coding_root.mkdir()
         settings = SimpleNamespace(**vars(options))
         settings.timeout = 180
@@ -68,6 +78,9 @@ def main():
                         help='explicitly remove the request-count budget; retain counts, output/body bounds and deadlines')
     for name in ('launcher', 'codex', 'model', 'guardian-model', 'output'):
         parser.add_argument('--' + name, required=True)
+    parser.add_argument('--workspace-parent', type=Path, default=Path.home(),
+                        help='Windows execution parent with normal inherited ACLs; staging ACLs remain untouched')
+    parser.add_argument('--owned-installation', type=Path, help='verify existing installed launcher ownership before native admission')
     options = parser.parse_args()
     output = Path(options.output)
     if output.exists() or output.is_symlink() or not output.parent.is_dir():
@@ -76,8 +89,13 @@ def main():
     if os.name == 'nt':
         import windows_process
         options.codex = windows_process.resolve_codex(options.codex)
-    with tempfile.TemporaryDirectory(prefix='tofa-acceptance-pair-') as directory:
-        report = run(options, Path(directory).resolve())
+    if os.name == 'nt':
+        from windows_qualification_preflight import execution_workspace
+        with execution_workspace(options.workspace_parent) as root:
+            report = run(options, root)
+    else:
+        with tempfile.TemporaryDirectory(prefix='tofa-acceptance-pair-') as directory:
+            report = run(options, Path(directory).resolve())
     live.write_json(Path(options.output), report)
     return 0 if report['passed'] else 1
 

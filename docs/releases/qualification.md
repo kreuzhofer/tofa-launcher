@@ -4,6 +4,54 @@ For the next candidate after the merged native-account integration, use the
 [current #106 candidate plan](next-candidate-106.md). The dated candidate sections
 below retain their original scope and results; they are not the current handoff.
 
+## Current Windows retention and admission policy
+
+The [rc18 assessment](v0.1.0-rc.18-windows.md) supersedes the historical purge
+instructions below for current Windows follow-up work. Keep active credentials
+and configuration installed. Do not rerun a frozen wizard that includes purge.
+
+The current `qualify_windows.py` installs/onboards into a newly declared state
+root, checks preserve-uninstall/reinstall, and retains the working installation,
+configuration and saved credentials by default. `qualification_scope` is
+`preserve_lifecycle`; the `purge` stage is `not_run / retained_by_policy`.
+`retained_state` must pass along with preservation, scratch cleanup and helper
+completion. Removed-state booleans remain truthful and can be false. Explicit
+`--purge` selects `full_lifecycle` and requires its removed-state checks; in manual
+mode it also requires the existing `PURGE` confirmation. Never apply it to the
+working login merely to turn a cleanup field green.
+
+For a follow-up that needs only an acceptance pair, reuse the existing
+`LOCALAPPDATA`, `XDG_CONFIG_HOME` and `TOFA_INSTALL_DIR` namespace and invoke
+`scripts/qualification_pair.py` with explicit launcher/client/Main/Guardian and a
+new output file. Do not re-onboard, reinstall or remove saved configuration.
+With `TOFA_NATIVE_WINDOWS_CODEX_HOME` pointing to the existing initialized sandbox,
+the pair first verifies launcher admission and native sandbox prerequisites without
+inference. Failure stops before coding and records zero paid requests.
+
+Use `--workspace-parent` to select an existing normal user-profile execution
+parent; the Windows default is the current home. Only a uniquely owned child is
+created/removed. Protected transfer staging is for inputs, not execution; do not
+relax its ACLs. The pair adds its Python interpreter directory to process PATH
+and restores the parent environment afterward; saved PATH and shell policy stay
+unchanged. Model identities/catalogs remain provenance, but selected roles must
+pass actual launcher admission. No automatic model substitution occurs.
+
+The same admission check can run independently:
+
+```text
+python scripts/windows_qualification_preflight.py --launcher INSTALLED_TOFA
+  --codex NATIVE_CODEX --model MAIN --guardian-model GUARDIAN
+  --owned-installation INSTALL_ROOT --native-home INITIALIZED_CODEX_HOME
+  --workspace-parent NORMAL_PARENT --output NEW_REPORT.json
+```
+
+Supply that as one command with normal platform quoting. It uses `-- --version`
+and owned native sandbox commands only: exact cwd, relative read/write, the
+installed Python interpreter, and denied writes outside the workspace. It neither
+initializes the sandbox nor changes login/configuration. Ownership markers are
+BOM-aware and mismatched owners fail before launching. There is no paid retry.
+Record the tooling revision separately from the immutable release source.
+
 ## Agent-operated rc14 qualification (2026-10-01)
 
 Required targets are macOS ARM64 and Windows 11 ARM64 in UTM. Existing hosted
@@ -285,7 +333,7 @@ implementations may add evidence fields without changing these names:
 | `model` | `moonshotai/Kimi-K3` |
 | `started_utc` | UTC timestamp |
 | `existing_state` | Booleans for `installation`, `configuration`, `file_credentials`, `vault_references` |
-| `stages` | Ordered `{name, status}` entries; statuses `pending`, `running`, `passed`, `failed`, `incomplete` |
+| `stages` | Ordered `{name, status}` entries; statuses `pending`, `running`, `passed`, `failed`, `incomplete`, `not_run` |
 | `preservation` | Named boolean checks; `null` means not established |
 | `cleanup` | Named boolean checks; `null` means not established |
 | `outcome` | `passed`, `failed`, or `incomplete` |
@@ -295,8 +343,9 @@ implementations may add evidence fields without changing these names:
 Shared stages: `preflight`, `recovery`, `download`, `install`, `login`,
 `fresh_terminal`, `live`, `uninstall`, `reinstall`, `saved_login_reuse`, `purge`.
 A `passed` human stage records the maintainer's explicit confirmation; synthetic
-CI answers never establish real-machine acceptance. Full macOS and Windows reports
-against the same final candidate remain required by #23.
+CI answers never establish real-machine acceptance. Platform verdicts against
+the same final candidate remain required by #23; retain their exact scope and
+report destructive cleanup independently from preserved-login acceptance.
 
 ## Offline development checks
 

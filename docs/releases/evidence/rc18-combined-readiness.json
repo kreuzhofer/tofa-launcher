@@ -1,0 +1,192 @@
+{
+  "schema": "tofa-rc18-combined-readiness-v1",
+  "assessed_utc": "2026-11-12T16:06:56.474574+00:00",
+  "verdict": "qualified_experimental_scoped",
+  "candidate": {
+    "version": "v0.1.0-rc.18",
+    "source_runner": "319ee8123c7fe734708353501d23db15683ea3a9",
+    "product_baseline": "b2135469a26337e40ad91caf76f926e34327e646",
+    "manifest_sha256": "429e03bd0bd3c9a84e3be130566666c4541015903765e38d63931df1f63997e6",
+    "mac_arm64_sha256": "90fde6cfb3663699b6e7399f297325f4d199d5aa4627a4e629b091a82680cf46",
+    "windows_arm64_sha256": "8630723a7e28f908334499812f0f97931a918ed14854194a056b471821b44d72",
+    "published_assets_reverified": 18
+  },
+  "mac": {
+    "verdict": "passed",
+    "stages": 11,
+    "report_sha256": "8c825dc0dcaa3c9d0a10988b2220ca11fe7fde089b7efc41d08b6312796519ab",
+    "client": "codex-cli 0.167.2",
+    "os": "macOS 27.0.1 ARM64"
+  },
+  "windows": {
+    "verdict": "functional_and_preserve_lifecycle_passed",
+    "assessment_commit": "6c9d382606e62eac059bad55174accdd117e2513",
+    "private_assessment_sha256": "cb1b7b6fb172cb2a677132af5aa6b28ef2da6fba16ab16e21111a0e9b48491ec",
+    "original_receipts_reverified": 56,
+    "client": "codex-cli 0.160.1 ARM64 explicitly selected",
+    "default_client_0_162_0": "sandbox_setup_failed_not_qualified",
+    "working_vault_purge": "not_run",
+    "active_credentials_configuration": "retained"
+  },
+  "desktop": {
+    "verdict": "accepted_behaviour_specific_reuse",
+    "current_components": {
+      "version": "26.1027.61615",
+      "build": "24141",
+      "hashes": {
+        "application": "b3783838c86c3124d4b0fd5fa5c2d2fca327b4b4f52c7c7c369df25cfa879509",
+        "application_archive": "bb88615052255e79b5977885f9a0cc212c268589587c79d4d3b7c4b46e881a95",
+        "application_info": "fb72c75a6cabb64f05420aef782b2d6ac86269a6c5557a75dabfa796905ee6ef",
+        "engine": "58a91f6ea19bea477ae3a2ec48d619f0039afe75d3476260747e11d201fa7cea",
+        "native_transport": "872b35a9f8c8a63a90477b02c3023fff93ff212c0624b024afc350b9d9c12676"
+      },
+      "changed_components": []
+    },
+    "runtime": {
+      "bundle_version": "26.1110.11258",
+      "artifact_tool_version": "2.8.145",
+      "hashes": {
+        "manifest": "9a6c84731dd321b369be411515e1d485200eb5490f813411607fb9b67993c1da",
+        "node": "4f0f73aa8c10cbf8f5caa825488203f1049ee08c76e70067678dde1cdf1160ea",
+        "python": "72ce7a84750d175f879cb5adfbfa57923964dc7ffd0bd371667382f0b2af1f47",
+        "artifact_package": "44c1563ac90b7f74027c9d0a5f6417dd771a1158a085fdaf2609bce10d950d9d",
+        "artifact_module": "e61ce82fd8d9b311d0c032b0ed6d4d1237cd86bb34cc3c9d655ca3cf5fe79c74",
+        "soffice": "81c7db1c6dbcdd606d95abef337b4529aeda6a4fa1cf23a5a567f9c5655c8b66",
+        "pdfinfo": "fee70ade670fb025343aca2b5c3a2aacacb8ed9edce1b716b233b5de924b6bf5",
+        "pdftoppm": "de772e88ab9977ccde25def9b403bf42675d75f5dd82b19fbd7d8123ad183159",
+        "native_soffice": "0602181a6c26c8e46aa166db18412cef1b31b6d95eb9d7033ffc4cc0ce2e66f2",
+        "native_pdfinfo": "45fa717fb4aaec4bfbefc3a07612ff2539dbfcce30fb30e976aa5d4a35bef802",
+        "native_pdftoppm": "d9d81b176e8fd38d07f2fbf4f84c17dc991c6bac3730ff3cad3239c4fcbed892"
+      },
+      "unchanged_from_accepted_preview": true
+    },
+    "recent_reviews": [
+      {
+        "run": "runtime-preview.5f5c33f6763b5750",
+        "review_sha256": "c89c750d252e40184108c3139feceebc159a78da1d806fcb93b4a22235e3aebd",
+        "receipts_verified": 79,
+        "original_status": "accepted_scoped_runtime_and_native_previews"
+      },
+      {
+        "run": "service-switching.81a930919206127f",
+        "review_sha256": "e0fd0a9f9f1c93eaffb77096de720a81339b266b08eeef430ae289ba025d7622",
+        "receipts_verified": 38,
+        "original_status": "accepted_scoped_switching"
+      },
+      {
+        "run": "history-resume.e2506ffd3acb779b",
+        "review_sha256": "a70fa64dfcceb75225812a2245ff170db5de718e9cfb4572ce078f143e8f8df8",
+        "receipts_verified": 33,
+        "original_status": "accepted_scoped_routed_resume_and_tool_continuation"
+      },
+      {
+        "run": "review-routing.915fd65e00347bff",
+        "review_sha256": "4ba05c4dd03ecfe5be89874aa6eed40de6f6424e8d6b162e721d6037b5c5aacf",
+        "receipts_verified": 40,
+        "original_status": "accepted_scoped_approval_routing"
+      },
+      {
+        "run": "native-history-seed.91atr_ph",
+        "review_sha256": "533a3ddbb0d2c8778f7cd66e0438109b8629f0e1fe24d9839162a405ea05fe9a",
+        "receipts_verified": 17,
+        "original_status": "accepted_recovered_native_seed"
+      },
+      {
+        "run": "history-resume.d011310d5cb3424f",
+        "review_sha256": "57eefc44a8f3234155c679a4f2e3af140a0f2d3280bef09363831360f8d8f27c",
+        "receipts_verified": 35,
+        "original_status": "accepted_scoped"
+      },
+      {
+        "run": "ordinary-recovery.pre9innp",
+        "review_sha256": "ca35e41192216a8b1f35694d6670ee95a063340b47a4f94e7da4001f1438856c",
+        "receipts_verified": 25,
+        "original_status": "failed_actionable_inactive_route_guidance"
+      }
+    ],
+    "recent_receipts_reverified": 267,
+    "earlier_reviews": [
+      {
+        "run": "clean-exit.e84b8bc112ba9506",
+        "review_sha256": "f41bb2009926422fe9c17e4dfc6ee76fa790f352c8a4fbfa382c4effac743ae2",
+        "receipt_count": 29,
+        "original_status": "functional_clean_exit_observed_plugin_preservation_unqualified",
+        "policy_assessment_sha256": "b540755be472b18920e0fa9a76630c001626a7e6de8a47631b301fd7ca2ba44f"
+      },
+      {
+        "run": "repeat-launch.5fdfe556d4edba09",
+        "review_sha256": "766b845c80d647899e44b0b377a5978a01871a8c0e6422ddf7619a12dc658a94",
+        "receipt_count": 13,
+        "original_status": "blocked_by_catalog_identity_drift",
+        "policy_assessment_sha256": "8b6b23db9947081fad55e51c6eccd740a9b9bd17d41985452df3b0cea9b1c6bd"
+      },
+      {
+        "run": "launcher-crash.cbfecaaa8a046312",
+        "review_sha256": "909e48812c8768e984264bee816ebb47640206914c7aadb14df4927a5cd6f9ac",
+        "receipt_count": 32,
+        "original_status": "accepted_for_scoped_launcher_crash",
+        "policy_assessment_sha256": null
+      },
+      {
+        "run": "ordinary-recovery.a9vi4y_n",
+        "review_sha256": "71bb7c08cda140f65cd8d1b6d6a041903477e857a510e17a2b74e84b66b6f667",
+        "receipt_count": 25,
+        "original_status": "functional_recovery_observed_preservation_unqualified",
+        "policy_assessment_sha256": null
+      }
+    ],
+    "earlier_receipts_reverified": 99,
+    "material_compatibility_change": false,
+    "reason": "Relevant current app/engine/transport/runtime components match retained evidence; frozen product equals accepted admission baseline; subsequent qualification tooling does not change product or installers."
+  },
+  "tooling": {
+    "branch": "fix/134-plugin-inventory",
+    "commits": [
+      "cf8d91a",
+      "6c9d382"
+    ],
+    "disposition": "reviewed_pushed_unmerged_separate_pr_followup",
+    "part_of_rc18": false,
+    "merge_is_rc18_gate": false
+  },
+  "ci": {
+    "canonical-ci": {
+      "head": "319ee8123c7fe734708353501d23db15683ea3a9",
+      "url": "https://github.com/kreuzhofer/tofa-launcher/actions/runs/43193550374",
+      "jobs": {
+        "artifacts": "success",
+        "native (windows-latest)": "success",
+        "native (ubuntu-latest)": "success",
+        "native (macos-latest)": "success",
+        "publish": "success"
+      }
+    },
+    "tooling-ci": {
+      "head": "cf8d91abdcb9c088b278566b513b5abe2cc6c412",
+      "url": "https://github.com/kreuzhofer/tofa-launcher/actions/runs/43240837484",
+      "jobs": {
+        "artifacts": "success",
+        "native (windows-latest)": "success",
+        "native (macos-latest)": "success",
+        "native (ubuntu-latest)": "success",
+        "publish": "skipped"
+      }
+    }
+  },
+  "remaining_required_gates": [],
+  "limitations": [
+    "Experimental scope only; no model support certification or stable promotion.",
+    "Windows default CLI 0.162.0 is not qualified.",
+    "Working Windows vault purge is unrun; synthetic cleanup evidence is a separate lane.",
+    "Windows Desktop remains disabled.",
+    "Ordinary Desktop may reconnect indefinitely; stop, quit, relaunch through TOFA and reopen the same conversation.",
+    "Original failed/incomplete reports and unexplained historical preservation differences remain unchanged."
+  ],
+  "actions": {
+    "candidate_rebuilt": false,
+    "desktop_launched": false,
+    "accepted_live_checks_repeated": false,
+    "credentials_or_configuration_changed": false,
+    "stable_promoted": false
+  }
+}
