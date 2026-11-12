@@ -1,8 +1,10 @@
 """Declared qualification scope at the authenticated Observer HTTP boundary."""
 import hashlib
 import json
+import threading
 from pathlib import Path
 import unittest
+from unittest import mock
 
 from capability_observer import NAMING_MODEL, Observer, hashed
 import capability_observer_test as boundary_tests
@@ -310,12 +312,27 @@ class DeclaredScopeTests(unittest.TestCase):
 
     def test_pre_main_title_does_not_admit_unrelated_or_future_context(self):
         helper = boundary_tests.SplitAuthorizationTests()
+        original_stop = Observer.stop
         for prompt in ('Unrelated private task.', 'Recall scoped lighthouse.', 'Finish scoped lighthouse.'):
-            with self.subTest(prompt=prompt), self.boundary() as (observer, seen, registration):
-                helper.register(observer, registration)
-                self.send(observer, self.title(prompt), 403)
-                self.assertFalse(any(r[0] == '/responses' for r in seen))
-                self.assertEqual(observer.reason, 'scope_mismatch')
+            with self.subTest(prompt=prompt):
+                response_received = threading.Event()
+                def stop_after_response(observer, reason):
+                    if reason == 'scope_mismatch' and not response_received.wait(2):
+                        raise AssertionError('client did not consume the rejection')
+                    return original_stop(observer, reason)
+                # Force the valid scheduling order where the client receives the
+                # rejection before the handler records the terminal stop reason.
+                with mock.patch.object(Observer, 'stop', stop_after_response):
+                    with self.boundary() as (observer, seen, registration):
+                        helper.register(observer, registration)
+                        try:
+                            self.send(observer, self.title(prompt), 403)
+                            self.assertFalse(any(r[0] == '/responses' for r in seen))
+                        finally:
+                            response_received.set()
+                    # Boundary exit joins the request handlers before inspecting
+                    # the terminal state; HTTP reply delivery alone does not.
+                    self.assertEqual(observer.reason, 'scope_mismatch')
 
     def test_pre_main_title_does_not_authorize_review(self):
         helper = boundary_tests.SplitAuthorizationTests()
