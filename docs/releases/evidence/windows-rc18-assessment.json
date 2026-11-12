@@ -83,5 +83,38 @@
     "active_windows_rc18_vault_purge": "not_run; preserve working login",
     "ordinary_credentials_purged": false,
     "uninstaller_product_change_required": false
+  },
+  "tooling_validation": {
+    "commit": "cf8d91a",
+    "native_no_inference_checks": {
+      "installation_ownership": true,
+      "model_admission": true,
+      "cwd": true,
+      "relative_read": true,
+      "relative_write": true,
+      "python": true,
+      "outside_write_denied": true,
+      "engine_closed": true
+    },
+    "native_preservation": {
+      "ordinary_preserved": true,
+      "paths_preserved": true,
+      "saved_policy_preserved": true,
+      "saved_config_preserved": true,
+      "saved_credentials_active": true
+    },
+    "probe_receipt_sha256": "792d1fca0075c0428ff81dcf7bc1248a3e2072ebad211845bc1d2b1555a568cf",
+    "preservation_receipt_sha256": "46ca4571bc46d63aa860c607fee0054d21e1c05f9a3f1eaca5260eeb6678ead9",
+    "ci": "https://github.com/kreuzhofer/tofa-launcher/actions/runs/43240837484",
+    "ci_status": "success",
+    "ci_jobs": {
+      "artifacts": "success",
+      "native (windows-latest)": "success",
+      "native (macos-latest)": "success",
+      "native (ubuntu-latest)": "success",
+      "publish": "skipped"
+    },
+    "disposable_windows_admission_tests": 7,
+    "disposable_windows_lifecycle_tests": 21
   }
 }
