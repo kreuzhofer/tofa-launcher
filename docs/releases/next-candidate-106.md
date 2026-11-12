@@ -4,9 +4,12 @@ Follow-up: rc18 was published from `319ee812` and Mac ARM64 lifecycle passed.
 [Windows ARM64 integration and preserve-lifecycle passed](v0.1.0-rc.18-windows.md),
 with active credentials retained and destructive cleanup assessed separately.
 The remaining-work tables below preserve the original pre-publication plan;
-use the [rc18 status](v0.1.0-rc.18.md) for current evidence. No stable promotion.
+use the [qualified combined verdict](v0.1.0-rc.18-readiness.md) for current
+evidence, scoped limitations and the unmerged #105 tooling disposition.
+No stable promotion.
 
-Decision recorded November 12, 2026: **combined release readiness is incomplete**.
+Original pre-publication decision, superseded by the linked combined verdict:
+**combined release readiness was incomplete**.
 The macOS Desktop integration is accepted for its recorded behaviours. A new
 shared published candidate and its Mac/Windows CLI lifecycle verdicts are still
 needed. This plan does not publish a release, launch Desktop, authorize live
