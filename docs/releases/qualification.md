@@ -1,5 +1,9 @@
 # Local prerelease qualification
 
+For the next candidate after the merged native-account integration, use the
+[current #106 candidate plan](next-candidate-106.md). The dated candidate sections
+below retain their original scope and results; they are not the current handoff.
+
 ## Agent-operated rc14 qualification (2026-10-01)
 
 Required targets are macOS ARM64 and Windows 11 ARM64 in UTM. Existing hosted
