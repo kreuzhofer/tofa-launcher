@@ -1,5 +1,11 @@
 # Shared candidate plan after native-account integration (#106)
 
+Follow-up: rc18 was published from `319ee812` and Mac ARM64 lifecycle passed.
+[Windows ARM64 integration and preserve-lifecycle passed](v0.1.0-rc.18-windows.md),
+with active credentials retained and destructive cleanup assessed separately.
+The remaining-work tables below preserve the original pre-publication plan;
+use the [rc18 status](v0.1.0-rc.18.md) for current evidence. No stable promotion.
+
 Decision recorded November 12, 2026: **combined release readiness is incomplete**.
 The macOS Desktop integration is accepted for its recorded behaviours. A new
 shared published candidate and its Mac/Windows CLI lifecycle verdicts are still

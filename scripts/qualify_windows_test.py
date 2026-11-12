@@ -17,6 +17,14 @@ SCRIPTS = Path(__file__).resolve().parent
 VERSION = "v0.1.0-rc.1"
 
 
+class WindowsQualificationInterfaceTests(unittest.TestCase):
+    def test_purge_requires_an_explicit_command_option(self):
+        result = subprocess.run([sys.executable, str(SCRIPTS / 'qualify_windows.py'), '--help'], capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('--purge', result.stdout)
+        self.assertIn('default retains', result.stdout)
+
+
 @unittest.skipUnless(os.name == "nt", "native Windows required")
 class WindowsQualificationTests(unittest.TestCase):
     @classmethod
@@ -116,10 +124,10 @@ class Fixture {
             hashlib.sha256(p.read_bytes()).hexdigest() + "  " + p.name + "\n"
             for p in self.assets.iterdir() if p.name != "SHA256SUMS"))
 
-    def run_runner(self, answers="READY\nFOUND\nPURGE\n", timeout=20):
+    def run_runner(self, answers="READY\nFOUND\nPURGE\n", timeout=20, purge=True):
         result = subprocess.run([sys.executable, str(SCRIPTS / "qualify_windows.py"),
                                  "--version", VERSION, "--output", str(self.report),
-                                 "--timeout", str(timeout)], input=answers, text=True, capture_output=True,
+                                 "--timeout", str(timeout)] + (["--purge"] if purge else []), input=answers, text=True, capture_output=True,
                                 env=self.env, timeout=120)
         self.assertTrue(self.report.is_file(), result.stdout + result.stderr)
         report = json.loads(self.report.read_text())
@@ -142,6 +150,37 @@ class Fixture {
         self.assertTrue(report["live"]["same_session"])
         self.assertTrue(report["saved_login_reuse"]["passed"])
         self.assertTrue(all(stage["status"] == "passed" for stage in report["stages"]))
+
+    def test_default_preserves_working_login_configuration_and_installation(self):
+        result, report = self.run_runner(answers="READY\nFOUND\n", purge=False)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(report['qualification_scope'], 'preserve_lifecycle')
+        self.assertEqual(report['outcome'], 'passed')
+        summary = self.report.with_suffix('.md').read_text()
+        self.assertIn('Scope: `preserve_lifecycle`', summary)
+        self.assertIn('Retained state:', summary)
+        self.assertIn('Destructive purge was not run', summary)
+        self.assertEqual(next(s for s in report['stages'] if s['name'] == 'purge')['status'], 'not_run')
+        self.assertTrue(all(report['retained_state'].values()))
+        self.assertEqual((self.config / 'credentials.yml').read_text(), 'PRIVATE_KEY')
+        self.assertTrue((self.config / 'config.yml').is_file())
+        self.assertTrue((self.install / 'bin/tofa.exe').is_file())
+        self.assertTrue(report['saved_login_reuse']['passed'])
+        self.assertTrue(all(report['preservation'].values()))
+        self.assertEqual((self.root / 'logins').read_text(), 'login\n')
+
+    def test_preserved_login_mutation_cannot_pass_retained_scope(self):
+        for mode in ("saved_config_changed", "saved_credential_changed"):
+            with self.subTest(mode=mode):
+                self.env['FIXTURE_MODE'] = mode
+                self.report = self.root / (mode + '.json')
+                result, report = self.run_runner(answers="READY\nFOUND\n", purge=False)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertEqual(report['reason'], 'final_state_incomplete')
+                self.assertTrue(report['saved_login_reuse']['passed'])
+                self.assertFalse(all(report['retained_state'].values()))
+                self.assertFalse(all(report['cleanup'].values()))
+                self.assertNotEqual(next(s for s in report['stages'] if s['name'] == 'purge')['status'], 'passed')
 
     def test_npm_cmd_is_resolved_without_shell_argument_parsing(self):
         native = self.bin / "actual-client.exe"
@@ -250,6 +289,19 @@ class Fixture {
         self.assertEqual(report["outcome"], "incomplete")
         self.assertEqual(report["reason"], "interrupted")
         self.assertTrue(report["cleanup"]["scratch_removed"])
+
+    def test_default_retains_usable_synthetic_vault_login(self):
+        self.env['FIXTURE_BACKEND'] = 'keyring'
+        fixture = [sys.executable, str(SCRIPTS / 'fixtures/windows_qualification.py'), 'tofa.exe']
+        # Only this test's unique synthetic reference is removed by test teardown.
+        self.addCleanup(subprocess.run, fixture + ['__vault_cleanup'], env=self.env, check=True)
+        result, report = self.run_runner(answers="READY\nFOUND\n", purge=False)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue(all(report['retained_state'].values()))
+        self.assertFalse(report['cleanup']['vault_credentials_removed'])
+        self.assertTrue(all(report['preservation'].values()))
+        self.assertEqual(next(s for s in report['stages'] if s['name'] == 'purge')['status'], 'not_run')
+        subprocess.run(fixture + ['__vault_check'], env=self.env, check=True)
 
     def test_synthetic_vault_reuse_and_purge(self):
         self.env["FIXTURE_BACKEND"] = "keyring"

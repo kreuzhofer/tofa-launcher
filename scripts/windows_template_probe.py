@@ -61,7 +61,7 @@ class NativeEngine:
             args.extend(['-c', setting])
         self.process = subprocess.Popen(args, cwd=workspace, env=env, stdin=subprocess.PIPE,
             stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, encoding='utf-8',
-            creationflags=subprocess.CREATE_NO_WINDOW)
+            creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
         self.messages: queue.Queue[Any] = queue.Queue(maxsize=128)
         self.sequence = 0
         self.notifications = []
