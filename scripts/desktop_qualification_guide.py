@@ -13,8 +13,7 @@ import time
 
 from desktop_qualification import private_run, read as private_read, save, integration_identity, integration_protected
 
-CANDIDATE_NAME = '372255f'
-HASHES = {'tofa': '7e74232c325b32b5f8c0c6ada314fdb05cc6191c5c1a05f01f0ec61678823b1f', 'source.tar': 'ef0e4738ed5ab65986512892bf460d6a4b3a34cceca1c0e08ec496e019a9f401'}
+import qualification_kit
 
 
 def read(path):
@@ -75,22 +74,13 @@ def response(run, pid, prompt, choices):
 
 
 def check(kit):
-    candidate = kit/'candidates'/CANDIDATE_NAME
-    for name, expected in HASHES.items():
-        if hashlib.sha256((candidate/name).read_bytes()).hexdigest() != expected:
-            raise ValueError('pinned candidate hash mismatch: '+name)
-    with tarfile.open(candidate/'source.tar') as archive:
-        for member in archive.getmembers():
-            if member.isfile() and member.name.startswith('scripts/'):
-                target = candidate/'source'/member.name
-                if target.is_symlink() or target.read_bytes() != archive.extractfile(member).read():
-                    raise ValueError('frozen collector source mismatch')
-    app = Path('/Applications/ChatGPT.app')
+    plan = qualification_kit.check(kit)
+    if plan['case'] != 'clean-exit':
+        raise ValueError('this operator guide supports clean-exit only')
+    app, runtime = Path(plan['app_bundle']), Path(plan['runtime_root'])
     if not (app/'Contents/Info.plist').is_file(): raise ValueError('host Desktop missing')
-    roots = list((Path.home()/'.cache/codex-runtimes').glob('*/runtime.json'))
-    if len(roots) != 1: raise ValueError('runtime discovery ambiguous or absent; agent review required')
-    read(roots[0])
-    print(roots[0].parent)
+    read(runtime/'runtime.json')
+    print(runtime)
 
 
 def identity_changes(before, after):
@@ -242,17 +232,28 @@ def main():
     kit = Path(sys.argv.pop(1)).resolve()
     action = sys.argv[1]
     if action == 'check': return check(kit)
+    if action == 'field':
+        plan = qualification_kit.declaration(kit)
+        key = sys.argv[2]
+        if key not in ('collector','launcher','model','guardian','requests','output_tokens'):
+            raise ValueError('unsupported guide field')
+        print(str(kit/plan[key]) if key in ('collector','launcher') else plan[key])
+        return
+    if action == 'prepare':
+        print(json.dumps(qualification_kit.prepare(kit)))
+        return
     if action == 'receipt':
         sources = [Path(__file__), Path(__file__).with_name('desktop_qualification_operator.sh')]
-        save(Path(sys.argv[2])/'guide.json', {'schema':'tofa-manual-guide-v1','candidate':CANDIDATE_NAME,
-             'candidate_hashes':HASHES,'guide_hashes':{p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in sources}})
+        save(Path(sys.argv[2])/'guide.json', {'schema':'tofa-manual-guide-v1','candidate':qualification_kit.declaration(kit)['source_revision'],
+             'kit_sha256':qualification_kit.digest(kit/'kit.json'),
+             'candidate_hashes':qualification_kit.declaration(kit)['files'],'guide_hashes':{p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in sources}})
         return
     run = private_run(Path(sys.argv[2]))
     if action == 'history-before': return history_before(run)
     if action == 'history-after': return history_after(run)
     if action == 'summarize':
         value = summary(run)
-        archive = kit/'evidence'/run.name
+        archive = Path(qualification_kit.declaration(kit)['durable_root'])/'evidence'/run.name
         value['durable_evidence'] = str(archive)
         with (run/'guide-summary.json').open('x') as stream: json.dump(value, stream, indent=2)
         # Copy only after the collector has ended. Keep original evidence paths.
