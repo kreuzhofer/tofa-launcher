@@ -15,6 +15,11 @@ when assigning triage roles.
 Use a single-context layout. Read `docs/agents/domain.md` before exploring
 the codebase.
 
+### Qualification and release work
+
+Read `docs/agents/qualification.md` before preparing or restoring guides, resuming
+a qualification campaign, reconciling evidence, or monitoring release CI.
+
 ### Development Principles
 Test-Driven Development: Write or update tests first. Do not claim completion unless tests run and pass, or explicitly state why they could not be run.
 

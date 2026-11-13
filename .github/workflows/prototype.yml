@@ -80,6 +80,9 @@ jobs:
           python3 scripts/presentation_runtime_test.py -v
           python3 scripts/desktop_qualification_test.py -v
           python3 scripts/desktop_qualification_guide_test.py -v
+          python3 scripts/qualification_kit_test.py -v
+          python3 scripts/qualification_reconcile_test.py -v
+          python3 scripts/qualification_workflow_test.py -v
           python3 -m unittest discover -s scripts -p system_skills_contract_test.py -v
           bash -n scripts/desktop_qualification_operator.sh
           python3 scripts/capability_scope_test.py -v
@@ -113,10 +116,25 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: ./scripts/windows_latest_test.ps1
+      - name: Lifecycle process diagnostics fixtures
+        run: python scripts/lifecycle_process_test.py -v
+      - name: Lifecycle executable resolution with duplicate PATH matches
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/windows_lifecycle_resolution_test.ps1 -PythonExecutable (python -c 'import sys; print(sys.executable)')
       - name: Native Windows candidate installation lifecycle
         if: runner.os == 'Windows'
         shell: pwsh
         run: ./scripts/windows_lifecycle_test.ps1 -Dist dist -Version $env:VERSION
+      - name: Retain sanitized Windows lifecycle failures
+        if: failure() && runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-lifecycle-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .ci-diagnostics/windows-lifecycle/*.json
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Windows process ownership and discovery
         if: runner.os == 'Windows'
         run: python scripts/windows_process_test.py -v

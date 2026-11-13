@@ -246,18 +246,30 @@ class QualificationTests(unittest.TestCase):
     def test_refusal_guide_cli_keeps_safe_reason_and_durable_evidence(self):
         import subprocess
         root = q.ROOT; root.mkdir(mode=0o700, exist_ok=True)
-        with tempfile.TemporaryDirectory(dir=root) as temporary:
+        with tempfile.TemporaryDirectory(dir=root) as temporary, tempfile.TemporaryDirectory(dir=Path(__file__).parent) as durable_temporary:
             fixture_root, run, frozen = self.refused_attempt(temporary)
             with contextlib.redirect_stdout(io.StringIO()): q.launch(run)
             script = str(Path(__file__).with_name('desktop_qualification_guide.py'))
             kit = fixture_root/'kit'; kit.mkdir(mode=0o700)
+            durable = Path(durable_temporary)
+            # The restored guide lives under /tmp; its declared archive does not.
+            (kit/'kit.json').write_text(json.dumps({
+                'schema':'tofa-qualification-kit-v1','source_revision':'a'*40,
+                'launcher':'tofa','collector':'collector.py','model_services':'models.json',
+                'files':{'tofa':'b'*64,'collector.py':'c'*64,'models.json':'d'*64},
+                'app_bundle':'/unused/app','runtime_root':'/unused/runtime',
+                'durable_root':str(durable),'run_root':'/tmp/tofa-presentation-validation',
+                'case':'clean-exit','model':'fixture/main','guardian':'fixture/reviewer',
+                'seconds':600,'requests':8,'output_tokens':4096,'prompt':'fixture',
+                'automatic_retries':0,'retain_credentials':True}))
             command = [sys.executable, script, str(kit)]
             ready = subprocess.run(command+['ready',str(run),'99999999'], capture_output=True, text=True, timeout=3)
             self.assertNotEqual(ready.returncode, 0)
             self.assertIn('Desktop profile is in use', ready.stderr)
             result = subprocess.run(command+['summarize',str(run)], capture_output=True, text=True, timeout=3)
             self.assertEqual(result.returncode, 0, result.stderr)
-            archive = kit/'evidence'/run.name
+            archive = durable/'evidence'/run.name
+            self.assertFalse((kit/'evidence').exists())
             summary = json.loads((archive/'guide-summary.json').read_text())
             self.assertEqual(summary['durable_evidence'], str(archive))
             self.assertEqual(summary['failure_phase'], 'prelaunch')

@@ -198,7 +198,7 @@ finish() {
 # the whole file before the first prompt, so an edit mid-run can't break it.
 # ──────────────────────────────────────────────────────────────────────────
 
-# Private host-only guide for candidate 372255f. Human performs every UI action.
+# Frozen kit guide. Human performs every UI action.
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)
 KIT=""
 PYTHON=/usr/bin/python3
@@ -258,12 +258,14 @@ run_wizard() {
   fi
   KIT=$(cd -- "$2" && pwd -P)
   shift 2
-  CANDIDATE="$KIT/candidates/372255f"
-  COLLECTOR="$CANDIDATE/source/scripts/desktop_qualification.py"
+  COLLECTOR=$(guide field collector)
+  MODEL=$(guide field model)
+  GUARDIAN=$(guide field guardian)
+  REVISION=$(guide field source_revision)
+  DURABLE=$(guide field durable_root)
   if [[ "${1:-}" == "--check" && $# == 1 ]]; then
     guide check >/dev/null
     collect freeze --help >/dev/null
-    "$PYTHON" -c 'import sys; sys.path.insert(0,sys.argv[1]); import desktop_qualification, capability_observer' "$CANDIDATE/source/scripts"
     say "Pinned assets and collector imports verified. No launch, network request, or inference."
     return
   fi
@@ -273,29 +275,24 @@ run_wizard() {
   runtime=$(guide check)
 
   stage "Prepare host Desktop"
-  say "One clean-exit check on this Mac; candidate 372255f. No VM."
-  say "Paid Kimi-K3; GLM-5.3-Flash Guardian; Lightning naming."
+  say "One clean-exit check on this Mac; candidate $REVISION. No VM."
+  say "Paid $MODEL; $GUARDIAN Guardian; Lightning naming."
   say "These are explicit selections for this attempt, not model-specific qualification requirements."
   say "Catalog changes are recorded as provenance; integration and preservation checks still apply."
-  say "Workspace setup happens before the baseline. Then 10 minutes from candidate launch, including observations; 8 requests, 4096 output tokens/request."
+  say "Workspace setup happens before the baseline. Then 10 minutes from candidate launch, including observations; $(guide field requests) requests, $(guide field output_tokens) output tokens/request."
   say "One attempt only. No retries or model substitutions. Ctrl-C cancels and retains evidence."
   step "Save Desktop work. Note your current account, installed plugins and Code Review availability, then QUIT ChatGPT Desktop normally."
   note "Keep ordinary settings unchanged. No password, token, account name, or other secret is requested."
   confirm "Desktop is quit and you are ready to do the check now?" || { say "No launch performed."; return; }
 
-  mkdir -p "$KIT/invocations"
-  INVOCATION=$(mktemp -d "$KIT/invocations/guide.XXXXXX")
+  mkdir -p "$DURABLE/invocations"
+  INVOCATION=$(mktemp -d "$DURABLE/invocations/guide.XXXXXX")
   trap cleanup EXIT
   trap 'exit 130' INT
   trap 'exit 143' TERM
   guide receipt "$INVOCATION"
   say "Allocating one fresh workspace. The preservation baseline is captured after ordinary-client setup."
-  if collect prepare --launcher "$CANDIDATE/tofa" --app-bundle /Applications/ChatGPT.app \
-    --runtime-root "$runtime" --model-services "$KIT/model-services.json" \
-    --source-revision 372255f639db639b7ebb6f0077ca127981c1e0f1 \
-    --case clean-exit --defer-snapshot --model moonshotai/Kimi-K3 --guardian zai-org/GLM-5.3-Flash \
-    --seconds 600 --requests 8 --output-tokens 4096 \
-    --prompt 'Reply exactly: tofa-clean-exit-ok. Do not use tools or create files.' \
+  if guide prepare \
     > "$INVOCATION/prepare.json" 2> "$INVOCATION/prepare.log"; then
     :
   else
@@ -323,7 +320,7 @@ run_wizard() {
 
   stage "Check preserved account and features"
   say "The candidate's native process and launch receipt were observed."
-  say "Keep Kimi-K3 selected throughout this check. Selecting another main model ends this bounded attempt; model switching is a separate test."
+  say "Keep $MODEL selected throughout this check. Selecting another main model ends this bounded attempt; model switching is a separate test."
   say "p = personally verified; f = missing/changed/failed; u = not observed or unsure."
   step "Open Settings → Account and check the account matches what you used before. Do not sign in again or change settings."
   observation account-visible "Account still visible and correct"
@@ -335,7 +332,7 @@ run_wizard() {
   stage "Submit the fixed smoke prompt"
   say "In Codex mode, select the EXACT workspace prepared above and start a NEW conversation within it."
   printf '\n%s\n\n' "$RUN/workspace"
-  say "Select Kimi-K3. Submit exactly this one prompt:"
+  say "Select $MODEL. Submit exactly this one prompt:"
   printf '\n%s\n\n' 'Reply exactly: tofa-clean-exit-ok. Do not use tools or create files.'
   say "Prompt file: $RUN/prompt.txt"
   step "Wait for the main answer. Inspect the automatic title separately; do not wait on a visibly failed title."

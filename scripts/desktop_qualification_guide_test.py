@@ -161,15 +161,36 @@ class GuideTests(unittest.TestCase):
         self.write('finish.json', {'stop':'operator_finished'})
         self.assertFalse(guide.summary(self.run)['protected_equal'])
 
+    def test_handoff_announces_declared_roles_and_keeps_invocations_durable(self):
+        import subprocess
+        script = Path(__file__).with_name('desktop_qualification_operator.sh').read_text()
+        start = script.index('  stage "Prepare host Desktop"')
+        end = script.index('  say "Allocating one fresh workspace', start)
+        durable = self.run/'durable'
+        durable.mkdir()
+        fixture = ('set -euo pipefail\n'
+                   'KIT="$1/temporary"; DURABLE="$1/durable"; REVISION=reviewed-revision; MODEL=another/main; GUARDIAN=another/reviewer\n'
+                   'stage() { echo "$*"; }; say() { echo "$*"; }; step() { :; }; note() { :; }; confirm() { return 0; }\n'
+                   'guide() { if [[ "$1" == field ]]; then echo 8; else echo "$INVOCATION"; fi; }\n'
+                   'cleanup() { :; }\nrun() {\n' + script[start:end] + '\n}\nrun\n')
+        result = subprocess.run(['bash','-c',fixture,'fixture',str(self.run)],capture_output=True,text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('reviewed-revision', result.stdout)
+        self.assertIn('another/main', result.stdout)
+        self.assertIn('another/reviewer', result.stdout)
+        self.assertNotIn('372255f', result.stdout)
+        self.assertEqual(len(list((durable/'invocations').glob('guide.*'))), 1)
+        self.assertFalse((self.run/'temporary/invocations').exists())
+
     def test_failed_prepare_reports_a_visible_error(self):
         import subprocess
         script = Path(__file__).with_name('desktop_qualification_operator.sh').read_text()
         # Execute the real guide's prepare boundary with a failing fixture.
-        start = script.rfind('\n', 0, script.index('collect prepare --launcher')) + 1
+        start = script.rfind('\n', 0, script.index('if guide prepare')) + 1
         end = script.index('\n  RUN=$(', start)
         fixture = ('set -euo pipefail\n'
                    'INVOCATION="$1"; KIT=unused; CANDIDATE=unused; runtime=unused\n'
-                   'collect() { false; }; warn() { echo "$*" >&2; }\n'
+                   'guide() { false; }; warn() { echo "$*" >&2; }\n'
                    'cleanup() { echo cleanup; }; trap cleanup EXIT\nrun() {\n' + script[start:end] + '\n}\nrun\n')
         result = subprocess.run(['bash','-c',fixture,'fixture',str(self.run)],capture_output=True,text=True)
         self.assertNotEqual(result.returncode, 0)
@@ -177,24 +198,6 @@ class GuideTests(unittest.TestCase):
         self.assertIn('cleanup',result.stdout)
         self.assertIn('Preparation failed before launch', result.stderr)
 
-
-    def test_preparation_declares_reviewed_candidate_and_new_budget(self):
-        import subprocess
-        script = Path(__file__).with_name('desktop_qualification_operator.sh').read_text()
-        start = script.rfind('\n', 0, script.index('collect prepare --launcher')) + 1
-        end = script.index('\n  RUN=$(', start)
-        capture = ('set -euo pipefail\n'
-                   'INVOCATION="$1"; KIT=kit; CANDIDATE=candidate; runtime=runtime\n'
-                   'collect() { /usr/bin/python3 -c \'import json,sys; print(json.dumps(sys.argv[1:]))\' "$@"; }\n'
-                   'warn() { echo "$*" >&2; }\nrun() {\n' + script[start:end] + '\n}\nrun\n')
-        result = subprocess.run(['bash','-c',capture,'fixture',str(self.run)],capture_output=True,text=True)
-        self.assertEqual(result.returncode, 0, result.stderr)
-        args = json.loads((self.run/'prepare.json').read_text())
-        self.assertIn('--defer-snapshot', args)
-        for flag, expected in {'--source-revision':'372255f639db639b7ebb6f0077ca127981c1e0f1',
-                              '--seconds':'600','--requests':'8','--output-tokens':'4096',
-                              '--case':'clean-exit','--model':'moonshotai/Kimi-K3'}.items():
-            self.assertEqual(args[args.index(flag)+1], expected)
 
     def test_workspace_setup_confirmation_precedes_freeze_and_launch(self):
         import subprocess

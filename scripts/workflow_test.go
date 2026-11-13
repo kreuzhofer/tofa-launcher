@@ -118,3 +118,50 @@ for event, ref, native, artifacts in itertools.product(
 		}
 	}
 }
+
+func TestLifecycleFailureArtifactIncludesOnlySanitizedReceipts(t *testing.T) {
+	data, err := os.ReadFile("../.github/workflows/prototype.yml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var workflow struct {
+		Jobs map[string]struct {
+			Steps []struct {
+				Uses string
+				If   string
+				With map[string]string
+			}
+		}
+	}
+	if err := yaml.Unmarshal(data, &workflow); err != nil {
+		t.Fatal(err)
+	}
+	found := false
+	for _, step := range workflow.Jobs["native"].Steps {
+		if step.Uses != "actions/upload-artifact@v4" {
+			continue
+		}
+		found = true
+		if step.With["path"] != ".ci-diagnostics/windows-lifecycle/*.json" || step.With["include-hidden-files"] != "true" {
+			t.Fatal("failure artifact must include hidden diagnostic JSON, never raw scratch files")
+		}
+		if !strings.Contains(step.With["name"], "github.run_attempt") {
+			t.Fatal("retain separate workflow attempts")
+		}
+		check := exec.Command("python3", "-c", `
+import sys
+from types import SimpleNamespace as NS
+expression = sys.argv[1].replace('&&',' and ').replace('||',' or ')
+for failed in (False, True):
+    for platform in ('Windows','macOS','Linux'):
+        actual = eval(expression, {'__builtins__':{}}, {'failure':lambda:failed, 'runner':NS(os=platform)})
+        assert actual == (failed and platform == 'Windows'), (failed, platform)
+`, step.If)
+		if output, err := check.CombinedOutput(); err != nil {
+			t.Fatalf("failure upload gate: %v\n%s", err, output)
+		}
+	}
+	if !found {
+		t.Fatal("missing failure diagnostic artifact")
+	}
+}
