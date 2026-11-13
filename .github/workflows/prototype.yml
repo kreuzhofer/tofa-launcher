@@ -81,6 +81,7 @@ jobs:
           python3 scripts/desktop_qualification_test.py -v
           python3 scripts/desktop_qualification_guide_test.py -v
           python3 scripts/qualification_kit_test.py -v
+          python3 scripts/qualification_reconcile_test.py -v
           python3 -m unittest discover -s scripts -p system_skills_contract_test.py -v
           bash -n scripts/desktop_qualification_operator.sh
           python3 scripts/capability_scope_test.py -v

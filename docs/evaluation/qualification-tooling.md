@@ -75,3 +75,38 @@ attempt. Archive the finished collector's evidence, not an in-progress copy.
 A collector import failure, preparation failure, launch failure and provider
 failure are separate outcomes. Keep the original receipt for each; fixing a guide
 does not change an earlier attempt's result.
+
+## Reconcile behaviour evidence
+
+`scripts/qualification_reconcile.py --declaration PATH --output NEW_JSON` invokes
+only the pinned launcher's `desktop-qualification assess` public interface. It
+never runs an engine or Desktop, changes admission or grants a release verdict.
+Use a declaration with these fields:
+
+- `schema`: `tofa-release-reconciliation-v1`.
+- `candidate`: descriptive release identity; `target`: the assessor plan's exact
+  target object, including source revision and component hashes.
+- `assessor` and `assessment`: `{ "path": "...", "sha256": "..." }` references to
+  the reviewed executable and existing assessor plan. Paths may be absolute or
+  relative to the declaration. The assessor verifies its nested evidence bindings.
+- `provenance`: diagnostic catalog, selected model and plugin-cache information.
+  This object supplies no acceptance conditions.
+- Optional `retained_reviews`: entries with a hash-bound `review`, `evidence_root`,
+  `reviewer` and `reason`. The tool verifies every `original_receipts_sha256` binding
+  in each review and retains its original status. These records accompany the
+  matrix; they do not silently fill a missing assessor row. Reuse decisions belong
+  in the existing assessor plan, with its required attribution and impact analysis.
+
+Output preserves the authoritative assessor result and maps its rows to accepted,
+reused, targeted-evidence-needed or investigate-failed-contract. A failed current
+security check cannot be repaired by appending an older successful review. Output
+is private and exclusive-created; retain failed reconciliation attempts separately.
+Review its content before publishing a sanitized summary.
+
+Before proposing any manual rerun, identify the specific affected behaviour, the
+material change or missing observation, and why retained evidence plus automated
+checks cannot establish it. Routine catalog/model/plugin-cache changes are not
+sufficient. A Desktop update needs contract checks and impact review, then only
+observations for affected or unproven behaviours. CLI platform scope and the final
+combined release decision remain separate reviewed records; this tool does not
+reinterpret a historical purge omission or broaden experimental client support.
