@@ -32,6 +32,8 @@ def run(job, phase, diagnostics):
     executable = Path(job['executable'])
     if not executable.is_absolute() or not executable.is_file():
         raise ValueError('absolute executable required')
+    # Uninstall may remove its own binary before returning a failure.
+    executable_digest = hashlib.sha256(executable.read_bytes()).hexdigest()
     args = job['arguments']
     if not isinstance(args, list) or any(not isinstance(arg, str) for arg in args):
         raise ValueError('argument array required')
@@ -62,7 +64,7 @@ def run(job, phase, diagnostics):
                     failure = 'cleanup_failed'
     if failure:
         report = {'schema':'tofa-ci-process-failure-v1', 'phase':phase, 'outcome':failure,
-            'executable_sha256':hashlib.sha256(executable.read_bytes()).hexdigest(),
+            'executable_sha256':executable_digest,
             'pid':process.pid if process else None, 'deadline_ms':deadline,
             'elapsed_ms':round((time.monotonic() - started)*1000),
             'exit_code':process.returncode if process else None,

@@ -77,4 +77,24 @@ class ProcessTests(unittest.TestCase):
             self.assertGreater(report['stderr']['bytes'], 0)
             self.assertNotIn('PRIVATE_VALUE', raw)
 
+    @unittest.skipIf(os.name == 'nt', 'owned executable script fixture uses POSIX shebang')
+    def test_uninstaller_removing_itself_still_retains_original_executable_identity(self):
+        import hashlib
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            executable = root/'owned-uninstaller'
+            executable.write_text('#!'+sys.executable+'\nimport pathlib,sys\npathlib.Path(__file__).unlink()\nsys.exit(7)\n')
+            executable.chmod(0o700)
+            expected = hashlib.sha256(executable.read_bytes()).hexdigest()
+            job = {'executable':str(executable),'arguments':[], 'stdout':str(root/'out'),
+                   'stderr':str(root/'err'),'timeout_ms':10000}
+            (root/'job.json').write_text(json.dumps(job))
+            result = subprocess.run([sys.executable,str(SCRIPT),'--job',str(root/'job.json'),
+                '--phase','uninstall_purge','--diagnostics',str(root/'diagnostics')],
+                capture_output=True,text=True,timeout=15)
+            self.assertNotEqual(result.returncode, 0)
+            receipts = list((root/'diagnostics').glob('*.json'))
+            self.assertEqual(len(receipts), 1, result.stderr)
+            self.assertEqual(json.loads(receipts[0].read_text())['executable_sha256'], expected)
+
 if __name__ == '__main__': unittest.main()
