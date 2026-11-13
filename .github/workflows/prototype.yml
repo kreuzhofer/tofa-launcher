@@ -118,6 +118,10 @@ jobs:
         run: ./scripts/windows_latest_test.ps1
       - name: Lifecycle process diagnostics fixtures
         run: python scripts/lifecycle_process_test.py -v
+      - name: Lifecycle executable resolution with duplicate PATH matches
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/windows_lifecycle_resolution_test.ps1 -PythonExecutable (python -c 'import sys; print(sys.executable)')
       - name: Native Windows candidate installation lifecycle
         if: runner.os == 'Windows'
         shell: pwsh
