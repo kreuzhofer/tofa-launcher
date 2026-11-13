@@ -134,3 +134,25 @@ failed job's evidence. Check the complete workflow state before requesting one
 specifically authorized failed-job rerun; an in-progress workflow cannot be
 rerun. A passing rerun does not relabel the original failure or justify dropping
 coverage, increasing deadlines or retrying paid inference.
+
+## Campaign preflight and CI observation
+
+`qualification_workflow.py preflight --campaign PRIVATE_JSON` checks the explicit
+checkout, integration branch, full HEAD, clean tracked state, required tools,
+process-only Git author identity and accepted receipt hashes. Untracked files are
+reported by count and retained. It returns a Git argv prefix and a scoped next
+action without executing it. The private index format and handoff procedure are
+in [the agent workflow](../agents/qualification.md).
+
+```sh
+python3 scripts/qualification_workflow.py watch-ci \
+  --repository OWNER/REPO --run-id RUN_ID --head FULL_SHA \
+  --output NEW_DURABLE_DIRECTORY --seconds 600 --poll-seconds 10
+```
+
+The watcher makes read-only `gh api` calls for the pinned run and its jobs. It
+stores observations exclusively, prints state changes and stops at completion or
+its deadline. A failed workflow remains failed in the snapshots even when the
+watcher itself completes successfully. Failed job IDs become eligible for a
+separately authorized rerun only after workflow completion. The watcher never
+reruns jobs, retries inference, publishes artifacts or modifies credentials.
