@@ -51,7 +51,8 @@ python3 scripts/qualification_kit.py restore --kit "$KIT"
 python3 scripts/qualification_kit.py status --kit "$KIT"
 ```
 
-`check` verifies pinned bytes and collector imports. `restore` creates a fresh
+`check` verifies pinned bytes, launcher execution permission, durable-root access
+and both collector and lazy Observer imports. `restore` creates a fresh
 copy under `/tmp/tofa-presentation-validation/guides/`, verifies it again and
 reports its path. It never extracts over an existing attempt or edits old receipts.
 The original durable kit is still the archive destination. Missing `/tmp` files
@@ -65,7 +66,9 @@ clean-exit case; other behaviours require their own reviewed case guidance.
 
 `qualification_kit.py prepare --kit "$KIT"` is separately available for agents.
 It delegates only to the collector's `prepare --defer-snapshot` action, allocates a
-fresh workspace and saves private preparation diagnostics durably. It does not
+fresh workspace and saves private preparation diagnostics durably. Its durable
+receipt is reserved before execution, including on startup failure or timeout;
+`--prepare-timeout SECONDS` bounds this non-launch step to at most 60 seconds. It does not
 snapshot, launch, infer or grant a pass. The operator performs that preparation
 itself, so do not run both preparation paths for the same intended handoff.
 `status --run PATH` identifies consumed attempts and directs review, never retry.
