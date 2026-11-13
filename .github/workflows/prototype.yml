@@ -128,6 +128,7 @@ jobs:
         with:
           name: windows-lifecycle-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
           path: .ci-diagnostics/windows-lifecycle/*.json
+          include-hidden-files: true
           if-no-files-found: ignore
           retention-days: 14
       - name: Windows process ownership and discovery

@@ -261,6 +261,8 @@ run_wizard() {
   COLLECTOR=$(guide field collector)
   MODEL=$(guide field model)
   GUARDIAN=$(guide field guardian)
+  REVISION=$(guide field source_revision)
+  DURABLE=$(guide field durable_root)
   if [[ "${1:-}" == "--check" && $# == 1 ]]; then
     guide check >/dev/null
     collect freeze --help >/dev/null
@@ -273,8 +275,8 @@ run_wizard() {
   runtime=$(guide check)
 
   stage "Prepare host Desktop"
-  say "One clean-exit check on this Mac; candidate 372255f. No VM."
-  say "Paid Kimi-K3; GLM-5.3-Flash Guardian; Lightning naming."
+  say "One clean-exit check on this Mac; candidate $REVISION. No VM."
+  say "Paid $MODEL; $GUARDIAN Guardian; Lightning naming."
   say "These are explicit selections for this attempt, not model-specific qualification requirements."
   say "Catalog changes are recorded as provenance; integration and preservation checks still apply."
   say "Workspace setup happens before the baseline. Then 10 minutes from candidate launch, including observations; $(guide field requests) requests, $(guide field output_tokens) output tokens/request."
@@ -283,8 +285,8 @@ run_wizard() {
   note "Keep ordinary settings unchanged. No password, token, account name, or other secret is requested."
   confirm "Desktop is quit and you are ready to do the check now?" || { say "No launch performed."; return; }
 
-  mkdir -p "$KIT/invocations"
-  INVOCATION=$(mktemp -d "$KIT/invocations/guide.XXXXXX")
+  mkdir -p "$DURABLE/invocations"
+  INVOCATION=$(mktemp -d "$DURABLE/invocations/guide.XXXXXX")
   trap cleanup EXIT
   trap 'exit 130' INT
   trap 'exit 143' TERM

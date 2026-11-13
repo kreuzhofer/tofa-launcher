@@ -18,8 +18,10 @@ class KitTests(unittest.TestCase):
         self.kit.mkdir()
         (self.kit / "source/scripts").mkdir(parents=True)
         (self.kit / "tofa").write_text("synthetic candidate")
+        (self.kit / "tofa").chmod(0o700)
         (self.kit / "model-services.json").write_text("{}")
         (self.kit / "source/scripts/dependency.py").write_text("VALUE = 1")
+        (self.kit / "source/scripts/capability_observer.py").write_text("class Observer: pass")
         (self.kit / "source/scripts/desktop_qualification.py").write_text("import dependency\n")
         self.plan = {"schema":"tofa-qualification-kit-v1", "source_revision":"a"*40,
             "launcher":"tofa", "collector":"source/scripts/desktop_qualification.py",
@@ -104,6 +106,35 @@ if __name__ == '__main__':
         self.assertFalse(result["desktop_launched"])
         self.assertEqual((Path(result["durable_preparation"])/"kit.json").read_bytes(), (self.kit/"kit.json").read_bytes())
         self.assertEqual(json.loads(self.run_cli("status", "--run", result["run"]).stdout)["status"], "prepared")
+
+    def test_lazy_observer_dependency_fails_before_handoff(self):
+        (self.kit/"source/scripts/capability_observer.py").write_text('import unavailable_observer_dependency')
+        self.pin()
+        self.assertIn('collector_import_failed', self.run_cli('check', ok=False).stderr)
+
+    def test_nonexecutable_candidate_is_rejected_before_handoff(self):
+        (self.kit/'tofa').chmod(0o600)
+        self.assertIn('launcher_not_executable', self.run_cli('check', ok=False).stderr)
+
+    def test_preparation_timeout_retains_partial_diagnostics_durably(self):
+        app = self.kit/'App/Contents'
+        app.mkdir(parents=True)
+        (app/'Info.plist').write_text('fixture')
+        runtime = self.kit/'runtime'
+        runtime.mkdir()
+        (runtime/'runtime.json').write_text('{}')
+        self.plan.update(app_bundle=str(app.parent),runtime_root=str(runtime))
+        (self.kit/'source/scripts/desktop_qualification.py').write_text(
+            'if __name__ == "__main__":\n import time\n print("partial prepare diagnostic", flush=True)\n time.sleep(30)\n')
+        self.pin()
+        self.run_cli('prepare', '--prepare-timeout', '1', ok=False)
+        attempts = list((self.kit/'preparations').glob('prepare.*'))
+        self.assertEqual(len(attempts), 1)
+        report = json.loads((attempts[0]/'preparation.json').read_text())
+        self.assertEqual(report['status'], 'failed')
+        self.assertEqual(report['failure'], 'TimeoutExpired')
+        self.assertIn('partial prepare diagnostic', (attempts[0]/'collector.stdout').read_text())
+        self.assertFalse(report['desktop_launched'])
 
     def test_restore_after_tmp_deletion_verifies_bytes_and_never_launches(self):
         first = json.loads(self.run_cli("restore").stdout)

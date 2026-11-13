@@ -235,7 +235,7 @@ def main():
     if action == 'field':
         plan = qualification_kit.declaration(kit)
         key = sys.argv[2]
-        if key not in ('collector','launcher','model','guardian','requests','output_tokens'):
+        if key not in ('collector','launcher','model','guardian','requests','output_tokens','source_revision','durable_root'):
             raise ValueError('unsupported guide field')
         print(str(kit/plan[key]) if key in ('collector','launcher') else plan[key])
         return

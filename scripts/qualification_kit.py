@@ -64,6 +64,10 @@ def check(kit):
     for relative, expected in plan['files'].items():
         if not re.fullmatch('[0-9a-f]{64}', expected) or digest(regular(kit, relative)) != expected:
             raise ValueError('pinned kit hash mismatch: ' + relative)
+    if not os.access(kit / plan['launcher'], os.X_OK):
+        raise ValueError('launcher_not_executable')
+    if not os.access(Path(plan['durable_root']), os.W_OK | os.X_OK):
+        raise ValueError('durable_root_not_writable')
     scripts = (kit / plan['collector']).parent
     for path in scripts.rglob('*'):
         if path.is_file() or path.is_symlink():
@@ -74,7 +78,8 @@ def check(kit):
     result = subprocess.run([sys.executable, '-B', '-s', '-c',
         'import importlib.util,sys; sys.path.insert(0,sys.argv[1]); '
         's=importlib.util.spec_from_file_location("collector_preflight",sys.argv[2]); '
-        'm=importlib.util.module_from_spec(s); s.loader.exec_module(m)',
+        'm=importlib.util.module_from_spec(s); s.loader.exec_module(m); '
+        'from capability_observer import Observer',
         str(scripts), str(kit / plan['collector'])], cwd=scripts, env=env,
         capture_output=True, timeout=30)
     if result.returncode:
@@ -100,45 +105,59 @@ def restore(kit):
     return {'kit': str(destination), 'desktop_launched': False, 'next_action': 'check_or_prepare'}
 
 
-def prepare(kit):
+def prepare(kit, timeout=60):
     plan = check(kit)
-    if plan['case'] != 'clean-exit':
-        raise ValueError('this guide supports clean-exit only; other cases need a reviewed case guide')
-    if plan['prompt'] != 'Reply exactly: tofa-clean-exit-ok. Do not use tools or create files.':
-        raise ValueError('clean-exit guide requires its fixed smoke prompt')
-    if not (Path(plan['app_bundle']) / 'Contents/Info.plist').is_file():
-        raise ValueError('Desktop application missing')
-    if not (Path(plan['runtime_root']) / 'runtime.json').is_file():
-        raise ValueError('supplied runtime missing')
-    # This public collector action allocates a fresh workspace only. Snapshot and
-    # launch remain separate actions, after explicit human workspace setup.
-    args = [sys.executable, '-B', str(kit / plan['collector']), 'prepare', '--defer-snapshot']
-    for key in ('launcher', 'model_services'):
-        args += ['--' + key.replace('_', '-'), str(kit / plan[key])]
-    for key in ('app_bundle','runtime_root','source_revision','case','model','guardian',
-                'seconds','requests','output_tokens','prompt'):
-        args += ['--' + key.replace('_', '-'), str(plan[key])]
-    result = subprocess.run(args, cwd=kit, capture_output=True, text=True, timeout=60)
     archive = Path(plan['durable_root']) / 'preparations'
     archive.mkdir(mode=0o700, exist_ok=True)
     attempt = Path(tempfile.mkdtemp(prefix='prepare.', dir=archive))
-    (attempt / 'collector.stdout').write_text(result.stdout)
-    (attempt / 'collector.stderr').write_text(result.stderr)
     (attempt / 'kit.json').write_bytes((kit / 'kit.json').read_bytes())
-    if result.returncode:
-        raise ValueError('preparation_failed_before_launch; private diagnostics: ' + str(attempt))
-    record = json.loads(result.stdout)
-    run = Path(record['run'])
-    if not run.resolve().is_relative_to((RUN_ROOT / 'runs').resolve()) or record.get('desktop_launched') is not False:
-        raise ValueError('unexpected preparation result')
-    if any((run / name).exists() for name in ('start.json', 'finish.json', 'collection.json')):
-        raise ValueError('attempt_consumed_no_retry')
-    binding = {'schema': 'tofa-kit-binding-v1', 'kit_sha256': digest(kit / 'kit.json')}
-    with (run / 'kit-binding.json').open('x') as stream:
-        json.dump(binding, stream)
-    record['durable_preparation'] = str(attempt)
-    (attempt / 'result.json').write_text(json.dumps(record, indent=2) + '\n')
-    return record
+    stdout, stderr = '', ''
+    receipt = {'schema':'tofa-kit-preparation-v1', 'desktop_launched':False,
+               'phase':'preparation', 'status':'failed'}
+    try:
+        if plan['case'] != 'clean-exit':
+            raise ValueError('this guide supports clean-exit only')
+        if plan['prompt'] != 'Reply exactly: tofa-clean-exit-ok. Do not use tools or create files.':
+            raise ValueError('clean-exit guide requires its fixed smoke prompt')
+        if not (Path(plan['app_bundle']) / 'Contents/Info.plist').is_file():
+            raise ValueError('Desktop application missing')
+        if not (Path(plan['runtime_root']) / 'runtime.json').is_file():
+            raise ValueError('supplied runtime missing')
+        # Allocate only; snapshot and launch follow human workspace setup.
+        args = [sys.executable, '-B', str(kit / plan['collector']), 'prepare', '--defer-snapshot']
+        for key in ('launcher', 'model_services'):
+            args += ['--' + key.replace('_', '-'), str(kit / plan[key])]
+        for key in ('app_bundle','runtime_root','source_revision','case','model','guardian',
+                    'seconds','requests','output_tokens','prompt'):
+            args += ['--' + key.replace('_', '-'), str(plan[key])]
+        result = subprocess.run(args, cwd=kit, capture_output=True, text=True, timeout=timeout)
+        stdout, stderr = result.stdout, result.stderr
+        receipt['exit_code'] = result.returncode
+        if result.returncode: raise ValueError('collector_prepare_failed')
+        record = json.loads(stdout)
+        run = Path(record['run'])
+        if not run.resolve().is_relative_to((RUN_ROOT / 'runs').resolve()) or record.get('desktop_launched') is not False:
+            raise ValueError('unexpected preparation result')
+        if any((run / name).exists() for name in ('start.json', 'finish.json', 'collection.json')):
+            raise ValueError('attempt_consumed_no_retry')
+        binding = {'schema': 'tofa-kit-binding-v1', 'kit_sha256': digest(kit / 'kit.json')}
+        with (run / 'kit-binding.json').open('x') as stream:
+            json.dump(binding, stream)
+        record['durable_preparation'] = str(attempt)
+        (attempt / 'result.json').write_text(json.dumps(record, indent=2) + '\n')
+        receipt['status'] = 'prepared'
+        return record
+    except (OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError) as error:
+        receipt['failure'] = type(error).__name__
+        receipt['failure_detail'] = str(error)[:1024]
+        if isinstance(error, subprocess.TimeoutExpired):
+            stdout, stderr = error.stdout or b'', error.stderr or b''
+        raise ValueError('preparation_failed_before_launch; private diagnostics: ' + str(attempt)) from error
+    finally:
+        for name, data in (('collector.stdout', stdout), ('collector.stderr', stderr)):
+            if isinstance(data, bytes): data = data.decode('utf-8', errors='replace')
+            (attempt / name).write_text(data[:1024*1024])
+        (attempt / 'preparation.json').write_text(json.dumps(receipt, indent=2) + '\n')
 
 
 def status(kit, run):
@@ -163,6 +182,7 @@ def main():
     parser.add_argument('action', choices=('check','restore','prepare','status'))
     parser.add_argument('--kit', required=True, type=Path)
     parser.add_argument('--run', type=Path, help='status only; never resumes an attempt')
+    parser.add_argument('--prepare-timeout', type=int, default=60, choices=range(1,61), metavar='SECONDS')
     options = parser.parse_args()
     if options.run and options.action != 'status': parser.error('--run is status-only')
     kit = options.kit.absolute()
@@ -172,7 +192,7 @@ def main():
             plan = check(kit)
             result = {'status':'checked', 'desktop_launched':False, 'source_revision':plan['source_revision']}
         elif options.action == 'restore': result = restore(kit)
-        elif options.action == 'prepare': result = prepare(kit)
+        elif options.action == 'prepare': result = prepare(kit, options.prepare_timeout)
         else: result = status(kit, options.run)
         print(json.dumps(result, indent=2))
     except (OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError) as error:

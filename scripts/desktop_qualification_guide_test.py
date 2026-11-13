@@ -161,6 +161,27 @@ class GuideTests(unittest.TestCase):
         self.write('finish.json', {'stop':'operator_finished'})
         self.assertFalse(guide.summary(self.run)['protected_equal'])
 
+    def test_handoff_announces_declared_roles_and_keeps_invocations_durable(self):
+        import subprocess
+        script = Path(__file__).with_name('desktop_qualification_operator.sh').read_text()
+        start = script.index('  stage "Prepare host Desktop"')
+        end = script.index('  say "Allocating one fresh workspace', start)
+        durable = self.run/'durable'
+        durable.mkdir()
+        fixture = ('set -euo pipefail\n'
+                   'KIT="$1/temporary"; DURABLE="$1/durable"; REVISION=reviewed-revision; MODEL=another/main; GUARDIAN=another/reviewer\n'
+                   'stage() { echo "$*"; }; say() { echo "$*"; }; step() { :; }; note() { :; }; confirm() { return 0; }\n'
+                   'guide() { if [[ "$1" == field ]]; then echo 8; else echo "$INVOCATION"; fi; }\n'
+                   'cleanup() { :; }\nrun() {\n' + script[start:end] + '\n}\nrun\n')
+        result = subprocess.run(['bash','-c',fixture,'fixture',str(self.run)],capture_output=True,text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('reviewed-revision', result.stdout)
+        self.assertIn('another/main', result.stdout)
+        self.assertIn('another/reviewer', result.stdout)
+        self.assertNotIn('372255f', result.stdout)
+        self.assertEqual(len(list((durable/'invocations').glob('guide.*'))), 1)
+        self.assertFalse((self.run/'temporary/invocations').exists())
+
     def test_failed_prepare_reports_a_visible_error(self):
         import subprocess
         script = Path(__file__).with_name('desktop_qualification_operator.sh').read_text()
