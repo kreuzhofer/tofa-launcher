@@ -169,8 +169,35 @@ sys.exit(0 if (pathlib.Path(os.environ['HOME'])/'synthetic-vault').exists() else
             self.assertNotIn(secret, self.report.with_suffix(".md").read_text())
         return result, evidence
 
+    def test_existing_login_is_reused_without_reauthentication(self):
+        (self.config / "config.yml").write_text("credential_backend: file\n")
+        (self.config / "credentials.yml").write_text("PRIVATE_KEY")
+        result, report = self.run_runner(answers="READY\nFOUND\n")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse((self.home / "login-count").exists())
+        self.assertEqual(report["login_action"], "reused")
+        self.assertTrue(all(report["retained_state"].values()))
+
+    def test_live_failure_retains_login_without_purge(self):
+        self.env["FIXTURE_MODE"] = "preservation_failure"
+        result, report = self.run_runner(answers="READY\nFOUND\n")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(report["reason"], "preservation_failed")
+        self.assertEqual((self.config / "credentials.yml").read_text(), "PRIVATE_KEY")
+        self.assertTrue((self.install / "bin/tofa").is_file())
+
+    def test_default_retains_working_login_and_reports_purge_unrun(self):
+        result, report = self.run_runner(answers="READY\nFOUND\n")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(report["qualification_scope"], "preserve_lifecycle")
+        self.assertTrue(all(report["retained_state"].values()))
+        self.assertEqual((self.config / "credentials.yml").read_text(), "PRIVATE_KEY")
+        self.assertTrue((self.install / "bin/tofa").is_file())
+        self.assertEqual(next(s for s in report["stages"] if s["name"] == "purge"),
+                         {"name": "purge", "status": "not_run", "reason": "retained_by_policy"})
+
     def test_complete_lifecycle_uses_pinned_download_and_saved_login(self):
-        result, report = self.run_runner()
+        result, report = self.run_runner(extra=('--purge',))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr + json.dumps(report))
         self.assertEqual(report["outcome"], "passed")
         self.assertEqual(report["candidate"]["tag"], VERSION)
@@ -205,7 +232,7 @@ sys.exit(0 if (pathlib.Path(os.environ['HOME'])/'synthetic-vault').exists() else
             "config = home/'.config/tofa'", "config = pathlib.Path(os.environ['XDG_CONFIG_HOME'])/'tofa'").replace(
             "sys.argv[1:3] == ['auth','login']", "sys.argv[1:2] == ['--model']"))
         self.checksums()
-        result, report = self.run_runner(answers='', extra=('--agent-state-root', str(self.home/'agent-state')))
+        result, report = self.run_runner(answers='', extra=('--agent-state-root', str(self.home/'agent-state'), '--purge'))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr + json.dumps(report))
         self.assertTrue(all(report['cleanup'].values()))
         self.assertEqual(report['operator'], 'agent')
@@ -322,7 +349,7 @@ sys.exit(0 if (pathlib.Path(os.environ['HOME'])/'synthetic-vault').exists() else
         self.assertFalse(report["cleanup"]["binary_removed"])
 
     def test_declined_purge_retains_saved_credentials(self):
-        result, report = self.run_runner("READY\nFOUND\nNO\n")
+        result, report = self.run_runner("READY\nFOUND\nNO\n", extra=("--purge",))
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(report["outcome"], "incomplete")
         self.assertTrue(report["saved_login_reuse"]["passed"])
@@ -353,7 +380,7 @@ sys.exit(0 if (pathlib.Path(os.environ['HOME'])/'synthetic-vault').exists() else
     @unittest.skipUnless(platform.system() == "Darwin", "macOS vault boundary")
     def test_synthetic_vault_lifecycle_checks_presence_without_reading_secret(self):
         self.env["FIXTURE_BACKEND"] = "keyring"
-        result, report = self.run_runner()
+        result, report = self.run_runner(extra=('--purge',))
         self.assertEqual(result.returncode, 0, json.dumps(report))
         self.assertEqual(report["backend"], "keyring")
         self.assertTrue(report["cleanup"]["vault_credentials_removed"])
@@ -362,7 +389,7 @@ sys.exit(0 if (pathlib.Path(os.environ['HOME'])/'synthetic-vault').exists() else
     @unittest.skipUnless(platform.system() == "Darwin", "macOS vault boundary")
     def test_failed_synthetic_vault_purge_keeps_recovery_and_fails(self):
         self.env.update(FIXTURE_BACKEND="keyring", FIXTURE_MODE="purge_failure")
-        result, report = self.run_runner()
+        result, report = self.run_runner(extra=('--purge',))
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(report["outcome"], "failed")
         self.assertFalse(report["cleanup"]["vault_credentials_removed"])

@@ -4,7 +4,22 @@ For the next candidate after the merged native-account integration, use the
 [current #106 candidate plan](next-candidate-106.md). The dated candidate sections
 below retain their original scope and results; they are not the current handoff.
 
-## Current Windows retention and admission policy
+## Current retention and admission policy
+
+Both maintained platform qualifiers retain the working installation, configuration
+and credentials by default. Mac qualification now records `preserve_lifecycle`
+with purge `not_run / retained_by_policy`, matching Windows. Mac also reuses a
+complete existing login; an incomplete login stops for review instead of being
+replaced. A failed run never triggers automatic purge or reauthentication.
+
+Migration from older Mac guides: omit `--purge` for normal qualification. Explicit
+`--purge` selects destructive coverage; manual mode additionally asks for `PURGE`.
+Use that coverage only in a declared disposable state namespace with separate
+authorization. `--agent-state-root` alone no longer authorizes purge. Existing
+frozen guides and historical full-lifecycle receipts retain their original meaning;
+do not rerun them merely to adopt this tooling change. Ten-minute human steps use
+`--human-timeout 600`. Removed-state booleans may correctly be false in a retained
+run; final retained-state and preservation checks must pass instead.
 
 The [rc18 assessment](v0.1.0-rc.18-windows.md) supersedes the historical purge
 instructions below for current Windows follow-up work. Keep active credentials

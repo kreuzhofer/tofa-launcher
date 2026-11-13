@@ -237,7 +237,8 @@ def qualify(options, reports):
     shells = set()
     snapshots_ready = False
     refs = set()
-    evidence = {"schema_version": 1, "candidate": {"tag": options.version},
+    login_state, login_refs = {}, set()
+    evidence = {"schema_version": 1, "qualification_scope": "full_lifecycle" if options.purge else "preserve_lifecycle", "candidate": {"tag": options.version},
                 "host": {"os": platform.system(), "arch": platform.machine(), "release": platform.mac_ver()[0] or platform.release()},
                 "operator": "agent" if options.agent_state_root else "human",
                 "client": {}, "backend": "unknown", "model": options.model, "guardian_model": options.guardian_model,
@@ -297,12 +298,21 @@ def qualify(options, reports):
             raise Failure("installed_version_mismatch")
 
     def login():
-        nonlocal refs
-        print("Enter the real Token Factory credentials in the launcher's interactive prompt. OS prompts may appear.", flush=True)
-        args = onboarding_command(binary, options) if options.agent_state_root else [str(binary), "auth", "login"]
-        if options.storage and not options.agent_state_root:
-            args += ["--storage", options.storage]
-        command(args, options.human_timeout, interactive=True)
+        nonlocal refs, login_state, login_refs
+        existing = (config / "config.yml").is_file() and ((config / "credentials.yml").is_file() or refs)
+        if existing:
+            if options.storage:
+                raise Failure("existing_login_storage_change_requires_separate_consent")
+            evidence["login_action"] = "reused"
+        else:
+            if any((config / name).exists() for name in ("config.yml", "credentials.yml")) or refs:
+                raise Failure("incomplete_saved_login_requires_review")
+            print("Enter Token Factory credentials in the launcher's interactive prompt. OS prompts may appear.", flush=True)
+            args = onboarding_command(binary, options) if options.agent_state_root else [str(binary), "auth", "login"]
+            if options.storage and not options.agent_state_root:
+                args += ["--storage", options.storage]
+            command(args, options.human_timeout, interactive=True)
+            evidence["login_action"] = "created"
         _, doctor = command([str(binary), "doctor"], options.timeout)
         match = re.search(r"^Credential backend: (file|keyring) \(", doctor, flags=re.M)
         if not match:
@@ -311,6 +321,8 @@ def qualify(options, reports):
         refs |= vault_refs(config)
         if evidence["backend"] == "keyring" and (not refs or vault_absent(refs, options.timeout)):
             raise Failure("saved_vault_credential_missing")
+        login_state = {name: file_state(config / name) for name in ("config.yml", "credentials.yml")}
+        login_refs = vault_refs(config)
 
     def live(name):
         with tempfile.TemporaryDirectory(prefix="live-", dir=scratch.name) as directory:
@@ -352,7 +364,7 @@ def qualify(options, reports):
         downloads = Path(scratch.name).resolve() / "download"
         downloads.mkdir()
         stage("preflight", preflight)
-        stage("recovery", lambda: None if options.agent_state_root else confirm("This run replaces the installed launcher and login, then uninstalls and explicitly purges local tofa state. Existing state: " + json.dumps(evidence["existing_state"]) + ". Prepare any credential backup/recovery or token reissue yourself before continuing. Close other launcher/Codex sessions.", "READY", options.human_timeout))
+        stage("recovery", lambda: None if options.agent_state_root else confirm("This run installs/logs in and tests preserve-uninstall/reinstall. The working installation and login remain unless --purge is explicitly selected. Existing state: " + json.dumps(evidence["existing_state"]) + ". Prepare credential recovery and close other launcher/Codex sessions.", "READY", options.human_timeout))
         stage("download", lambda: download(options.version, downloads, options.timeout, evidence, options.downloaded_assets))
         stage("install", install_candidate)
         if options.agent_state_root: install_candidate()
@@ -369,7 +381,11 @@ def qualify(options, reports):
         stage("uninstall", uninstall)
         stage("reinstall", install_candidate)
         stage("saved_login_reuse", lambda: live("saved_login_reuse"))
-        stage("purge", purge)
+        if options.purge:
+            stage("purge", purge)
+        else:
+            next(item for item in evidence["stages"] if item["name"] == "purge").update(
+                status="not_run", reason="retained_by_policy")
         evidence["outcome"] = "passed"
     except (KeyboardInterrupt, EOFError):
         evidence["reason"] = "interrupted"
@@ -398,8 +414,23 @@ def qualify(options, reports):
             evidence["preservation"]["unrelated_config"] = config_before == unrelated_state(config, CONFIG_OWNED)
             evidence["preservation"]["unrelated_installation"] = install_before == unrelated_state(install, INSTALL_OWNED)
             evidence["preservation"]["shell_settings"] = all(shell_content(path) == content for path, content in shell_before.items())
-            if evidence["outcome"] == "passed" and not all(evidence["cleanup"].values()):
-                evidence.update(outcome="failed", reason="cleanup_incomplete")
+            if options.purge:
+                finished = all(evidence["cleanup"].values())
+            else:
+                evidence["retained_state"] = {
+                    "installation": binary.is_file() and (install / ".tofa-install").is_file()
+                        and live_compat.digest(binary) == evidence["candidate"].get("binary_sha256"),
+                    "configuration": (config / "config.yml").is_file()
+                        and file_state(config / "config.yml") == login_state.get("config.yml"),
+                    "credentials": (bool(login_refs) and vault_refs(config) == login_refs
+                        and all(not vault_absent({ref}, options.timeout) for ref in login_refs)
+                        and file_state(config / "credentials.yml") == login_state.get("credentials.yml"))
+                        if evidence["backend"] == "keyring" else ((config / "credentials.yml").is_file()
+                        and file_state(config / "credentials.yml") == login_state.get("credentials.yml")),
+                    "path": (install / ".path-files").is_file() and owned_path_blocks_remain()}
+                finished = all(evidence["retained_state"].values()) and evidence["cleanup"]["scratch_removed"]
+            if evidence["outcome"] == "passed" and not finished:
+                evidence.update(outcome="failed", reason="final_state_incomplete")
             if not all(evidence["preservation"].values()):
                 evidence.update(outcome="failed", reason="preservation_failed")
         except (OSError, ValueError, Failure, subprocess.SubprocessError):
@@ -423,7 +454,8 @@ def main():
     parser.add_argument("--version", required=True, type=prerelease)
     parser.add_argument("--output", required=True, type=Path, help="new .json file; a matching .md summary is also created")
     parser.add_argument("--downloaded-assets", type=Path, help="trusted host-downloaded release assets plus release.json and commit.json; checksums are reverified locally")
-    parser.add_argument("--agent-state-root", type=Path, help="authorize automated lifecycle/purge only in this NEW disposable directory; login remains interactive")
+    parser.add_argument("--agent-state-root", type=Path, help="authorize automated lifecycle in this NEW owned directory; login remains interactive and purge requires --purge")
+    parser.add_argument("--purge", action="store_true", help="explicitly test destructive cleanup; default retains the working login, configuration and installation")
     parser.add_argument("--codex", default=shutil.which("codex"))
     parser.add_argument("--check-pair", action="store_true", help="bounded coding plus native Guardian allow/deny checks; requires --guardian-model")
     parser.add_argument("--model", default=live_compat.MODEL, help="exact main model; remains Experimental")
