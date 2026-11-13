@@ -3,7 +3,8 @@
 param(
  [Parameter(Mandatory=$true)][string]$Dist,
  [Parameter(Mandatory=$true)][string]$Version,
- [switch]$DisposableVM
+ [switch]$DisposableVM,
+ [string]$Diagnostics=(Join-Path (Get-Location) ".ci-diagnostics/windows-lifecycle")
 )
 $ErrorActionPreference='Stop'
 Set-StrictMode -Version Latest
@@ -26,6 +27,8 @@ $Bin=Join-Path $Root 'bin'
 $Binary=Join-Path $Bin 'tofa.exe'
 $Helpers=Join-Path $Temp 'helpers'
 $PowerShell=(Get-Command powershell.exe -CommandType Application).Source
+$Python=(Get-Command python -CommandType Application -ErrorAction Stop).Source
+$ProcessRunner=Join-Path $PSScriptRoot "lifecycle_process.py"
 $OriginalUserPath=[Environment]::GetEnvironmentVariable('Path','User')
 $OriginalEnv=@{}
 foreach($Name in @('LOCALAPPDATA','TOFA_INSTALL_DIR','TOFA_RELEASE_BASE_URL','TEMP','TMP','Path')) {
@@ -94,26 +97,24 @@ function Wait-Cleanup([string]$Out,[string]$Err,[int]$TimeoutSeconds=20) {
  }
  return $Output
 }
-function Run-Process([string]$File,[string[]]$Arguments) {
+function Run-Process([string]$File,[string[]]$Arguments,[string]$Phase) {
  $script:Sequence++
  $Out=Join-Path $Temp "$Sequence.out"
  $Err=Join-Path $Temp "$Sequence.err"
- $Process=Start-Process -FilePath $File -ArgumentList $Arguments -PassThru -NoNewWindow -RedirectStandardOutput $Out -RedirectStandardError $Err
- try {
-  # Windows PowerShell 5 may lose ExitCode unless the native handle is retained.
-  $null=$Process.Handle
-  Assert ($Process.WaitForExit(10000)) "Process timeout: $File"
-  Assert ($Process.ExitCode -eq 0) "Process failed (exit=$($Process.ExitCode)): $File $Arguments stdout=$(Read-Log $Out) stderr=$(Read-Log $Err)"
-  return @{Out=$Out;Err=$Err;Text=(Read-Log $Out)}
- } finally {
-  if(!$Process.HasExited){$Process.Kill();$Process.WaitForExit(5000) | Out-Null}
-  $Process.Dispose()
- }
+ $Job=Join-Path $Temp "$Sequence.job.json"
+ # JSON preserves argument boundaries across PowerShell/Python/native processes.
+ # Logs remain scratch-only; the runner retains allowlisted failure metadata.
+ @{executable=$File;arguments=@($Arguments);stdout=$Out;stderr=$Err;timeout_ms=10000} |
+  ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $Job -Encoding UTF8
+ & $Python $ProcessRunner --job $Job --phase $Phase --diagnostics $Diagnostics
+ Assert ($LASTEXITCODE -eq 0) "Lifecycle process failed in $Phase; inspect retained sanitized diagnostics"
+ return @{Out=$Out;Err=$Err;Text=(Read-Log $Out)}
 }
 function Uninstall-Candidate([switch]$Purge) {
  $Arguments=@('uninstall')
  if($Purge){$Arguments+='--purge'}
- $Result=Run-Process $Binary $Arguments
+ $Phase=if($Purge){'uninstall_purge'}else{'uninstall_preserve'}
+ $Result=Run-Process $Binary $Arguments $Phase
  Assert ($Result.Text.Contains('Uninstaller started;')) 'CLI did not start its asynchronous helper'
  $Output=Wait-Cleanup $Result.Out $Result.Err
  Assert ($Output.Contains('Removed tofa')) 'Missing cleanup completion message'
@@ -128,9 +129,10 @@ function Fresh-Probe([switch]$Removed) {
  # when this non-CI account already has an ordinary tofa earlier in user PATH.
  if($DisposableVM -and !$Removed){$env:Path=$Bin+';'+(($env:Path -split ';' | Where-Object {$_ -ne $Bin}) -join ';')}
  try {
-  $Arguments=@('-NoProfile','-File',('"'+(Join-Path $Temp 'probe.ps1')+'"'),'-ExpectedBinary',('"'+$Binary+'"'),'-Version',$Version)
+  $Arguments=@('-NoProfile','-File',(Join-Path $Temp 'probe.ps1'),'-ExpectedBinary',$Binary,'-Version',$Version)
   if($Removed){$Arguments+='-Removed'}
-  $null=Run-Process $PowerShell $Arguments
+  $Phase=if($Removed){'fresh_probe_removed'}else{'fresh_probe_installed'}
+  $null=Run-Process $PowerShell $Arguments $Phase
  } finally {$env:Path=$OriginalEnv['Path']}
 }
 function Assert-Installed {

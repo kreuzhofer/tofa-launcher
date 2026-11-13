@@ -115,10 +115,20 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: ./scripts/windows_latest_test.ps1
+      - name: Lifecycle process diagnostics fixtures
+        run: python scripts/lifecycle_process_test.py -v
       - name: Native Windows candidate installation lifecycle
         if: runner.os == 'Windows'
         shell: pwsh
         run: ./scripts/windows_lifecycle_test.ps1 -Dist dist -Version $env:VERSION
+      - name: Retain sanitized Windows lifecycle failures
+        if: failure() && runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-lifecycle-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .ci-diagnostics/windows-lifecycle/*.json
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Windows process ownership and discovery
         if: runner.os == 'Windows'
         run: python scripts/windows_process_test.py -v

@@ -110,3 +110,27 @@ sufficient. A Desktop update needs contract checks and impact review, then only
 observations for affected or unproven behaviours. CLI platform scope and the final
 combined release decision remain separate reviewed records; this tool does not
 reinterpret a historical purge omission or broaden experimental client support.
+
+## CI failure diagnostics
+
+The native Windows lifecycle check uses `lifecycle_process.py` for its bounded
+probe/uninstall processes. It preserves the ten-second deadline and existing
+asynchronous-helper ownership/cleanup checks. Python is required for this CI
+check (already present on Actions runners). Arguments cross the PowerShell
+boundary through an owned JSON job file, not a shell command string.
+
+Failures retain a `tofa-ci-process-failure-v1` receipt outside the scratch tree:
+phase, executable digest, deadline/elapsed time, exit code, direct-process cleanup
+and bounded stdout/stderr byte counts plus fixed diagnostic markers. Raw output,
+arguments, paths and environment values are excluded. This does not prove that
+an asynchronous helper finished; the lifecycle check separately waits for and
+stops its owned helpers. Default diagnostics are `.ci-diagnostics/windows-lifecycle/`;
+`-Diagnostics` can select a private destination for an explicitly authorized
+synthetic run. CI uploads only those JSON receipts, on Windows failure, retaining
+the workflow attempt identity. It never uploads the raw scratch tree.
+
+A timeout is an observed outcome, not a root-cause diagnosis. Preserve the first
+failed job's evidence. Check the complete workflow state before requesting one
+specifically authorized failed-job rerun; an in-progress workflow cannot be
+rerun. A passing rerun does not relabel the original failure or justify dropping
+coverage, increasing deadlines or retrying paid inference.
